@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { UserProgress, QuizResult, StudySession } from "@/types";
 
@@ -25,8 +25,8 @@ interface ProgressState {
   // Actions
   loadProgress: () => Promise<void>;
   loadStats: () => Promise<void>;
-  recordStudySession: (session: Omit<StudySession, 'id' | 'created_at'>) => Promise<void>;
-  recordQuizResult: (result: Omit<QuizResult, 'id' | 'created_at'>) => Promise<void>;
+  recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
+  recordQuizResult: (result: Omit<QuizResult, "id" | "created_at">) => Promise<void>;
   updateSentenceProgress: (sentenceId: string, correct: boolean) => Promise<void>;
   getTodayProgress: () => UserProgress[];
   getWeekProgress: () => UserProgress[];
@@ -58,17 +58,19 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   loadProgress: async () => {
     set({ loading: true, error: null });
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         set({ loading: false });
         return;
       }
 
       const { data, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("user_progress")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(1000);
 
       if (error) {
@@ -85,7 +87,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       await get().loadStats();
     } catch (error) {
       set({
-        error: 'Failed to load progress',
+        error: "Failed to load progress",
         loading: false,
       });
     }
@@ -93,48 +95,54 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
   loadStats: async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = now.toISOString().split("T")[0];
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
       // Get study sessions
       const { data: sessions } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('user_id', user.id);
+        .from("study_sessions")
+        .select("*")
+        .eq("user_id", user.id);
 
       // Get quiz results
       const { data: quizResults } = await supabase
-        .from('quiz_results')
-        .select('*')
-        .eq('user_id', user.id);
+        .from("quiz_results")
+        .select("*")
+        .eq("user_id", user.id);
 
       // Calculate stats
       const totalSentencesStudied = sessions?.length || 0;
-      const totalSentencesLearned = sessions?.filter(s => s.completed).length || 0;
+      const totalSentencesLearned = sessions?.filter((s) => s.completed).length || 0;
 
-      const studyTimeToday = sessions
-        ?.filter(s => s.created_at.startsWith(today))
-        .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
+      const studyTimeToday =
+        sessions
+          ?.filter((s) => s.created_at.startsWith(today))
+          .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
 
-      const studyTimeThisWeek = sessions
-        ?.filter(s => s.created_at >= weekAgo)
-        .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
+      const studyTimeThisWeek =
+        sessions
+          ?.filter((s) => s.created_at >= weekAgo)
+          .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
 
-      const studyTimeThisMonth = sessions
-        ?.filter(s => s.created_at >= monthAgo)
-        .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
+      const studyTimeThisMonth =
+        sessions
+          ?.filter((s) => s.created_at >= monthAgo)
+          .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
 
       const totalQuizQuestions = quizResults?.length || 0;
-      const correctQuizAnswers = quizResults?.filter(q => q.correct).length || 0;
-      const quizAccuracy = totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
+      const correctQuizAnswers = quizResults?.filter((q) => q.correct).length || 0;
+      const quizAccuracy =
+        totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
       // Calculate streak
-      const studyDates = [...new Set(sessions?.map(s => s.created_at.split('T')[0]) || [])]
+      const studyDates = [...new Set(sessions?.map((s) => s.created_at.split("T")[0]) || [])]
         .sort()
         .reverse();
 
@@ -146,7 +154,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         const date = new Date(studyDates[i]);
         const prevDate = i > 0 ? new Date(studyDates[i - 1]) : null;
 
-        if (!prevDate || (date.getTime() - prevDate.getTime()) === 24 * 60 * 60 * 1000) {
+        if (!prevDate || date.getTime() - prevDate.getTime() === 24 * 60 * 60 * 1000) {
           tempStreak++;
           if (i === 0) currentStreak = tempStreak;
         } else {
@@ -174,17 +182,19 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         },
       });
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error("Error loading stats:", error);
     }
   },
 
-  recordStudySession: async (session) => {
+  recordStudySession: async (session: Omit<StudySession, "id" | "created_at">) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('study_sessions')
+        .from("study_sessions")
         .insert({
           ...session,
           user_id: user.id,
@@ -194,24 +204,26 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .single();
 
       if (error) {
-        console.error('Error recording study session:', error);
+        console.error("Error recording study session:", error);
         return;
       }
 
       // Reload stats
       await get().loadStats();
     } catch (error) {
-      console.error('Error recording study session:', error);
+      console.error("Error recording study session:", error);
     }
   },
 
-  recordQuizResult: async (result) => {
+  recordQuizResult: async (result: Omit<QuizResult, "id" | "created_at">) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('quiz_results')
+        .from("quiz_results")
         .insert({
           ...result,
           user_id: user.id,
@@ -221,69 +233,70 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .single();
 
       if (error) {
-        console.error('Error recording quiz result:', error);
+        console.error("Error recording quiz result:", error);
         return;
       }
 
       // Reload stats
       await get().loadStats();
     } catch (error) {
-      console.error('Error recording quiz result:', error);
+      console.error("Error recording quiz result:", error);
     }
   },
 
-  updateSentenceProgress: async (sentenceId, correct) => {
+  updateSentenceProgress: async (sentenceId: string, correct: boolean) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('user_progress')
-        .insert({
-          user_id: user.id,
-          sentence_id: sentenceId,
-          correct,
-          created_at: new Date().toISOString(),
-        });
+      const { data, error } = await supabase.from("user_progress").insert({
+        user_id: user.id,
+        sentence_id: sentenceId,
+        correct,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
-        console.error('Error updating sentence progress:', error);
+        console.error("Error updating sentence progress:", error);
         return;
       }
 
       // Reload progress
       await get().loadProgress();
     } catch (error) {
-      console.error('Error updating sentence progress:', error);
+      console.error("Error updating sentence progress:", error);
     }
   },
 
   getTodayProgress: () => {
     const { progress } = get();
-    const today = new Date().toISOString().split('T')[0];
-    return progress.filter(p => p.created_at.startsWith(today));
+    const today = new Date().toISOString().split("T")[0];
+    return progress.filter((p) => p.created_at.startsWith(today));
   },
 
   getWeekProgress: () => {
     const { progress } = get();
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    return progress.filter(p => p.created_at >= weekAgo);
+    return progress.filter((p) => p.created_at >= weekAgo);
   },
 
   getMonthProgress: () => {
     const { progress } = get();
     const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    return progress.filter(p => p.created_at >= monthAgo);
+    return progress.filter((p) => p.created_at >= monthAgo);
   },
 
   calculateStreak: async () => {
     await get().loadStats();
   },
 
-  clear: () => set({
-    progress: [],
-    stats: DEFAULT_STATS,
-    loading: false,
-    error: null,
-  }),
+  clear: () =>
+    set({
+      progress: [],
+      stats: DEFAULT_STATS,
+      loading: false,
+      error: null,
+    }),
 }));

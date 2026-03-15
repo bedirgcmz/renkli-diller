@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -19,7 +19,11 @@ interface AuthState {
 
   // Actions
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName?: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
@@ -34,7 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: false,
   initialized: false,
 
-  signIn: async (email, password) => {
+  signIn: async (email: string, password: string) => {
     set({ loading: true });
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -50,16 +54,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (data.user) {
         // Fetch user profile
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
+          .from("profiles")
+          .select("*")
+          .eq("id", data.user.id)
           .single();
 
         const user: User = {
           id: data.user.id,
           email: data.user.email!,
-          full_name: profile?.full_name || '',
-          avatar_url: profile?.avatar_url || '',
+          full_name: profile?.full_name || "",
+          avatar_url: profile?.avatar_url || "",
           is_premium: profile?.is_premium || false,
           created_at: data.user.created_at,
         };
@@ -71,17 +75,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
 
         // Store session in AsyncStorage
-        await AsyncStorage.setItem('supabase_session', JSON.stringify(data.session));
+        await AsyncStorage.setItem("supabase_session", JSON.stringify(data.session));
       }
 
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: "An unexpected error occurred" };
     }
   },
 
-  signUp: async (email, password, fullName) => {
+  signUp: async (email: string, password: string, fullName?: string) => {
     set({ loading: true });
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -103,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: "An unexpected error occurred" };
     }
   },
 
@@ -111,9 +115,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
-          redirectTo: 'renkli-diller://auth/callback',
+          redirectTo: "renkli-diller://auth/callback",
         },
       });
 
@@ -126,7 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: "An unexpected error occurred" };
     }
   },
 
@@ -134,7 +138,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       await supabase.auth.signOut();
-      await AsyncStorage.removeItem('supabase_session');
+      await AsyncStorage.removeItem("supabase_session");
       set({
         user: null,
         session: null,
@@ -142,15 +146,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       set({ loading: false });
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
     }
   },
 
-  resetPassword: async (email) => {
+  resetPassword: async (email: string) => {
     set({ loading: true });
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'renkli-diller://auth/reset-password',
+        redirectTo: "renkli-diller://auth/reset-password",
       });
 
       if (error) {
@@ -162,20 +166,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: "An unexpected error occurred" };
     }
   },
 
-  updateProfile: async (updates) => {
+  updateProfile: async (updates: Partial<User>) => {
     const { user } = get();
-    if (!user) return { success: false, error: 'No user logged in' };
+    if (!user) return { success: false, error: "No user logged in" };
 
     set({ loading: true });
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      const { error } = await supabase.from("profiles").update(updates).eq("id", user.id);
 
       if (error) {
         set({ loading: false });
@@ -190,31 +191,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: "An unexpected error occurred" };
     }
   },
 
   initialize: async () => {
     try {
       // Try to restore session from AsyncStorage
-      const storedSession = await AsyncStorage.getItem('supabase_session');
+      const storedSession = await AsyncStorage.getItem("supabase_session");
       if (storedSession) {
         const session = JSON.parse(storedSession);
-        const { data: { user } } = await supabase.auth.setSession(session);
+        const {
+          data: { user },
+        } = await supabase.auth.setSession(session);
 
         if (user) {
           // Fetch user profile
           const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
             .single();
 
           const userData: User = {
             id: user.id,
             email: user.email!,
-            full_name: profile?.full_name || '',
-            avatar_url: profile?.avatar_url || '',
+            full_name: profile?.full_name || "",
+            avatar_url: profile?.avatar_url || "",
             is_premium: profile?.is_premium || false,
             created_at: user.created_at,
           };
@@ -230,19 +233,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
+        if (event === "SIGNED_IN" && session?.user) {
           // Fetch user profile
           const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
+            .from("profiles")
+            .select("*")
+            .eq("id", session.user.id)
             .single();
 
           const user: User = {
             id: session.user.id,
             email: session.user.email!,
-            full_name: profile?.full_name || '',
-            avatar_url: profile?.avatar_url || '',
+            full_name: profile?.full_name || "",
+            avatar_url: profile?.avatar_url || "",
             is_premium: profile?.is_premium || false,
             created_at: session.user.created_at,
           };
@@ -253,9 +256,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
 
           // Store session
-          await AsyncStorage.setItem('supabase_session', JSON.stringify(session));
-        } else if (event === 'SIGNED_OUT') {
-          await AsyncStorage.removeItem('supabase_session');
+          await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
+        } else if (event === "SIGNED_OUT") {
+          await AsyncStorage.removeItem("supabase_session");
           set({
             user: null,
             session: null,
@@ -265,15 +268,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({ initialized: true });
     } catch (error) {
-      console.error('Auth initialization error:', error);
+      console.error("Auth initialization error:", error);
       set({ initialized: true });
     }
   },
 
-  clear: () => set({
-    user: null,
-    session: null,
-    loading: false,
-    initialized: false,
-  }),
+  clear: () =>
+    set({
+      user: null,
+      session: null,
+      loading: false,
+      initialized: false,
+    }),
 }));

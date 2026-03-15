@@ -1,20 +1,20 @@
 // Language types
-export type SupportedLanguage = 'tr' | 'en' | 'sv' | 'de';
+export type SupportedLanguage = "tr" | "en" | "sv" | "de";
 
 // Sentence types
-export type SentenceStatus = 'new' | 'learning' | 'learned';
+export type SentenceStatus = "new" | "learning" | "learned";
 
 export type SentenceCategory =
-  | 'daily_conversation'
-  | 'business_english'
-  | 'phrasal_verbs'
-  | 'travel'
-  | 'academic'
-  | 'idioms'
-  | 'grammar_patterns'
-  | 'technology'
-  | 'health'
-  | 'social_modern';
+  | "daily_conversation"
+  | "business_english"
+  | "phrasal_verbs"
+  | "travel"
+  | "academic"
+  | "idioms"
+  | "grammar_patterns"
+  | "technology"
+  | "health"
+  | "social_modern";
 
 export interface Sentence {
   id: string;
@@ -52,7 +52,7 @@ export interface QuizResult {
   user_id: string;
   sentence_id: string;
   correct: boolean;
-  question_type: 'multiple_choice' | 'fill_blank';
+  question_type: "multiple_choice" | "fill_blank";
   created_at: string;
 }
 
@@ -60,7 +60,7 @@ export interface QuizResult {
 export interface QuizQuestion {
   id: string;
   sentence: Sentence;
-  type: 'multiple_choice' | 'fill_blank';
+  type: "multiple_choice" | "fill_blank";
   question: string;
   options?: string[]; // For multiple choice
   correctAnswer: string;
@@ -71,7 +71,7 @@ export interface QuizQuestion {
 export interface UserSettings {
   uiLanguage: SupportedLanguage;
   targetLanguage: SupportedLanguage;
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   dailyGoal: number;
   notifications: boolean;
   reminderTime: string;
@@ -135,7 +135,9 @@ export interface ThemeColors {
   background: string;
   backgroundSecondary: string;
   backgroundTertiary: string;
+  cardBackground: string;
   text: string;
+  textPrimary: string;
   textSecondary: string;
   textTertiary: string;
   primary: string;
@@ -143,6 +145,10 @@ export interface ThemeColors {
   primaryDark: string;
   secondary: string;
   accent: string;
+  statusLearning: string;
+  statusNew: string;
+  statusUnlearned: string;
+  premiumAccent: string;
   success: string;
   warning: string;
   error: string;
@@ -158,7 +164,7 @@ export interface ThemeColors {
 
 // Legacy types (for backward compatibility)
 export type SentenceState = SentenceStatus;
-export type KeywordMarker = '*' | '#' | '%' | '@' | '+' | '&' | '{' | '~';
+export type KeywordMarker = "*" | "#" | "%" | "@" | "+" | "&" | "{" | "~";
 
 export interface KeywordColor {
   marker: KeywordMarker;

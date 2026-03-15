@@ -1,12 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from "@supabase/supabase-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Supabase configuration
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  throw new Error("Missing Supabase environment variables");
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -59,7 +59,7 @@ export type Database = {
           target_text: string;
           keywords: string[];
           category: string;
-          status: 'new' | 'learning' | 'learned';
+          status: "new" | "learning" | "learned";
           is_preset: boolean;
           created_at: string;
           updated_at: string;
@@ -71,7 +71,7 @@ export type Database = {
           target_text: string;
           keywords?: string[];
           category?: string;
-          status?: 'new' | 'learning' | 'learned';
+          status?: "new" | "learning" | "learned";
           is_preset?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -83,7 +83,7 @@ export type Database = {
           target_text?: string;
           keywords?: string[];
           category?: string;
-          status?: 'new' | 'learning' | 'learned';
+          status?: "new" | "learning" | "learned";
           is_preset?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -144,7 +144,7 @@ export type Database = {
           user_id: string;
           sentence_id: string;
           correct: boolean;
-          question_type: 'multiple_choice' | 'fill_blank';
+          question_type: "multiple_choice" | "fill_blank";
           created_at: string;
         };
         Insert: {
@@ -152,7 +152,7 @@ export type Database = {
           user_id: string;
           sentence_id: string;
           correct: boolean;
-          question_type: 'multiple_choice' | 'fill_blank';
+          question_type: "multiple_choice" | "fill_blank";
           created_at?: string;
         };
         Update: {
@@ -160,7 +160,7 @@ export type Database = {
           user_id?: string;
           sentence_id?: string;
           correct?: boolean;
-          question_type?: 'multiple_choice' | 'fill_blank';
+          question_type?: "multiple_choice" | "fill_blank";
           created_at?: string;
         };
       };
@@ -170,7 +170,7 @@ export type Database = {
           user_id: string;
           ui_language: string;
           target_language: string;
-          theme: 'light' | 'dark';
+          theme: "light" | "dark";
           daily_goal: number;
           notifications: boolean;
           reminder_time: string;
@@ -186,7 +186,7 @@ export type Database = {
           user_id: string;
           ui_language?: string;
           target_language?: string;
-          theme?: 'light' | 'dark';
+          theme?: "light" | "dark";
           daily_goal?: number;
           notifications?: boolean;
           reminder_time?: string;
@@ -202,7 +202,7 @@ export type Database = {
           user_id?: string;
           ui_language?: string;
           target_language?: string;
-          theme?: 'light' | 'dark';
+          theme?: "light" | "dark";
           daily_goal?: number;
           notifications?: boolean;
           reminder_time?: string;

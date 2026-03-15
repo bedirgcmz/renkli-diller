@@ -2,24 +2,13 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
-  }
-}
-      ]
-    }
   },
-  "include": [
-    "src",
-    "App.tsx",
-    "app.json",
-    "index.js"
-  ],
-  "exclude": [
-    "node_modules",
-    "babel.config.js"
-  ],
-  "extends": "expo/tsconfig.base"
+  "include": ["src", "App.tsx", "app.json", "index.js"],
+  "exclude": ["node_modules", "babel.config.js"]
 }

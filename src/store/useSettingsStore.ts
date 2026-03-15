@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SupportedLanguage } from "@/types";
@@ -108,7 +108,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ loading: true });
     try {
       // Try to load from AsyncStorage first
-      const stored = await AsyncStorage.getItem('user_settings');
+      const stored = await AsyncStorage.getItem("user_settings");
       if (stored) {
         const settings = JSON.parse(stored);
         set({ ...settings, loading: false, initialized: true });
@@ -116,12 +116,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       }
 
       // If no stored settings, try to load from Supabase
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data: settings } = await supabase
-          .from('user_settings')
-          .select('*')
-          .eq('user_id', user.id)
+          .from("user_settings")
+          .select("*")
+          .eq("user_id", user.id)
           .single();
 
         if (settings) {
@@ -131,16 +133,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             initialized: true,
           });
           // Cache in AsyncStorage
-          await AsyncStorage.setItem('user_settings', JSON.stringify(settings));
+          await AsyncStorage.setItem("user_settings", JSON.stringify(settings));
           return;
         }
       }
 
       // Use defaults
       set({ ...DEFAULT_SETTINGS, loading: false, initialized: true });
-      await AsyncStorage.setItem('user_settings', JSON.stringify(DEFAULT_SETTINGS));
+      await AsyncStorage.setItem("user_settings", JSON.stringify(DEFAULT_SETTINGS));
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error("Error loading settings:", error);
       set({ ...DEFAULT_SETTINGS, loading: false, initialized: true });
     }
   },
@@ -151,25 +153,25 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
     try {
       // Save to AsyncStorage
-      await AsyncStorage.setItem('user_settings', JSON.stringify(newSettings));
+      await AsyncStorage.setItem("user_settings", JSON.stringify(newSettings));
 
       // Save to Supabase if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
-        const { error } = await supabase
-          .from('user_settings')
-          .upsert({
-            user_id: user.id,
-            ...newSettings,
-            updated_at: new Date().toISOString(),
-          });
+        const { error } = await supabase.from("user_settings").upsert({
+          user_id: user.id,
+          ...newSettings,
+          updated_at: new Date().toISOString(),
+        });
 
         if (error) {
-          console.error('Error saving settings to Supabase:', error);
+          console.error("Error saving settings to Supabase:", error);
         }
       }
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error("Error saving settings:", error);
     }
   },
 

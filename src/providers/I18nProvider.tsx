@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '@/i18n';
-import { useSettingsStore } from '@/store/useSettingsStore';
+import React, { createContext, useContext, useEffect } from "react";
+import { I18nextProvider } from "react-i18next";
+import i18n from "@/i18n";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 interface I18nContextType {
   changeLanguage: (language: string) => Promise<void>;
@@ -12,7 +12,7 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 export const useI18n = () => {
   const context = useContext(I18nContext);
   if (!context) {
-    throw new Error('useI18n must be used within an I18nProvider');
+    throw new Error("useI18n must be used within an I18nProvider");
   }
   return context;
 };
@@ -54,9 +54,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
 
   return (
     <I18nContext.Provider value={value}>
-      <I18nextProvider i18n={i18n}>
-        {children}
-      </I18nextProvider>
+      <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
     </I18nContext.Provider>
   );
 };

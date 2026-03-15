@@ -1,3 +1,3 @@
-import { useTheme as useThemeContext } from '@/providers/ThemeProvider';
+import { useTheme as useThemeContext } from "@/providers/ThemeProvider";
 
 export const useTheme = useThemeContext;

@@ -41,26 +41,26 @@ export default function TabNavigator() {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: "500",
         },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
           switch (route.name) {
-            case 'Learn':
-              iconName = focused ? 'book' : 'book-outline';
+            case "Learn":
+              iconName = focused ? "book" : "book-outline";
               break;
-            case 'Quiz':
-              iconName = focused ? 'school' : 'school-outline';
+            case "Quiz":
+              iconName = focused ? "school" : "school-outline";
               break;
-            case 'Sentences':
-              iconName = focused ? 'list' : 'list-outline';
+            case "Sentences":
+              iconName = focused ? "list" : "list-outline";
               break;
-            case 'Profile':
-              iconName = focused ? 'person' : 'person-outline';
+            case "Profile":
+              iconName = focused ? "person" : "person-outline";
               break;
             default:
-              iconName = 'help-circle-outline';
+              iconName = "help-circle-outline";
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -71,28 +71,28 @@ export default function TabNavigator() {
         name="Learn"
         component={LearnScreen}
         options={{
-          tabBarLabel: t('tabs.learn'),
+          tabBarLabel: t("tabs.learn"),
         }}
       />
       <Tab.Screen
         name="Quiz"
         component={QuizScreen}
         options={{
-          tabBarLabel: t('tabs.quiz'),
+          tabBarLabel: t("tabs.quiz"),
         }}
       />
       <Tab.Screen
         name="Sentences"
         component={SentencesScreen}
         options={{
-          tabBarLabel: t('tabs.sentences'),
+          tabBarLabel: t("tabs.sentences"),
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: t('tabs.profile'),
+          tabBarLabel: t("tabs.profile"),
         }}
       />
     </Tab.Navigator>

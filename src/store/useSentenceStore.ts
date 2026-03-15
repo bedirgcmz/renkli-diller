@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { Sentence, SentenceStatus, SentenceCategory } from "@/types";
 
@@ -18,8 +18,13 @@ interface SentenceState {
   // Actions
   loadSentences: (filters?: SentenceFilters) => Promise<void>;
   loadPresetSentences: (category?: SentenceCategory) => Promise<void>;
-  addSentence: (sentence: Omit<Sentence, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; error?: string }>;
-  updateSentence: (id: string, updates: Partial<Sentence>) => Promise<{ success: boolean; error?: string }>;
+  addSentence: (
+    sentence: Omit<Sentence, "id" | "created_at" | "updated_at">,
+  ) => Promise<{ success: boolean; error?: string }>;
+  updateSentence: (
+    id: string,
+    updates: Partial<Sentence>,
+  ) => Promise<{ success: boolean; error?: string }>;
   deleteSentence: (id: string) => Promise<{ success: boolean; error?: string }>;
   markAsLearned: (id: string) => Promise<void>;
   markAsUnlearned: (id: string) => Promise<void>;
@@ -37,26 +42,25 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   loading: false,
   error: null,
 
-  loadSentences: async (filters = {}) => {
+  loadSentences: async (filters: SentenceFilters = {}) => {
     set({ loading: true, error: null });
     try {
-      let query = supabase
-        .from('sentences')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from("sentences").select("*").order("created_at", { ascending: false });
 
       // Apply filters
       if (filters.status) {
-        query = query.eq('status', filters.status);
+        query = query.eq("status", filters.status);
       }
       if (filters.category) {
-        query = query.eq('category', filters.category);
+        query = query.eq("category", filters.category);
       }
       if (filters.search) {
-        query = query.or(`source_text.ilike.%${filters.search}%,target_text.ilike.%${filters.search}%`);
+        query = query.or(
+          `source_text.ilike.%${filters.search}%,target_text.ilike.%${filters.search}%`,
+        );
       }
       if (filters.isPreset !== undefined) {
-        query = query.eq('is_preset', filters.isPreset);
+        query = query.eq("is_preset", filters.isPreset);
       }
 
       const { data, error } = await query;
@@ -72,23 +76,23 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       });
     } catch (error) {
       set({
-        error: 'Failed to load sentences',
+        error: "Failed to load sentences",
         loading: false,
       });
     }
   },
 
-  loadPresetSentences: async (category) => {
+  loadPresetSentences: async (category?: SentenceCategory) => {
     set({ loading: true, error: null });
     try {
       let query = supabase
-        .from('sentences')
-        .select('*')
-        .eq('is_preset', true)
-        .order('created_at', { ascending: false });
+        .from("sentences")
+        .select("*")
+        .eq("is_preset", true)
+        .order("created_at", { ascending: false });
 
       if (category) {
-        query = query.eq('category', category);
+        query = query.eq("category", category);
       }
 
       const { data, error } = await query;
@@ -104,23 +108,25 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       });
     } catch (error) {
       set({
-        error: 'Failed to load preset sentences',
+        error: "Failed to load preset sentences",
         loading: false,
       });
     }
   },
 
-  addSentence: async (sentenceData) => {
+  addSentence: async (sentenceData: Omit<Sentence, "id" | "created_at" | "updated_at">) => {
     set({ loading: true, error: null });
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         set({ loading: false });
-        return { success: false, error: 'User not authenticated' };
+        return { success: false, error: "User not authenticated" };
       }
 
       const { data, error } = await supabase
-        .from('sentences')
+        .from("sentences")
         .insert({
           ...sentenceData,
           user_id: user.id,
@@ -145,20 +151,20 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'Failed to add sentence' };
+      return { success: false, error: "Failed to add sentence" };
     }
   },
 
-  updateSentence: async (id, updates) => {
+  updateSentence: async (id: string, updates: Partial<Sentence>) => {
     set({ loading: true, error: null });
     try {
       const { error } = await supabase
-        .from('sentences')
+        .from("sentences")
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) {
         set({ loading: false });
@@ -167,8 +173,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
 
       // Update local state
       const { sentences } = get();
-      const updatedSentences = sentences.map(sentence =>
-        sentence.id === id ? { ...sentence, ...updates } : sentence
+      const updatedSentences = sentences.map((sentence) =>
+        sentence.id === id ? { ...sentence, ...updates } : sentence,
       );
 
       set({
@@ -179,17 +185,14 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'Failed to update sentence' };
+      return { success: false, error: "Failed to update sentence" };
     }
   },
 
-  deleteSentence: async (id) => {
+  deleteSentence: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const { error } = await supabase
-        .from('sentences')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("sentences").delete().eq("id", id);
 
       if (error) {
         set({ loading: false });
@@ -198,7 +201,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
 
       // Remove from local state
       const { sentences } = get();
-      const filteredSentences = sentences.filter(sentence => sentence.id !== id);
+      const filteredSentences = sentences.filter((sentence) => sentence.id !== id);
 
       set({
         sentences: filteredSentences,
@@ -208,46 +211,47 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       return { success: true };
     } catch (error) {
       set({ loading: false });
-      return { success: false, error: 'Failed to delete sentence' };
+      return { success: false, error: "Failed to delete sentence" };
     }
   },
 
-  markAsLearned: async (id) => {
-    await get().updateSentence(id, { status: 'learned' });
+  markAsLearned: async (id: string) => {
+    await get().updateSentence(id, { status: "learned" });
   },
 
-  markAsUnlearned: async (id) => {
-    await get().updateSentence(id, { status: 'new' });
+  markAsUnlearned: async (id: string) => {
+    await get().updateSentence(id, { status: "new" });
   },
 
-  addToLearningList: async (id) => {
-    await get().updateSentence(id, { status: 'learning' });
+  addToLearningList: async (id: string) => {
+    await get().updateSentence(id, { status: "learning" });
   },
 
-  removeFromLearningList: async (id) => {
-    await get().updateSentence(id, { status: 'new' });
+  removeFromLearningList: async (id: string) => {
+    await get().updateSentence(id, { status: "new" });
   },
 
   getNextSentence: () => {
     const { sentences } = get();
-    const learningSentences = sentences.filter(s => s.status === 'learning');
+    const learningSentences = sentences.filter((s) => s.status === "learning");
     return learningSentences.length > 0 ? learningSentences[0] : null;
   },
 
   getLearnedCount: () => {
     const { sentences } = get();
-    return sentences.filter(s => s.status === 'learned').length;
+    return sentences.filter((s) => s.status === "learned").length;
   },
 
   getLearningCount: () => {
     const { sentences } = get();
-    return sentences.filter(s => s.status === 'learning').length;
+    return sentences.filter((s) => s.status === "learning").length;
   },
 
-  clear: () => set({
-    sentences: [],
-    presetSentences: [],
-    loading: false,
-    error: null,
-  }),
+  clear: () =>
+    set({
+      sentences: [],
+      presetSentences: [],
+      loading: false,
+      error: null,
+    }),
 }));

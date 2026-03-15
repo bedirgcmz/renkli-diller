@@ -1,8 +1,8 @@
 import { shareAsync } from "expo-sharing";
-import RNHTMLtoPDF from "react-native-html-to-pdf";
+import * as RNHTMLtoPDF from "react-native-html-to-pdf";
 
 export async function createPdf(html: string, fileName: string) {
-  const { filePath } = await RNHTMLtoPDF.convert({ html, fileName });
+  const { filePath } = await RNHTMLtoPDF.generatePDF({ html, fileName });
   return filePath;
 }
 
