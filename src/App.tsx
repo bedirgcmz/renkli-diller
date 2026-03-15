@@ -10,9 +10,6 @@ import { I18nProvider } from "@/providers/I18nProvider";
 // Navigation
 import AppNavigator from "@/navigation/AppNavigator";
 
-// Styles
-import "@/styles/global.css";
-
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
