@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 export function useDailyGoal(goal: number, completed: number) {
   return useMemo(() => {
@@ -6,7 +6,7 @@ export function useDailyGoal(goal: number, completed: number) {
     return {
       goal,
       completed,
-      progress
+      progress,
     };
   }, [goal, completed]);
 }

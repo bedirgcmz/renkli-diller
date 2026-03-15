@@ -1,5 +1,5 @@
-import create from 'zustand';
-import { Sentence } from '@/types';
+import create from "zustand";
+import { Sentence } from "@/types";
 
 interface SentenceState {
   sentences: Sentence[];
@@ -10,5 +10,5 @@ interface SentenceState {
 export const useSentenceStore = create<SentenceState>((set) => ({
   sentences: [],
   addSentences: (items) => set({ sentences: items }),
-  clear: () => set({ sentences: [] })
+  clear: () => set({ sentences: [] }),
 }));

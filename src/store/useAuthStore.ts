@@ -1,4 +1,4 @@
-import create from 'zustand';
+import create from "zustand";
 
 interface AuthState {
   userId: string | null;
@@ -11,5 +11,5 @@ export const useAuthStore = create<AuthState>((set) => ({
   userId: null,
   token: null,
   setUser: (userId, token) => set({ userId, token }),
-  clear: () => set({ userId: null, token: null })
+  clear: () => set({ userId: null, token: null }),
 }));

@@ -1,8 +1,8 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import LearnScreen from '@/screens/tabs/LearnScreen';
-import QuizScreen from '@/screens/tabs/QuizScreen';
-import SentencesScreen from '@/screens/tabs/SentencesScreen';
-import ProfileScreen from '@/screens/tabs/ProfileScreen';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import LearnScreen from "@/screens/tabs/LearnScreen";
+import QuizScreen from "@/screens/tabs/QuizScreen";
+import SentencesScreen from "@/screens/tabs/SentencesScreen";
+import ProfileScreen from "@/screens/tabs/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
 

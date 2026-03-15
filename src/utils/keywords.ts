@@ -1,8 +1,8 @@
-import { KeywordColor, TextSegment } from '@/types';
-import { KEYWORD_COLORS } from './constants';
+import { KeywordColor, TextSegment } from "@/types";
+import { KEYWORD_COLORS } from "./constants";
 
-const markerToColor = new Map<KeywordColor['marker'], string>(
-  KEYWORD_COLORS.map((c) => [c.marker, c.color] as const)
+const markerToColor = new Map<KeywordColor["marker"], string>(
+  KEYWORD_COLORS.map((c) => [c.marker, c.color] as const),
 );
 
 const markerPattern = /([*#%@+&{~])(.*?)\1/g;
@@ -19,15 +19,15 @@ export function parseKeywords(text: string): TextSegment[] {
     if (lastIndex < start) {
       segments.push({
         text: text.slice(lastIndex, start),
-        color: null
+        color: null,
       });
     }
 
-    const color = markerToColor.get(marker as KeywordColor['marker']) ?? null;
+    const color = markerToColor.get(marker as KeywordColor["marker"]) ?? null;
     segments.push({
       text: inner,
       color,
-      isItalic: marker === '@'
+      isItalic: marker === "@",
     });
 
     lastIndex = end;
@@ -36,7 +36,7 @@ export function parseKeywords(text: string): TextSegment[] {
   if (lastIndex < text.length) {
     segments.push({
       text: text.slice(lastIndex),
-      color: null
+      color: null,
     });
   }
 

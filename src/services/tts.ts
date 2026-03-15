@@ -1,4 +1,4 @@
-import * as Speech from 'expo-speech';
+import * as Speech from "expo-speech";
 
 export function speak(text: string, language?: string) {
   Speech.speak(text, { language });

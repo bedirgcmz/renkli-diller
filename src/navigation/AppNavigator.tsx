@@ -1,8 +1,8 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AuthScreen from '@/screens/onboarding/AuthScreen';
-import WelcomeScreen from '@/screens/onboarding/WelcomeScreen';
-import TabNavigator from '@/navigation/TabNavigator';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AuthScreen from "@/screens/onboarding/AuthScreen";
+import WelcomeScreen from "@/screens/onboarding/WelcomeScreen";
+import TabNavigator from "@/navigation/TabNavigator";
 
 const Stack = createNativeStackNavigator();
 
