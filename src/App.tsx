@@ -1,12 +1,29 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+// Providers
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { I18nProvider } from '@/providers/I18nProvider';
+
+// Navigation
+import AppNavigator from '@/navigation/AppNavigator';
+
+// Styles
+import '@/styles/global.css';
 
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold">Renkli Diller</Text>
-      <Text className="mt-2 text-sm text-gray-600">Welcome to the colorful languages app.</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <I18nProvider>
+          <ThemeProvider>
+            <AppNavigator />
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </I18nProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
