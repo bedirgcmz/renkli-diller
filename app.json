@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "renkli-diller",
+    "name": "Renkli Diller",
     "slug": "renkli-diller",
+    "scheme": "renklidiller",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,9 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.renklidiller.app"
     },
     "android": {
+      "package": "com.renklidiller.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -24,6 +27,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-sharing",
+      "expo-secure-store"
+    ]
   }
 }
