@@ -1,106 +1,218 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { AuthStackParamList } from "@/types";
+import { useTheme } from "@/hooks/useTheme";
 
-export default function SignUpScreen() {
+interface SignUpProps {
+  onSwitchToSignIn?: () => void;
+}
+
+export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, "SignUp">>();
+  const { colors } = useTheme();
   const signUp = useAuthStore((s) => s.signUp);
+  const loading = useAuthStore((s) => s.loading);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const validate = () => {
+    if (!email || !email.includes("@")) {
+      setError(t("onboarding.email") + " " + t("common.error"));
+      return false;
+    }
+    if (!password || password.length < 6) {
+      setError(t("onboarding.password") + " " + t("common.error"));
+      return false;
+    }
+    if (password !== confirmPassword) {
+      setError(t("onboarding.confirm_password") + " " + t("common.error"));
+      return false;
+    }
+    return true;
+  };
+
   const handleSignUp = async () => {
-    const { success, error: signUpError } = await signUp(email, password, fullName);
+    setError(null);
+    if (!validate()) return;
+
+    const { success, error: signUpError } = await signUp(email.trim(), password, fullName);
     if (!success) {
       setError(signUpError || t("common.error"));
+      return;
     }
+
+    onSwitchToSignIn?.();
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t("onboarding.sign_up")}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={t("onboarding.email")}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder={t("onboarding.password")}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder={t("onboarding.confirm_password")}
-        value={fullName}
-        onChangeText={setFullName}
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>{t("onboarding.sign_up")}</Text>
-      </TouchableOpacity>
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
-          <Text style={styles.link}>{t("onboarding.sign_in")}</Text>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <Text style={[styles.title, { color: colors.text }]}>{t("onboarding.sign_up")}</Text>
+
+        <View style={[styles.inputGroup, { borderColor: colors.border }]}>
+          <TextInput
+            style={[styles.input, { color: colors.text }]}
+            placeholder={t("onboarding.email")}
+            placeholderTextColor={colors.textSecondary}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            returnKeyType="next"
+          />
+        </View>
+
+        <View style={[styles.inputGroup, { borderColor: colors.border }]}>
+          <TextInput
+            style={[styles.input, { color: colors.text }]}
+            placeholder={t("onboarding.password")}
+            placeholderTextColor={colors.textSecondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            textContentType="newPassword"
+            returnKeyType="next"
+          />
+          <TouchableOpacity
+            style={styles.eyeToggle}
+            onPress={() => setShowPassword((prev) => !prev)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.eyeText, { color: colors.accent }]}>
+              {" "}
+              {showPassword ? "Gizle" : "Göster"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.inputGroup, { borderColor: colors.border }]}>
+          <TextInput
+            style={[styles.input, { color: colors.text }]}
+            placeholder={t("onboarding.confirm_password")}
+            placeholderTextColor={colors.textSecondary}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showPassword}
+            textContentType="newPassword"
+            returnKeyType="done"
+          />
+        </View>
+
+        <View style={[styles.inputGroup, { borderColor: colors.border }]}>
+          <TextInput
+            style={[styles.input, { color: colors.text }]}
+            placeholder={t("onboarding.sign_up")}
+            placeholderTextColor={colors.textSecondary}
+            value={fullName}
+            onChangeText={setFullName}
+            returnKeyType="done"
+          />
+        </View>
+
+        {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
+
+        <TouchableOpacity
+          style={[styles.primaryButton, { backgroundColor: colors.accent }]}
+          onPress={handleSignUp}
+          activeOpacity={0.8}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.primaryButtonText}>{t("onboarding.sign_up")}</Text>
+          )}
         </TouchableOpacity>
-      </View>
-    </View>
+
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => onSwitchToSignIn?.()}>
+            <Text style={[styles.link, { color: colors.accent }]}>
+              {t("onboarding.already_have_account")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     padding: 24,
     justifyContent: "center",
-    backgroundColor: "#fff",
   },
   title: {
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 24,
   },
-  input: {
-    height: 48,
+  inputGroup: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-  },
-  button: {
-    height: 48,
-    backgroundColor: "#007AFF",
-    borderRadius: 10,
-    justifyContent: "center",
+    borderRadius: 12,
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  buttonText: {
-    color: "#fff",
+  input: {
+    flex: 1,
+    height: 46,
+    fontSize: 16,
+  },
+  eyeToggle: {
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  eyeText: {
+    fontSize: 14,
     fontWeight: "600",
   },
-  actions: {
+  primaryButton: {
+    height: 48,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 16,
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  actions: {
+    marginTop: 18,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
   link: {
-    color: "#007AFF",
+    fontSize: 14,
   },
   error: {
-    marginTop: 8,
-    color: "#d00",
+    marginTop: 12,
+    fontSize: 13,
   },
 });

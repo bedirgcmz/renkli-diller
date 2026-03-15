@@ -9,8 +9,7 @@ import type { AuthStackParamList } from "@/types";
 export default function LanguageSelectionScreen() {
   const { t } = useTranslation();
   const setUILanguage = useSettingsStore((s) => s.setUILanguage);
-  const navigation =
-    useNavigation<NativeStackNavigationProp<AuthStackParamList, "LanguageSelection">>();
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, "Auth">>();
 
   const selectLanguage = async (lang: string) => {
     await setUILanguage(lang as any);

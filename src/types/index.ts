@@ -89,10 +89,8 @@ export type RootStackParamList = {
 };
 
 export type AuthStackParamList = {
-  SignIn: undefined;
-  SignUp: undefined;
+  Auth: undefined;
   ResetPassword: undefined;
-  LanguageSelection: undefined;
 };
 
 export type TabParamList = {

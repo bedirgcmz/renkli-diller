@@ -21,6 +21,7 @@ interface ThemeColors {
   primaryDark: string;
   secondary: string;
   accent: string;
+  premiumAccent: string;
 
   // Status colors
   success: string;
@@ -51,15 +52,16 @@ const lightTheme: ThemeColors = {
   textSecondary: "#6C757D",
   textTertiary: "#ADB5BD",
 
-  primary: "#007AFF",
-  primaryLight: "#4DA3FF",
-  primaryDark: "#0056CC",
+  primary: "#3B8BD4",
+  primaryLight: "#7BB7F0",
+  primaryDark: "#2A6EA0",
   secondary: "#6C757D",
-  accent: "#FF9500",
+  accent: "#3B8BD4",
+  premiumAccent: "#8B5CF6",
 
-  success: "#28A745",
+  success: "#2ECC71",
   warning: "#FFC107",
-  error: "#DC3545",
+  error: "#E53E3E",
   info: "#17A2B8",
 
   border: "#DEE2E6",
@@ -74,31 +76,32 @@ const lightTheme: ThemeColors = {
 };
 
 const darkTheme: ThemeColors = {
-  background: "#121212",
-  backgroundSecondary: "#1E1E1E",
-  backgroundTertiary: "#2C2C2C",
+  background: "#121220",
+  backgroundSecondary: "#1E1E2E",
+  backgroundTertiary: "#2C2C3A",
 
   text: "#FFFFFF",
   textSecondary: "#B3B3B3",
   textTertiary: "#808080",
 
-  primary: "#0A84FF",
-  primaryLight: "#4DA3FF",
-  primaryDark: "#0056CC",
+  primary: "#5BA3E8",
+  primaryLight: "#85C1FF",
+  primaryDark: "#3B7FD2",
   secondary: "#B3B3B3",
-  accent: "#FF9500",
+  accent: "#5BA3E8",
+  premiumAccent: "#8B5CF6",
 
-  success: "#28A745",
+  success: "#2ECC71",
   warning: "#FFC107",
-  error: "#DC3545",
+  error: "#E53E3E",
   info: "#17A2B8",
 
   border: "#383838",
   borderLight: "#484848",
   divider: "#383838",
 
-  surface: "#1E1E1E",
-  surfaceSecondary: "#2C2C2C",
+  surface: "#1E1E2E",
+  surfaceSecondary: "#2C2C2E",
 
   keyword: "#FF6B6B",
   keywordBg: "#2C1818",
