@@ -26,17 +26,18 @@ export default function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { user, signOut } = useAuthStore();
   const { sentences, loadSentences } = useSentenceStore();
-  const { stats, loadStats } = useProgressStore();
+  const { stats, progressMap, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
 
   useEffect(() => {
     loadSentences();
-    loadStats();
+    loadProgress();
   }, []);
 
-  const learnedCount = sentences.filter((s) => s.status === "learned").length;
-  const learningCount = sentences.filter((s) => s.status === "learning").length;
+  const totalStudied = Object.keys(progressMap).length;
+  const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
+  const learningCount = Object.values(progressMap).filter((s) => s === "learning").length;
   const todayLearned = learnedCount; // simplified — ideally from today's progress
   const dailyGoalProgress = Math.min(todayLearned / dailyGoal, 1);
 
@@ -179,7 +180,7 @@ export default function ProfileScreen() {
         {/* Stats grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: t("profile.sentences_studied"), value: stats.totalSentencesStudied, icon: "📖" },
+            { label: t("profile.sentences_studied"), value: totalStudied, icon: "📖" },
             { label: t("profile.sentences_learned"), value: learnedCount, icon: "✅" },
             {
               label: t("profile.quiz_accuracy"),
