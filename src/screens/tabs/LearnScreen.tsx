@@ -5,18 +5,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  ScrollView,
   Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  GestureDetector,
-  Gesture,
-} from "react-native-gesture-handler";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
+import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { Sentence } from "@/types";
@@ -27,35 +24,61 @@ export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { sentences, loading, loadSentences, markAsLearned, markAsUnlearned, addToLearningList, removeFromLearningList } =
-    useSentenceStore();
+  const {
+    sentences: userSentences,
+    presetSentences,
+    loading,
+    loadSentences,
+    loadPresetSentences,
+  } = useSentenceStore();
+  const { progressMap, loadProgress, addToLearning, markAsLearned: presetMarkLearned, forgot } =
+    useProgressStore();
 
   const [activeTab, setActiveTab] = useState<TabKey>("learning");
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Animasyon
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const cardTranslateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     loadSentences();
+    loadPresetSentences();
+    loadProgress();
   }, []);
 
-  // Aktif taba göre cümleleri filtrele
-  const filteredSentences: Sentence[] = sentences.filter(
-    (s) => s.status === activeTab,
-  );
+  // Birleşik liste: user sentences + preset sentences (progressMap'ten durum al)
+  const learningList: Sentence[] = [
+    ...userSentences.filter((s) => s.status === "learning"),
+    ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
+  ];
 
+  const learnedList: Sentence[] = [
+    ...userSentences.filter((s) => s.status === "learned"),
+    ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
+  ];
+
+  const filteredSentences = activeTab === "learning" ? learningList : learnedList;
   const currentSentence = filteredSentences[currentIndex] ?? null;
   const total = filteredSentences.length;
 
-  // Tab değişince index sıfırla
+  // Index sınırını koru
+  useEffect(() => {
+    if (currentIndex >= total && total > 0) {
+      setCurrentIndex(total - 1);
+    }
+  }, [total]);
+
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);
     setCurrentIndex(0);
   };
 
-  // Kart animasyonu ile geçiş
+  const getEffectiveState = (s: Sentence): "new" | "learning" | "learned" => {
+    if (s.is_preset) return progressMap[s.id] ?? "new";
+    return s.status as "new" | "learning" | "learned";
+  };
+
+  // Animasyon
   const animateAndGo = useCallback(
     (direction: "next" | "prev", callback: () => void) => {
       const outX = direction === "next" ? -40 : 40;
@@ -73,7 +96,7 @@ export default function LearnScreen() {
         ]).start();
       });
     },
-    [cardOpacity, cardTranslateX],
+    [cardOpacity, cardTranslateX]
   );
 
   const goNext = useCallback(() => {
@@ -88,69 +111,55 @@ export default function LearnScreen() {
     }
   }, [currentIndex, animateAndGo]);
 
-  // Swipe gesture
   const swipeGesture = Gesture.Pan()
     .activeOffsetX([-20, 20])
     .onEnd((e) => {
-      if (e.translationX < -50) {
-        runOnJS(goNext)();
-      } else if (e.translationX > 50) {
-        runOnJS(goPrev)();
-      }
+      if (e.translationX < -50) runOnJS(goNext)();
+      else if (e.translationX > 50) runOnJS(goPrev)();
     });
 
-  // Aksiyonlar — index koruma ile
+  // Öğren: new → learning
+  const handleLearn = async () => {
+    if (!currentSentence) return;
+    if (currentSentence.is_preset) {
+      await addToLearning(currentSentence.id);
+    } else {
+      const { addToLearningList } = useSentenceStore.getState();
+      await addToLearningList(currentSentence.id);
+      await loadSentences();
+    }
+  };
+
+  // Öğrendim: learning → learned → sonraki karta geç
   const handleMarkLearned = async () => {
     if (!currentSentence) return;
-    await markAsLearned(currentSentence.id);
-    await loadSentences();
-    // Sınır kontrolü
-    const newTotal = filteredSentences.length - 1;
-    if (currentIndex >= newTotal && newTotal > 0) {
-      setCurrentIndex(newTotal - 1);
-    } else if (newTotal === 0) {
-      setCurrentIndex(0);
+    animateAndGo("next", () => {});
+    if (currentSentence.is_preset) {
+      await presetMarkLearned(currentSentence.id);
+    } else {
+      const { updateSentence } = useSentenceStore.getState();
+      await updateSentence(currentSentence.id, { status: "learned" });
+      await loadSentences();
     }
   };
 
-  const handleMarkUnlearned = async () => {
+  // Unuttum: learned → new
+  const handleForgot = async () => {
     if (!currentSentence) return;
-    await markAsUnlearned(currentSentence.id);
-    await loadSentences();
-    const newTotal = filteredSentences.length - 1;
-    if (currentIndex >= newTotal && newTotal > 0) {
-      setCurrentIndex(newTotal - 1);
-    } else if (newTotal === 0) {
-      setCurrentIndex(0);
+    if (currentSentence.is_preset) {
+      await forgot(currentSentence.id);
+    } else {
+      const { updateSentence } = useSentenceStore.getState();
+      await updateSentence(currentSentence.id, { status: "new" });
+      await loadSentences();
     }
   };
 
-  const handleAddToList = async () => {
-    if (!currentSentence) return;
-    await addToLearningList(currentSentence.id);
-    await loadSentences();
-  };
-
-  const handleRemoveFromList = async () => {
-    if (!currentSentence) return;
-    await removeFromLearningList(currentSentence.id);
-    await loadSentences();
-    const newTotal = filteredSentences.length - 1;
-    if (currentIndex >= newTotal && newTotal > 0) {
-      setCurrentIndex(newTotal - 1);
-    } else if (newTotal === 0) {
-      setCurrentIndex(0);
-    }
-  };
-
-  const learningCount = sentences.filter((s) => s.status === "learning").length;
-  const learnedCount = sentences.filter((s) => s.status === "learned").length;
+  const learningCount = learningList.length;
+  const learnedCount = learnedList.length;
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={["top"]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       {/* Başlık */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
@@ -165,12 +174,15 @@ export default function LearnScreen() {
         )}
       </View>
 
-      {/* Segment Control (Tab) */}
+      {/* Segment Control */}
       <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
         <TouchableOpacity
           style={[
             styles.segmentTab,
-            activeTab === "learning" && [styles.segmentTabActive, { backgroundColor: colors.surface, shadowColor: colors.text }],
+            activeTab === "learning" && [
+              styles.segmentTabActive,
+              { backgroundColor: colors.surface, shadowColor: colors.text },
+            ],
           ]}
           onPress={() => handleTabChange("learning")}
           activeOpacity={0.8}
@@ -184,7 +196,7 @@ export default function LearnScreen() {
             {t("sentences.filter_learning")}
           </Text>
           {learningCount > 0 && (
-            <View style={[styles.badge, { backgroundColor: "#2ECC71" }]}>
+            <View style={[styles.badge, { backgroundColor: "#3B8BD4" }]}>
               <Text style={styles.badgeText}>{learningCount}</Text>
             </View>
           )}
@@ -193,7 +205,10 @@ export default function LearnScreen() {
         <TouchableOpacity
           style={[
             styles.segmentTab,
-            activeTab === "learned" && [styles.segmentTabActive, { backgroundColor: colors.surface, shadowColor: colors.text }],
+            activeTab === "learned" && [
+              styles.segmentTabActive,
+              { backgroundColor: colors.surface, shadowColor: colors.text },
+            ],
           ]}
           onPress={() => handleTabChange("learned")}
           activeOpacity={0.8}
@@ -207,7 +222,7 @@ export default function LearnScreen() {
             {t("sentences.filter_learned")}
           </Text>
           {learnedCount > 0 && (
-            <View style={[styles.badge, { backgroundColor: colors.primary }]}>
+            <View style={[styles.badge, { backgroundColor: "#2ECC71" }]}>
               <Text style={styles.badgeText}>{learnedCount}</Text>
             </View>
           )}
@@ -223,7 +238,6 @@ export default function LearnScreen() {
         <EmptyState tab={activeTab} colors={colors} t={t} />
       ) : (
         <>
-          {/* Swipe destekli kart alanı */}
           <GestureDetector gesture={swipeGesture}>
             <Animated.View
               style={[
@@ -236,17 +250,15 @@ export default function LearnScreen() {
                   sentence={currentSentence}
                   uiLanguage={uiLanguage}
                   targetLanguage={targetLanguage}
-                  state={activeTab === "learned" ? "learned" : currentSentence.status as "new" | "learning" | "learned"}
+                  state={getEffectiveState(currentSentence)}
+                  onLearn={handleLearn}
                   onMarkLearned={handleMarkLearned}
-                  onMarkUnlearned={handleMarkUnlearned}
-                  onAddToList={handleAddToList}
-                  onRemoveFromList={handleRemoveFromList}
+                  onForgot={handleForgot}
                 />
               )}
             </Animated.View>
           </GestureDetector>
 
-          {/* Prev / Next butonları */}
           <View style={styles.navRow}>
             <TouchableOpacity
               style={[
@@ -258,8 +270,13 @@ export default function LearnScreen() {
               disabled={currentIndex === 0}
               activeOpacity={0.7}
             >
-              <Text style={[styles.navBtnText, { color: currentIndex === 0 ? colors.textTertiary : colors.text }]}>
-                ‹  {t("learn.prev")}
+              <Text
+                style={[
+                  styles.navBtnText,
+                  { color: currentIndex === 0 ? colors.textTertiary : colors.text },
+                ]}
+              >
+                ‹ {t("learn.prev")}
               </Text>
             </TouchableOpacity>
 
@@ -273,13 +290,17 @@ export default function LearnScreen() {
               disabled={currentIndex === total - 1}
               activeOpacity={0.7}
             >
-              <Text style={[styles.navBtnText, { color: currentIndex === total - 1 ? colors.textTertiary : colors.text }]}>
-                {t("learn.next")}  ›
+              <Text
+                style={[
+                  styles.navBtnText,
+                  { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
+                ]}
+              >
+                {t("learn.next")} ›
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Motivasyon mesajı */}
           <MotivationBar
             tab={activeTab}
             remaining={activeTab === "learning" ? total - currentIndex - 1 : 0}
@@ -292,8 +313,6 @@ export default function LearnScreen() {
     </SafeAreaView>
   );
 }
-
-// ─── Alt bileşenler ────────────────────────────────────────────────────────────
 
 function EmptyState({
   tab,
@@ -312,7 +331,7 @@ function EmptyState({
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
         {tab === "learning"
-          ? "Cümleler ekranından cümle ekleyerek başlayabilirsiniz."
+          ? "Cümleler ekranından 'Öğren' butonuna basarak başlayabilirsiniz."
           : "Henüz öğrenilen cümle yok."}
       </Text>
     </View>
@@ -350,12 +369,8 @@ function MotivationBar({
   );
 }
 
-// ─── Stiller ──────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -364,19 +379,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 12,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-  },
-  counterBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  counterText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
+  headerTitle: { fontSize: 22, fontWeight: "700" },
+  counterBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  counterText: { fontSize: 13, fontWeight: "600" },
   segmentContainer: {
     flexDirection: "row",
     marginHorizontal: 20,
@@ -399,10 +404,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  segmentLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
+  segmentLabel: { fontSize: 14, fontWeight: "500" },
   badge: {
     minWidth: 18,
     height: 18,
@@ -411,21 +413,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 4,
   },
-  badgeText: {
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardWrapper: {
-    flex: 1,
-    paddingHorizontal: 20,
-    justifyContent: "center",
-  },
+  badgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center" },
+  cardWrapper: { flex: 1, paddingHorizontal: 20, justifyContent: "center" },
   navRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -440,13 +430,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  navBtnDisabled: {
-    opacity: 0.4,
-  },
-  navBtnText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
+  navBtnDisabled: { opacity: 0.4 },
+  navBtnText: { fontSize: 15, fontWeight: "600" },
   motivationBar: {
     marginHorizontal: 20,
     marginBottom: 16,
@@ -455,10 +440,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  motivationText: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
+  motivationText: { fontSize: 13, fontWeight: "500" },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
@@ -466,17 +448,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     gap: 12,
   },
-  emptyIcon: {
-    fontSize: 52,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
+  emptyIcon: { fontSize: 52 },
+  emptyTitle: { fontSize: 18, fontWeight: "600", textAlign: "center" },
+  emptySubtitle: { fontSize: 14, textAlign: "center", lineHeight: 20 },
 });

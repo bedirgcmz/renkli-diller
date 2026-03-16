@@ -10,21 +10,26 @@ interface ProgressStats {
   quizAccuracy: number;
   totalQuizQuestions: number;
   correctQuizAnswers: number;
-  studyTimeToday: number; // minutes
-  studyTimeThisWeek: number; // minutes
-  studyTimeThisMonth: number; // minutes
+  studyTimeToday: number;
+  studyTimeThisWeek: number;
+  studyTimeThisMonth: number;
   lastStudyDate: string | null;
 }
 
 interface ProgressState {
   progress: UserProgress[];
+  progressMap: Record<string, "learning" | "learned">;
   stats: ProgressStats;
   loading: boolean;
   error: string | null;
 
-  // Actions
   loadProgress: () => Promise<void>;
   loadStats: () => Promise<void>;
+  // State-machine actions for preset sentences
+  addToLearning: (sentenceId: string) => Promise<void>;
+  markAsLearned: (sentenceId: string) => Promise<void>;
+  forgot: (sentenceId: string) => Promise<void>;
+  // Legacy quiz tracking
   recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
   recordQuizResult: (result: Omit<QuizResult, "id" | "created_at">) => Promise<void>;
   updateSentenceProgress: (sentenceId: string, correct: boolean) => Promise<void>;
@@ -51,6 +56,7 @@ const DEFAULT_STATS: ProgressStats = {
 
 export const useProgressStore = create<ProgressState>((set, get) => ({
   progress: [],
+  progressMap: {},
   stats: DEFAULT_STATS,
   loading: false,
   error: null,
@@ -78,18 +84,94 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         return;
       }
 
-      set({
-        progress: data || [],
-        loading: false,
-      });
+      // Build progressMap from rows that have a state field
+      const progressMap: Record<string, "learning" | "learned"> = {};
+      for (const row of data || []) {
+        if (row.state === "learning" || row.state === "learned") {
+          progressMap[String(row.sentence_id)] = row.state;
+        }
+      }
 
-      // Load stats after progress
+      set({ progress: data || [], progressMap, loading: false });
       await get().loadStats();
-    } catch (error) {
-      set({
-        error: "Failed to load progress",
-        loading: false,
-      });
+    } catch {
+      set({ error: "Failed to load progress", loading: false });
+    }
+  },
+
+  // Öğrenme listesine ekle: new → learning
+  addToLearning: async (sentenceId: string) => {
+    // Optimistic update
+    set((state) => ({
+      progressMap: { ...state.progressMap, [sentenceId]: "learning" },
+    }));
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from("user_progress").upsert(
+        {
+          user_id: user.id,
+          sentence_id: sentenceId,
+          state: "learning",
+          created_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,sentence_id" }
+      );
+    } catch {
+      console.error("addToLearning failed");
+    }
+  },
+
+  // Öğrenildi: learning → learned
+  markAsLearned: async (sentenceId: string) => {
+    set((state) => ({
+      progressMap: { ...state.progressMap, [sentenceId]: "learned" },
+    }));
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from("user_progress").upsert(
+        {
+          user_id: user.id,
+          sentence_id: sentenceId,
+          state: "learned",
+          learned_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,sentence_id" }
+      );
+    } catch {
+      console.error("markAsLearned failed");
+    }
+  },
+
+  // Unuttum: learned/learning → new (sil)
+  forgot: async (sentenceId: string) => {
+    set((state) => {
+      const { [sentenceId]: _removed, ...rest } = state.progressMap;
+      return { progressMap: rest };
+    });
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase
+        .from("user_progress")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("sentence_id", sentenceId);
+    } catch {
+      console.error("forgot failed");
     }
   },
 
@@ -105,19 +187,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-      // Get study sessions
       const { data: sessions } = await supabase
         .from("study_sessions")
         .select("*")
         .eq("user_id", user.id);
 
-      // Get quiz results
       const { data: quizResults } = await supabase
         .from("quiz_results")
         .select("*")
         .eq("user_id", user.id);
 
-      // Calculate stats
       const totalSentencesStudied = sessions?.length || 0;
       const totalSentencesLearned = sessions?.filter((s) => s.completed).length || 0;
 
@@ -141,7 +220,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
-      // Calculate streak
       const studyDates = [...new Set(sessions?.map((s) => s.created_at.split("T")[0]) || [])]
         .sort()
         .reverse();
@@ -186,84 +264,58 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     }
   },
 
-  recordStudySession: async (session: Omit<StudySession, "id" | "created_at">) => {
+  recordStudySession: async (session) => {
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      await supabase
         .from("study_sessions")
-        .insert({
-          ...session,
-          user_id: user.id,
-          created_at: new Date().toISOString(),
-        })
+        .insert({ ...session, user_id: user.id, created_at: new Date().toISOString() })
         .select()
         .single();
 
-      if (error) {
-        console.error("Error recording study session:", error);
-        return;
-      }
-
-      // Reload stats
       await get().loadStats();
     } catch (error) {
       console.error("Error recording study session:", error);
     }
   },
 
-  recordQuizResult: async (result: Omit<QuizResult, "id" | "created_at">) => {
+  recordQuizResult: async (result) => {
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      await supabase
         .from("quiz_results")
-        .insert({
-          ...result,
-          user_id: user.id,
-          created_at: new Date().toISOString(),
-        })
+        .insert({ ...result, user_id: user.id, created_at: new Date().toISOString() })
         .select()
         .single();
 
-      if (error) {
-        console.error("Error recording quiz result:", error);
-        return;
-      }
-
-      // Reload stats
       await get().loadStats();
     } catch (error) {
       console.error("Error recording quiz result:", error);
     }
   },
 
-  updateSentenceProgress: async (sentenceId: string, correct: boolean) => {
+  updateSentenceProgress: async (sentenceId, correct) => {
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase.from("user_progress").insert({
+      await supabase.from("user_progress").insert({
         user_id: user.id,
         sentence_id: sentenceId,
         correct,
         created_at: new Date().toISOString(),
       });
 
-      if (error) {
-        console.error("Error updating sentence progress:", error);
-        return;
-      }
-
-      // Reload progress
       await get().loadProgress();
     } catch (error) {
       console.error("Error updating sentence progress:", error);
@@ -295,6 +347,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   clear: () =>
     set({
       progress: [],
+      progressMap: {},
       stats: DEFAULT_STATS,
       loading: false,
       error: null,

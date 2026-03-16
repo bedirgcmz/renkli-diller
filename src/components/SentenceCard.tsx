@@ -1,5 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Animated,
+} from "react-native";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -7,10 +13,11 @@ import { parseKeywords } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
 import { Sentence, SupportedLanguage, TextSegment } from "@/types";
 
+// State renkleri: KIRMIZI=new, MAVİ=learning, YEŞİL=learned
 const STATUS_BAR_COLOR: Record<"new" | "learning" | "learned", string> = {
-  new: "#3B8BD4",
-  learning: "#2ECC71",
-  learned: "#E53E3E",
+  new: "#E53E3E",
+  learning: "#3B8BD4",
+  learned: "#2ECC71",
 };
 
 const LANG_CODE: Record<SupportedLanguage, string> = {
@@ -57,15 +64,57 @@ function KeywordText({
   );
 }
 
-interface SentenceCardProps {
+// Animated buton ile press efekti
+function AnimatedBtn({
+  onPress,
+  bgColor,
+  children,
+}: {
+  onPress: () => void;
+  bgColor: string;
+  children: React.ReactNode;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.88,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 6,
+    }).start();
+  };
+
+  return (
+    <Pressable onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+      <Animated.View
+        style={[
+          styles.actionBtn,
+          { backgroundColor: bgColor, transform: [{ scale }] },
+        ]}
+      >
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+export interface SentenceCardProps {
   sentence: Sentence;
   uiLanguage: SupportedLanguage;
   targetLanguage: SupportedLanguage;
   state: "new" | "learning" | "learned";
-  onMarkLearned: () => void;
-  onMarkUnlearned: () => void;
-  onAddToList: () => void;
-  onRemoveFromList: () => void;
+  onLearn: () => void;       // KIRMIZI → MAVİ
+  onMarkLearned: () => void; // MAVİ → YEŞİL
+  onForgot: () => void;      // YEŞİL → KIRMIZI
   showTarget?: boolean;
 }
 
@@ -74,10 +123,9 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   uiLanguage,
   targetLanguage,
   state,
+  onLearn,
   onMarkLearned,
-  onMarkUnlearned,
-  onAddToList,
-  onRemoveFromList,
+  onForgot,
   showTarget = true,
 }) => {
   const { colors } = useTheme();
@@ -111,9 +159,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
       const sourceText = stripMarkers(sentence.source_text);
       Speech.speak(sourceText, {
         language: LANG_CODE[uiLanguage],
-        onDone: () => {
-          setTimeout(speakTarget, 1000);
-        },
+        onDone: () => { setTimeout(speakTarget, 1000); },
         onStopped: () => setSpeaking(false),
         onError: () => setSpeaking(false),
       });
@@ -124,11 +170,11 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
-      {/* Renkli durum barı */}
+      {/* Renkli durum barı: KIRMIZI=new, MAVİ=learning, YEŞİL=learned */}
       <View style={[styles.statusBar, { backgroundColor: barColor }]} />
 
       <View style={styles.body}>
-        {/* Metin bölümü */}
+        {/* Metin */}
         <View style={styles.textSection}>
           <KeywordText
             segments={sourceSegments}
@@ -149,84 +195,50 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
             </View>
           )}
 
-          <View
-            style={[
-              styles.categoryChip,
-              { backgroundColor: colors.backgroundTertiary },
-            ]}
-          >
-            <Text style={[styles.categoryText, { color: colors.textSecondary }]}>
-              {sentence.category.replace(/_/g, " ")}
-            </Text>
-          </View>
+          {sentence.category_name ? (
+            <View style={[styles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}>
+              <Text style={[styles.categoryText, { color: colors.textSecondary }]}>
+                {sentence.category_name}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
-        {/* Aksyon butonları (sağ kolon) */}
+        {/* Sağ kolon: TTS + tek durum butonu */}
         <View style={styles.actions}>
-          {/* Listeye ekle / listeden çıkar */}
-          {state === "new" && (
-            <TouchableOpacity
-              onPress={onAddToList}
-              hitSlop={HIT_SLOP}
-              activeOpacity={0.7}
-              style={[styles.actionBtn, { backgroundColor: colors.primary + "20" }]}
-            >
-              <Ionicons name="add-circle-outline" size={22} color={colors.primary} />
-            </TouchableOpacity>
-          )}
-          {state === "learning" && (
-            <TouchableOpacity
-              onPress={onRemoveFromList}
-              hitSlop={HIT_SLOP}
-              activeOpacity={0.7}
-              style={[styles.actionBtn, { backgroundColor: colors.backgroundTertiary }]}
-            >
-              <Ionicons name="remove-circle-outline" size={22} color={colors.textSecondary} />
-            </TouchableOpacity>
-          )}
-          {state === "learned" && (
-            <TouchableOpacity
-              onPress={onMarkUnlearned}
-              hitSlop={HIT_SLOP}
-              activeOpacity={0.7}
-              style={[styles.actionBtn, { backgroundColor: "#E53E3E20" }]}
-            >
-              <Ionicons name="refresh-outline" size={22} color="#E53E3E" />
-            </TouchableOpacity>
-          )}
-
-          {/* TTS butonu */}
-          <TouchableOpacity
+          {/* TTS - her zaman görünür */}
+          <AnimatedBtn
             onPress={handleAudio}
-            hitSlop={HIT_SLOP}
-            activeOpacity={0.7}
-            style={[styles.actionBtn, { backgroundColor: colors.primary + "15" }]}
+            bgColor={colors.primary + "18"}
           >
             <Ionicons
               name={speaking ? "stop-circle" : "volume-high-outline"}
-              size={22}
+              size={20}
               color={colors.primary}
             />
-          </TouchableOpacity>
+          </AnimatedBtn>
 
-          {/* Öğrendim / Tekrar öğren */}
-          {state !== "learned" ? (
-            <TouchableOpacity
-              onPress={onMarkLearned}
-              hitSlop={HIT_SLOP}
-              activeOpacity={0.7}
-              style={[styles.actionBtn, { backgroundColor: "#2ECC7120" }]}
-            >
-              <Ionicons name="checkmark-circle-outline" size={22} color="#2ECC71" />
-            </TouchableOpacity>
-          ) : null}
+          {/* Durum butonu: sadece bir tanesi gösterilir */}
+          {state === "new" && (
+            <AnimatedBtn onPress={onLearn} bgColor="#3B8BD420">
+              <Ionicons name="add-circle-outline" size={20} color="#3B8BD4" />
+            </AnimatedBtn>
+          )}
+          {state === "learning" && (
+            <AnimatedBtn onPress={onMarkLearned} bgColor="#2ECC7120">
+              <Ionicons name="checkmark-circle-outline" size={20} color="#2ECC71" />
+            </AnimatedBtn>
+          )}
+          {state === "learned" && (
+            <AnimatedBtn onPress={onForgot} bgColor="#E53E3E20">
+              <Ionicons name="refresh-outline" size={20} color="#E53E3E" />
+            </AnimatedBtn>
+          )}
         </View>
       </View>
     </View>
   );
 };
-
-const HIT_SLOP = { top: 6, bottom: 6, left: 6, right: 6 };
 
 const styles = StyleSheet.create({
   card: {

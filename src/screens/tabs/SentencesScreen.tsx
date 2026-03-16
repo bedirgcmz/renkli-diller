@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,37 +18,26 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
+import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { parseKeywords } from "@/utils/keywords";
-import { Sentence, SentenceCategory, SentenceStatus, MainStackParamList, TextSegment } from "@/types";
+import { Sentence, SentenceStatus, MainStackParamList, TextSegment } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
 type SentenceTab = "preset" | "mine";
 
 const STATUS_FILTERS: Array<{ key: StatusFilter; labelKey: string }> = [
   { key: "all", labelKey: "sentences.filter_all" },
+  { key: "new", labelKey: "sentences.filter_new" },
   { key: "learning", labelKey: "sentences.filter_learning" },
   { key: "learned", labelKey: "sentences.filter_learned" },
-  { key: "new", labelKey: "sentences.filter_new" },
 ];
 
-const ALL_CATEGORIES: SentenceCategory[] = [
-  "daily_conversation",
-  "business_english",
-  "phrasal_verbs",
-  "travel",
-  "academic",
-  "idioms",
-  "grammar_patterns",
-  "technology",
-  "health",
-  "social_modern",
-];
-
+// Durum bar renkleri: KIRMIZI=new, MAVİ=learning, YEŞİL=learned
 const STATUS_BAR_COLOR: Record<SentenceStatus, string> = {
-  new: "#3B8BD4",
-  learning: "#2ECC71",
-  learned: "#E53E3E",
+  new: "#E53E3E",
+  learning: "#3B8BD4",
+  learned: "#2ECC71",
 };
 
 function KeywordLine({
@@ -79,11 +69,11 @@ function KeywordLine({
 }
 
 interface SentenceItemProps {
-  sentence: Sentence;
+  sentence: Sentence & { effectiveStatus: SentenceStatus };
   isUserSentence: boolean;
   onLearn: () => void;
-  onLearned: () => void;
-  onForget: () => void;
+  onMarkLearned: () => void;
+  onForgot: () => void;
   onEdit: () => void;
   onDelete: () => void;
   colors: any;
@@ -94,95 +84,105 @@ function SentenceItem({
   sentence,
   isUserSentence,
   onLearn,
-  onLearned,
-  onForget,
+  onMarkLearned,
+  onForgot,
   onEdit,
   onDelete,
   colors,
   t,
 }: SentenceItemProps) {
-  const barColor = STATUS_BAR_COLOR[sentence.status];
+  const barColor = STATUS_BAR_COLOR[sentence.effectiveStatus];
   const keywordsText = sentence.keywords.filter(Boolean).join(", ");
 
   return (
     <View style={[itemStyles.card, { backgroundColor: colors.surface }]}>
       <View style={[itemStyles.statusBar, { backgroundColor: barColor }]} />
       <View style={itemStyles.body}>
-        {/* Edit/Delete icons — top right */}
         <View style={itemStyles.iconRow}>
-          <TouchableOpacity onPress={onEdit} hitSlop={HIT} activeOpacity={0.7}>
+          <Pressable
+            onPress={onEdit}
+            hitSlop={HIT}
+            style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+          >
             <Ionicons name="create-outline" size={18} color={colors.primary} />
-          </TouchableOpacity>
+          </Pressable>
           {isUserSentence && (
-            <TouchableOpacity onPress={onDelete} hitSlop={HIT} activeOpacity={0.7}>
+            <Pressable
+              onPress={onDelete}
+              hitSlop={HIT}
+              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+            >
               <Ionicons name="trash-outline" size={18} color={colors.error} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
 
-        {/* Sentences */}
         <KeywordLine text={sentence.source_text} baseColor={colors.text} fontSize={15} />
         <View style={itemStyles.targetRow}>
-          <KeywordLine
-            text={sentence.target_text}
-            baseColor={colors.textSecondary}
-            fontSize={13}
-          />
+          <KeywordLine text={sentence.target_text} baseColor={colors.textSecondary} fontSize={13} />
         </View>
 
-        {/* Keywords */}
         {keywordsText ? (
           <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>
             🔑 {keywordsText}
           </Text>
         ) : null}
 
-        {/* Category */}
-        <View
-          style={[itemStyles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}
-        >
-          <Text style={[itemStyles.categoryText, { color: colors.textSecondary }]}>
-            {t(`categories.${sentence.category}`)}
-          </Text>
-        </View>
+        {sentence.category_name ? (
+          <View style={[itemStyles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}>
+            <Text style={[itemStyles.categoryText, { color: colors.textSecondary }]}>
+              {sentence.category_name}
+            </Text>
+          </View>
+        ) : null}
 
-        {/* Action buttons */}
+        {/* Tek aksiyon butonu — duruma göre */}
         <View style={itemStyles.actionRow}>
-          {sentence.status !== "learning" ? (
-            <TouchableOpacity
-              style={[itemStyles.actionBtn, { backgroundColor: "#2ECC7118" }]}
+          {sentence.effectiveStatus === "new" && (
+            <Pressable
+              style={({ pressed }) => [
+                itemStyles.actionBtn,
+                { backgroundColor: "#3B8BD418" },
+                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+              ]}
               onPress={onLearn}
-              activeOpacity={0.8}
             >
-              <Text style={[itemStyles.actionBtnText, { color: "#2ECC71" }]}>
+              <Ionicons name="add-circle-outline" size={14} color="#3B8BD4" />
+              <Text style={[itemStyles.actionBtnText, { color: "#3B8BD4" }]}>
                 {t("learn.add_to_list")}
               </Text>
-            </TouchableOpacity>
-          ) : null}
-
-          {sentence.status !== "learned" ? (
-            <TouchableOpacity
-              style={[itemStyles.actionBtn, { backgroundColor: colors.primary + "18" }]}
-              onPress={onLearned}
-              activeOpacity={0.8}
+            </Pressable>
+          )}
+          {sentence.effectiveStatus === "learning" && (
+            <Pressable
+              style={({ pressed }) => [
+                itemStyles.actionBtn,
+                { backgroundColor: "#2ECC7118" },
+                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+              ]}
+              onPress={onMarkLearned}
             >
-              <Text style={[itemStyles.actionBtnText, { color: colors.primary }]}>
+              <Ionicons name="checkmark-circle-outline" size={14} color="#2ECC71" />
+              <Text style={[itemStyles.actionBtnText, { color: "#2ECC71" }]}>
                 {t("learn.mark_learned")}
               </Text>
-            </TouchableOpacity>
-          ) : null}
-
-          {sentence.status !== "new" ? (
-            <TouchableOpacity
-              style={[itemStyles.actionBtn, { backgroundColor: "#E53E3E18" }]}
-              onPress={onForget}
-              activeOpacity={0.8}
+            </Pressable>
+          )}
+          {sentence.effectiveStatus === "learned" && (
+            <Pressable
+              style={({ pressed }) => [
+                itemStyles.actionBtn,
+                { backgroundColor: "#E53E3E18" },
+                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+              ]}
+              onPress={onForgot}
             >
+              <Ionicons name="refresh-outline" size={14} color="#E53E3E" />
               <Text style={[itemStyles.actionBtnText, { color: "#E53E3E" }]}>
                 {t("learn.mark_unlearned")}
               </Text>
-            </TouchableOpacity>
-          ) : null}
+            </Pressable>
+          )}
         </View>
       </View>
     </View>
@@ -224,17 +224,20 @@ const itemStyles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 6,
   },
-  categoryText: { fontSize: 11, textTransform: "capitalize" },
+  categoryText: { fontSize: 11 },
   actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
   actionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 7,
   },
   actionBtnText: { fontSize: 12, fontWeight: "600" },
 });
 
-// ─── Main Screen ─────────────────────────────────────────────────────────────
+// ─── Ana ekran ────────────────────────────────────────────────────────────────
 
 export default function SentencesScreen() {
   const { t } = useTranslation();
@@ -244,209 +247,230 @@ export default function SentencesScreen() {
   const {
     sentences,
     presetSentences,
+    categories,
     loading,
     loadSentences,
     loadPresetSentences,
+    loadCategories,
     markAsLearned,
     markAsUnlearned,
     addToLearningList,
     deleteSentence,
   } = useSentenceStore();
+  const { progressMap, loadProgress } = useProgressStore();
 
   const [activeTab, setActiveTab] = useState<SentenceTab>("preset");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [categoryFilter, setCategoryFilter] = useState<SentenceCategory | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<number | "all">("all");
   const [searchText, setSearchText] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
+    loadCategories();
     loadPresetSentences();
-    loadSentences({ isPreset: false });
+    loadSentences();
+    loadProgress();
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadPresetSentences(), loadSentences({ isPreset: false })]);
+    await Promise.all([loadPresetSentences(), loadSentences(), loadProgress()]);
     setRefreshing(false);
   };
 
-  // Source of truth: preset tab uses presetSentences, mine tab uses sentences
-  const sourceList = activeTab === "preset" ? presetSentences : sentences;
+  // Preset cümlelere progressMap'ten durum ekle
+  const sourceList = useMemo(() => {
+    const base = activeTab === "preset" ? presetSentences : sentences;
+    return base.map((s) => ({
+      ...s,
+      effectiveStatus: (s.is_preset
+        ? (progressMap[s.id] ?? "new")
+        : s.status) as SentenceStatus,
+    }));
+  }, [activeTab, presetSentences, sentences, progressMap]);
 
   const displayed = useMemo(() => {
     return sourceList
-      .filter(() => true) // already filtered by source
-      .filter((s) => statusFilter === "all" || s.status === statusFilter)
-      .filter((s) => categoryFilter === "all" || s.category === categoryFilter)
+      .filter((s) => statusFilter === "all" || s.effectiveStatus === statusFilter)
+      .filter((s) => categoryFilter === "all" || s.category_id === categoryFilter)
       .filter(
         (s) =>
           !searchText ||
           s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
-          s.target_text.toLowerCase().includes(searchText.toLowerCase()),
+          s.target_text.toLowerCase().includes(searchText.toLowerCase())
       );
   }, [sourceList, statusFilter, categoryFilter, searchText]);
 
   const handleDelete = (sentence: Sentence) => {
-    Alert.alert(
-      t("sentences.delete"),
-      t("sentences.delete_confirm"),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.delete"),
-          style: "destructive",
-          onPress: () => deleteSentence(sentence.id),
-        },
-      ],
-    );
+    Alert.alert(t("sentences.delete"), t("sentences.delete_confirm"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: () => deleteSentence(sentence.id),
+      },
+    ]);
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>{t("sentences.title")}</Text>
-      </View>
+      {/* ── Sabit üst alan (başlık + filtreler) ─────────────────────── */}
+      <View>
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t("sentences.title")}</Text>
+        </View>
 
-      {/* Search bar */}
-      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
-        <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          placeholder={t("sentences.search_placeholder")}
-          placeholderTextColor={colors.textTertiary}
-          value={searchText}
-          onChangeText={setSearchText}
-          clearButtonMode="while-editing"
-        />
-        {searchText ? (
-          <TouchableOpacity onPress={() => setSearchText("")}>
-            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
-        ) : null}
-      </View>
-
-      {/* Segment control */}
-      <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
-        {(["preset", "mine"] as SentenceTab[]).map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[
-              styles.segmentTab,
-              activeTab === tab && [styles.segmentTabActive, { backgroundColor: colors.surface }],
-            ]}
-            onPress={() => { setActiveTab(tab); setStatusFilter("all"); setCategoryFilter("all"); }}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.segmentLabel,
-                { color: activeTab === tab ? colors.text : colors.textSecondary },
-              ]}
-            >
-              {tab === "preset" ? t("sentences.preset_sentences") : t("sentences.my_sentences")}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Status filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipsRow}
-      >
-        {STATUS_FILTERS.map((f) => (
-          <TouchableOpacity
-            key={f.key}
-            style={[
-              styles.chip,
-              {
-                backgroundColor:
-                  statusFilter === f.key ? colors.primary : colors.backgroundSecondary,
-                borderColor: statusFilter === f.key ? colors.primary : colors.border,
-              },
-            ]}
-            onPress={() => setStatusFilter(f.key)}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                { color: statusFilter === f.key ? "#fff" : colors.textSecondary },
-              ]}
-            >
-              {t(f.labelKey)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Category filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipsRow}
-      >
-        <TouchableOpacity
+        {/* Arama */}
+        <View
           style={[
-            styles.chip,
-            {
-              backgroundColor:
-                categoryFilter === "all" ? colors.accent : colors.backgroundSecondary,
-              borderColor: categoryFilter === "all" ? colors.accent : colors.border,
-            },
+            styles.searchBar,
+            { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
           ]}
-          onPress={() => setCategoryFilter("all")}
-          activeOpacity={0.8}
         >
-          <Text
-            style={[
-              styles.chipText,
-              { color: categoryFilter === "all" ? "#fff" : colors.textSecondary },
-            ]}
-          >
-            {t("sentences.filter_all")}
-          </Text>
-        </TouchableOpacity>
-        {ALL_CATEGORIES.map((cat) => (
+          <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder={t("sentences.search_placeholder")}
+            placeholderTextColor={colors.textTertiary}
+            value={searchText}
+            onChangeText={setSearchText}
+            clearButtonMode="while-editing"
+          />
+          {searchText ? (
+            <TouchableOpacity onPress={() => setSearchText("")}>
+              <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        {/* Segment: Hazır / Benim */}
+        <View
+          style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}
+        >
+          {(["preset", "mine"] as SentenceTab[]).map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[
+                styles.segmentTab,
+                activeTab === tab && [
+                  styles.segmentTabActive,
+                  { backgroundColor: colors.surface },
+                ],
+              ]}
+              onPress={() => {
+                setActiveTab(tab);
+                setStatusFilter("all");
+                setCategoryFilter("all");
+              }}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.segmentLabel,
+                  { color: activeTab === tab ? colors.text : colors.textSecondary },
+                ]}
+              >
+                {tab === "preset" ? t("sentences.preset_sentences") : t("sentences.my_sentences")}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Durum filtreleri */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+        >
+          {STATUS_FILTERS.map((f) => (
+            <TouchableOpacity
+              key={f.key}
+              style={[
+                styles.chip,
+                {
+                  backgroundColor:
+                    statusFilter === f.key ? colors.primary : colors.backgroundSecondary,
+                  borderColor: statusFilter === f.key ? colors.primary : colors.border,
+                },
+              ]}
+              onPress={() => setStatusFilter(f.key)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: statusFilter === f.key ? "#fff" : colors.textSecondary },
+                ]}
+              >
+                {t(f.labelKey)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Kategori filtreleri */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+        >
           <TouchableOpacity
-            key={cat}
             style={[
               styles.chip,
               {
                 backgroundColor:
-                  categoryFilter === cat ? colors.accent : colors.backgroundSecondary,
-                borderColor: categoryFilter === cat ? colors.accent : colors.border,
+                  categoryFilter === "all" ? colors.primary : colors.backgroundSecondary,
+                borderColor: categoryFilter === "all" ? colors.primary : colors.border,
               },
             ]}
-            onPress={() => setCategoryFilter(cat)}
+            onPress={() => setCategoryFilter("all")}
             activeOpacity={0.8}
           >
             <Text
               style={[
                 styles.chipText,
-                { color: categoryFilter === cat ? "#fff" : colors.textSecondary },
+                { color: categoryFilter === "all" ? "#fff" : colors.textSecondary },
               ]}
             >
-              {t(`categories.${cat}`)}
+              {t("sentences.filter_all")}
             </Text>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              style={[
+                styles.chip,
+                {
+                  backgroundColor:
+                    categoryFilter === cat.id ? colors.primary : colors.backgroundSecondary,
+                  borderColor: categoryFilter === cat.id ? colors.primary : colors.border,
+                },
+              ]}
+              onPress={() => setCategoryFilter(cat.id)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: categoryFilter === cat.id ? "#fff" : colors.textSecondary },
+                ]}
+              >
+                {cat[`name_${uiLanguage}` as keyof typeof cat] as string}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-      {/* List */}
+      {/* ── Scrollable cümle listesi ─────────────────────────────────── */}
       <FlatList
         data={displayed}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        style={styles.list}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
@@ -461,8 +485,8 @@ export default function SentencesScreen() {
             sentence={item}
             isUserSentence={!item.is_preset}
             onLearn={() => addToLearningList(item.id)}
-            onLearned={() => markAsLearned(item.id)}
-            onForget={() => markAsUnlearned(item.id)}
+            onMarkLearned={() => markAsLearned(item.id)}
+            onForgot={() => markAsUnlearned(item.id)}
             onEdit={() => navigation.navigate("EditSentence", { sentenceId: item.id })}
             onDelete={() => handleDelete(item)}
             colors={colors}
@@ -471,7 +495,7 @@ export default function SentencesScreen() {
         )}
       />
 
-      {/* FAB — Cümle ekle */}
+      {/* FAB */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: colors.primary }]}
         onPress={() => navigation.navigate("AddSentence")}
@@ -485,11 +509,7 @@ export default function SentencesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 10,
-  },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10 },
   headerTitle: { fontSize: 22, fontWeight: "700" },
   searchBar: {
     flexDirection: "row",
@@ -508,7 +528,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 12,
     padding: 4,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   segmentTab: {
     flex: 1,
@@ -523,11 +543,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   segmentLabel: { fontSize: 13, fontWeight: "500" },
-  chipsRow: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    gap: 6,
-  },
+  chipsRow: { paddingHorizontal: 16, paddingBottom: 8, gap: 6 },
   chip: {
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -535,15 +551,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipText: { fontSize: 12, fontWeight: "500" },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 90,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    paddingTop: 60,
-    gap: 10,
-  },
+  list: { flex: 1 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 90, paddingTop: 4 },
+  emptyContainer: { alignItems: "center", paddingTop: 60, gap: 10 },
   emptyIcon: { fontSize: 44 },
   emptyText: { fontSize: 15 },
   fab: {
