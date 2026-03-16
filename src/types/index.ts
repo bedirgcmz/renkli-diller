@@ -93,6 +93,9 @@ export type MainStackParamList = {
   AddSentence: undefined;
   EditSentence: { sentenceId: string };
   AutoMode: undefined;
+  Settings: undefined;
+  Paywall: undefined;
+  CategoryBrowser: undefined;
 };
 
 export type AuthStackParamList = {

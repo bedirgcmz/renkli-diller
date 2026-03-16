@@ -243,8 +243,10 @@ export default function SentencesScreen() {
   const { uiLanguage } = useSettingsStore();
   const {
     sentences,
+    presetSentences,
     loading,
     loadSentences,
+    loadPresetSentences,
     markAsLearned,
     markAsUnlearned,
     addToLearningList,
@@ -258,18 +260,22 @@ export default function SentencesScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadSentences();
+    loadPresetSentences();
+    loadSentences({ isPreset: false });
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadSentences();
+    await Promise.all([loadPresetSentences(), loadSentences({ isPreset: false })]);
     setRefreshing(false);
   };
 
+  // Source of truth: preset tab uses presetSentences, mine tab uses sentences
+  const sourceList = activeTab === "preset" ? presetSentences : sentences;
+
   const displayed = useMemo(() => {
-    return sentences
-      .filter((s) => (activeTab === "preset" ? s.is_preset : !s.is_preset))
+    return sourceList
+      .filter(() => true) // already filtered by source
       .filter((s) => statusFilter === "all" || s.status === statusFilter)
       .filter((s) => categoryFilter === "all" || s.category === categoryFilter)
       .filter(
@@ -278,7 +284,7 @@ export default function SentencesScreen() {
           s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
           s.target_text.toLowerCase().includes(searchText.toLowerCase()),
       );
-  }, [sentences, activeTab, statusFilter, categoryFilter, searchText]);
+  }, [sourceList, statusFilter, categoryFilter, searchText]);
 
   const handleDelete = (sentence: Sentence) => {
     Alert.alert(
