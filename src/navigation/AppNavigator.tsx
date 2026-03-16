@@ -7,7 +7,7 @@ import { View, ActivityIndicator } from "react-native";
 
 // Screens
 import AuthNavigator from "./AuthNavigator";
-import TabNavigator from "./TabNavigator";
+import MainNavigator from "./MainNavigator";
 import WelcomeScreen from "@/screens/onboarding/WelcomeScreen";
 
 const Stack = createNativeStackNavigator();
@@ -38,7 +38,7 @@ export default function AppNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           // User is authenticated - show main app
-          <Stack.Screen name="Main" component={TabNavigator} />
+          <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
           // User is not authenticated - show auth flow
           <>

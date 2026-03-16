@@ -88,6 +88,13 @@ export type RootStackParamList = {
   Main: undefined;
 };
 
+export type MainStackParamList = {
+  Tabs: undefined;
+  AddSentence: undefined;
+  EditSentence: { sentenceId: string };
+  AutoMode: undefined;
+};
+
 export type AuthStackParamList = {
   Auth: undefined;
   ResetPassword: undefined;
