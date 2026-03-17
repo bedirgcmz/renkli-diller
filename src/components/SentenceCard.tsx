@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 10,
+    marginTop: 6,
+    marginBottom: 6,
   },
 });

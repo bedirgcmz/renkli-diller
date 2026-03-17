@@ -283,15 +283,15 @@ const itemStyles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   statusBar: { height: 8, width: "100%" },
-  body: { padding: 12 },
+  body: { padding: 6, paddingHorizontal: 12 },
   iconRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 12,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   targetRow: {
     marginTop: 4,
@@ -308,7 +308,12 @@ const itemStyles = StyleSheet.create({
     marginTop: 6,
   },
   categoryText: { fontSize: 11 },
-  actionRow: { flexDirection: "row", marginTop: 10, justifyContent: "space-between", alignItems: "center" },
+  actionRow: {
+    flexDirection: "row",
+    marginTop: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
 });
 
 // ─── Ana ekran ────────────────────────────────────────────────────────────────

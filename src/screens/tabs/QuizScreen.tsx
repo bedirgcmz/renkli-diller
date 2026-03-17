@@ -131,8 +131,8 @@ function buildSession(
 export default function QuizScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { sentences, loadSentences } = useSentenceStore();
-  const { recordQuizResult } = useProgressStore();
+  const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
+  const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
 
@@ -147,18 +147,29 @@ export default function QuizScreen() {
   const [showHint, setShowHint] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [dailyCount, setDailyCount] = useState(0);
+  const [initialized, setInitialized] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    loadSentences();
+    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+      setInitialized(true),
+    );
     return () => {
       if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     };
   }, []);
 
+  // Tüm cümleler: user sentences + öğreniliyor/öğrenildi preset cümleler
+  const allSentences: Sentence[] = [
+    ...sentences,
+    ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
+  ];
+
   // Usable sentences: prefer learning, fallback to all
-  const learningSentences = sentences.filter((s) => s.status === "learning");
-  const quizSentences = learningSentences.length >= 4 ? learningSentences : sentences;
+  const learningSentences = allSentences.filter(
+    (s) => s.status === "learning" || progressMap[s.id] === "learning",
+  );
+  const quizSentences = learningSentences.length >= 4 ? learningSentences : allSentences;
 
   const sessionSize = isPremium ? 20 : FREE_QUIZ_DAILY_LIMIT;
   const dailyLimitReached = !isPremium && dailyCount >= FREE_QUIZ_DAILY_LIMIT;
@@ -226,7 +237,7 @@ export default function QuizScreen() {
   const hint = fbQ ? fbQ.answer.slice(0, 2) + "…" : "";
 
   // Not enough sentences
-  if (quizSentences.length < 4 && !sentences.length) {
+  if (!initialized) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
         <View style={styles.centered}>

@@ -87,7 +87,7 @@ function LearnedCard({
             marginLeft: 10,
             borderColor: "#EF4444",
             borderWidth: 1,
-            borderRadius: 6,
+            borderRadius: 5,
             overflow: "hidden",
           }}
         >
@@ -98,7 +98,7 @@ function LearnedCard({
                   flexDirection: "row",
                   alignItems: "center",
                   paddingHorizontal: 8,
-                  paddingVertical: 6,
+                  paddingVertical: 4,
                   backgroundColor: pressed ? "#FCA5A5" : "#FEE2E2",
                   transform: [{ scale: pressed ? 0.95 : 1 }],
                   opacity: pressed ? 0.92 : 1,
