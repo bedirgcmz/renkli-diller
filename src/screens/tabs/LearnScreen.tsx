@@ -44,19 +44,29 @@ function LearnedCard({
 
   function PillLine({ segs, baseColor, fontSize, fontWeight }: { segs: ReturnType<typeof parseKeywords>; baseColor: string; fontSize: number; fontWeight?: string }) {
     return (
-      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      <Text style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>
         {segs.map((seg, i) => {
           if (seg.isPill && seg.pillIndex !== null) {
             const color = getPillColor(colorOffset + seg.pillIndex, isDark);
             return (
-              <View key={i} style={{ backgroundColor: color.bg, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, marginHorizontal: 1, marginVertical: 1 }}>
-                <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-              </View>
+              <Text
+                key={i}
+                style={{
+                  backgroundColor: color.bg,
+                  color: color.text,
+                  fontSize,
+                  fontWeight: "700",
+                  borderRadius: 4,
+                  paddingHorizontal: 4,
+                }}
+              >
+                {` ${seg.text} `}
+              </Text>
             );
           }
           return <Text key={i} style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>{seg.text}</Text>;
         })}
-      </View>
+      </Text>
     );
   }
 
