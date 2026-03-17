@@ -36,6 +36,8 @@ export interface UserProgress {
   user_id: string;
   sentence_id: string;
   correct: boolean;
+  state?: "learning" | "learned";
+  learned_at?: string | null;
   created_at: string;
 }
 

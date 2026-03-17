@@ -26,7 +26,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { user, signOut } = useAuthStore();
   const { sentences, loadSentences } = useSentenceStore();
-  const { stats, progressMap, loadProgress } = useProgressStore();
+  const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
 
@@ -38,7 +38,10 @@ export default function ProfileScreen() {
   const totalStudied = Object.keys(progressMap).length;
   const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
   const learningCount = Object.values(progressMap).filter((s) => s === "learning").length;
-  const todayLearned = learnedCount; // simplified — ideally from today's progress
+  const today = new Date().toISOString().split("T")[0];
+  const todayLearned = progress.filter(
+    (p) => p.state === "learned" && p.learned_at?.startsWith(today),
+  ).length;
   const dailyGoalProgress = Math.min(todayLearned / dailyGoal, 1);
 
   const initials = (user?.full_name || user?.email || "?")
