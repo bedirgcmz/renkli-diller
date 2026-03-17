@@ -171,7 +171,12 @@
     "my_sentences_only": "Sadece Kendi Cümlelerim",
     "preset_only": "Sadece Hazır Cümleler",
     "generate": "PDF Oluştur",
-    "share": "Paylaş"
+    "share": "Paylaş",
+    "learned_only": "Öğrendiklerim",
+    "learning_only": "Öğreniyorum",
+    "generating": "Oluşturuluyor...",
+    "select_filter": "Filtre Seçin",
+    "no_sentences": "Seçilen filtreye göre cümle bulunamadı."
   },
   "categories": {
     "daily_conversation": "Günlük Konuşma",

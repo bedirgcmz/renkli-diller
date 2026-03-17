@@ -171,7 +171,12 @@
     "my_sentences_only": "Endast mina meningar",
     "preset_only": "Endast förinställda",
     "generate": "Generera PDF",
-    "share": "Dela"
+    "share": "Dela",
+    "learned_only": "Inlärda",
+    "learning_only": "Lärande",
+    "generating": "Genererar...",
+    "select_filter": "Välj filter",
+    "no_sentences": "Inga meningar hittades för valt filter."
   },
   "categories": {
     "daily_conversation": "Daglig konversation",

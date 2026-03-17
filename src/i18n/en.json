@@ -171,7 +171,12 @@
     "my_sentences_only": "My Sentences Only",
     "preset_only": "Preset Only",
     "generate": "Generate PDF",
-    "share": "Share"
+    "share": "Share",
+    "learned_only": "Learned",
+    "learning_only": "Learning",
+    "generating": "Generating...",
+    "select_filter": "Select Filter",
+    "no_sentences": "No sentences found for the selected filter."
   },
   "categories": {
     "daily_conversation": "Daily Conversation",

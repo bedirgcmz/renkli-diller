@@ -171,7 +171,12 @@
     "my_sentences_only": "Nur meine Sätze",
     "preset_only": "Nur voreingestellt",
     "generate": "PDF generieren",
-    "share": "Teilen"
+    "share": "Teilen",
+    "learned_only": "Gelernte",
+    "learning_only": "Lernende",
+    "generating": "Wird generiert...",
+    "select_filter": "Filter auswählen",
+    "no_sentences": "Keine Sätze für den ausgewählten Filter gefunden."
   },
   "categories": {
     "daily_conversation": "Tägliche Konversation",

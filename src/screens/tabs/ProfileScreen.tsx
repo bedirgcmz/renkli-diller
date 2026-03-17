@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { MainStackParamList } from "@/types";
+import PDFExportModal from "@/components/PDFExportModal";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -29,6 +30,7 @@ export default function ProfileScreen() {
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
   useEffect(() => {
     loadSentences();
@@ -82,6 +84,7 @@ export default function ProfileScreen() {
           Alert.alert(t("common.premium_badge"), t("add_sentence.upgrade_to_add_more"));
           return;
         }
+        setPdfModalVisible(true);
       },
       badge: isPremium ? undefined : t("common.premium_badge"),
     },
@@ -243,6 +246,8 @@ export default function ProfileScreen() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+
+      <PDFExportModal visible={pdfModalVisible} onClose={() => setPdfModalVisible(false)} />
     </SafeAreaView>
   );
 }
