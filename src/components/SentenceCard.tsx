@@ -1,13 +1,8 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Animated,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { parseKeywords } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
@@ -64,57 +59,14 @@ function KeywordText({
   );
 }
 
-// Animated buton ile press efekti
-function AnimatedBtn({
-  onPress,
-  bgColor,
-  children,
-}: {
-  onPress: () => void;
-  bgColor: string;
-  children: React.ReactNode;
-}) {
-  const scale = useRef(new Animated.Value(1)).current;
-
-  const onPressIn = () => {
-    Animated.spring(scale, {
-      toValue: 0.88,
-      useNativeDriver: true,
-      speed: 50,
-      bounciness: 4,
-    }).start();
-  };
-  const onPressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 30,
-      bounciness: 6,
-    }).start();
-  };
-
-  return (
-    <Pressable onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
-      <Animated.View
-        style={[
-          styles.actionBtn,
-          { backgroundColor: bgColor, transform: [{ scale }] },
-        ]}
-      >
-        {children}
-      </Animated.View>
-    </Pressable>
-  );
-}
-
 export interface SentenceCardProps {
   sentence: Sentence;
   uiLanguage: SupportedLanguage;
   targetLanguage: SupportedLanguage;
   state: "new" | "learning" | "learned";
-  onLearn: () => void;       // KIRMIZI → MAVİ
+  onLearn: () => void; // KIRMIZI → MAVİ
   onMarkLearned: () => void; // MAVİ → YEŞİL
-  onForgot: () => void;      // YEŞİL → KIRMIZI
+  onForgot: () => void; // YEŞİL → KIRMIZI
   showTarget?: boolean;
 }
 
@@ -128,6 +80,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   onForgot,
   showTarget = true,
 }) => {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const { isPremium } = usePremium();
   const [speaking, setSpeaking] = useState(false);
@@ -142,24 +95,21 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
       setSpeaking(false);
       return;
     }
-
     setSpeaking(true);
-
     const speakTarget = () => {
-      const targetText = stripMarkers(sentence.target_text);
-      Speech.speak(targetText, {
+      Speech.speak(stripMarkers(sentence.target_text), {
         language: LANG_CODE[targetLanguage],
         onDone: () => setSpeaking(false),
         onStopped: () => setSpeaking(false),
         onError: () => setSpeaking(false),
       });
     };
-
     if (isPremium) {
-      const sourceText = stripMarkers(sentence.source_text);
-      Speech.speak(sourceText, {
+      Speech.speak(stripMarkers(sentence.source_text), {
         language: LANG_CODE[uiLanguage],
-        onDone: () => { setTimeout(speakTarget, 1000); },
+        onDone: () => {
+          setTimeout(speakTarget, 1000);
+        },
         onStopped: () => setSpeaking(false),
         onError: () => setSpeaking(false),
       });
@@ -168,72 +118,124 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
     }
   };
 
+  // Durum butonu config
+  const actionConfig = {
+    new: {
+      label: t("learn.add_to_list"),
+      icon: "add-circle-outline" as const,
+      color: "#3B8BD4",
+      bg: "#3B8BD420",
+      bgPressed: "#3B8BD440",
+      handler: onLearn,
+    },
+    learning: {
+      label: t("learn.mark_learned"),
+      icon: "checkmark-circle-outline" as const,
+      color: "#2ECC71",
+      bg: "#2ECC7120",
+      bgPressed: "#2ECC7140",
+      handler: onMarkLearned,
+    },
+    learned: {
+      label: t("learn.mark_unlearned"),
+      icon: "refresh-outline" as const,
+      color: "#E53E3E",
+      bg: "#E53E3E20",
+      bgPressed: "#E53E3E40",
+      handler: onForgot,
+    },
+  }[state];
+
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
-      {/* Renkli durum barı: KIRMIZI=new, MAVİ=learning, YEŞİL=learned */}
+      {/* 8px renkli durum barı */}
       <View style={[styles.statusBar, { backgroundColor: barColor }]} />
 
       <View style={styles.body}>
-        {/* Metin */}
-        <View style={styles.textSection}>
-          <KeywordText
-            segments={sourceSegments}
-            baseColor={colors.text}
-            fontSize={18}
-            lineHeight={26}
-            fontWeight="500"
-          />
+        {/* Kaynak dil — tam genişlik, sağda buton yok */}
+        <KeywordText
+          segments={sourceSegments}
+          baseColor={colors.text}
+          fontSize={18}
+          lineHeight={26}
+          fontWeight="500"
+        />
 
-          {showTarget && (
-            <View style={styles.targetContainer}>
+        {/* Hedef dil + TTS yan yana */}
+        {showTarget && (
+          <View style={styles.targetRow}>
+            <View style={styles.targetText}>
               <KeywordText
                 segments={targetSegments}
                 baseColor={colors.textSecondary}
-                fontSize={16}
+                fontSize={15}
                 lineHeight={22}
               />
             </View>
-          )}
+            {/* TTS — hedef dilin sağında */}
+            <Pressable
+              onPress={handleAudio}
+              style={({ pressed }) => [
+                styles.ttsBtn,
+                {
+                  backgroundColor: pressed ? colors.primary + "30" : colors.primary + "15",
+                  transform: [{ scale: pressed ? 0.9 : 1 }],
+                },
+              ]}
+            >
+              <Ionicons
+                name={speaking ? "stop-circle" : "volume-high-outline"}
+                size={22}
+                color={colors.primary}
+              />
+            </Pressable>
+          </View>
+        )}
 
-          {sentence.category_name ? (
-            <View style={[styles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}>
-              <Text style={[styles.categoryText, { color: colors.textSecondary }]}>
-                {sentence.category_name}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+        {/* Kategori chip */}
+        {sentence.category_name ? (
+          <View style={[styles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}>
+            <Text style={[styles.categoryText, { color: colors.textSecondary }]}>
+              {sentence.category_name}
+            </Text>
+          </View>
+        ) : null}
 
-        {/* Sağ kolon: TTS + tek durum butonu */}
-        <View style={styles.actions}>
-          {/* TTS - her zaman görünür */}
-          <AnimatedBtn
-            onPress={handleAudio}
-            bgColor={colors.primary + "18"}
-          >
-            <Ionicons
-              name={speaking ? "stop-circle" : "volume-high-outline"}
-              size={20}
-              color={colors.primary}
-            />
-          </AnimatedBtn>
+        {/* Tek aksiyon butonu — kart alt kısmında, sağa hizalı */}
+        <View style={styles.actionRow}>
+          <Pressable onPress={actionConfig.handler}>
+            {({ pressed }) => (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 3,
+                  paddingHorizontal: 16,
+                  borderRadius: 8,
+                  backgroundColor: pressed ? actionConfig.bgPressed : "#22C57E",
+                  borderWidth: 1,
+                  borderColor: actionConfig.color,
+                  transform: [{ scale: pressed ? 0.93 : 1 }],
+                  alignSelf: "flex-start",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons name={actionConfig.icon} size={22} color={"#fff"} />
 
-          {/* Durum butonu: sadece bir tanesi gösterilir */}
-          {state === "new" && (
-            <AnimatedBtn onPress={onLearn} bgColor="#3B8BD420">
-              <Ionicons name="add-circle-outline" size={20} color="#3B8BD4" />
-            </AnimatedBtn>
-          )}
-          {state === "learning" && (
-            <AnimatedBtn onPress={onMarkLearned} bgColor="#2ECC7120">
-              <Ionicons name="checkmark-circle-outline" size={20} color="#2ECC71" />
-            </AnimatedBtn>
-          )}
-          {state === "learned" && (
-            <AnimatedBtn onPress={onForgot} bgColor="#E53E3E20">
-              <Ionicons name="refresh-outline" size={20} color="#E53E3E" />
-            </AnimatedBtn>
-          )}
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    marginLeft: 6,
+                    color: "#fff",
+                    fontWeight: "600",
+                    fontSize: 14,
+                  }}
+                >
+                  {actionConfig.label}
+                </Text>
+              </View>
+            )}
+          </Pressable>
         </View>
       </View>
     </View>
@@ -251,22 +253,33 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   statusBar: {
-    height: 5,
+    height: 8,
     width: "100%",
   },
   body: {
-    flexDirection: "row",
     padding: 16,
-    gap: 12,
+    paddingBottom: 6,
+    gap: 0,
   },
-  textSection: {
-    flex: 1,
-  },
-  targetContainer: {
+  targetRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(0,0,0,0.08)",
+  },
+  targetText: {
+    flex: 1,
+  },
+  ttsBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
   },
   categoryChip: {
     alignSelf: "flex-start",
@@ -277,20 +290,10 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 11,
-    textTransform: "capitalize",
   },
-  actions: {
-    width: 36,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 10,
-    paddingTop: 2,
-  },
-  actionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 10,
   },
 });

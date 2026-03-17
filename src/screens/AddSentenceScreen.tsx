@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,21 +21,8 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { parseKeywords } from "@/utils/keywords";
 import { FREE_USER_SENTENCE_LIMIT } from "@/utils/constants";
-import { Sentence, SentenceCategory, MainStackParamList, TextSegment } from "@/types";
+import { MainStackParamList, TextSegment } from "@/types";
 import { KEYWORD_COLORS } from "@/utils/constants";
-
-const ALL_CATEGORIES: SentenceCategory[] = [
-  "daily_conversation",
-  "business_english",
-  "phrasal_verbs",
-  "travel",
-  "academic",
-  "idioms",
-  "grammar_patterns",
-  "technology",
-  "health",
-  "social_modern",
-];
 
 function KeywordPreview({ text, baseColor }: { text: string; baseColor: string }) {
   if (!text) return null;
@@ -64,18 +51,24 @@ export default function AddSentenceScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { sentences, addSentence } = useSentenceStore();
+  const { sentences, categories, addSentence, loadCategories } = useSentenceStore();
   const { isPremium } = usePremium();
 
   const [sourceText, setSourceText] = useState("");
   const [targetText, setTargetText] = useState("");
   const [keywords, setKeywords] = useState(["", "", ""]);
-  const [category, setCategory] = useState<SentenceCategory>("daily_conversation");
+  const [categoryId, setCategoryId] = useState<number | undefined>(
+    categories[0]?.id
+  );
   const [categoryOpen, setCategoryOpen] = useState(false);
+
+  useEffect(() => {
+    if (categories.length === 0) loadCategories();
+  }, []);
   const [guideOpen, setGuideOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const userSentenceCount = sentences.filter((s) => !s.is_preset).length;
+  const userSentenceCount = sentences.length;
 
   const handleSave = async () => {
     if (!sourceText.trim() || !targetText.trim()) {
@@ -97,9 +90,7 @@ export default function AddSentenceScreen() {
       source_text: sourceText.trim(),
       target_text: targetText.trim(),
       keywords: keywords.filter((k) => k.trim() !== ""),
-      category,
-      status: "new",
-      is_preset: false,
+      category_id: categoryId,
     });
     setSaving(false);
 
@@ -247,7 +238,7 @@ export default function AddSentenceScreen() {
               activeOpacity={0.8}
             >
               <Text style={[styles.dropdownBtnText, { color: colors.primary }]}>
-                {t(`categories.${category}`)}
+                {categories.find((c) => c.id === categoryId)?.[`name_${uiLanguage}` as keyof typeof categories[0]] as string ?? "—"}
               </Text>
               <Ionicons
                 name={categoryOpen ? "chevron-up" : "chevron-down"}
@@ -257,24 +248,24 @@ export default function AddSentenceScreen() {
             </TouchableOpacity>
             {categoryOpen && (
               <View style={[styles.dropdownList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                {ALL_CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <TouchableOpacity
-                    key={cat}
+                    key={cat.id}
                     style={[
                       styles.dropdownItem,
-                      cat === category && { backgroundColor: colors.primary + "18" },
+                      cat.id === categoryId && { backgroundColor: colors.primary + "18" },
                     ]}
-                    onPress={() => { setCategory(cat); setCategoryOpen(false); }}
+                    onPress={() => { setCategoryId(cat.id); setCategoryOpen(false); }}
                   >
                     <Text
                       style={[
                         styles.dropdownItemText,
-                        { color: cat === category ? colors.primary : colors.text },
+                        { color: cat.id === categoryId ? colors.primary : colors.text },
                       ]}
                     >
-                      {t(`categories.${cat}`)}
+                      {cat[`name_${uiLanguage}` as keyof typeof cat] as string}
                     </Text>
-                    {cat === category && (
+                    {cat.id === categoryId && (
                       <Ionicons name="checkmark" size={16} color={colors.primary} />
                     )}
                   </TouchableOpacity>

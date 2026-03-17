@@ -22,11 +22,12 @@ export interface Sentence {
   source_text: string;
   target_text: string;
   keywords: string[];
-  category: SentenceCategory;
+  category_id?: number;
+  category_name?: string;
   status: SentenceStatus;
   is_preset: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Progress types
@@ -135,7 +136,7 @@ export interface AddSentenceForm {
   source_text: string;
   target_text: string;
   keywords: string[];
-  category: SentenceCategory;
+  category_id?: number;
 }
 
 // Theme types

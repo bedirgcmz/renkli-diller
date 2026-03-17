@@ -6,6 +6,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  FlatList,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
@@ -16,9 +18,138 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
-import { Sentence } from "@/types";
+import { parseKeywords } from "@/utils/keywords";
+import { Sentence, TextSegment } from "@/types";
 
 type TabKey = "learning" | "learned";
+
+// ─── Küçük "Öğrenildi" liste kartı ────────────────────────────────────────────
+
+function LearnedCard({
+  sentence,
+  onForgot,
+  colors,
+  t,
+}: {
+  sentence: Sentence;
+  onForgot: () => void;
+  colors: any;
+  t: (k: string) => string;
+}) {
+  const sourceSegs: TextSegment[] = parseKeywords(sentence.source_text);
+  const targetSegs: TextSegment[] = parseKeywords(sentence.target_text);
+
+  return (
+    <View style={[learnedStyles.card, { backgroundColor: colors.surface }]}>
+      <View style={learnedStyles.statusBar} />
+      <View style={learnedStyles.body}>
+        <View style={learnedStyles.texts}>
+          <Text numberOfLines={2}>
+            {sourceSegs.map((seg, i) => (
+              <Text
+                key={i}
+                style={{
+                  color: seg.color ?? colors.text,
+                  fontStyle: seg.isItalic ? "italic" : "normal",
+                  fontSize: 15,
+                  fontWeight: "500",
+                }}
+              >
+                {seg.text}
+              </Text>
+            ))}
+          </Text>
+          <Text numberOfLines={2} style={{ marginTop: 4 }}>
+            {targetSegs.map((seg, i) => (
+              <Text
+                key={i}
+                style={{
+                  color: seg.color ?? colors.textSecondary,
+                  fontStyle: seg.isItalic ? "italic" : "normal",
+                  fontSize: 13,
+                }}
+              >
+                {seg.text}
+              </Text>
+            ))}
+          </Text>
+          {sentence.category_name ? (
+            <View style={[learnedStyles.chip, { backgroundColor: colors.backgroundTertiary }]}>
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                {sentence.category_name}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        <View
+          style={{
+            alignSelf: "flex-end",
+            marginLeft: 10,
+            borderColor: "#EF4444",
+            borderWidth: 1,
+            borderRadius: 6,
+            overflow: "hidden",
+          }}
+        >
+          <Pressable onPress={onForgot}>
+            {({ pressed }) => (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: 8,
+                  paddingVertical: 6,
+                  backgroundColor: pressed ? "#FCA5A5" : "#FEE2E2",
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                  opacity: pressed ? 0.92 : 1,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#DC2626",
+                    fontSize: 12,
+                    fontWeight: "600",
+                  }}
+                >
+                  {t("learn.mark_unlearned")}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const learnedStyles = StyleSheet.create({
+  card: {
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+    marginBottom: 10,
+  },
+  statusBar: { height: 8, backgroundColor: "#2ECC71" },
+  body: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    padding: 12,
+  },
+  texts: { flex: 1 },
+  chip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+    marginTop: 5,
+  },
+});
+
+// ─── Ana ekran ─────────────────────────────────────────────────────────────────
 
 export default function LearnScreen() {
   const { t } = useTranslation();
@@ -31,8 +162,13 @@ export default function LearnScreen() {
     loadSentences,
     loadPresetSentences,
   } = useSentenceStore();
-  const { progressMap, loadProgress, addToLearning, markAsLearned: presetMarkLearned, forgot } =
-    useProgressStore();
+  const {
+    progressMap,
+    loadProgress,
+    addToLearning,
+    markAsLearned: presetMarkLearned,
+    forgot,
+  } = useProgressStore();
 
   const [activeTab, setActiveTab] = useState<TabKey>("learning");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -46,7 +182,6 @@ export default function LearnScreen() {
     loadProgress();
   }, []);
 
-  // Birleşik liste: user sentences + preset sentences (progressMap'ten durum al)
   const learningList: Sentence[] = [
     ...userSentences.filter((s) => s.status === "learning"),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
@@ -57,11 +192,10 @@ export default function LearnScreen() {
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 
-  const filteredSentences = activeTab === "learning" ? learningList : learnedList;
-  const currentSentence = filteredSentences[currentIndex] ?? null;
-  const total = filteredSentences.length;
+  const total = learningList.length;
+  const currentSentence = learningList[currentIndex] ?? null;
 
-  // Index sınırını koru
+  // index sınırı koru
   useEffect(() => {
     if (currentIndex >= total && total > 0) {
       setCurrentIndex(total - 1);
@@ -78,12 +212,12 @@ export default function LearnScreen() {
     return s.status as "new" | "learning" | "learned";
   };
 
-  // Animasyon
+  // ── Animasyon ──────────────────────────────────────────────────────────────
+
   const animateAndGo = useCallback(
     (direction: "next" | "prev", callback: () => void) => {
       const outX = direction === "next" ? -40 : 40;
       const inX = direction === "next" ? 40 : -40;
-
       Animated.parallel([
         Animated.timing(cardOpacity, { toValue: 0, duration: 140, useNativeDriver: true }),
         Animated.timing(cardTranslateX, { toValue: outX, duration: 140, useNativeDriver: true }),
@@ -96,19 +230,15 @@ export default function LearnScreen() {
         ]).start();
       });
     },
-    [cardOpacity, cardTranslateX]
+    [cardOpacity, cardTranslateX],
   );
 
   const goNext = useCallback(() => {
-    if (currentIndex < total - 1) {
-      animateAndGo("next", () => setCurrentIndex((i) => i + 1));
-    }
+    if (currentIndex < total - 1) animateAndGo("next", () => setCurrentIndex((i) => i + 1));
   }, [currentIndex, total, animateAndGo]);
 
   const goPrev = useCallback(() => {
-    if (currentIndex > 0) {
-      animateAndGo("prev", () => setCurrentIndex((i) => i - 1));
-    }
+    if (currentIndex > 0) animateAndGo("prev", () => setCurrentIndex((i) => i - 1));
   }, [currentIndex, animateAndGo]);
 
   const swipeGesture = Gesture.Pan()
@@ -118,54 +248,61 @@ export default function LearnScreen() {
       else if (e.translationX > 50) runOnJS(goPrev)();
     });
 
-  // Öğren: new → learning
+  // ── Aksiyonlar ─────────────────────────────────────────────────────────────
+
   const handleLearn = async () => {
     if (!currentSentence) return;
     if (currentSentence.is_preset) {
       await addToLearning(currentSentence.id);
     } else {
-      const { addToLearningList } = useSentenceStore.getState();
-      await addToLearningList(currentSentence.id);
+      await useSentenceStore.getState().addToLearningList(currentSentence.id);
       await loadSentences();
     }
   };
 
-  // Öğrendim: learning → learned → sonraki karta geç
   const handleMarkLearned = async () => {
     if (!currentSentence) return;
     animateAndGo("next", () => {});
     if (currentSentence.is_preset) {
       await presetMarkLearned(currentSentence.id);
     } else {
-      const { updateSentence } = useSentenceStore.getState();
-      await updateSentence(currentSentence.id, { status: "learned" });
+      await useSentenceStore.getState().updateSentence(currentSentence.id, { status: "learned" });
       await loadSentences();
     }
   };
 
-  // Unuttum: learned → new
-  const handleForgot = async () => {
+  const handleForgotCard = async () => {
     if (!currentSentence) return;
     if (currentSentence.is_preset) {
       await forgot(currentSentence.id);
     } else {
-      const { updateSentence } = useSentenceStore.getState();
-      await updateSentence(currentSentence.id, { status: "new" });
+      await useSentenceStore.getState().updateSentence(currentSentence.id, { status: "new" });
       await loadSentences();
     }
   };
 
-  const learningCount = learningList.length;
-  const learnedCount = learnedList.length;
+  const handleForgotItem = async (sentence: Sentence) => {
+    if (sentence.is_preset) {
+      await forgot(sentence.id);
+    } else {
+      await useSentenceStore.getState().updateSentence(sentence.id, { status: "new" });
+      await loadSentences();
+    }
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
       {/* Başlık */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
           {activeTab === "learning" ? t("learn.title") : t("learn.learned_title")}
         </Text>
-        {total > 0 && (
+        {activeTab === "learning" && total > 0 && (
           <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
             <Text style={[styles.counterText, { color: colors.primary }]}>
               {currentIndex + 1}/{total}
@@ -181,7 +318,7 @@ export default function LearnScreen() {
             styles.segmentTab,
             activeTab === "learning" && [
               styles.segmentTabActive,
-              { backgroundColor: colors.surface, shadowColor: colors.text },
+              { backgroundColor: colors.surface },
             ],
           ]}
           onPress={() => handleTabChange("learning")}
@@ -195,9 +332,9 @@ export default function LearnScreen() {
           >
             {t("sentences.filter_learning")}
           </Text>
-          {learningCount > 0 && (
+          {learningList.length > 0 && (
             <View style={[styles.badge, { backgroundColor: "#3B8BD4" }]}>
-              <Text style={styles.badgeText}>{learningCount}</Text>
+              <Text style={styles.badgeText}>{learningList.length}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -207,7 +344,7 @@ export default function LearnScreen() {
             styles.segmentTab,
             activeTab === "learned" && [
               styles.segmentTabActive,
-              { backgroundColor: colors.surface, shadowColor: colors.text },
+              { backgroundColor: colors.surface },
             ],
           ]}
           onPress={() => handleTabChange("learned")}
@@ -221,108 +358,122 @@ export default function LearnScreen() {
           >
             {t("sentences.filter_learned")}
           </Text>
-          {learnedCount > 0 && (
+          {learnedList.length > 0 && (
             <View style={[styles.badge, { backgroundColor: "#2ECC71" }]}>
-              <Text style={styles.badgeText}>{learnedCount}</Text>
+              <Text style={styles.badgeText}>{learnedList.length}</Text>
             </View>
           )}
         </TouchableOpacity>
       </View>
 
-      {/* İçerik */}
-      {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : total === 0 ? (
-        <EmptyState tab={activeTab} colors={colors} t={t} />
-      ) : (
-        <>
-          <GestureDetector gesture={swipeGesture}>
-            <Animated.View
-              style={[
-                styles.cardWrapper,
-                { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
-              ]}
-            >
-              {currentSentence && (
-                <SentenceCard
-                  sentence={currentSentence}
-                  uiLanguage={uiLanguage}
-                  targetLanguage={targetLanguage}
-                  state={getEffectiveState(currentSentence)}
-                  onLearn={handleLearn}
-                  onMarkLearned={handleMarkLearned}
-                  onForgot={handleForgot}
-                />
-              )}
-            </Animated.View>
-          </GestureDetector>
-
-          <View style={styles.navRow}>
-            <TouchableOpacity
-              style={[
-                styles.navBtn,
-                { backgroundColor: colors.backgroundSecondary },
-                currentIndex === 0 && styles.navBtnDisabled,
-              ]}
-              onPress={goPrev}
-              disabled={currentIndex === 0}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.navBtnText,
-                  { color: currentIndex === 0 ? colors.textTertiary : colors.text },
-                ]}
-              >
-                ‹ {t("learn.prev")}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.navBtn,
-                { backgroundColor: colors.backgroundSecondary },
-                currentIndex === total - 1 && styles.navBtnDisabled,
-              ]}
-              onPress={goNext}
-              disabled={currentIndex === total - 1}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.navBtnText,
-                  { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
-                ]}
-              >
-                {t("learn.next")} ›
-              </Text>
-            </TouchableOpacity>
+      {/* ── Öğreniliyor sekmesi: swipeable kart ────────────────────────────── */}
+      {activeTab === "learning" &&
+        (loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
+        ) : total === 0 ? (
+          <EmptyState tab="learning" colors={colors} t={t} />
+        ) : (
+          <>
+            <GestureDetector gesture={swipeGesture}>
+              <Animated.View
+                style={[
+                  styles.cardWrapper,
+                  { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
+                ]}
+              >
+                {currentSentence && (
+                  <SentenceCard
+                    sentence={currentSentence}
+                    uiLanguage={uiLanguage}
+                    targetLanguage={targetLanguage}
+                    state={getEffectiveState(currentSentence)}
+                    onLearn={handleLearn}
+                    onMarkLearned={handleMarkLearned}
+                    onForgot={handleForgotCard}
+                  />
+                )}
+              </Animated.View>
+            </GestureDetector>
 
-          <MotivationBar
-            tab={activeTab}
-            remaining={activeTab === "learning" ? total - currentIndex - 1 : 0}
-            learnedCount={learnedCount}
-            colors={colors}
-            t={t}
+            <View style={styles.navRow}>
+              <TouchableOpacity
+                style={[
+                  styles.navBtn,
+                  { backgroundColor: colors.backgroundSecondary },
+                  currentIndex === 0 && styles.navBtnDisabled,
+                ]}
+                onPress={goPrev}
+                disabled={currentIndex === 0}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.navBtnText,
+                    { color: currentIndex === 0 ? colors.textTertiary : colors.text },
+                  ]}
+                >
+                  ‹ {t("learn.prev")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.navBtn,
+                  { backgroundColor: colors.backgroundSecondary },
+                  currentIndex === total - 1 && styles.navBtnDisabled,
+                ]}
+                onPress={goNext}
+                disabled={currentIndex === total - 1}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.navBtnText,
+                    { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
+                  ]}
+                >
+                  {t("learn.next")} ›
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <MotivationBar
+              remaining={total - currentIndex - 1}
+              learnedCount={learnedList.length}
+              colors={colors}
+              t={t}
+            />
+          </>
+        ))}
+
+      {/* ── Öğrenildi sekmesi: FlatList ────────────────────────────────────── */}
+      {activeTab === "learned" &&
+        (learnedList.length === 0 ? (
+          <EmptyState tab="learned" colors={colors} t={t} />
+        ) : (
+          <FlatList
+            data={learnedList}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.learnedListContent}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <LearnedCard
+                sentence={item}
+                onForgot={() => handleForgotItem(item)}
+                colors={colors}
+                t={t}
+              />
+            )}
           />
-        </>
-      )}
+        ))}
     </SafeAreaView>
   );
 }
 
-function EmptyState({
-  tab,
-  colors,
-  t,
-}: {
-  tab: TabKey;
-  colors: any;
-  t: (key: string) => string;
-}) {
+// ─── Alt bileşenler ────────────────────────────────────────────────────────────
+
+function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: string) => string }) {
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>{tab === "learning" ? "📚" : "🎉"}</Text>
@@ -339,20 +490,16 @@ function EmptyState({
 }
 
 function MotivationBar({
-  tab,
   remaining,
   learnedCount,
   colors,
   t,
 }: {
-  tab: TabKey;
   remaining: number;
   learnedCount: number;
   colors: any;
-  t: (key: string) => string;
+  t: (k: string) => string;
 }) {
-  if (tab !== "learning") return null;
-
   const message =
     remaining > 0
       ? `${remaining} ${t("learn.sentences_to_learn")} 💪`
@@ -368,6 +515,8 @@ function MotivationBar({
     </View>
   );
 }
+
+// ─── Stiller ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -441,6 +590,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   motivationText: { fontSize: 13, fontWeight: "500" },
+  learnedListContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+  },
   emptyContainer: {
     flex: 1,
     alignItems: "center",

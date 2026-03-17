@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,20 +20,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { parseKeywords } from "@/utils/keywords";
-import { Sentence, SentenceCategory, MainStackParamList, TextSegment } from "@/types";
-
-const ALL_CATEGORIES: SentenceCategory[] = [
-  "daily_conversation",
-  "business_english",
-  "phrasal_verbs",
-  "travel",
-  "academic",
-  "idioms",
-  "grammar_patterns",
-  "technology",
-  "health",
-  "social_modern",
-];
+import { MainStackParamList, TextSegment } from "@/types";
 
 function KeywordPreview({ text, baseColor }: { text: string; baseColor: string }) {
   if (!text) return null;
@@ -63,7 +50,7 @@ export default function EditSentenceScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const route = useRoute<RouteProp<MainStackParamList, "EditSentence">>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { sentences, updateSentence } = useSentenceStore();
+  const { sentences, categories, updateSentence, loadCategories } = useSentenceStore();
 
   const sentence = sentences.find((s) => s.id === route.params.sentenceId);
 
@@ -74,10 +61,14 @@ export default function EditSentenceScreen() {
     sentence?.keywords[1] ?? "",
     sentence?.keywords[2] ?? "",
   ]);
-  const [category, setCategory] = useState<SentenceCategory>(
-    sentence?.category ?? "daily_conversation",
+  const [categoryId, setCategoryId] = useState<number | undefined>(
+    sentence?.category_id,
   );
   const [categoryOpen, setCategoryOpen] = useState(false);
+
+  useEffect(() => {
+    if (categories.length === 0) loadCategories();
+  }, []);
   const [saving, setSaving] = useState(false);
 
   if (!sentence) {
@@ -106,7 +97,7 @@ export default function EditSentenceScreen() {
       source_text: sourceText.trim(),
       target_text: targetText.trim(),
       keywords: keywords.filter((k) => k.trim() !== ""),
-      category,
+      category_id: categoryId,
     });
     setSaving(false);
 
@@ -263,7 +254,7 @@ export default function EditSentenceScreen() {
               activeOpacity={0.8}
             >
               <Text style={[styles.dropdownBtnText, { color: colors.primary }]}>
-                {t(`categories.${category}`)}
+                {categories.find((c) => c.id === categoryId)?.[`name_${uiLanguage}` as keyof typeof categories[0]] as string ?? "—"}
               </Text>
               <Ionicons
                 name={categoryOpen ? "chevron-up" : "chevron-down"}
@@ -278,24 +269,24 @@ export default function EditSentenceScreen() {
                   { backgroundColor: colors.surface, borderColor: colors.border },
                 ]}
               >
-                {ALL_CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <TouchableOpacity
-                    key={cat}
+                    key={cat.id}
                     style={[
                       styles.dropdownItem,
-                      cat === category && { backgroundColor: colors.primary + "18" },
+                      cat.id === categoryId && { backgroundColor: colors.primary + "18" },
                     ]}
-                    onPress={() => { setCategory(cat); setCategoryOpen(false); }}
+                    onPress={() => { setCategoryId(cat.id); setCategoryOpen(false); }}
                   >
                     <Text
                       style={[
                         styles.dropdownItemText,
-                        { color: cat === category ? colors.primary : colors.text },
+                        { color: cat.id === categoryId ? colors.primary : colors.text },
                       ]}
                     >
-                      {t(`categories.${cat}`)}
+                      {cat[`name_${uiLanguage}` as keyof typeof cat] as string}
                     </Text>
-                    {cat === category && (
+                    {cat.id === categoryId && (
                       <Ionicons name="checkmark" size={16} color={colors.primary} />
                     )}
                   </TouchableOpacity>
