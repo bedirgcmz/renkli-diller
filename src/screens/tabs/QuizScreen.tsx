@@ -65,7 +65,7 @@ function KeywordText({
                 color: color.text,
                 fontSize,
                 fontWeight: "700",
-                borderRadius: 5,
+                borderRadius: 8,
                 paddingHorizontal: 5,
               }}
             >

@@ -66,8 +66,8 @@ function KeywordLine({
                 color: color.text,
                 fontSize,
                 fontWeight: "700",
-                borderRadius: 4,
-                paddingHorizontal: 4,
+                borderRadius: 8,
+                paddingHorizontal: 5,
               }}
             >
               {` ${seg.text} `}

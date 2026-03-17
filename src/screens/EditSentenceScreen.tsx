@@ -39,8 +39,8 @@ function KeywordPreview({ text, baseColor, colorSeed }: { text: string; baseColo
                 color: color.text,
                 fontSize: 14,
                 fontWeight: "700",
-                borderRadius: 4,
-                paddingHorizontal: 4,
+                borderRadius: 8,
+                paddingHorizontal: 5,
               }}
             >
               {` ${seg.text} `}

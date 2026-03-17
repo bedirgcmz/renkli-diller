@@ -56,8 +56,8 @@ function LearnedCard({
                   color: color.text,
                   fontSize,
                   fontWeight: "700",
-                  borderRadius: 4,
-                  paddingHorizontal: 4,
+                  borderRadius: 8,
+                  paddingHorizontal: 5,
                 }}
               >
                 {` ${seg.text} `}
@@ -79,46 +79,44 @@ function LearnedCard({
         end={{ x: 1, y: 0 }}
       />
       <View style={learnedStyles.body}>
-        <View style={learnedStyles.texts}>
-          <PillLine segs={sourceSegs} baseColor={colors.text} fontSize={15} fontWeight="500" />
-          <View style={{ marginTop: 4 }}>
-            <PillLine segs={targetSegs} baseColor={colors.textSecondary} fontSize={13} />
-          </View>
+        <PillLine segs={sourceSegs} baseColor={colors.text} fontSize={15} fontWeight="500" />
+        <View style={{ marginTop: 4 }}>
+          <PillLine segs={targetSegs} baseColor={colors.textSecondary} fontSize={13} />
+        </View>
+        <View style={learnedStyles.cardFooter}>
           {sentence.category_name ? (
             <View style={[learnedStyles.chip, { backgroundColor: colors.backgroundTertiary }]}>
               <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                 {sentence.category_name}
               </Text>
             </View>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={onForgot}
-          style={({ pressed }) => ({
-            alignSelf: "flex-end",
-            marginLeft: 10,
-            borderRadius: 8,
-            overflow: "hidden",
-            transform: [{ scale: pressed ? 0.95 : 1 }],
-            opacity: pressed ? 0.85 : 1,
-          })}
-        >
-          <GradientView
-            colors={["#E85D5D", "#DC2626"]}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingHorizontal: 10,
-              paddingVertical: 6,
+          ) : <View />}
+          <Pressable
+            onPress={onForgot}
+            style={({ pressed }) => ({
               borderRadius: 8,
-              gap: 4,
-            }}
+              overflow: "hidden",
+              transform: [{ scale: pressed ? 0.95 : 1 }],
+              opacity: pressed ? 0.85 : 1,
+            })}
           >
-            <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
-              {t("learn.mark_unlearned")}
-            </Text>
-          </GradientView>
-        </Pressable>
+            <GradientView
+              colors={["#E85D5D", "#DC2626"]}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 8,
+                gap: 4,
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
+                {t("learn.mark_unlearned")}
+              </Text>
+            </GradientView>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -137,11 +135,16 @@ const learnedStyles = StyleSheet.create({
   },
   statusBar: { height: 8 },
   body: {
-    flexDirection: "row",
-    alignItems: "flex-end",
+    flexDirection: "column",
     padding: 12,
+    gap: 0,
   },
-  texts: { flex: 1 },
+  cardFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
   chip: {
     alignSelf: "flex-start",
     paddingHorizontal: 6,
