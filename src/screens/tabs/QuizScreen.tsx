@@ -32,7 +32,9 @@ interface MCQuestion {
 interface FBQuestion {
   type: "fill_blank";
   sentence: Sentence;
-  answer: string; // target language keyword
+  questionText: string;   // gösterilecek cümle (düz metin)
+  answer: string;         // beklenen çeviri (düz metin)
+  direction: "source_to_target" | "target_to_source";
 }
 
 type Question = MCQuestion | FBQuestion;
@@ -84,11 +86,22 @@ function generateMCQuestion(sentence: Sentence, allSentences: Sentence[]): MCQue
   return { type: "multiple_choice", sentence, options, correctAnswer: correct };
 }
 
-function generateFBQuestion(sentence: Sentence): FBQuestion | null {
-  const kws = sentence.keywords.filter((k) => k.trim());
-  if (kws.length === 0) return null;
-  const answer = kws[Math.floor(Math.random() * kws.length)];
-  return { type: "fill_blank", sentence, answer };
+function normalize(s: string): string {
+  return s.toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+function generateFBQuestion(sentence: Sentence): FBQuestion {
+  const direction: FBQuestion["direction"] =
+    Math.random() > 0.5 ? "source_to_target" : "target_to_source";
+  const questionText =
+    direction === "source_to_target"
+      ? stripMarkers(sentence.source_text)
+      : stripMarkers(sentence.target_text);
+  const answer =
+    direction === "source_to_target"
+      ? stripMarkers(sentence.target_text)
+      : stripMarkers(sentence.source_text);
+  return { type: "fill_blank", sentence, questionText, answer, direction };
 }
 
 function buildSession(
@@ -116,7 +129,7 @@ export default function QuizScreen() {
   const { colors } = useTheme();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
-  const { targetLanguage } = useSettingsStore();
+  const { uiLanguage, targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
 
   const [mode, setMode] = useState<QuizMode>("multiple_choice");
@@ -180,7 +193,7 @@ export default function QuizScreen() {
   const handleAnswer = (answer: string) => {
     if (showResult) return;
     const correct = currentQ.type === "fill_blank"
-      ? answer.trim().toLowerCase() === (currentQ as FBQuestion).answer.toLowerCase()
+      ? normalize(answer) === normalize((currentQ as FBQuestion).answer)
       : answer === (currentQ as MCQuestion).correctAnswer;
 
     setIsCorrect(correct);
@@ -214,7 +227,14 @@ export default function QuizScreen() {
 
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
   const mcQ = currentQ?.type === "multiple_choice" ? (currentQ as MCQuestion) : null;
-  const hint = fbQ ? fbQ.answer.slice(0, 2) + "…" : "";
+  // İpucu: cevabın ilk 3 kelimesi
+  const hint = fbQ ? fbQ.answer.split(" ").slice(0, 3).join(" ") + "…" : "";
+  // Yön etiketi: "Türkçe → İsveççe" gibi
+  const directionLabel = fbQ
+    ? fbQ.direction === "source_to_target"
+      ? `${t(`languages.${uiLanguage}`)} → ${t(`languages.${targetLanguage}`)}`
+      : `${t(`languages.${targetLanguage}`)} → ${t(`languages.${uiLanguage}`)}`
+    : "";
 
   // Not enough sentences
   if (!initialized) {
@@ -332,20 +352,33 @@ export default function QuizScreen() {
                 {currentIdx + 1}/{questions.length}
               </Text>
 
-              {/* Soru metni: MC → hedef dil, FB → kaynak dil (renkli kelimelerle) */}
+              {/* FB: yön etiketi */}
+              {fbQ && (
+                <Text style={[styles.directionLabel, { color: colors.primary }]}>
+                  {directionLabel}
+                </Text>
+              )}
+
+              {/* Soru metni: MC → hedef dil (renkli), FB → düz metin */}
               <View style={styles.questionPrompt}>
-                <KeywordText
-                  text={fbQ ? currentQ.sentence.source_text : currentQ.sentence.target_text}
-                  baseColor={colors.text}
-                  fontSize={18}
-                />
+                {fbQ ? (
+                  <Text style={[styles.fbQuestionText, { color: colors.text }]}>
+                    {fbQ.questionText}
+                  </Text>
+                ) : (
+                  <KeywordText
+                    text={currentQ.sentence.target_text}
+                    baseColor={colors.text}
+                    fontSize={18}
+                  />
+                )}
               </View>
 
               {/* FB: yönlendirme + yardım ikonu */}
               {fbQ && (
                 <View style={styles.fbInstructionRow}>
                   <Text style={[styles.fbInstructionText, { color: colors.textSecondary }]}>
-                    {t("quiz.fill_blank_instruction")} {t(`languages.${targetLanguage}`)}
+                    {t("quiz.fill_blank_instruction")}
                   </Text>
                   <TouchableOpacity onPress={() => setShowHelp((v) => !v)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                     <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
@@ -605,6 +638,17 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   resultText: { fontSize: 14, fontWeight: "600", lineHeight: 20 },
+  directionLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  fbQuestionText: {
+    fontSize: 18,
+    lineHeight: 27,
+    fontWeight: "500",
+  },
   fbInstructionRow: {
     flexDirection: "row",
     alignItems: "center",

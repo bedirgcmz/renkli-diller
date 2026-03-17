@@ -53,8 +53,8 @@
     "submit": "Submit",
     "next_question": "Next Question →",
     "questions_remaining": "questions remaining",
-    "fill_blank_instruction": "Translate the colored words into:",
-    "fill_blank_help": "Write the target language equivalent of the colored/marked words in the sentence. If there are multiple keywords, you can write any of them."
+    "fill_blank_instruction": "Write the full translation of the sentence:",
+    "fill_blank_help": "Use the sentence pairs from your learning cards. Translate the shown sentence completely. The direction is indicated by the arrow — sometimes source to target, sometimes the reverse."
   },
   "sentences": {
     "title": "All Sentences",

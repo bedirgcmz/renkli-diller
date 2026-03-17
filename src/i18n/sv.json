@@ -53,8 +53,8 @@
     "submit": "Skicka",
     "next_question": "Nästa fråga →",
     "questions_remaining": "frågor kvar",
-    "fill_blank_instruction": "Översätt de färgade orden till:",
-    "fill_blank_help": "Skriv målspråksekvivalenten för de färgmarkerade orden i meningen. Om det finns flera nyckelord kan du skriva vilket som helst."
+    "fill_blank_instruction": "Skriv den fullständiga översättningen av meningen:",
+    "fill_blank_help": "Använd meningsparen från dina inlärningskort. Översätt den visade meningen helt. Riktningen anges med pilen — ibland källa till mål, ibland omvänt."
   },
   "sentences": {
     "title": "Alla meningar",

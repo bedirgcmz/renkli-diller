@@ -53,8 +53,8 @@
     "submit": "Gönder",
     "next_question": "Sonraki Soru →",
     "questions_remaining": "kalan soru",
-    "fill_blank_instruction": "Renkli kelimeleri bu dilde çevirin:",
-    "fill_blank_help": "Cümledeki renkli işaretli kelimelerin hedef dildeki karşılığını yazın. Birden fazla keyword varsa herhangi birini yazabilirsiniz."
+    "fill_blank_instruction": "Verilen cümlenin tam çevirisini yazın:",
+    "fill_blank_help": "Öğrenme kartlarındaki cümle çiftlerini kullanın. Gösterilen cümleyi tam olarak çevirin. Yön ok ile belirtilir — bazen kaynaktan hedefe, bazen hedefe kaynağa sorulur."
   },
   "sentences": {
     "title": "Tüm Cümleler",
