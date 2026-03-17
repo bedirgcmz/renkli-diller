@@ -76,9 +76,9 @@
     "delete_confirm": "Sind Sie sicher, dass Sie diesen Satz löschen möchten?",
     "target_words": "Zielwörter",
     "category": "Kategorie",
-    "status_new": "Neu",
-    "status_learning": "Lernst du",
-    "status_learned": "Gelernt"
+    "status_new": "Neu ✨",
+    "status_learning": "Lernst du..",
+    "status_learned": "Gelernt ✔"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",

@@ -175,18 +175,11 @@ export interface ThemeColors {
 
 // Legacy types (for backward compatibility)
 export type SentenceState = SentenceStatus;
-export type KeywordMarker = "*" | "#" | "%" | "@" | "+" | "&" | "{" | "~";
 
-export interface KeywordColor {
-  marker: KeywordMarker;
-  color: string;
-  name: string;
-}
-
-export interface TextSegment {
+export interface PillSegment {
   text: string;
-  color: string | null;
-  isItalic?: boolean;
+  isPill: boolean;
+  pillIndex: number | null;
 }
 
 export interface Category {

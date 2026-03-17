@@ -4,9 +4,9 @@ import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
-import { parseKeywords } from "@/utils/keywords";
+import { parseKeywords, getPillColor, stripMarkers } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
-import { Sentence, SupportedLanguage, TextSegment } from "@/types";
+import { Sentence, SupportedLanguage } from "@/types";
 
 // State renkleri: KIRMIZI=new, MAVİ=learning, YEŞİL=learned
 const STATUS_BAR_COLOR: Record<"new" | "learning" | "learned", string> = {
@@ -22,40 +22,56 @@ const LANG_CODE: Record<SupportedLanguage, string> = {
   de: "de-DE",
 };
 
-function stripMarkers(text: string): string {
-  return text.replace(/([*#%@+&{~])(.*?)\1/g, "$2");
-}
-
 function KeywordText({
-  segments,
+  text,
   baseColor,
   fontSize,
   lineHeight,
   fontWeight,
+  colorSeed,
 }: {
-  segments: TextSegment[];
+  text: string;
   baseColor: string;
   fontSize: number;
   lineHeight: number;
   fontWeight?: "400" | "500" | "600";
+  colorSeed: string;
 }) {
+  const { isDark } = useTheme();
+  const segments = parseKeywords(text);
   return (
-    <Text>
-      {segments.map((seg, i) => (
-        <Text
-          key={i}
-          style={{
-            color: seg.color ?? baseColor,
-            fontStyle: seg.isItalic ? "italic" : "normal",
-            fontSize,
-            lineHeight,
-            fontWeight: fontWeight ?? "400",
-          }}
-        >
-          {seg.text}
-        </Text>
-      ))}
-    </Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.map((seg, i) => {
+        if (seg.isPill && seg.pillIndex !== null) {
+          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
+          return (
+            <View
+              key={i}
+              style={{
+                backgroundColor: color.bg,
+                borderRadius: 5,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                marginHorizontal: 1,
+                marginVertical: 2,
+              }}
+            >
+              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>
+                {seg.text}
+              </Text>
+            </View>
+          );
+        }
+        return (
+          <Text
+            key={i}
+            style={{ color: baseColor, fontSize, lineHeight, fontWeight: fontWeight ?? "400" }}
+          >
+            {seg.text}
+          </Text>
+        );
+      })}
+    </View>
   );
 }
 
@@ -85,8 +101,6 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   const { isPremium } = usePremium();
   const [speaking, setSpeaking] = useState(false);
 
-  const sourceSegments = parseKeywords(sentence.source_text);
-  const targetSegments = parseKeywords(sentence.target_text);
   const barColor = STATUS_BAR_COLOR[state];
 
   const handleAudio = async () => {
@@ -154,11 +168,12 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
       <View style={styles.body}>
         {/* Kaynak dil — tam genişlik, sağda buton yok */}
         <KeywordText
-          segments={sourceSegments}
+          text={sentence.source_text}
           baseColor={colors.text}
           fontSize={18}
           lineHeight={26}
           fontWeight="500"
+          colorSeed={String(sentence.id)}
         />
 
         {/* Hedef dil + TTS yan yana */}
@@ -166,10 +181,11 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           <View style={styles.targetRow}>
             <View style={styles.targetText}>
               <KeywordText
-                segments={targetSegments}
+                text={sentence.target_text}
                 baseColor={colors.textSecondary}
                 fontSize={15}
                 lineHeight={22}
+                colorSeed={String(sentence.id)}
               />
             </View>
             {/* TTS — hedef dilin sağında */}

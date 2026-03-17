@@ -76,9 +76,9 @@
     "delete_confirm": "Är du säker på att du vill ta bort denna mening?",
     "target_words": "Målord",
     "category": "Kategori",
-    "status_new": "Ny",
-    "status_learning": "Lär dig",
-    "status_learned": "Lärt dig"
+    "status_new": "Ny ✨",
+    "status_learning": "Lär dig..",
+    "status_learned": "Lärt dig ✔"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",

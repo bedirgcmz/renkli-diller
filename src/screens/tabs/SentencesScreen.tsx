@@ -20,8 +20,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { parseKeywords } from "@/utils/keywords";
-import { Sentence, SentenceStatus, MainStackParamList, TextSegment } from "@/types";
+import { parseKeywords, getPillColor } from "@/utils/keywords";
+import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
 type SentenceTab = "preset" | "mine";
@@ -44,27 +44,43 @@ function KeywordLine({
   text,
   baseColor,
   fontSize,
+  colorSeed,
 }: {
   text: string;
   baseColor: string;
   fontSize: number;
+  colorSeed: string;
 }) {
-  const segments: TextSegment[] = parseKeywords(text);
+  const { isDark } = useTheme();
+  const segments = parseKeywords(text);
   return (
-    <Text numberOfLines={2}>
-      {segments.map((seg, i) => (
-        <Text
-          key={i}
-          style={{
-            color: seg.color ?? baseColor,
-            fontStyle: seg.isItalic ? "italic" : "normal",
-            fontSize,
-          }}
-        >
-          {seg.text}
-        </Text>
-      ))}
-    </Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.map((seg, i) => {
+        if (seg.isPill && seg.pillIndex !== null) {
+          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
+          return (
+            <View
+              key={i}
+              style={{
+                backgroundColor: color.bg,
+                borderRadius: 4,
+                paddingHorizontal: 5,
+                paddingVertical: 1,
+                marginHorizontal: 1,
+                marginVertical: 1,
+              }}
+            >
+              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          );
+        }
+        return (
+          <Text key={i} style={{ color: baseColor, fontSize }}>
+            {seg.text}
+          </Text>
+        );
+      })}
+    </View>
   );
 }
 
@@ -117,9 +133,19 @@ function SentenceItem({
           )}
         </View>
 
-        <KeywordLine text={sentence.source_text} baseColor={colors.text} fontSize={15} />
+        <KeywordLine
+          text={sentence.source_text}
+          baseColor={colors.text}
+          fontSize={15}
+          colorSeed={String(sentence.id)}
+        />
         <View style={itemStyles.targetRow}>
-          <KeywordLine text={sentence.target_text} baseColor={colors.textSecondary} fontSize={13} />
+          <KeywordLine
+            text={sentence.target_text}
+            baseColor={colors.textSecondary}
+            fontSize={13}
+            colorSeed={String(sentence.id)}
+          />
         </View>
 
         {keywordsText ? (
@@ -285,7 +311,7 @@ const itemStyles = StyleSheet.create({
     elevation: 2,
     marginBottom: 16,
   },
-  statusBar: { height: 8, width: "100%" },
+  statusBar: { height: 6, width: "100%" },
   body: { padding: 6, paddingHorizontal: 12 },
   iconRow: {
     flexDirection: "row",

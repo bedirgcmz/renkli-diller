@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,9 +16,9 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { parseKeywords } from "@/utils/keywords";
+import { parseKeywords, getPillColor, stripMarkers } from "@/utils/keywords";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
-import { Sentence, TextSegment } from "@/types";
+import { Sentence } from "@/types";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -39,36 +39,33 @@ interface FBQuestion {
 
 type Question = MCQuestion | FBQuestion;
 
-function stripMarkers(text: string): string {
-  return text.replace(/([*#%@+&{~])(.*?)\1/g, "$2");
-}
-
 function KeywordText({
   text,
   baseColor,
   fontSize,
+  colorSeed,
 }: {
   text: string;
   baseColor: string;
   fontSize: number;
+  colorSeed: string;
 }) {
-  const segments: TextSegment[] = parseKeywords(text);
+  const { isDark } = useTheme();
+  const segments = parseKeywords(text);
   return (
-    <Text style={{ flexWrap: "wrap" }}>
-      {segments.map((seg, i) => (
-        <Text
-          key={i}
-          style={{
-            color: seg.color ?? baseColor,
-            fontStyle: seg.isItalic ? "italic" : "normal",
-            fontSize,
-            lineHeight: fontSize * 1.5,
-          }}
-        >
-          {seg.text}
-        </Text>
-      ))}
-    </Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.map((seg, i) => {
+        if (seg.isPill && seg.pillIndex !== null) {
+          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
+          return (
+            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginHorizontal: 1, marginVertical: 2 }}>
+              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          );
+        }
+        return <Text key={i} style={{ color: baseColor, fontSize, lineHeight: fontSize * 1.5 }}>{seg.text}</Text>;
+      })}
+    </View>
   );
 }
 
@@ -374,6 +371,7 @@ export default function QuizScreen() {
                     text={currentQ.sentence.target_text}
                     baseColor={colors.text}
                     fontSize={18}
+                    colorSeed={String(currentQ.sentence.id)}
                   />
                 )}
               </View>

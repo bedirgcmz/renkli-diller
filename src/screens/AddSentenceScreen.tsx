@@ -19,30 +19,28 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { parseKeywords } from "@/utils/keywords";
+import { parseKeywords, getPillColor } from "@/utils/keywords";
 import { FREE_USER_SENTENCE_LIMIT } from "@/utils/constants";
-import { MainStackParamList, TextSegment } from "@/types";
-import { KEYWORD_COLORS } from "@/utils/constants";
+import { MainStackParamList } from "@/types";
 
-function KeywordPreview({ text, baseColor }: { text: string; baseColor: string }) {
+function KeywordPreview({ text, baseColor, colorSeed }: { text: string; baseColor: string; colorSeed: string }) {
+  const { isDark } = useTheme();
   if (!text) return null;
-  const segments: TextSegment[] = parseKeywords(text);
+  const segments = parseKeywords(text);
   return (
-    <Text style={{ flexWrap: "wrap" }}>
-      {segments.map((seg, i) => (
-        <Text
-          key={i}
-          style={{
-            color: seg.color ?? baseColor,
-            fontStyle: seg.isItalic ? "italic" : "normal",
-            fontSize: 14,
-            lineHeight: 20,
-          }}
-        >
-          {seg.text}
-        </Text>
-      ))}
-    </Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.map((seg, i) => {
+        if (seg.isPill && seg.pillIndex !== null) {
+          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
+          return (
+            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, marginHorizontal: 1, marginVertical: 1 }}>
+              <Text style={{ color: color.text, fontSize: 14, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          );
+        }
+        return <Text key={i} style={{ color: baseColor, fontSize: 14, lineHeight: 20 }}>{seg.text}</Text>;
+      })}
+    </View>
   );
 }
 
@@ -148,17 +146,24 @@ export default function AddSentenceScreen() {
           </TouchableOpacity>
           {guideOpen && (
             <View style={[styles.guideBody, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
-              {KEYWORD_COLORS.map((kc) => (
-                <View key={kc.marker} style={styles.guideRow}>
-                  <Text style={[styles.guideMarker, { color: kc.color }]}>
-                    {kc.marker}kelime{kc.marker}
-                  </Text>
-                  <Text style={[styles.guideArrow, { color: colors.textSecondary }]}>→</Text>
-                  <View style={[styles.guideSample, { backgroundColor: kc.color + "22" }]}>
-                    <Text style={[styles.guideSampleText, { color: kc.color }]}>{kc.name}</Text>
-                  </View>
+              <Text style={[styles.guideMarker, { color: colors.text }]}>
+                Vurgulamak istediğin kelime veya kelime grubunu{" "}
+                <Text style={{ fontWeight: "700" }}>**çift yıldız**</Text> içine al:
+              </Text>
+              <View style={[styles.guideRow, { marginTop: 8 }]}>
+                <Text style={[styles.guideMarker, { color: colors.textSecondary }]}>
+                  {"I want to **get used to** this."}
+                </Text>
+              </View>
+              <View style={[styles.guideRow, { marginTop: 4 }]}>
+                <Text style={[styles.guideArrow, { color: colors.textSecondary }]}>→</Text>
+                <View style={[styles.guideSample, { backgroundColor: "#54A0FF" }]}>
+                  <Text style={[styles.guideSampleText, { color: "#fff" }]}>get used to</Text>
                 </View>
-              ))}
+                <Text style={[{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }]}>
+                  renkli badge olarak gösterilir
+                </Text>
+              </View>
             </View>
           )}
 
@@ -181,7 +186,7 @@ export default function AddSentenceScreen() {
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
                   {t("add_sentence.preview")}
                 </Text>
-                <KeywordPreview text={sourceText} baseColor={colors.text} />
+                <KeywordPreview text={sourceText} baseColor={colors.text} colorSeed={sourceText} />
               </View>
             ) : null}
           </View>
@@ -205,7 +210,7 @@ export default function AddSentenceScreen() {
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
                   {t("add_sentence.preview")}
                 </Text>
-                <KeywordPreview text={targetText} baseColor={colors.textSecondary} />
+                <KeywordPreview text={targetText} baseColor={colors.textSecondary} colorSeed={sourceText} />
               </View>
             ) : null}
           </View>

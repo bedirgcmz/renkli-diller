@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,9 +9,14 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { parseKeywords } from "@/utils/keywords";
-import { FREE_AUTO_MODE_LIMIT, MIN_DELAY_MS, DELAY_PER_CHAR_MS, POST_READ_DELAY_MS } from "@/utils/constants";
-import { TextSegment, SupportedLanguage } from "@/types";
+import { parseKeywords, getPillColor, stripMarkers } from "@/utils/keywords";
+import {
+  FREE_AUTO_MODE_LIMIT,
+  MIN_DELAY_MS,
+  DELAY_PER_CHAR_MS,
+  POST_READ_DELAY_MS,
+} from "@/utils/constants";
+import { SupportedLanguage } from "@/types";
 
 type Phase = "idle" | "source" | "waiting" | "target" | "post" | "done";
 type Speed = 0.5 | 1 | 1.5 | 2;
@@ -31,36 +30,47 @@ const LANG_CODE: Record<SupportedLanguage, string> = {
   de: "de-DE",
 };
 
-function stripMarkers(text: string): string {
-  return text.replace(/([*#%@+&{~])(.*?)\1/g, "$2");
-}
-
 function KeywordText({
   text,
   baseColor,
   fontSize,
+  colorSeed,
 }: {
   text: string;
   baseColor: string;
   fontSize: number;
+  colorSeed: string;
 }) {
-  const segments: TextSegment[] = parseKeywords(text);
+  const { isDark } = useTheme();
+  const segments = parseKeywords(text);
   return (
-    <Text style={{ flexWrap: "wrap" }}>
-      {segments.map((seg, i) => (
-        <Text
-          key={i}
-          style={{
-            color: seg.color ?? baseColor,
-            fontStyle: seg.isItalic ? "italic" : "normal",
-            fontSize,
-            lineHeight: fontSize * 1.5,
-          }}
-        >
-          {seg.text}
-        </Text>
-      ))}
-    </Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.map((seg, i) => {
+        if (seg.isPill && seg.pillIndex !== null) {
+          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
+          return (
+            <View
+              key={i}
+              style={{
+                backgroundColor: color.bg,
+                borderRadius: 5,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                marginHorizontal: 1,
+                marginVertical: 2,
+              }}
+            >
+              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          );
+        }
+        return (
+          <Text key={i} style={{ color: baseColor, fontSize, lineHeight: fontSize * 1.5 }}>
+            {seg.text}
+          </Text>
+        );
+      })}
+    </View>
   );
 }
 
@@ -99,9 +109,7 @@ export default function AutoModeScreen() {
     ...sentences.filter((s) => s.status === "learning"),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
-  const sessionSentences = isPremium
-    ? allLearning
-    : allLearning.slice(0, FREE_AUTO_MODE_LIMIT);
+  const sessionSentences = isPremium ? allLearning : allLearning.slice(0, FREE_AUTO_MODE_LIMIT);
 
   const sentence = sessionSentences[currentIndex];
   const total = sessionSentences.length;
@@ -233,14 +241,20 @@ export default function AutoModeScreen() {
 
   if (!initialized) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top", "bottom"]}
+      >
         <ActivityIndicator style={{ flex: 1 }} color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top", "bottom"]}
+    >
       {/* Header */}
       <View style={styles.topBar}>
         <View style={{ width: 26 }} />
@@ -304,7 +318,8 @@ export default function AutoModeScreen() {
               <KeywordText
                 text={sentence.source_text}
                 baseColor={colors.text}
-                fontSize={22}
+                fontSize={18}
+                colorSeed={String(sentence.id)}
               />
             </View>
 
@@ -321,6 +336,7 @@ export default function AutoModeScreen() {
                   text={sentence.target_text}
                   baseColor={colors.textSecondary}
                   fontSize={18}
+                  colorSeed={String(sentence.id)}
                 />
               ) : (
                 <View style={[styles.hiddenTarget, { backgroundColor: colors.backgroundTertiary }]}>
@@ -337,7 +353,10 @@ export default function AutoModeScreen() {
       {/* Show button */}
       {phase === "waiting" && isPlaying && (
         <TouchableOpacity
-          style={[styles.showBtn, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}
+          style={[
+            styles.showBtn,
+            { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+          ]}
           onPress={handleShow}
           activeOpacity={0.8}
         >
@@ -367,10 +386,7 @@ export default function AutoModeScreen() {
             activeOpacity={0.8}
           >
             <Text
-              style={[
-                styles.speedChipText,
-                { color: speed === s ? "#fff" : colors.textSecondary },
-              ]}
+              style={[styles.speedChipText, { color: speed === s ? "#fff" : colors.textSecondary }]}
             >
               {s}x
             </Text>
@@ -392,11 +408,7 @@ export default function AutoModeScreen() {
           disabled={total === 0}
           activeOpacity={0.85}
         >
-          <Ionicons
-            name={isPlaying ? "pause" : "play"}
-            size={32}
-            color="#fff"
-          />
+          <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="#fff" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -436,7 +448,7 @@ const styles = StyleSheet.create({
   },
   sentenceCard: {
     borderRadius: 18,
-    padding: 24,
+    padding: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,

@@ -76,9 +76,9 @@
     "delete_confirm": "Bu cümleyi silmek istediğinize emin misiniz?",
     "target_words": "Hedef Kelimeler",
     "category": "Kategori",
-    "status_new": "Yeni",
-    "status_learning": "Öğreniyorsun",
-    "status_learned": "Öğrendin"
+    "status_new": "Yeni ✨",
+    "status_learning": "Öğreniyorsun..",
+    "status_learned": "Öğrendin ✔"
   },
   "add_sentence": {
     "title": "Yeni Cümle Ekle",

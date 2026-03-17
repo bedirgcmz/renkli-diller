@@ -18,8 +18,8 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
-import { parseKeywords } from "@/utils/keywords";
-import { Sentence, TextSegment } from "@/types";
+import { parseKeywords, getPillColor, textToColorIndex } from "@/utils/keywords";
+import { Sentence } from "@/types";
 
 type TabKey = "learning" | "learned";
 
@@ -36,43 +36,38 @@ function LearnedCard({
   colors: any;
   t: (k: string) => string;
 }) {
-  const sourceSegs: TextSegment[] = parseKeywords(sentence.source_text);
-  const targetSegs: TextSegment[] = parseKeywords(sentence.target_text);
+  const { isDark } = useTheme();
+  const sourceSegs = parseKeywords(sentence.source_text);
+  const targetSegs = parseKeywords(sentence.target_text);
+  const colorOffset = textToColorIndex(String(sentence.id));
+
+  function PillLine({ segs, baseColor, fontSize, fontWeight }: { segs: ReturnType<typeof parseKeywords>; baseColor: string; fontSize: number; fontWeight?: string }) {
+    return (
+      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+        {segs.map((seg, i) => {
+          if (seg.isPill && seg.pillIndex !== null) {
+            const color = getPillColor(colorOffset + seg.pillIndex, isDark);
+            return (
+              <View key={i} style={{ backgroundColor: color.bg, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, marginHorizontal: 1, marginVertical: 1 }}>
+                <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+              </View>
+            );
+          }
+          return <Text key={i} style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>{seg.text}</Text>;
+        })}
+      </View>
+    );
+  }
 
   return (
     <View style={[learnedStyles.card, { backgroundColor: colors.surface }]}>
       <View style={learnedStyles.statusBar} />
       <View style={learnedStyles.body}>
         <View style={learnedStyles.texts}>
-          <Text numberOfLines={2}>
-            {sourceSegs.map((seg, i) => (
-              <Text
-                key={i}
-                style={{
-                  color: seg.color ?? colors.text,
-                  fontStyle: seg.isItalic ? "italic" : "normal",
-                  fontSize: 15,
-                  fontWeight: "500",
-                }}
-              >
-                {seg.text}
-              </Text>
-            ))}
-          </Text>
-          <Text numberOfLines={2} style={{ marginTop: 4 }}>
-            {targetSegs.map((seg, i) => (
-              <Text
-                key={i}
-                style={{
-                  color: seg.color ?? colors.textSecondary,
-                  fontStyle: seg.isItalic ? "italic" : "normal",
-                  fontSize: 13,
-                }}
-              >
-                {seg.text}
-              </Text>
-            ))}
-          </Text>
+          <PillLine segs={sourceSegs} baseColor={colors.text} fontSize={15} fontWeight="500" />
+          <View style={{ marginTop: 4 }}>
+            <PillLine segs={targetSegs} baseColor={colors.textSecondary} fontSize={13} />
+          </View>
           {sentence.category_name ? (
             <View style={[learnedStyles.chip, { backgroundColor: colors.backgroundTertiary }]}>
               <Text style={{ fontSize: 11, color: colors.textSecondary }}>
