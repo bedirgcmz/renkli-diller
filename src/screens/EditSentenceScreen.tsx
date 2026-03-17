@@ -75,7 +75,7 @@ export default function EditSentenceScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.centered}>
-          <Text style={{ color: colors.textSecondary }}>Cümle bulunamadı.</Text>
+          <Text style={{ color: colors.textSecondary }}>{t("add_sentence.not_found")}</Text>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16 }}>
             <Text style={{ color: colors.primary }}>{t("common.back")}</Text>
           </TouchableOpacity>
@@ -88,7 +88,7 @@ export default function EditSentenceScreen() {
 
   const handleSave = async () => {
     if (!sourceText.trim() || !targetText.trim()) {
-      Alert.alert(t("common.error"), "Lütfen her iki cümleyi de doldurun.");
+      Alert.alert(t("common.error"), t("add_sentence.fill_both"));
       return;
     }
 
@@ -104,7 +104,7 @@ export default function EditSentenceScreen() {
     if (result.success) {
       navigation.goBack();
     } else {
-      Alert.alert(t("common.error"), result.error ?? "Güncelleme başarısız.");
+      Alert.alert(t("common.error"), result.error ?? t("add_sentence.update_failed"));
     }
   };
 
@@ -137,7 +137,7 @@ export default function EditSentenceScreen() {
           <View style={[styles.readonlyBanner, { backgroundColor: colors.warning + "22" }]}>
             <Ionicons name="information-circle-outline" size={16} color={colors.warning} />
             <Text style={[styles.readonlyText, { color: colors.warning }]}>
-              Bu hazır cümleyi düzenleyemezsiniz.
+              {t("add_sentence.preset_readonly")}
             </Text>
           </View>
         )}
@@ -171,7 +171,7 @@ export default function EditSentenceScreen() {
             {sourceText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
-                  Önizleme:
+                  {t("add_sentence.preview")}
                 </Text>
                 <KeywordPreview text={sourceText} baseColor={colors.text} />
               </View>
@@ -202,7 +202,7 @@ export default function EditSentenceScreen() {
             {targetText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
-                  Önizleme:
+                  {t("add_sentence.preview")}
                 </Text>
                 <KeywordPreview text={targetText} baseColor={colors.textSecondary} />
               </View>
@@ -230,7 +230,7 @@ export default function EditSentenceScreen() {
                 value={kw}
                 onChangeText={isUserSentence ? (v) => updateKeyword(idx, v) : undefined}
                 editable={isUserSentence}
-                placeholder={`Kelime ${idx + 1}`}
+                placeholder={`${t("add_sentence.word_placeholder")} ${idx + 1}`}
                 placeholderTextColor={colors.textTertiary}
               />
             ))}

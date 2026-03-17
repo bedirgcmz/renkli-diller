@@ -51,7 +51,7 @@ export default function ProfileScreen() {
   const handleSignOut = () => {
     Alert.alert(
       t("profile.sign_out"),
-      "Çıkış yapmak istediğinize emin misiniz?",
+      t("profile.confirm_signout"),
       [
         { text: t("common.cancel"), style: "cancel" },
         { text: t("common.yes"), style: "destructive", onPress: () => signOut() },
@@ -182,7 +182,7 @@ export default function ProfileScreen() {
               value: `${Math.round(stats.quizAccuracy)}%`,
               icon: "🎯",
             },
-            { label: "Öğreniyor", value: learningCount, icon: "📝" },
+            { label: t("profile.learning"), value: learningCount, icon: "📝" },
           ].map((stat, i) => (
             <View key={i} style={[styles.statCard, { backgroundColor: colors.surface }]}>
               <Text style={styles.statIcon}>{stat.icon}</Text>

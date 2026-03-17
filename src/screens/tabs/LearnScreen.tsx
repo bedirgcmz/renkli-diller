@@ -482,8 +482,8 @@ function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: strin
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
         {tab === "learning"
-          ? "Cümleler ekranından 'Öğren' butonuna basarak başlayabilirsiniz."
-          : "Henüz öğrenilen cümle yok."}
+          ? t("learn.start_hint")
+          : t("learn.no_learned_sentences")}
       </Text>
     </View>
   );

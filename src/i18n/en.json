@@ -36,7 +36,9 @@
     "sentences_to_learn": "sentences to learn",
     "sentences_learned": "sentences learned",
     "listen": "Listen",
-    "show_translation": "Show Translation"
+    "show_translation": "Show Translation",
+    "start_hint": "You can start by pressing 'Add to My Learning List' in the Sentences screen.",
+    "no_learned_sentences": "No learned sentences yet."
   },
   "quiz": {
     "title": "Quiz",
@@ -54,7 +56,10 @@
     "next_question": "Next Question →",
     "questions_remaining": "questions remaining",
     "fill_blank_instruction": "Write the full translation of the sentence:",
-    "fill_blank_help": "Use the sentence pairs from your learning cards. Translate the shown sentence completely. The direction is indicated by the arrow — sometimes source to target, sometimes the reverse."
+    "fill_blank_help": "Use the sentence pairs from your learning cards. Translate the shown sentence completely. The direction is indicated by the arrow — sometimes source to target, sometimes the reverse.",
+    "min_sentences": "At least 2 sentences are required for the quiz.",
+    "new_session": "New Session",
+    "answer_placeholder": "Write your answer..."
   },
   "sentences": {
     "title": "All Sentences",
@@ -85,7 +90,15 @@
     "save": "Save",
     "cancel": "Cancel",
     "limit_reached": "Free sentence limit reached",
-    "upgrade_to_add_more": "Upgrade to Premium to add more sentences"
+    "upgrade_to_add_more": "Upgrade to Premium to add more sentences",
+    "preview": "Preview:",
+    "fill_both": "Please fill in both sentences.",
+    "save_failed": "Saving failed.",
+    "update_failed": "Update failed.",
+    "word_placeholder": "Word",
+    "sentence_placeholder": "sentence...",
+    "not_found": "Sentence not found.",
+    "preset_readonly": "You cannot edit this preset sentence."
   },
   "auto_mode": {
     "title": "Auto Mode",
@@ -95,7 +108,8 @@
     "show_answer": "Show Answer",
     "thinking_time": "Thinking time...",
     "session_limit": "Free session limit reached",
-    "sentences_completed": "sentences completed"
+    "sentences_completed": "sentences completed",
+    "no_sentences": "No sentences in your learning list."
   },
   "profile": {
     "title": "Profile",
@@ -111,7 +125,9 @@
     "settings": "Settings",
     "premium": "Premium",
     "export_pdf": "Download PDF",
-    "sign_out": "Sign Out"
+    "sign_out": "Sign Out",
+    "confirm_signout": "Are you sure you want to sign out?",
+    "learning": "Learning"
   },
   "settings": {
     "title": "Settings",
@@ -126,7 +142,8 @@
     "account": "Account",
     "delete_account": "Delete Account",
     "about": "About",
-    "version": "Version"
+    "version": "Version",
+    "delete_account_warning": "This action cannot be undone. Your account and all data will be deleted."
   },
   "premium": {
     "title": "Go Premium",
@@ -185,7 +202,10 @@
     "no": "No",
     "free": "Free",
     "premium_badge": "Premium",
-    "upgrade": "Upgrade"
+    "upgrade": "Upgrade",
+    "restart": "Restart",
+    "preview": "Preview:",
+    "optional": "optional"
   },
   "languages": {
     "tr": "Türkçe",

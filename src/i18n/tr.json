@@ -36,7 +36,9 @@
     "sentences_to_learn": "öğrenilecek cümlen var",
     "sentences_learned": "cümle öğrendin",
     "listen": "Dinle",
-    "show_translation": "Çeviriyi Göster"
+    "show_translation": "Çeviriyi Göster",
+    "start_hint": "Cümleler ekranından 'Öğrenme Listeme Ekle' butonuna basarak başlayabilirsiniz.",
+    "no_learned_sentences": "Henüz öğrenilen cümle yok."
   },
   "quiz": {
     "title": "Quiz",
@@ -54,7 +56,10 @@
     "next_question": "Sonraki Soru →",
     "questions_remaining": "kalan soru",
     "fill_blank_instruction": "Verilen cümlenin tam çevirisini yazın:",
-    "fill_blank_help": "Öğrenme kartlarındaki cümle çiftlerini kullanın. Gösterilen cümleyi tam olarak çevirin. Yön ok ile belirtilir — bazen kaynaktan hedefe, bazen hedefe kaynağa sorulur."
+    "fill_blank_help": "Öğrenme kartlarındaki cümle çiftlerini kullanın. Gösterilen cümleyi tam olarak çevirin. Yön ok ile belirtilir — bazen kaynaktan hedefe, bazen hedefe kaynağa sorulur.",
+    "min_sentences": "Quiz için en az 2 cümle gereklidir.",
+    "new_session": "Yeni Oturum",
+    "answer_placeholder": "Cevabınızı yazın..."
   },
   "sentences": {
     "title": "Tüm Cümleler",
@@ -85,7 +90,15 @@
     "save": "Kaydet",
     "cancel": "İptal",
     "limit_reached": "Ücretsiz cümle limitine ulaştınız",
-    "upgrade_to_add_more": "Daha fazla cümle eklemek için Premium'a geçin"
+    "upgrade_to_add_more": "Daha fazla cümle eklemek için Premium'a geçin",
+    "preview": "Önizleme:",
+    "fill_both": "Lütfen her iki cümleyi de doldurun.",
+    "save_failed": "Kaydetme başarısız.",
+    "update_failed": "Güncelleme başarısız.",
+    "word_placeholder": "Kelime",
+    "sentence_placeholder": "cümlesi...",
+    "not_found": "Cümle bulunamadı.",
+    "preset_readonly": "Bu hazır cümleyi düzenleyemezsiniz."
   },
   "auto_mode": {
     "title": "Otomatik Mod",
@@ -95,7 +108,8 @@
     "show_answer": "Cevabı Göster",
     "thinking_time": "Düşünme zamanı...",
     "session_limit": "Ücretsiz oturum limiti doldu",
-    "sentences_completed": "cümle tamamlandı"
+    "sentences_completed": "cümle tamamlandı",
+    "no_sentences": "Öğrenme listenizde cümle yok."
   },
   "profile": {
     "title": "Profil",
@@ -111,7 +125,9 @@
     "settings": "Ayarlar",
     "premium": "Premium",
     "export_pdf": "PDF İndir",
-    "sign_out": "Çıkış Yap"
+    "sign_out": "Çıkış Yap",
+    "confirm_signout": "Çıkış yapmak istediğinize emin misiniz?",
+    "learning": "Öğreniyor"
   },
   "settings": {
     "title": "Ayarlar",
@@ -126,7 +142,8 @@
     "account": "Hesap",
     "delete_account": "Hesabı Sil",
     "about": "Hakkında",
-    "version": "Versiyon"
+    "version": "Versiyon",
+    "delete_account_warning": "Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz silinecek."
   },
   "premium": {
     "title": "Premium'a Geç",
@@ -185,7 +202,10 @@
     "no": "Hayır",
     "free": "Ücretsiz",
     "premium_badge": "Premium",
-    "upgrade": "Yükselt"
+    "upgrade": "Yükselt",
+    "restart": "Yeniden Başlat",
+    "preview": "Önizleme:",
+    "optional": "opsiyonel"
   },
   "languages": {
     "tr": "Türkçe",

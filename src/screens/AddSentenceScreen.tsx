@@ -72,7 +72,7 @@ export default function AddSentenceScreen() {
 
   const handleSave = async () => {
     if (!sourceText.trim() || !targetText.trim()) {
-      Alert.alert(t("common.error"), "Lütfen her iki cümleyi de doldurun.");
+      Alert.alert(t("common.error"), t("add_sentence.fill_both"));
       return;
     }
 
@@ -97,7 +97,7 @@ export default function AddSentenceScreen() {
     if (result.success) {
       navigation.goBack();
     } else {
-      Alert.alert(t("common.error"), result.error ?? "Kaydetme başarısız.");
+      Alert.alert(t("common.error"), result.error ?? t("add_sentence.save_failed"));
     }
   };
 
@@ -171,7 +171,7 @@ export default function AddSentenceScreen() {
               style={[styles.textarea, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border, color: colors.text }]}
               value={sourceText}
               onChangeText={setSourceText}
-              placeholder={`${t(`languages.${uiLanguage}`)} cümlesi...`}
+              placeholder={`${t(`languages.${uiLanguage}`)} ${t("add_sentence.sentence_placeholder")}`}
               placeholderTextColor={colors.textTertiary}
               multiline
               textAlignVertical="top"
@@ -179,7 +179,7 @@ export default function AddSentenceScreen() {
             {sourceText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
-                  Önizleme:
+                  {t("add_sentence.preview")}
                 </Text>
                 <KeywordPreview text={sourceText} baseColor={colors.text} />
               </View>
@@ -195,7 +195,7 @@ export default function AddSentenceScreen() {
               style={[styles.textarea, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border, color: colors.text }]}
               value={targetText}
               onChangeText={setTargetText}
-              placeholder={`${t(`languages.${targetLanguage}`)} cümlesi...`}
+              placeholder={`${t(`languages.${targetLanguage}`)} ${t("add_sentence.sentence_placeholder")}`}
               placeholderTextColor={colors.textTertiary}
               multiline
               textAlignVertical="top"
@@ -203,7 +203,7 @@ export default function AddSentenceScreen() {
             {targetText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
-                  Önizleme:
+                  {t("add_sentence.preview")}
                 </Text>
                 <KeywordPreview text={targetText} baseColor={colors.textSecondary} />
               </View>
@@ -213,7 +213,7 @@ export default function AddSentenceScreen() {
           {/* Keywords */}
           <View style={styles.fieldBlock}>
             <Text style={[styles.fieldLabel, { color: colors.text }]}>
-              {t("add_sentence.keywords")} ({t("common.done").toLowerCase()}: opsiyonel)
+              {t("add_sentence.keywords")} ({t("common.optional")})
             </Text>
             {keywords.map((kw, idx) => (
               <TextInput
@@ -221,7 +221,7 @@ export default function AddSentenceScreen() {
                 style={[styles.input, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border, color: colors.text, marginBottom: idx < 2 ? 8 : 0 }]}
                 value={kw}
                 onChangeText={(v) => updateKeyword(idx, v)}
-                placeholder={`Kelime ${idx + 1}`}
+                placeholder={`${t("add_sentence.word_placeholder")} ${idx + 1}`}
                 placeholderTextColor={colors.textTertiary}
               />
             ))}

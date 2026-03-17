@@ -272,7 +272,7 @@ export default function AutoModeScreen() {
           <View style={[styles.emptyCard, { backgroundColor: colors.surface }]}>
             <Text style={styles.emptyIcon}>📚</Text>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              Öğrenme listenizde cümle yok.
+              {t("auto_mode.no_sentences")}
             </Text>
           </View>
         ) : phase === "done" ? (
@@ -291,7 +291,7 @@ export default function AutoModeScreen() {
               }}
               activeOpacity={0.85}
             >
-              <Text style={styles.restartBtnText}>Yeniden Başlat</Text>
+              <Text style={styles.restartBtnText}>{t("common.restart")}</Text>
             </TouchableOpacity>
           </View>
         ) : sentence ? (

@@ -257,7 +257,7 @@ export default function QuizScreen() {
         <View style={styles.centered}>
           <Text style={styles.emptyIcon}>📚</Text>
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            Quiz için en az 2 cümle gereklidir.
+            {t("quiz.min_sentences")}
           </Text>
         </View>
       </SafeAreaView>
@@ -345,7 +345,7 @@ export default function QuizScreen() {
               onPress={startSession}
               activeOpacity={0.85}
             >
-              <Text style={styles.restartBtnText}>Yeni Oturum</Text>
+              <Text style={styles.restartBtnText}>{t("quiz.new_session")}</Text>
             </TouchableOpacity>
           </View>
         ) : currentQ ? (
@@ -470,7 +470,7 @@ export default function QuizScreen() {
                   ]}
                   value={input}
                   onChangeText={setInput}
-                  placeholder="Cevabınızı yazın..."
+                  placeholder={t("quiz.answer_placeholder")}
                   placeholderTextColor={colors.textTertiary}
                   editable={!showResult}
                   autoCapitalize="none"

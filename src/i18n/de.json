@@ -36,7 +36,9 @@
     "sentences_to_learn": "Sätze zu lernen",
     "sentences_learned": "Sätze gelernt",
     "listen": "Anhören",
-    "show_translation": "Übersetzung anzeigen"
+    "show_translation": "Übersetzung anzeigen",
+    "start_hint": "Sie können beginnen, indem Sie auf 'Zur Lernliste hinzufügen' auf dem Sätze-Bildschirm tippen.",
+    "no_learned_sentences": "Noch keine gelernten Sätze."
   },
   "quiz": {
     "title": "Quiz",
@@ -54,7 +56,10 @@
     "next_question": "Nächste Frage →",
     "questions_remaining": "Fragen übrig",
     "fill_blank_instruction": "Schreiben Sie die vollständige Übersetzung des Satzes:",
-    "fill_blank_help": "Verwenden Sie die Satzpaare aus Ihren Lernkarten. Übersetzen Sie den angezeigten Satz vollständig. Die Richtung wird durch den Pfeil angegeben — manchmal Quelle zu Ziel, manchmal umgekehrt."
+    "fill_blank_help": "Verwenden Sie die Satzpaare aus Ihren Lernkarten. Übersetzen Sie den angezeigten Satz vollständig. Die Richtung wird durch den Pfeil angegeben — manchmal Quelle zu Ziel, manchmal umgekehrt.",
+    "min_sentences": "Mindestens 2 Sätze sind für das Quiz erforderlich.",
+    "new_session": "Neue Sitzung",
+    "answer_placeholder": "Schreiben Sie Ihre Antwort..."
   },
   "sentences": {
     "title": "Alle Sätze",
@@ -85,7 +90,15 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "limit_reached": "Kostenloses Satz-Limit erreicht",
-    "upgrade_to_add_more": "Upgrade auf Premium, um mehr Sätze hinzuzufügen"
+    "upgrade_to_add_more": "Upgrade auf Premium, um mehr Sätze hinzuzufügen",
+    "preview": "Vorschau:",
+    "fill_both": "Bitte füllen Sie beide Sätze aus.",
+    "save_failed": "Speichern fehlgeschlagen.",
+    "update_failed": "Aktualisierung fehlgeschlagen.",
+    "word_placeholder": "Wort",
+    "sentence_placeholder": "Satz...",
+    "not_found": "Satz nicht gefunden.",
+    "preset_readonly": "Sie können diesen voreingestellten Satz nicht bearbeiten."
   },
   "auto_mode": {
     "title": "Automatischer Modus",
@@ -95,7 +108,8 @@
     "show_answer": "Antwort anzeigen",
     "thinking_time": "Denkzeit...",
     "session_limit": "Kostenloses Sitzungs-Limit erreicht",
-    "sentences_completed": "Sätze abgeschlossen"
+    "sentences_completed": "Sätze abgeschlossen",
+    "no_sentences": "Keine Sätze in Ihrer Lernliste."
   },
   "profile": {
     "title": "Profil",
@@ -111,7 +125,9 @@
     "settings": "Einstellungen",
     "premium": "Premium",
     "export_pdf": "PDF herunterladen",
-    "sign_out": "Abmelden"
+    "sign_out": "Abmelden",
+    "confirm_signout": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+    "learning": "Lernt gerade"
   },
   "settings": {
     "title": "Einstellungen",
@@ -126,7 +142,8 @@
     "account": "Konto",
     "delete_account": "Konto löschen",
     "about": "Über",
-    "version": "Version"
+    "version": "Version",
+    "delete_account_warning": "Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle Daten werden gelöscht."
   },
   "premium": {
     "title": "Premium werden",
@@ -185,7 +202,10 @@
     "no": "Nein",
     "free": "Kostenlos",
     "premium_badge": "Premium",
-    "upgrade": "Upgrade"
+    "upgrade": "Upgrade",
+    "restart": "Neu starten",
+    "preview": "Vorschau:",
+    "optional": "optional"
   },
   "languages": {
     "tr": "Türkçe",

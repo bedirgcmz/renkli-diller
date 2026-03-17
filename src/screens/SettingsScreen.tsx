@@ -140,7 +140,7 @@ export default function SettingsScreen() {
   const handleDeleteAccount = () => {
     Alert.alert(
       t("settings.delete_account"),
-      "Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz silinecek.",
+      t("settings.delete_account_warning"),
       [
         { text: t("common.cancel"), style: "cancel" },
         {

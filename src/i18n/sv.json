@@ -36,7 +36,9 @@
     "sentences_to_learn": "meningar att lära",
     "sentences_learned": "meningar inlärda",
     "listen": "Lyssna",
-    "show_translation": "Visa översättning"
+    "show_translation": "Visa översättning",
+    "start_hint": "Du kan börja genom att trycka på 'Lägg till i min lärlista' på Meningar-skärmen.",
+    "no_learned_sentences": "Inga inlärda meningar ännu."
   },
   "quiz": {
     "title": "Quiz",
@@ -54,7 +56,10 @@
     "next_question": "Nästa fråga →",
     "questions_remaining": "frågor kvar",
     "fill_blank_instruction": "Skriv den fullständiga översättningen av meningen:",
-    "fill_blank_help": "Använd meningsparen från dina inlärningskort. Översätt den visade meningen helt. Riktningen anges med pilen — ibland källa till mål, ibland omvänt."
+    "fill_blank_help": "Använd meningsparen från dina inlärningskort. Översätt den visade meningen helt. Riktningen anges med pilen — ibland källa till mål, ibland omvänt.",
+    "min_sentences": "Minst 2 meningar krävs för quiz.",
+    "new_session": "Ny session",
+    "answer_placeholder": "Skriv ditt svar..."
   },
   "sentences": {
     "title": "Alla meningar",
@@ -85,7 +90,15 @@
     "save": "Spara",
     "cancel": "Avbryt",
     "limit_reached": "Gratis meninggräns nådd",
-    "upgrade_to_add_more": "Uppgradera till Premium för att lägga till fler meningar"
+    "upgrade_to_add_more": "Uppgradera till Premium för att lägga till fler meningar",
+    "preview": "Förhandsvisning:",
+    "fill_both": "Fyll i båda meningarna.",
+    "save_failed": "Sparandet misslyckades.",
+    "update_failed": "Uppdatering misslyckades.",
+    "word_placeholder": "Ord",
+    "sentence_placeholder": "mening...",
+    "not_found": "Mening hittades inte.",
+    "preset_readonly": "Du kan inte redigera denna förinställda mening."
   },
   "auto_mode": {
     "title": "Automatiskt läge",
@@ -95,7 +108,8 @@
     "show_answer": "Visa svar",
     "thinking_time": "Tänktid...",
     "session_limit": "Gratis sessionsgräns nådd",
-    "sentences_completed": "meningar slutförda"
+    "sentences_completed": "meningar slutförda",
+    "no_sentences": "Inga meningar i din inlärningslista."
   },
   "profile": {
     "title": "Profil",
@@ -111,7 +125,9 @@
     "settings": "Inställningar",
     "premium": "Premium",
     "export_pdf": "Ladda ner PDF",
-    "sign_out": "Logga ut"
+    "sign_out": "Logga ut",
+    "confirm_signout": "Är du säker på att du vill logga ut?",
+    "learning": "Lärande"
   },
   "settings": {
     "title": "Inställningar",
@@ -126,7 +142,8 @@
     "account": "Konto",
     "delete_account": "Ta bort konto",
     "about": "Om",
-    "version": "Version"
+    "version": "Version",
+    "delete_account_warning": "Den här åtgärden kan inte ångras. Ditt konto och all data kommer att raderas."
   },
   "premium": {
     "title": "Gå Premium",
@@ -185,7 +202,10 @@
     "no": "Nej",
     "free": "Gratis",
     "premium_badge": "Premium",
-    "upgrade": "Uppgradera"
+    "upgrade": "Uppgradera",
+    "restart": "Starta om",
+    "preview": "Förhandsvisning:",
+    "optional": "valfri"
   },
   "languages": {
     "tr": "Türkçe",
