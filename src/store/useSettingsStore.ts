@@ -180,7 +180,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           tts_enabled: newSettings.ttsEnabled,
           tts_voice: newSettings.ttsVoice,
           updated_at: new Date().toISOString(),
-        });
+        }, { onConflict: "user_id" });
 
         if (error) {
           console.error("Error saving settings to Supabase:", error);
