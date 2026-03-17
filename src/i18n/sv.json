@@ -51,7 +51,10 @@
     "upgrade_for_unlimited": "Uppgradera till Premium för obegränsade quiz",
     "hint": "Ledtråd",
     "submit": "Skicka",
-    "questions_remaining": "frågor kvar"
+    "next_question": "Nästa fråga →",
+    "questions_remaining": "frågor kvar",
+    "fill_blank_instruction": "Översätt de färgade orden till:",
+    "fill_blank_help": "Skriv målspråksekvivalenten för de färgmarkerade orden i meningen. Om det finns flera nyckelord kan du skriva vilket som helst."
   },
   "sentences": {
     "title": "Alla meningar",

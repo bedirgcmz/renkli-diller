@@ -32,8 +32,7 @@ interface MCQuestion {
 interface FBQuestion {
   type: "fill_blank";
   sentence: Sentence;
-  questionText: string;
-  answer: string;
+  answer: string; // target language keyword
 }
 
 type Question = MCQuestion | FBQuestion;
@@ -86,26 +85,10 @@ function generateMCQuestion(sentence: Sentence, allSentences: Sentence[]): MCQue
 }
 
 function generateFBQuestion(sentence: Sentence): FBQuestion | null {
-  // Try keywords array first, then parsed segments
   const kws = sentence.keywords.filter((k) => k.trim());
-  let answer: string | null = null;
-
-  if (kws.length > 0) {
-    answer = kws[Math.floor(Math.random() * kws.length)];
-  } else {
-    const coloredSegs = parseKeywords(sentence.source_text).filter((s) => s.color !== null);
-    if (coloredSegs.length > 0) {
-      answer = coloredSegs[Math.floor(Math.random() * coloredSegs.length)].text;
-    }
-  }
-
-  if (!answer) return null;
-
-  const plainSource = stripMarkers(sentence.source_text);
-  const escaped = answer.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const questionText = plainSource.replace(new RegExp(escaped, "i"), "___");
-
-  return { type: "fill_blank", sentence, questionText, answer };
+  if (kws.length === 0) return null;
+  const answer = kws[Math.floor(Math.random() * kws.length)];
+  return { type: "fill_blank", sentence, answer };
 }
 
 function buildSession(
@@ -133,7 +116,7 @@ export default function QuizScreen() {
   const { colors } = useTheme();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
-  const { uiLanguage } = useSettingsStore();
+  const { targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
 
   const [mode, setMode] = useState<QuizMode>("multiple_choice");
@@ -145,6 +128,7 @@ export default function QuizScreen() {
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [input, setInput] = useState("");
   const [showHint, setShowHint] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [dailyCount, setDailyCount] = useState(0);
   const [initialized, setInitialized] = useState(false);
@@ -211,11 +195,6 @@ export default function QuizScreen() {
       correct,
       question_type: currentQ.type,
     });
-
-    // Auto-advance after 1.5s for MC
-    if (currentQ.type === "multiple_choice") {
-      nextTimerRef.current = setTimeout(goNext, 1500);
-    }
   };
 
   const goNext = () => {
@@ -229,6 +208,7 @@ export default function QuizScreen() {
       setShowResult(false);
       setInput("");
       setShowHint(false);
+      setShowHelp(false);
     }
   };
 
@@ -352,20 +332,30 @@ export default function QuizScreen() {
                 {currentIdx + 1}/{questions.length}
               </Text>
 
-              {/* Target sentence (question prompt) */}
+              {/* Soru metni: MC → hedef dil, FB → kaynak dil (renkli kelimelerle) */}
               <View style={styles.questionPrompt}>
                 <KeywordText
-                  text={currentQ.sentence.target_text}
+                  text={fbQ ? currentQ.sentence.source_text : currentQ.sentence.target_text}
                   baseColor={colors.text}
                   fontSize={18}
                 />
               </View>
 
-              {/* Fill blank question text */}
+              {/* FB: yönlendirme + yardım ikonu */}
               {fbQ && (
-                <View style={[styles.blankBox, { backgroundColor: colors.backgroundSecondary }]}>
-                  <Text style={[styles.blankText, { color: colors.textSecondary }]}>
-                    {fbQ.questionText}
+                <View style={styles.fbInstructionRow}>
+                  <Text style={[styles.fbInstructionText, { color: colors.textSecondary }]}>
+                    {t("quiz.fill_blank_instruction")} {t(`languages.${targetLanguage}`)}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowHelp((v) => !v)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
+              )}
+              {fbQ && showHelp && (
+                <View style={[styles.helpBox, { backgroundColor: colors.primary + "15" }]}>
+                  <Text style={[styles.helpText, { color: colors.primary }]}>
+                    {t("quiz.fill_blank_help")}
                   </Text>
                 </View>
               )}
@@ -500,20 +490,27 @@ export default function QuizScreen() {
               </View>
             )}
 
-            {/* MC result feedback */}
+            {/* MC result feedback + Next button */}
             {mcQ && showResult && (
-              <View
-                style={[
-                  styles.resultBanner,
-                  { backgroundColor: isCorrect ? "#2ECC7118" : "#E53E3E18" },
-                ]}
-              >
-                <Text
-                  style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}
+              <>
+                <View
+                  style={[
+                    styles.resultBanner,
+                    { backgroundColor: isCorrect ? "#2ECC7118" : "#E53E3E18" },
+                  ]}
                 >
-                  {isCorrect ? t("quiz.correct") : `${t("quiz.incorrect")} ${t("quiz.correct_answer_is")} "${mcQ.correctAnswer}"`}
-                </Text>
-              </View>
+                  <Text style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}>
+                    {isCorrect ? t("quiz.correct") : `${t("quiz.incorrect")} ${t("quiz.correct_answer_is")} "${mcQ.correctAnswer}"`}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={[styles.submitBtn, { backgroundColor: colors.primary, marginTop: 10 }]}
+                  onPress={goNext}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.submitBtnText}>{t("quiz.next_question")}</Text>
+                </TouchableOpacity>
+              </>
             )}
           </>
         ) : null}
@@ -608,6 +605,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   resultText: { fontSize: 14, fontWeight: "600", lineHeight: 20 },
+  fbInstructionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+    gap: 8,
+  },
+  fbInstructionText: { fontSize: 13, flex: 1 },
+  helpBox: {
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 8,
+  },
+  helpText: { fontSize: 13, lineHeight: 18 },
   fbContainer: { gap: 10 },
   hintText: { fontSize: 13, fontWeight: "500" },
   fbInput: {

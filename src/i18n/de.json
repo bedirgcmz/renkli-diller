@@ -51,7 +51,10 @@
     "upgrade_for_unlimited": "Upgrade auf Premium für unbegrenzte Quiz",
     "hint": "Hinweis",
     "submit": "Absenden",
-    "questions_remaining": "Fragen übrig"
+    "next_question": "Nächste Frage →",
+    "questions_remaining": "Fragen übrig",
+    "fill_blank_instruction": "Übersetzen Sie die farbigen Wörter ins:",
+    "fill_blank_help": "Schreiben Sie die zielsprachliche Entsprechung der farbig markierten Wörter im Satz. Bei mehreren Schlüsselwörtern können Sie eines davon schreiben."
   },
   "sentences": {
     "title": "Alle Sätze",

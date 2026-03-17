@@ -51,7 +51,10 @@
     "upgrade_for_unlimited": "Upgrade to Premium for unlimited quizzes",
     "hint": "Hint",
     "submit": "Submit",
-    "questions_remaining": "questions remaining"
+    "next_question": "Next Question →",
+    "questions_remaining": "questions remaining",
+    "fill_blank_instruction": "Translate the colored words into:",
+    "fill_blank_help": "Write the target language equivalent of the colored/marked words in the sentence. If there are multiple keywords, you can write any of them."
   },
   "sentences": {
     "title": "All Sentences",

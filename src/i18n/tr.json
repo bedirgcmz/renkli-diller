@@ -51,7 +51,10 @@
     "upgrade_for_unlimited": "Sınırsız quiz için Premium'a geçin",
     "hint": "İpucu",
     "submit": "Gönder",
-    "questions_remaining": "kalan soru"
+    "next_question": "Sonraki Soru →",
+    "questions_remaining": "kalan soru",
+    "fill_blank_instruction": "Renkli kelimeleri bu dilde çevirin:",
+    "fill_blank_help": "Cümledeki renkli işaretli kelimelerin hedef dildeki karşılığını yazın. Birden fazla keyword varsa herhangi birini yazabilirsiniz."
   },
   "sentences": {
     "title": "Tüm Cümleler",
