@@ -88,6 +88,7 @@ export default function AutoModeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTarget, setShowTarget] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef<Speed>(speed);
@@ -278,6 +279,26 @@ export default function AutoModeScreen() {
           {total > 0 ? `${currentIndex + 1}/${total}` : "0/0"}
         </Text>
         <Text style={[styles.phaseLabel, { color: colors.primary }]}>{phaseLabel}</Text>
+      </View>
+
+      {/* Info note */}
+      <View style={[styles.infoBox, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+        <TouchableOpacity
+          style={styles.infoHeader}
+          onPress={() => setInfoOpen((o) => !o)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.infoHeaderLeft}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
+            <Text style={[styles.infoTitle, { color: colors.primary }]}>{t("auto_mode.info_title")}</Text>
+          </View>
+          <Ionicons name={infoOpen ? "chevron-up" : "chevron-down"} size={14} color={colors.primary} />
+        </TouchableOpacity>
+        {infoOpen && (
+          <Text style={[styles.infoBody, { color: colors.textSecondary }]}>
+            {t("auto_mode.info_body")}
+          </Text>
+        )}
       </View>
 
       {/* Main card */}
@@ -531,5 +552,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
+  },
+  infoBox: {
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  infoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  infoHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  infoTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  infoBody: {
+    fontSize: 12,
+    lineHeight: 18,
+    paddingHorizontal: 12,
+    paddingBottom: 10,
   },
 });

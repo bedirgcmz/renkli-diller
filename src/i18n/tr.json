@@ -109,7 +109,9 @@
     "thinking_time": "Düşünme zamanı...",
     "session_limit": "Ücretsiz oturum limiti doldu",
     "sentences_completed": "cümle tamamlandı",
-    "no_sentences": "Öğrenme listenizde cümle yok."
+    "no_sentences": "Öğrenme listenizde cümle yok.",
+    "info_title": "Bu ekran nasıl çalışır?",
+    "info_body": "Burada yalnızca öğrenme listenize eklediğiniz cümleler oynatılır. Daha fazla cümleyle çalışmak için Cümleler ekranına gidip istediğin cümleleri \"Öğrenme Listeme Ekle\" butonuyla ekleyebilirsin."
   },
   "profile": {
     "title": "Profil",

@@ -109,7 +109,9 @@
     "thinking_time": "Tänktid...",
     "session_limit": "Gratis sessionsgräns nådd",
     "sentences_completed": "meningar slutförda",
-    "no_sentences": "Inga meningar i din inlärningslista."
+    "no_sentences": "Inga meningar i din inlärningslista.",
+    "info_title": "Hur fungerar den här skärmen?",
+    "info_body": "Här spelas endast meningar som du har lagt till i din inlärningslista. För att öva med fler meningar, gå till skärmen Meningar och lägg till dem med knappen \"Lägg till i min inlärningslista\"."
   },
   "profile": {
     "title": "Profil",

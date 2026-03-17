@@ -109,7 +109,9 @@
     "thinking_time": "Thinking time...",
     "session_limit": "Free session limit reached",
     "sentences_completed": "sentences completed",
-    "no_sentences": "No sentences in your learning list."
+    "no_sentences": "No sentences in your learning list.",
+    "info_title": "How does this screen work?",
+    "info_body": "Only sentences you have added to your learning list are played here. To practice with more sentences, go to the Sentences screen and add them using the \"Add to My Learning List\" button."
   },
   "profile": {
     "title": "Profile",

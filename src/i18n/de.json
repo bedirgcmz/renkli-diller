@@ -109,7 +109,9 @@
     "thinking_time": "Denkzeit...",
     "session_limit": "Kostenloses Sitzungs-Limit erreicht",
     "sentences_completed": "Sätze abgeschlossen",
-    "no_sentences": "Keine Sätze in Ihrer Lernliste."
+    "no_sentences": "Keine Sätze in Ihrer Lernliste.",
+    "info_title": "Wie funktioniert dieser Bildschirm?",
+    "info_body": "Hier werden nur Sätze abgespielt, die du zu deiner Lernliste hinzugefügt hast. Um mit mehr Sätzen zu üben, gehe zum Sätze-Bildschirm und füge sie mit der Schaltfläche \"Zu meiner Lernliste hinzufügen\" hinzu."
   },
   "profile": {
     "title": "Profil",
