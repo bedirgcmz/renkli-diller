@@ -158,7 +158,6 @@ export default function LearnScreen() {
   const {
     sentences: userSentences,
     presetSentences,
-    loading,
     loadSentences,
     loadPresetSentences,
   } = useSentenceStore();
@@ -172,14 +171,15 @@ export default function LearnScreen() {
 
   const [activeTab, setActiveTab] = useState<TabKey>("learning");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [initialized, setInitialized] = useState(false);
 
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const cardTranslateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    loadSentences();
-    loadPresetSentences();
-    loadProgress();
+    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+      setInitialized(true),
+    );
   }, []);
 
   const learningList: Sentence[] = [
@@ -368,7 +368,7 @@ export default function LearnScreen() {
 
       {/* ── Öğreniliyor sekmesi: swipeable kart ────────────────────────────── */}
       {activeTab === "learning" &&
-        (loading ? (
+        (!initialized ? (
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={colors.primary} />
           </View>
