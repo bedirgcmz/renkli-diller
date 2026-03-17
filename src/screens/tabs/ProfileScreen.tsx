@@ -67,11 +67,6 @@ export default function ProfileScreen() {
     badge?: string;
   }> = [
     {
-      icon: "play-circle-outline",
-      label: t("auto_mode.title"),
-      onPress: () => navigation.navigate("AutoMode"),
-    },
-    {
       icon: "grid-outline",
       label: t("sentences.preset_sentences"),
       onPress: () => navigation.navigate("CategoryBrowser"),

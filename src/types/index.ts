@@ -93,7 +93,6 @@ export type MainStackParamList = {
   Tabs: undefined;
   AddSentence: undefined;
   EditSentence: { sentenceId: string };
-  AutoMode: undefined;
   Settings: undefined;
   Paywall: undefined;
   CategoryBrowser: undefined;
@@ -108,6 +107,7 @@ export type TabParamList = {
   Learn: undefined;
   Quiz: undefined;
   Sentences: undefined;
+  AutoMode: undefined;
   Profile: undefined;
 };
 

@@ -4,7 +4,6 @@ import { MainStackParamList } from "@/types";
 import TabNavigator from "./TabNavigator";
 import AddSentenceScreen from "@/screens/AddSentenceScreen";
 import EditSentenceScreen from "@/screens/EditSentenceScreen";
-import AutoModeScreen from "@/screens/AutoModeScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import PaywallScreen from "@/screens/PaywallScreen";
 import CategoryBrowserScreen from "@/screens/CategoryBrowserScreen";
@@ -23,11 +22,6 @@ export default function MainNavigator() {
       <Stack.Screen
         name="EditSentence"
         component={EditSentenceScreen}
-        options={{ presentation: "modal" }}
-      />
-      <Stack.Screen
-        name="AutoMode"
-        component={AutoModeScreen}
         options={{ presentation: "modal" }}
       />
       <Stack.Screen

@@ -4,21 +4,20 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
+import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { parseKeywords } from "@/utils/keywords";
 import { FREE_AUTO_MODE_LIMIT, MIN_DELAY_MS, DELAY_PER_CHAR_MS, POST_READ_DELAY_MS } from "@/utils/constants";
-import { MainStackParamList, TextSegment, SupportedLanguage } from "@/types";
+import { TextSegment, SupportedLanguage } from "@/types";
 
 type Phase = "idle" | "source" | "waiting" | "target" | "post" | "done";
 type Speed = 0.5 | 1 | 1.5 | 2;
@@ -68,9 +67,9 @@ function KeywordText({
 export default function AutoModeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage, autoModeSpeed } = useSettingsStore();
-  const { sentences, loadSentences } = useSentenceStore();
+  const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
+  const { progressMap, loadProgress } = useProgressStore();
   const { isPremium } = usePremium();
 
   const [speed, setSpeed] = useState<Speed>((autoModeSpeed as Speed) ?? 1);
@@ -78,6 +77,7 @@ export default function AutoModeScreen() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTarget, setShowTarget] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef<Speed>(speed);
@@ -89,11 +89,16 @@ export default function AutoModeScreen() {
   }, [speed]);
 
   useEffect(() => {
-    loadSentences({ status: "learning" });
+    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+      setInitialized(true),
+    );
   }, []);
 
-  // Learning sentences, limited for free tier
-  const allLearning = sentences.filter((s) => s.status === "learning");
+  // Tüm öğreniliyor cümleler: user sentences + preset sentences (progressMap)
+  const allLearning = [
+    ...sentences.filter((s) => s.status === "learning"),
+    ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
+  ];
   const sessionSentences = isPremium
     ? allLearning
     : allLearning.slice(0, FREE_AUTO_MODE_LIMIT);
@@ -214,25 +219,6 @@ export default function AutoModeScreen() {
     setPhase("target");
   };
 
-  const handleBack = () => {
-    Alert.alert(
-      t("auto_mode.title"),
-      "Otomatik moddan çıkmak istediğinize emin misiniz?",
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.yes"),
-          style: "destructive",
-          onPress: () => {
-            clearTimer();
-            Speech.stop();
-            navigation.goBack();
-          },
-        },
-      ],
-    );
-  };
-
   const progress = total > 0 ? (currentIndex + 1) / total : 0;
   const phaseLabel =
     phase === "source"
@@ -245,13 +231,19 @@ export default function AutoModeScreen() {
             ? `${total} ${t("auto_mode.sentences_completed")}`
             : t("auto_mode.paused");
 
+  if (!initialized) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
+        <ActivityIndicator style={{ flex: 1 }} color={colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={handleBack} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="chevron-down" size={26} color={colors.text} />
-        </TouchableOpacity>
+        <View style={{ width: 26 }} />
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
         <View style={{ width: 26 }} />
       </View>
