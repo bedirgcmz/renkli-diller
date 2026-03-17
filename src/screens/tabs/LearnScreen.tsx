@@ -19,7 +19,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
-import { parseKeywords, getPillColor, textToColorIndex } from "@/utils/keywords";
+import { parseKeywords, getPillColor, splitWords, textToColorIndex } from "@/utils/keywords";
 import { Sentence } from "@/types";
 
 type TabKey = "learning" | "learned";
@@ -44,29 +44,21 @@ function LearnedCard({
 
   function PillLine({ segs, baseColor, fontSize, fontWeight }: { segs: ReturnType<typeof parseKeywords>; baseColor: string; fontSize: number; fontWeight?: string }) {
     return (
-      <Text style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>
-        {segs.map((seg, i) => {
+      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+        {segs.flatMap((seg, i) => {
           if (seg.isPill && seg.pillIndex !== null) {
             const color = getPillColor(colorOffset + seg.pillIndex, isDark);
-            return (
-              <Text
-                key={i}
-                style={{
-                  backgroundColor: color.bg,
-                  color: color.text,
-                  fontSize,
-                  fontWeight: "700",
-                  borderRadius: 8,
-                  paddingHorizontal: 5,
-                }}
-              >
-                {` ${seg.text} `}
-              </Text>
-            );
+            return [(
+              <View key={i} style={{ backgroundColor: color.bg, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
+                <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+              </View>
+            )];
           }
-          return <Text key={i} style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>{seg.text}</Text>;
+          return splitWords(seg.text).map((word, j) => (
+            <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>{word}</Text>
+          ));
         })}
-      </Text>
+      </View>
     );
   }
 

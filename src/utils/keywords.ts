@@ -62,6 +62,17 @@ export function getPillColor(pillIndex: number, isDark: boolean, seedText?: stri
 }
 
 /**
+ * Split plain text into word tokens preserving surrounding whitespace.
+ * " more text" → [" more ", "text"]
+ * ", are you free?" → [", ", "are ", "you ", "free?"]
+ * Used so each word can be a separate flex item, allowing proper wrap
+ * after View-based pill elements in a flex row.
+ */
+export function splitWords(text: string): string[] {
+  return text.match(/\s*\S+\s*/g) ?? (text ? [text] : []);
+}
+
+/**
  * Remove ** markers from text (used for TTS, quiz comparison, search, etc.)
  */
 export function stripMarkers(text: string): string {

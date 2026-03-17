@@ -19,7 +19,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { parseKeywords, getPillColor } from "@/utils/keywords";
+import { parseKeywords, getPillColor, splitWords } from "@/utils/keywords";
 import { FREE_USER_SENTENCE_LIMIT } from "@/utils/constants";
 import { MainStackParamList } from "@/types";
 
@@ -28,29 +28,21 @@ function KeywordPreview({ text, baseColor, colorSeed }: { text: string; baseColo
   if (!text) return null;
   const segments = parseKeywords(text);
   return (
-    <Text style={{ color: baseColor, fontSize: 14, lineHeight: 20 }}>
-      {segments.map((seg, i) => {
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.flatMap((seg, i) => {
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return (
-            <Text
-              key={i}
-              style={{
-                backgroundColor: color.bg,
-                color: color.text,
-                fontSize: 14,
-                fontWeight: "700",
-                borderRadius: 8,
-                paddingHorizontal: 5,
-              }}
-            >
-              {` ${seg.text} `}
-            </Text>
-          );
+          return [(
+            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
+              <Text style={{ color: color.text, fontSize: 14, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          )];
         }
-        return <Text key={i} style={{ color: baseColor, fontSize: 14 }}>{seg.text}</Text>;
+        return splitWords(seg.text).map((word, j) => (
+          <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize: 14, lineHeight: 20 }}>{word}</Text>
+        ));
       })}
-    </Text>
+    </View>
   );
 }
 

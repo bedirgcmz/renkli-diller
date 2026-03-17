@@ -4,7 +4,7 @@ import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
-import { parseKeywords, getPillColor, stripMarkers } from "@/utils/keywords";
+import { parseKeywords, getPillColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
 import { GradientView } from "@/components/GradientView";
 import { Sentence, SupportedLanguage } from "@/types";
@@ -41,33 +41,23 @@ function KeywordText({
   const { isDark } = useTheme();
   const segments = parseKeywords(text);
   return (
-    <Text style={{ color: baseColor, fontSize, lineHeight, fontWeight: fontWeight ?? "400" }}>
-      {segments.map((seg, i) => {
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.flatMap((seg, i) => {
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return (
-            <Text
-              key={i}
-              style={{
-                backgroundColor: color.bg,
-                color: color.text,
-                fontSize,
-                fontWeight: "700",
-                borderRadius: 8,
-                paddingHorizontal: 5,
-              }}
-            >
-              {` ${seg.text} `}
-            </Text>
-          );
+          return [(
+            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
+              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          )];
         }
-        return (
-          <Text key={i} style={{ color: baseColor, fontSize, fontWeight: fontWeight ?? "400" }}>
-            {seg.text}
+        return splitWords(seg.text).map((word, j) => (
+          <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize, lineHeight, fontWeight: fontWeight ?? "400" }}>
+            {word}
           </Text>
-        );
+        ));
       })}
-    </Text>
+    </View>
   );
 }
 

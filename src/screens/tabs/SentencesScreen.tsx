@@ -20,7 +20,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { parseKeywords, getPillColor } from "@/utils/keywords";
+import { parseKeywords, getPillColor, splitWords } from "@/utils/keywords";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -54,33 +54,21 @@ function KeywordLine({
   const { isDark } = useTheme();
   const segments = parseKeywords(text);
   return (
-    <Text style={{ color: baseColor, fontSize }}>
-      {segments.map((seg, i) => {
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+      {segments.flatMap((seg, i) => {
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return (
-            <Text
-              key={i}
-              style={{
-                backgroundColor: color.bg,
-                color: color.text,
-                fontSize,
-                fontWeight: "700",
-                borderRadius: 8,
-                paddingHorizontal: 5,
-              }}
-            >
-              {` ${seg.text} `}
-            </Text>
-          );
+          return [(
+            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
+              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
+            </View>
+          )];
         }
-        return (
-          <Text key={i} style={{ color: baseColor, fontSize }}>
-            {seg.text}
-          </Text>
-        );
+        return splitWords(seg.text).map((word, j) => (
+          <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize }}>{word}</Text>
+        ));
       })}
-    </Text>
+    </View>
   );
 }
 
