@@ -169,9 +169,18 @@ export default function LearnScreen() {
   const cardTranslateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
-      setInitialized(true),
-    );
+    let mounted = true;
+    const init = async () => {
+      try {
+        await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
+      } catch (e) {
+        // show screen regardless of error
+      } finally {
+        if (mounted) setInitialized(true);
+      }
+    };
+    init();
+    return () => { mounted = false; };
   }, []);
 
   const learningList: Sentence[] = [
@@ -375,6 +384,23 @@ export default function LearnScreen() {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* ── Progress bar (sadece learning tab + veri varsa) ─────────────── */}
+      {activeTab === "learning" && initialized && total > 0 && (
+        <View style={[styles.progressRow, { backgroundColor: colors.surfaceSecondary }]}>
+          <View style={[styles.progressTrack, { backgroundColor: colors.backgroundTertiary }]}>
+            <GradientView
+              colors={["#4DA3FF", "#49C98A"]}
+              style={[styles.progressFill, { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as any }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          </View>
+          <Text style={[styles.progressPercent, { color: colors.textSecondary }]}>
+            {Math.round(((currentIndex + 1) / total) * 100)}%
+          </Text>
+        </View>
+      )}
 
       {/* ── Öğreniliyor sekmesi: swipeable kart ────────────────────────────── */}
       {activeTab === "learning" &&
@@ -634,4 +660,30 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 52 },
   emptyTitle: { fontSize: 18, fontWeight: "600", textAlign: "center" },
   emptySubtitle: { fontSize: 14, textAlign: "center", lineHeight: 20 },
+  progressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    gap: 10,
+  },
+  progressTrack: {
+    flex: 1,
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 6,
+    borderRadius: 3,
+  },
+  progressPercent: {
+    fontSize: 12,
+    fontWeight: "600",
+    minWidth: 36,
+    textAlign: "right",
+  },
 });
