@@ -111,7 +111,7 @@ function SentenceItem({
   const keywordsText = sentence.keywords.filter(Boolean).join(", ");
 
   return (
-    <View style={[itemStyles.card, { backgroundColor: colors.surface }]}>
+    <View style={[itemStyles.card, { backgroundColor: colors.cardBackground }]}>
       <View style={[itemStyles.statusBar, { backgroundColor: barColor }]} />
       <View style={itemStyles.body}>
         <View style={itemStyles.iconRow}>
@@ -305,10 +305,10 @@ const itemStyles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
     marginBottom: 16,
   },
   statusBar: { height: 6, width: "100%" },
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
   segmentContainer: {
     flexDirection: "row",
     marginHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 25,
     padding: 4,
     marginBottom: 8,
   },

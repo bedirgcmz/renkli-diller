@@ -265,7 +265,7 @@ export default function EditSentenceScreen() {
               <View
                 style={[
                   styles.dropdownList,
-                  { backgroundColor: colors.surface, borderColor: colors.border },
+                  { backgroundColor: colors.cardBackground, borderColor: colors.border },
                 ]}
               >
                 {categories.map((cat) => (

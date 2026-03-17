@@ -12,6 +12,7 @@ interface ThemeColors {
 
   // Text colors
   text: string;
+  textPrimary: string;
   textSecondary: string;
   textTertiary: string;
 
@@ -21,10 +22,12 @@ interface ThemeColors {
   primaryDark: string;
   secondary: string;
   accent: string;
+  accentSoft: string;
   premiumAccent: string;
 
   // Status colors
   success: string;
+  successDark: string;
   warning: string;
   error: string;
   info: string;
@@ -36,6 +39,7 @@ interface ThemeColors {
 
   // Surface colors
   surface: string;
+  cardBackground: string;
   surfaceSecondary: string;
 
   // Special colors for learning
@@ -44,64 +48,72 @@ interface ThemeColors {
 }
 
 const lightTheme: ThemeColors = {
-  background: "#FFFFFF",
-  backgroundSecondary: "#F8F9FA",
-  backgroundTertiary: "#E9ECEF",
+  background: "#FAF8F4",
+  backgroundSecondary: "#ECE7DF",
+  backgroundTertiary: "#E6E0D7",
 
-  text: "#212529",
-  textSecondary: "#6C757D",
-  textTertiary: "#ADB5BD",
+  text: "#1A1A2E",
+  textPrimary: "#1A1A2E",
+  textSecondary: "#6B7280",
+  textTertiary: "#9CA3AF",
 
-  primary: "#3B8BD4",
-  primaryLight: "#7BB7F0",
+  primary: "#4DA3FF",
+  primaryLight: "#7CC4FF",
   primaryDark: "#2A6EA0",
-  secondary: "#6C757D",
-  accent: "#3B8BD4",
+  secondary: "#6B7280",
+  accent: "#4DA3FF",
+  accentSoft: "#7CC4FF",
   premiumAccent: "#8B5CF6",
 
-  success: "#2ECC71",
-  warning: "#FFC107",
-  error: "#E53E3E",
+  success: "#49C98A",
+  successDark: "#2FAF72",
+  warning: "#F59E0B",
+  error: "#E85D5D",
   info: "#17A2B8",
 
-  border: "#DEE2E6",
-  borderLight: "#F8F9FA",
-  divider: "#E9ECEF",
+  border: "#E6E0D7",
+  borderLight: "#ECE7DF",
+  divider: "#E6E0D7",
 
-  surface: "#FFFFFF",
-  surfaceSecondary: "#F8F9FA",
+  surface: "#F4F1EB",
+  cardBackground: "#F4F1EB",
+  surfaceSecondary: "#ECE7DF",
 
   keyword: "#FF6B6B",
   keywordBg: "#FFF5F5",
 };
 
 const darkTheme: ThemeColors = {
-  background: "#121220",
-  backgroundSecondary: "#1E1E2E",
-  backgroundTertiary: "#2C2C3A",
+  background: "#0B1020",
+  backgroundSecondary: "#1D2642",
+  backgroundTertiary: "#2A3558",
 
-  text: "#FFFFFF",
-  textSecondary: "#B3B3B3",
-  textTertiary: "#808080",
+  text: "#E6EAF2",
+  textPrimary: "#E6EAF2",
+  textSecondary: "#9CA3AF",
+  textTertiary: "#6B7280",
 
-  primary: "#5BA3E8",
-  primaryLight: "#85C1FF",
+  primary: "#4DA3FF",
+  primaryLight: "#7CC4FF",
   primaryDark: "#3B7FD2",
-  secondary: "#B3B3B3",
-  accent: "#5BA3E8",
+  secondary: "#9CA3AF",
+  accent: "#4DA3FF",
+  accentSoft: "#7CC4FF",
   premiumAccent: "#8B5CF6",
 
-  success: "#2ECC71",
-  warning: "#FFC107",
-  error: "#E53E3E",
+  success: "#49C98A",
+  successDark: "#2FAF72",
+  warning: "#F59E0B",
+  error: "#E85D5D",
   info: "#17A2B8",
 
-  border: "#383838",
-  borderLight: "#484848",
-  divider: "#383838",
+  border: "#2A3558",
+  borderLight: "#1D2642",
+  divider: "#2A3558",
 
-  surface: "#1E1E2E",
-  surfaceSecondary: "#2C2C2E",
+  surface: "#151C32",
+  cardBackground: "#151C32",
+  surfaceSecondary: "#1D2642",
 
   keyword: "#FF6B6B",
   keywordBg: "#2C1818",

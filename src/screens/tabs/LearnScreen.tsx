@@ -18,6 +18,7 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
+import { GradientView } from "@/components/GradientView";
 import { parseKeywords, getPillColor, textToColorIndex } from "@/utils/keywords";
 import { Sentence } from "@/types";
 
@@ -60,8 +61,13 @@ function LearnedCard({
   }
 
   return (
-    <View style={[learnedStyles.card, { backgroundColor: colors.surface }]}>
-      <View style={learnedStyles.statusBar} />
+    <View style={[learnedStyles.card, { backgroundColor: colors.cardBackground }]}>
+      <GradientView
+        colors={["#49C98A", "#6EE7B7"]}
+        style={learnedStyles.statusBar}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      />
       <View style={learnedStyles.body}>
         <View style={learnedStyles.texts}>
           <PillLine segs={sourceSegs} baseColor={colors.text} fontSize={15} fontWeight="500" />
@@ -76,42 +82,33 @@ function LearnedCard({
             </View>
           ) : null}
         </View>
-        <View
-          style={{
+        <Pressable
+          onPress={onForgot}
+          style={({ pressed }) => ({
             alignSelf: "flex-end",
             marginLeft: 10,
-            borderColor: "#EF4444",
-            borderWidth: 1,
-            borderRadius: 5,
+            borderRadius: 8,
             overflow: "hidden",
-          }}
+            transform: [{ scale: pressed ? 0.95 : 1 }],
+            opacity: pressed ? 0.85 : 1,
+          })}
         >
-          <Pressable onPress={onForgot}>
-            {({ pressed }) => (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  backgroundColor: pressed ? "#FCA5A5" : "#FEE2E2",
-                  transform: [{ scale: pressed ? 0.95 : 1 }],
-                  opacity: pressed ? 0.92 : 1,
-                }}
-              >
-                <Text
-                  style={{
-                    color: "#DC2626",
-                    fontSize: 12,
-                    fontWeight: "600",
-                  }}
-                >
-                  {t("learn.mark_unlearned")}
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        </View>
+          <GradientView
+            colors={["#E85D5D", "#DC2626"]}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              borderRadius: 8,
+              gap: 4,
+            }}
+          >
+            <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
+              {t("learn.mark_unlearned")}
+            </Text>
+          </GradientView>
+        </Pressable>
       </View>
     </View>
   );
@@ -128,7 +125,7 @@ const learnedStyles = StyleSheet.create({
     elevation: 2,
     marginBottom: 10,
   },
-  statusBar: { height: 8, backgroundColor: "#2ECC71" },
+  statusBar: { height: 8 },
   body: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -307,55 +304,73 @@ export default function LearnScreen() {
       </View>
 
       {/* Segment Control */}
-      <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
+      <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
         <TouchableOpacity
-          style={[
-            styles.segmentTab,
-            activeTab === "learning" && [
-              styles.segmentTabActive,
-              { backgroundColor: colors.surface },
-            ],
-          ]}
+          style={[styles.segmentTab, activeTab === "learning" && styles.segmentTabActiveWrapper]}
           onPress={() => handleTabChange("learning")}
           activeOpacity={0.8}
         >
-          <Text
-            style={[
-              styles.segmentLabel,
-              { color: activeTab === "learning" ? colors.text : colors.textSecondary },
-            ]}
-          >
-            {t("sentences.filter_learning")}
-          </Text>
-          {learningList.length > 0 && (
-            <View style={[styles.badge, { backgroundColor: "#3B8BD4" }]}>
-              <Text style={styles.badgeText}>{learningList.length}</Text>
+          {activeTab === "learning" ? (
+            <GradientView
+              colors={["#4DA3FF", "#7CC4FF"]}
+              style={styles.segmentTabGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={[styles.segmentLabel, { color: "#fff" }]}>
+                {t("sentences.filter_learning")}
+              </Text>
+              {learningList.length > 0 && (
+                <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                  <Text style={styles.badgeText}>{learningList.length}</Text>
+                </View>
+              )}
+            </GradientView>
+          ) : (
+            <View style={styles.segmentTabInner}>
+              <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
+                {t("sentences.filter_learning")}
+              </Text>
+              {learningList.length > 0 && (
+                <View style={[styles.badge, { backgroundColor: "#4DA3FF" }]}>
+                  <Text style={styles.badgeText}>{learningList.length}</Text>
+                </View>
+              )}
             </View>
           )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.segmentTab,
-            activeTab === "learned" && [
-              styles.segmentTabActive,
-              { backgroundColor: colors.surface },
-            ],
-          ]}
+          style={[styles.segmentTab, activeTab === "learned" && styles.segmentTabActiveWrapper]}
           onPress={() => handleTabChange("learned")}
           activeOpacity={0.8}
         >
-          <Text
-            style={[
-              styles.segmentLabel,
-              { color: activeTab === "learned" ? colors.text : colors.textSecondary },
-            ]}
-          >
-            {t("sentences.filter_learned")}
-          </Text>
-          {learnedList.length > 0 && (
-            <View style={[styles.badge, { backgroundColor: "#2ECC71" }]}>
-              <Text style={styles.badgeText}>{learnedList.length}</Text>
+          {activeTab === "learned" ? (
+            <GradientView
+              colors={["#4DA3FF", "#7CC4FF"]}
+              style={styles.segmentTabGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={[styles.segmentLabel, { color: "#fff" }]}>
+                {t("sentences.filter_learned")}
+              </Text>
+              {learnedList.length > 0 && (
+                <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                  <Text style={styles.badgeText}>{learnedList.length}</Text>
+                </View>
+              )}
+            </GradientView>
+          ) : (
+            <View style={styles.segmentTabInner}>
+              <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
+                {t("sentences.filter_learned")}
+              </Text>
+              {learnedList.length > 0 && (
+                <View style={[styles.badge, { backgroundColor: "#49C98A" }]}>
+                  <Text style={styles.badgeText}>{learnedList.length}</Text>
+                </View>
+              )}
             </View>
           )}
         </TouchableOpacity>
@@ -529,24 +544,44 @@ const styles = StyleSheet.create({
   segmentContainer: {
     flexDirection: "row",
     marginHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 25,
     padding: 4,
     marginBottom: 16,
   },
   segmentTab: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    borderRadius: 9,
-    gap: 6,
+    borderRadius: 22,
+    overflow: "hidden",
   },
   segmentTabActive: {
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
+  },
+  segmentTabActiveWrapper: {
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  segmentTabGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 22,
+    gap: 6,
+  },
+  segmentTabInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 22,
+    gap: 6,
   },
   segmentLabel: { fontSize: 14, fontWeight: "500" },
   badge: {

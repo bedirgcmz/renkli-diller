@@ -304,14 +304,14 @@ export default function AutoModeScreen() {
       {/* Main card */}
       <View style={styles.cardArea}>
         {total === 0 ? (
-          <View style={[styles.emptyCard, { backgroundColor: colors.surface }]}>
+          <View style={[styles.emptyCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.emptyIcon}>📚</Text>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {t("auto_mode.no_sentences")}
             </Text>
           </View>
         ) : phase === "done" ? (
-          <View style={[styles.doneCard, { backgroundColor: colors.surface }]}>
+          <View style={[styles.doneCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.doneIcon}>🎉</Text>
             <Text style={[styles.doneText, { color: colors.text }]}>
               {total} {t("auto_mode.sentences_completed")}
@@ -330,7 +330,7 @@ export default function AutoModeScreen() {
             </TouchableOpacity>
           </View>
         ) : sentence ? (
-          <View style={[styles.sentenceCard, { backgroundColor: colors.surface }]}>
+          <View style={[styles.sentenceCard, { backgroundColor: colors.cardBackground }]}>
             {/* Source */}
             <View style={styles.sourceSection}>
               <Text style={[styles.langLabel, { color: colors.textTertiary }]}>
@@ -471,10 +471,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
     shadowRadius: 10,
-    elevation: 4,
+    elevation: 3,
   },
   sourceSection: { marginBottom: 16 },
   targetSection: { marginTop: 16 },

@@ -143,7 +143,7 @@ export default function WelcomeScreen() {
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View
-            style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}
+            style={[styles.card, { backgroundColor: colors.cardBackground, shadowColor: colors.text }]}
           >
             <Text style={[styles.title, { color: colors.text }]}>{appName}</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>

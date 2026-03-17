@@ -252,7 +252,7 @@ export default function AddSentenceScreen() {
               />
             </TouchableOpacity>
             {categoryOpen && (
-              <View style={[styles.dropdownList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.dropdownList, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
                 {categories.map((cat) => (
                   <TouchableOpacity
                     key={cat.id}

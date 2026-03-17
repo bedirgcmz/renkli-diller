@@ -34,15 +34,20 @@ export default function TabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: colors.cardBackground,
           borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingBottom: insets.bottom + 4,
           paddingTop: 6,
           height: 56 + insets.bottom,
+          shadowColor: "#000",
+          shadowOpacity: 0.06,
+          shadowOffset: { width: 0, height: -2 },
+          shadowRadius: 8,
+          elevation: 6,
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarActiveTintColor: "#4DA3FF",
+        tabBarInactiveTintColor: "#9CA3AF",
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "500",

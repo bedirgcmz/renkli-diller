@@ -81,7 +81,7 @@ function LangPicker({
         <Ionicons name={open ? "chevron-up" : "chevron-down"} size={14} color={colors.textSecondary} />
       </TouchableOpacity>
       {open && (
-        <View style={[sStyles.pickerDropdown, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[sStyles.pickerDropdown, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
           {LANGUAGE_OPTIONS.map((opt) => (
             <TouchableOpacity
               key={opt.value}
@@ -173,7 +173,7 @@ export default function SettingsScreen() {
       >
         {/* ── Dil Ayarları ─────────────────────────────── */}
         <SectionTitle label={t("settings.ui_language").toUpperCase()} colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <View style={[sStyles.row, { borderBottomColor: colors.divider }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>🌐</Text>
@@ -204,7 +204,7 @@ export default function SettingsScreen() {
 
         {/* ── Görünüm ───────────────────────────────────── */}
         <SectionTitle label={t("settings.theme").toUpperCase()} colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <SettingRow icon="🌙" label={t("settings.dark")} colors={colors}>
             <Switch
               value={isDark}
@@ -217,7 +217,7 @@ export default function SettingsScreen() {
 
         {/* ── Hedef ─────────────────────────────────────── */}
         <SectionTitle label={t("settings.daily_goal").toUpperCase()} colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>📅</Text>
@@ -255,7 +255,7 @@ export default function SettingsScreen() {
 
         {/* ── Bildirimler ───────────────────────────────── */}
         <SectionTitle label={t("settings.notifications").toUpperCase()} colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>🔔</Text>
@@ -274,7 +274,7 @@ export default function SettingsScreen() {
 
         {/* ── Hesap ─────────────────────────────────────── */}
         <SectionTitle label={t("settings.account").toUpperCase()} colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <View style={[sStyles.row, { borderBottomColor: colors.divider }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>✉️</Text>
@@ -301,7 +301,7 @@ export default function SettingsScreen() {
 
         {/* ── Hakkında ──────────────────────────────────── */}
         <SectionTitle label={t("settings.about").toUpperCase()} colors={colors} />
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>ℹ️</Text>

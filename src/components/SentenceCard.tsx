@@ -6,13 +6,14 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { parseKeywords, getPillColor, stripMarkers } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
+import { GradientView } from "@/components/GradientView";
 import { Sentence, SupportedLanguage } from "@/types";
 
-// State renkleri: KIRMIZI=new, MAVİ=learning, YEŞİL=learned
-const STATUS_BAR_COLOR: Record<"new" | "learning" | "learned", string> = {
-  new: "#E53E3E",
-  learning: "#3B8BD4",
-  learned: "#2ECC71",
+// Status gradient colors
+const STATUS_BAR_GRADIENT: Record<"new" | "learning" | "learned", [string, string]> = {
+  new: ["#E85D5D", "#F87171"],
+  learning: ["#4DA3FF", "#7CC4FF"],
+  learned: ["#49C98A", "#6EE7B7"],
 };
 
 const LANG_CODE: Record<SupportedLanguage, string> = {
@@ -101,7 +102,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   const { isPremium } = usePremium();
   const [speaking, setSpeaking] = useState(false);
 
-  const barColor = STATUS_BAR_COLOR[state];
+  const barGradient = STATUS_BAR_GRADIENT[state];
 
   const handleAudio = async () => {
     if (speaking) {
@@ -132,41 +133,40 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
     }
   };
 
-  // Durum butonu config
+  // Button gradient colors per state
   const actionConfig = {
     new: {
       label: t("learn.add_to_list"),
       icon: "add-circle-outline" as const,
-      color: "#3B8BD4",
-      bg: "#3B8BD420",
-      bgPressed: "#3B8BD440",
+      gradient: ["#4DA3FF", "#2E7DC0"] as [string, string],
       handler: onLearn,
     },
     learning: {
       label: t("learn.mark_learned"),
       icon: "checkmark-circle-outline" as const,
-      color: "#2ECC71",
-      bg: "#2ECC7120",
-      bgPressed: "#2ECC7140",
+      gradient: ["#49C98A", "#2FAF72"] as [string, string],
       handler: onMarkLearned,
     },
     learned: {
       label: t("learn.mark_unlearned"),
       icon: "refresh-outline" as const,
-      color: "#E53E3E",
-      bg: "#E53E3E20",
-      bgPressed: "#E53E3E40",
+      gradient: ["#E85D5D", "#DC2626"] as [string, string],
       handler: onForgot,
     },
   }[state];
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface }]}>
-      {/* 8px renkli durum barı */}
-      <View style={[styles.statusBar, { backgroundColor: barColor }]} />
+    <View style={[styles.card, { backgroundColor: colors.cardBackground }]}>
+      {/* 8px gradient status bar */}
+      <GradientView
+        colors={barGradient}
+        style={styles.statusBar}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      />
 
       <View style={styles.body}>
-        {/* Kaynak dil — tam genişlik, sağda buton yok */}
+        {/* Source language — full width, no icon on right */}
         <KeywordText
           text={sentence.source_text}
           baseColor={colors.text}
@@ -176,7 +176,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           colorSeed={String(sentence.id)}
         />
 
-        {/* Hedef dil + TTS yan yana */}
+        {/* Target language + TTS side by side */}
         {showTarget && (
           <View style={styles.targetRow}>
             <View style={styles.targetText}>
@@ -188,7 +188,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                 colorSeed={String(sentence.id)}
               />
             </View>
-            {/* TTS — hedef dilin sağında */}
+            {/* TTS — on the right of target */}
             <Pressable
               onPress={handleAudio}
               style={({ pressed }) => [
@@ -208,7 +208,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           </View>
         )}
 
-        {/* Kategori chip */}
+        {/* Category chip — bottom left */}
         {sentence.category_name ? (
           <View style={[styles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}>
             <Text style={[styles.categoryText, { color: colors.textSecondary }]}>
@@ -217,40 +217,27 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           </View>
         ) : null}
 
-        {/* Tek aksiyon butonu — kart alt kısmında, sağa hizalı */}
+        {/* Action button — centered, ~80% width */}
         <View style={styles.actionRow}>
-          <Pressable onPress={actionConfig.handler}>
-            {({ pressed }) => (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 3,
-                  paddingHorizontal: 16,
-                  borderRadius: 8,
-                  backgroundColor: pressed ? actionConfig.bgPressed : "#22C57E",
-                  borderWidth: 1,
-                  borderColor: actionConfig.color,
-                  transform: [{ scale: pressed ? 0.93 : 1 }],
-                  alignSelf: "flex-start",
-                  justifyContent: "center",
-                }}
-              >
-                <Ionicons name={actionConfig.icon} size={22} color={"#fff"} />
-
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    marginLeft: 6,
-                    color: "#fff",
-                    fontWeight: "600",
-                    fontSize: 14,
-                  }}
-                >
-                  {actionConfig.label}
-                </Text>
-              </View>
-            )}
+          <Pressable
+            onPress={actionConfig.handler}
+            style={({ pressed }) => ({
+              transform: [{ scale: pressed ? 0.95 : 1 }],
+              opacity: pressed ? 0.85 : 1,
+              width: "80%",
+            })}
+          >
+            <GradientView
+              colors={actionConfig.gradient}
+              style={styles.actionBtn}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Ionicons name={actionConfig.icon} size={20} color="#fff" />
+              <Text numberOfLines={1} style={styles.actionBtnText}>
+                {actionConfig.label}
+              </Text>
+            </GradientView>
           </Pressable>
         </View>
       </View>
@@ -265,16 +252,18 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 3,
   },
   statusBar: {
     height: 8,
     width: "100%",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   body: {
     padding: 16,
-    paddingBottom: 6,
+    paddingBottom: 12,
     gap: 0,
   },
   targetRow: {
@@ -309,8 +298,22 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 6,
-    marginBottom: 6,
+    justifyContent: "center",
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  actionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    gap: 6,
+  },
+  actionBtnText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
   },
 });

@@ -328,7 +328,7 @@ export default function QuizScreen() {
 
         {/* Session complete */}
         {sessionComplete ? (
-          <View style={[styles.doneCard, { backgroundColor: colors.surface }]}>
+          <View style={[styles.doneCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.doneIcon}>🎉</Text>
             <Text style={[styles.doneTitle, { color: colors.text }]}>
               {score.correct}/{score.total} {t("quiz.score")}
@@ -348,7 +348,7 @@ export default function QuizScreen() {
         ) : currentQ ? (
           <>
             {/* Question card */}
-            <View style={[styles.questionCard, { backgroundColor: colors.surface }]}>
+            <View style={[styles.questionCard, { backgroundColor: colors.cardBackground }]}>
               <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
                 {currentIdx + 1}/{questions.length}
               </Text>
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   segmentContainer: {
     flexDirection: "row",
     marginHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 25,
     padding: 4,
     marginBottom: 10,
   },

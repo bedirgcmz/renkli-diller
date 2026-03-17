@@ -122,7 +122,7 @@ export default function ProfileScreen() {
         <Text style={[styles.screenTitle, { color: colors.text }]}>{t("profile.title")}</Text>
 
         {/* Avatar + user info */}
-        <View style={[styles.userCard, { backgroundColor: colors.surface }]}>
+        <View style={[styles.userCard, { backgroundColor: colors.cardBackground }]}>
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
@@ -147,7 +147,7 @@ export default function ProfileScreen() {
 
         {/* Streak + Daily Goal */}
         <View style={styles.streakRow}>
-          <View style={[styles.streakCard, { backgroundColor: colors.surface }]}>
+          <View style={[styles.streakCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.streakIcon}>🔥</Text>
             <Text style={[styles.streakNumber, { color: colors.text }]}>
               {stats.currentStreak}
@@ -157,7 +157,7 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          <View style={[styles.goalCard, { backgroundColor: colors.surface }]}>
+          <View style={[styles.goalCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={[styles.goalTitle, { color: colors.text }]}>
               {t("profile.today_goal")}
             </Text>
@@ -190,7 +190,7 @@ export default function ProfileScreen() {
             },
             { label: t("profile.learning"), value: learningCount, icon: "📝" },
           ].map((stat, i) => (
-            <View key={i} style={[styles.statCard, { backgroundColor: colors.surface }]}>
+            <View key={i} style={[styles.statCard, { backgroundColor: colors.cardBackground }]}>
               <Text style={styles.statIcon}>{stat.icon}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>{stat.value}</Text>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]} numberOfLines={2}>
@@ -201,7 +201,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Menu */}
-        <View style={[styles.menuCard, { backgroundColor: colors.surface }]}>
+        <View style={[styles.menuCard, { backgroundColor: colors.cardBackground }]}>
           {menuItems.map((item, idx) => (
             <View key={idx}>
               {idx > 0 && (
