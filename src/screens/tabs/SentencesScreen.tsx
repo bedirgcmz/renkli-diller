@@ -54,24 +54,24 @@ function KeywordLine({
   const { isDark } = useTheme();
   const segments = parseKeywords(text);
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+    <Text style={{ color: baseColor, fontSize }}>
       {segments.map((seg, i) => {
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
           return (
-            <View
+            <Text
               key={i}
               style={{
                 backgroundColor: color.bg,
+                color: color.text,
+                fontSize,
+                fontWeight: "700",
                 borderRadius: 4,
-                paddingHorizontal: 5,
-                paddingVertical: 1,
-                marginHorizontal: 1,
-                marginVertical: 1,
+                paddingHorizontal: 4,
               }}
             >
-              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-            </View>
+              {` ${seg.text} `}
+            </Text>
           );
         }
         return (
@@ -80,7 +80,7 @@ function KeywordLine({
           </Text>
         );
       })}
-    </View>
+    </Text>
   );
 }
 

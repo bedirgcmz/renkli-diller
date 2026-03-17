@@ -53,19 +53,29 @@ function KeywordText({
   const { isDark } = useTheme();
   const segments = parseKeywords(text);
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+    <Text style={{ color: baseColor, fontSize, lineHeight: fontSize * 1.5 }}>
       {segments.map((seg, i) => {
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
           return (
-            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginHorizontal: 1, marginVertical: 2 }}>
-              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-            </View>
+            <Text
+              key={i}
+              style={{
+                backgroundColor: color.bg,
+                color: color.text,
+                fontSize,
+                fontWeight: "700",
+                borderRadius: 5,
+                paddingHorizontal: 5,
+              }}
+            >
+              {` ${seg.text} `}
+            </Text>
           );
         }
-        return <Text key={i} style={{ color: baseColor, fontSize, lineHeight: fontSize * 1.5 }}>{seg.text}</Text>;
+        return <Text key={i} style={{ color: baseColor, fontSize }}>{seg.text}</Text>;
       })}
-    </View>
+    </Text>
   );
 }
 

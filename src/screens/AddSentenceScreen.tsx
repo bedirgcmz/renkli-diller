@@ -28,19 +28,29 @@ function KeywordPreview({ text, baseColor, colorSeed }: { text: string; baseColo
   if (!text) return null;
   const segments = parseKeywords(text);
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+    <Text style={{ color: baseColor, fontSize: 14, lineHeight: 20 }}>
       {segments.map((seg, i) => {
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
           return (
-            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, marginHorizontal: 1, marginVertical: 1 }}>
-              <Text style={{ color: color.text, fontSize: 14, fontWeight: "700" }}>{seg.text}</Text>
-            </View>
+            <Text
+              key={i}
+              style={{
+                backgroundColor: color.bg,
+                color: color.text,
+                fontSize: 14,
+                fontWeight: "700",
+                borderRadius: 4,
+                paddingHorizontal: 4,
+              }}
+            >
+              {` ${seg.text} `}
+            </Text>
           );
         }
-        return <Text key={i} style={{ color: baseColor, fontSize: 14, lineHeight: 20 }}>{seg.text}</Text>;
+        return <Text key={i} style={{ color: baseColor, fontSize: 14 }}>{seg.text}</Text>;
       })}
-    </View>
+    </Text>
   );
 }
 
