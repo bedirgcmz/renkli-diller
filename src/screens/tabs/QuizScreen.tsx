@@ -87,7 +87,11 @@ function generateMCQuestion(sentence: Sentence, allSentences: Sentence[]): MCQue
 }
 
 function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/\s+/g, " ");
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[.,!?;:'"«»„"]/g, "")  // noktalama kaldır
+    .replace(/\s+/g, " ");            // fazla boşluk normalize
 }
 
 function generateFBQuestion(sentence: Sentence): FBQuestion {
