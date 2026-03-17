@@ -127,13 +127,20 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           .single();
 
         if (settings) {
-          set({
-            ...settings,
-            loading: false,
-            initialized: true,
-          });
-          // Cache in AsyncStorage
-          await AsyncStorage.setItem("user_settings", JSON.stringify(settings));
+          const mapped: Settings = {
+            uiLanguage: settings.ui_language ?? DEFAULT_SETTINGS.uiLanguage,
+            targetLanguage: settings.target_language ?? DEFAULT_SETTINGS.targetLanguage,
+            theme: settings.theme ?? DEFAULT_SETTINGS.theme,
+            dailyGoal: settings.daily_goal ?? DEFAULT_SETTINGS.dailyGoal,
+            notifications: settings.notifications ?? DEFAULT_SETTINGS.notifications,
+            reminderTime: settings.reminder_time ?? DEFAULT_SETTINGS.reminderTime,
+            autoModeSpeed: settings.auto_mode_speed ?? DEFAULT_SETTINGS.autoModeSpeed,
+            showTranslations: settings.show_translations ?? DEFAULT_SETTINGS.showTranslations,
+            ttsEnabled: settings.tts_enabled ?? DEFAULT_SETTINGS.ttsEnabled,
+            ttsVoice: settings.tts_voice ?? DEFAULT_SETTINGS.ttsVoice,
+          };
+          set({ ...mapped, loading: false, initialized: true });
+          await AsyncStorage.setItem("user_settings", JSON.stringify(mapped));
           return;
         }
       }
@@ -162,7 +169,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       if (user) {
         const { error } = await supabase.from("user_settings").upsert({
           user_id: user.id,
-          ...newSettings,
+          ui_language: newSettings.uiLanguage,
+          target_language: newSettings.targetLanguage,
+          theme: newSettings.theme,
+          daily_goal: newSettings.dailyGoal,
+          notifications: newSettings.notifications,
+          reminder_time: newSettings.reminderTime,
+          auto_mode_speed: newSettings.autoModeSpeed,
+          show_translations: newSettings.showTranslations,
+          tts_enabled: newSettings.ttsEnabled,
+          tts_voice: newSettings.ttsVoice,
           updated_at: new Date().toISOString(),
         });
 
