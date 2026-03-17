@@ -387,7 +387,7 @@ export default function LearnScreen() {
 
       {/* ── Progress bar (sadece learning tab + veri varsa) ─────────────── */}
       {activeTab === "learning" && initialized && total > 0 && (
-        <View style={[styles.progressRow, { backgroundColor: colors.surfaceSecondary }]}>
+        <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
           <View style={[styles.progressTrack, { backgroundColor: colors.backgroundTertiary }]}>
             <GradientView
               colors={["#4DA3FF", "#49C98A"]}
@@ -669,6 +669,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 14,
     gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    elevation: 2,
   },
   progressTrack: {
     flex: 1,
