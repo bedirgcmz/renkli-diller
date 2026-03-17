@@ -49,7 +49,7 @@ function KeywordText({
         if (seg.isPill && seg.pillIndex !== null) {
           const color = getPillColor(seg.pillIndex, isDark, colorSeed);
           return [(
-            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
+            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
               <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
             </View>
           )];
