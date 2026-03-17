@@ -136,51 +136,134 @@ function SentenceItem({
           </View>
         ) : null}
 
-        {/* Tek aksiyon butonu — duruma göre */}
+        {/* Durum text (sol) + aksiyon butonu (sağ) */}
         <View style={itemStyles.actionRow}>
+          {/* Sol: durum text */}
           {sentence.effectiveStatus === "new" && (
-            <Pressable
-              style={({ pressed }) => [
-                itemStyles.actionBtn,
-                { backgroundColor: "#3B8BD418" },
-                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
-              ]}
-              onPress={onLearn}
-            >
-              <Ionicons name="add-circle-outline" size={14} color="#3B8BD4" />
-              <Text style={[itemStyles.actionBtnText, { color: "#3B8BD4" }]}>
-                {t("learn.add_to_list")}
-              </Text>
-            </Pressable>
+            <Text style={{ color: colors.textTertiary, fontSize: 12 }}>
+              {t("sentences.status_new")}
+            </Text>
           )}
           {sentence.effectiveStatus === "learning" && (
-            <Pressable
-              style={({ pressed }) => [
-                itemStyles.actionBtn,
-                { backgroundColor: "#2ECC7118" },
-                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
-              ]}
-              onPress={onMarkLearned}
-            >
-              <Ionicons name="checkmark-circle-outline" size={14} color="#2ECC71" />
-              <Text style={[itemStyles.actionBtnText, { color: "#2ECC71" }]}>
-                {t("learn.mark_learned")}
-              </Text>
-            </Pressable>
+            <Text style={{ color: "#3B8BD4", fontSize: 12, fontWeight: "500" }}>
+              {t("sentences.status_learning")}
+            </Text>
           )}
           {sentence.effectiveStatus === "learned" && (
-            <Pressable
-              style={({ pressed }) => [
-                itemStyles.actionBtn,
-                { backgroundColor: "#E53E3E18" },
-                pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
-              ]}
-              onPress={onForgot}
-            >
-              <Ionicons name="refresh-outline" size={14} color="#E53E3E" />
-              <Text style={[itemStyles.actionBtnText, { color: "#E53E3E" }]}>
-                {t("learn.mark_unlearned")}
-              </Text>
+            <Text style={{ color: "#2ECC71", fontSize: 12, fontWeight: "500" }}>
+              {t("sentences.status_learned")}
+            </Text>
+          )}
+
+          {/* Sağ: aksiyon butonu */}
+          {sentence.effectiveStatus === "new" && (
+            <Pressable onPress={onLearn}>
+              {({ pressed }) => (
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: "#3B8BD4",
+                    overflow: "hidden",
+                    paddingHorizontal: 6,
+                    paddingVertical: 4,
+                    backgroundColor: pressed ? "#3B8BD418" : "transparent",
+                    transform: [{ scale: pressed ? 0.95 : 1 }],
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="add-circle-outline" size={15} color="#3B8BD4" />
+                  <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{
+                      marginLeft: 6,
+                      color: "#3B8BD4",
+                      fontSize: 13,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {t("learn.add_to_list")}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          )}
+
+          {sentence.effectiveStatus === "learning" && (
+            <Pressable onPress={onMarkLearned}>
+              {({ pressed }) => (
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: "#2ECC71",
+                    overflow: "hidden",
+                    paddingHorizontal: 6,
+                    paddingVertical: 4,
+                    backgroundColor: pressed ? "#2ECC7118" : "transparent",
+                    transform: [{ scale: pressed ? 0.95 : 1 }],
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={15} color="#2ECC71" />
+                  <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{
+                      marginLeft: 6,
+                      color: "#2ECC71",
+                      fontSize: 13,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {t("learn.mark_learned")}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          )}
+
+          {sentence.effectiveStatus === "learned" && (
+            <Pressable onPress={onForgot}>
+              {({ pressed }) => (
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: "#E53E3E",
+                    overflow: "hidden",
+                    paddingHorizontal: 6,
+                    paddingVertical: 4,
+                    backgroundColor: pressed ? "#E53E3E18" : "transparent",
+                    transform: [{ scale: pressed ? 0.95 : 1 }],
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="refresh-outline" size={15} color="#E53E3E" />
+                  <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{
+                      marginLeft: 6,
+                      color: "#E53E3E",
+                      fontSize: 13,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {t("learn.mark_unlearned")}
+                  </Text>
+                </View>
+              )}
             </Pressable>
           )}
         </View>
@@ -202,7 +285,7 @@ const itemStyles = StyleSheet.create({
     elevation: 2,
     marginBottom: 10,
   },
-  statusBar: { height: 4, width: "100%" },
+  statusBar: { height: 8, width: "100%" },
   body: { padding: 12 },
   iconRow: {
     flexDirection: "row",
@@ -225,16 +308,7 @@ const itemStyles = StyleSheet.create({
     marginTop: 6,
   },
   categoryText: { fontSize: 11 },
-  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 7,
-  },
-  actionBtnText: { fontSize: 12, fontWeight: "600" },
+  actionRow: { flexDirection: "row", marginTop: 10, justifyContent: "space-between", alignItems: "center" },
 });
 
 // ─── Ana ekran ────────────────────────────────────────────────────────────────
@@ -283,9 +357,7 @@ export default function SentencesScreen() {
     const base = activeTab === "preset" ? presetSentences : sentences;
     return base.map((s) => ({
       ...s,
-      effectiveStatus: (s.is_preset
-        ? (progressMap[s.id] ?? "new")
-        : s.status) as SentenceStatus,
+      effectiveStatus: (s.is_preset ? (progressMap[s.id] ?? "new") : s.status) as SentenceStatus,
     }));
   }, [activeTab, presetSentences, sentences, progressMap]);
 
@@ -297,7 +369,7 @@ export default function SentencesScreen() {
         (s) =>
           !searchText ||
           s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
-          s.target_text.toLowerCase().includes(searchText.toLowerCase())
+          s.target_text.toLowerCase().includes(searchText.toLowerCase()),
       );
   }, [sourceList, statusFilter, categoryFilter, searchText]);
 
@@ -313,7 +385,10 @@ export default function SentencesScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
       {/* ── Sabit üst alan (başlık + filtreler) ─────────────────────── */}
       <View>
         <View style={styles.header}>
@@ -344,18 +419,13 @@ export default function SentencesScreen() {
         </View>
 
         {/* Segment: Hazır / Benim */}
-        <View
-          style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}
-        >
+        <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
           {(["preset", "mine"] as SentenceTab[]).map((tab) => (
             <TouchableOpacity
               key={tab}
               style={[
                 styles.segmentTab,
-                activeTab === tab && [
-                  styles.segmentTabActive,
-                  { backgroundColor: colors.surface },
-                ],
+                activeTab === tab && [styles.segmentTabActive, { backgroundColor: colors.surface }],
               ]}
               onPress={() => {
                 setActiveTab(tab);
@@ -470,7 +540,11 @@ export default function SentencesScreen() {
         showsVerticalScrollIndicator={false}
         style={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

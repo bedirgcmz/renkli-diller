@@ -29,7 +29,7 @@
     "no_sentences": "No sentences added yet",
     "mark_learned": "Mark as Learned",
     "mark_unlearned": "Mark as Unlearned",
-    "add_to_list": "Add to List",
+    "add_to_list": "Add to My Learning List",
     "remove_from_list": "Remove from List",
     "prev": "Previous",
     "next": "Next",
@@ -67,7 +67,10 @@
     "delete": "Delete",
     "delete_confirm": "Are you sure you want to delete this sentence?",
     "target_words": "Target Words",
-    "category": "Category"
+    "category": "Category",
+    "status_new": "New",
+    "status_learning": "Learning",
+    "status_learned": "Learned"
   },
   "add_sentence": {
     "title": "Add New Sentence",

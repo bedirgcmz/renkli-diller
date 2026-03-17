@@ -29,7 +29,7 @@
     "no_sentences": "Inga meningar tillagda ännu",
     "mark_learned": "Markera som inlärd",
     "mark_unlearned": "Markera som oinlärd",
-    "add_to_list": "Lägg till i lista",
+    "add_to_list": "Lägg till i min lärlista",
     "remove_from_list": "Ta bort från lista",
     "prev": "Föregående",
     "next": "Nästa",
@@ -67,7 +67,10 @@
     "delete": "Ta bort",
     "delete_confirm": "Är du säker på att du vill ta bort denna mening?",
     "target_words": "Målord",
-    "category": "Kategori"
+    "category": "Kategori",
+    "status_new": "Ny",
+    "status_learning": "Lär dig",
+    "status_learned": "Lärt dig"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",

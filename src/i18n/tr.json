@@ -29,7 +29,7 @@
     "no_sentences": "Henüz cümle eklenmemiş",
     "mark_learned": "Öğrendim",
     "mark_unlearned": "Tekrar Öğren",
-    "add_to_list": "Listeye Ekle",
+    "add_to_list": "Öğrenme Listeme Ekle",
     "remove_from_list": "Listeden Çıkar",
     "prev": "Önceki",
     "next": "Sonraki",
@@ -67,7 +67,10 @@
     "delete": "Sil",
     "delete_confirm": "Bu cümleyi silmek istediğinize emin misiniz?",
     "target_words": "Hedef Kelimeler",
-    "category": "Kategori"
+    "category": "Kategori",
+    "status_new": "Yeni",
+    "status_learning": "Öğreniyorsun",
+    "status_learned": "Öğrendin"
   },
   "add_sentence": {
     "title": "Yeni Cümle Ekle",

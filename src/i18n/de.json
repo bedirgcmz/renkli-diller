@@ -29,7 +29,7 @@
     "no_sentences": "Noch keine Sätze hinzugefügt",
     "mark_learned": "Als gelernt markieren",
     "mark_unlearned": "Als ungelernt markieren",
-    "add_to_list": "Zur Liste hinzufügen",
+    "add_to_list": "Zur Lernliste hinzufügen",
     "remove_from_list": "Aus Liste entfernen",
     "prev": "Vorherige",
     "next": "Nächste",
@@ -67,7 +67,10 @@
     "delete": "Löschen",
     "delete_confirm": "Sind Sie sicher, dass Sie diesen Satz löschen möchten?",
     "target_words": "Zielwörter",
-    "category": "Kategorie"
+    "category": "Kategorie",
+    "status_new": "Neu",
+    "status_learning": "Lernst du",
+    "status_learned": "Gelernt"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",
