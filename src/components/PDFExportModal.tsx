@@ -16,7 +16,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { createPdf, sharePdf } from "@/services/pdf";
+import { createAndSharePdf } from "@/services/pdf";
 import { Sentence } from "@/types";
 
 type FilterKey = "all" | "learned" | "learning" | "my_only";
@@ -131,8 +131,7 @@ export default function PDFExportModal({ visible, onClose }: Props) {
     try {
       const filterLabel = FILTERS.find((f) => f.key === filter)?.label ?? "";
       const html = buildHtml(filtered, t("pdf_export.title"), filterLabel);
-      const filePath = await createPdf(html, `renkli_diller_${filter}`);
-      await sharePdf(filePath);
+      await createAndSharePdf(html, `renkli_diller_${filter}`);
       onClose();
     } catch (err) {
       Alert.alert(t("common.error"), String(err));
