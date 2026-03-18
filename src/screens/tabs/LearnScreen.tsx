@@ -150,7 +150,7 @@ const learnedStyles = StyleSheet.create({
 
 export default function LearnScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const {
     sentences: userSentences,
@@ -298,9 +298,19 @@ export default function LearnScreen() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const bgGradient: [string, string] = isDark
+    ? ["#09091E", "#1C0A3A"]
+    : ["#F5F1FF", "#E8F4FF"];
+
   return (
+    <GradientView
+      colors={bgGradient}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={{ flex: 1 }}
       edges={["top"]}
     >
       {/* Başlık */}
@@ -509,6 +519,7 @@ export default function LearnScreen() {
           />
         ))}
     </SafeAreaView>
+    </GradientView>
   );
 }
 
