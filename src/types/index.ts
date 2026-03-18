@@ -94,7 +94,7 @@ export type RootStackParamList = {
 export type MainStackParamList = {
   Tabs: undefined;
   AddSentence: undefined;
-  EditSentence: { sentenceId: string };
+  EditSentence: { sentenceId: string; isPreset: boolean };
   Settings: undefined;
   Paywall: undefined;
   CategoryBrowser: undefined;

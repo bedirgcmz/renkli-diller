@@ -40,7 +40,6 @@ const STATUS_BAR_COLOR: Record<SentenceStatus, string> = {
   learned: "#2ECC71",
 };
 
-
 interface SentenceItemProps {
   sentence: Sentence & { effectiveStatus: SentenceStatus };
   isUserSentence: boolean;
@@ -107,7 +106,7 @@ function SentenceItem({
 
         {keywordsText ? (
           <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>
-            🔑 {keywordsText}
+            <Text style={{ fontSize: 10 }}>🔑 </Text> {keywordsText}
           </Text>
         ) : null}
 
@@ -549,7 +548,7 @@ export default function SentencesScreen() {
             onLearn={() => addToLearningList(item.id)}
             onMarkLearned={() => markAsLearned(item.id)}
             onForgot={() => markAsUnlearned(item.id)}
-            onEdit={() => navigation.navigate("EditSentence", { sentenceId: item.id })}
+            onEdit={() => navigation.navigate("EditSentence", { sentenceId: item.id, isPreset: item.is_preset })}
             onDelete={() => handleDelete(item)}
             colors={colors}
             t={t}

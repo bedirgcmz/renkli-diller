@@ -29,9 +29,11 @@ export default function EditSentenceScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const route = useRoute<RouteProp<MainStackParamList, "EditSentence">>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { sentences, categories, updateSentence, loadCategories } = useSentenceStore();
+  const { sentences, presetSentences, categories, updateSentence, loadCategories } = useSentenceStore();
 
-  const sentence = sentences.find((s) => s.id === route.params.sentenceId);
+  const { sentenceId, isPreset } = route.params;
+  const pool = isPreset ? presetSentences : sentences;
+  const sentence = pool.find((s) => s.id === sentenceId);
 
   const [sourceText, setSourceText] = useState(sentence?.source_text ?? "");
   const [targetText, setTargetText] = useState(sentence?.target_text ?? "");
