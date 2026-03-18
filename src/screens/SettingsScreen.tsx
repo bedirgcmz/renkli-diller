@@ -24,6 +24,9 @@ const LANGUAGE_OPTIONS: Array<{ value: SupportedLanguage; label: string; flag: s
   { value: "en", label: "English", flag: "🇬🇧" },
   { value: "sv", label: "Svenska", flag: "🇸🇪" },
   { value: "de", label: "Deutsch", flag: "🇩🇪" },
+  { value: "es", label: "Español", flag: "🇪🇸" },
+  { value: "fr", label: "Français", flag: "🇫🇷" },
+  { value: "pt", label: "Português", flag: "🇧🇷" },
 ];
 
 const DAILY_GOAL_OPTIONS = [5, 10, 20, 30];

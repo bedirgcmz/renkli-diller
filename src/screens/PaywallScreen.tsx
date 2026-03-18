@@ -77,7 +77,7 @@ export default function PaywallScreen() {
       setPackages(opts);
       // Varsayılan seçim: yıllık
       const defaultPkg = annual ?? monthly ?? lifetime;
-      if (defaultPkg) setSelectedPkg(defaultPkg.pkg ?? defaultPkg);
+      if (defaultPkg) setSelectedPkg(defaultPkg);
     } catch (e) {
       console.error("Offerings load error:", e);
     } finally {

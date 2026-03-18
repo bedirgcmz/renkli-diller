@@ -44,5 +44,8 @@ export const APP_NAMES: Record<SupportedLanguage, string> = {
   tr: 'Renkli Diller',
   en: 'Colorful Languages',
   sv: 'Färgglada Språk',
-  de: 'Bunte Sprachen'
+  de: 'Bunte Sprachen',
+  es: 'Lenguas Coloridas',
+  fr: 'Langues Colorées',
+  pt: 'Línguas Coloridas',
 };

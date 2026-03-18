@@ -24,6 +24,9 @@ export default function LanguageSelectionScreen() {
         { label: t("languages.en"), value: "en" },
         { label: t("languages.sv"), value: "sv" },
         { label: t("languages.de"), value: "de" },
+        { label: t("languages.es"), value: "es" },
+        { label: t("languages.fr"), value: "fr" },
+        { label: t("languages.pt"), value: "pt" },
       ].map((lang) => (
         <TouchableOpacity
           key={lang.value}

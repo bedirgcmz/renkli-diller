@@ -10,6 +10,9 @@ const LANGUAGE_CODES: Record<SupportedLanguage, string> = {
   en: "en-US",
   sv: "sv-SE",
   de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+  pt: "pt-BR",
 };
 
 function stripMarkers(text: string): string {

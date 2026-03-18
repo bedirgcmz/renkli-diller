@@ -22,6 +22,9 @@ const LANGUAGE_OPTIONS: Array<{ label: string; value: SupportedLanguage; emoji: 
   { label: "English", value: "en", emoji: "🇬🇧" },
   { label: "Svenska", value: "sv", emoji: "🇸🇪" },
   { label: "Deutsch", value: "de", emoji: "🇩🇪" },
+  { label: "Español", value: "es", emoji: "🇪🇸" },
+  { label: "Français", value: "fr", emoji: "🇫🇷" },
+  { label: "Português", value: "pt", emoji: "🇧🇷" },
 ];
 
 function LanguagePicker({

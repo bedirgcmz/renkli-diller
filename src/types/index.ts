@@ -1,5 +1,5 @@
 // Language types
-export type SupportedLanguage = "tr" | "en" | "sv" | "de";
+export type SupportedLanguage = "tr" | "en" | "sv" | "de" | "es" | "fr" | "pt";
 
 // Sentence types
 export type SentenceStatus = "new" | "learning" | "learned";

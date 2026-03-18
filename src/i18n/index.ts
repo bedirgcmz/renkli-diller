@@ -6,6 +6,9 @@ import en from "./en.json";
 import tr from "./tr.json";
 import sv from "./sv.json";
 import de from "./de.json";
+import es from "./es.json";
+import fr from "./fr.json";
+import pt from "./pt.json";
 import { SupportedLanguage } from "@/types";
 
 const LANGUAGE_KEY = "@language";
@@ -16,6 +19,9 @@ i18n.use(initReactI18next).init({
     tr: { translation: tr },
     sv: { translation: sv },
     de: { translation: de },
+    es: { translation: es },
+    fr: { translation: fr },
+    pt: { translation: pt },
   },
   lng: "tr",
   fallbackLng: "en",
@@ -39,7 +45,7 @@ export const changeLanguage = async (lang: SupportedLanguage) => {
 export const loadSavedLanguage = async () => {
   try {
     const savedLang = await AsyncStorage.getItem(LANGUAGE_KEY);
-    if (savedLang && ["tr", "en", "sv", "de"].includes(savedLang)) {
+    if (savedLang && ["tr", "en", "sv", "de", "es", "fr", "pt"].includes(savedLang)) {
       await i18n.changeLanguage(savedLang);
     }
   } catch (error) {
