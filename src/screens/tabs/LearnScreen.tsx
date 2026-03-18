@@ -303,12 +303,13 @@ export default function LearnScreen() {
     : ["#F5F1FF", "#E8F4FF"];
 
   return (
-    <GradientView
-      colors={bgGradient}
-      style={styles.container}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+    <View style={styles.container}>
+      <GradientView
+        colors={bgGradient}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
     <SafeAreaView
       style={{ flex: 1 }}
       edges={["top"]}
@@ -519,7 +520,7 @@ export default function LearnScreen() {
           />
         ))}
     </SafeAreaView>
-    </GradientView>
+    </View>
   );
 }
 
