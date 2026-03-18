@@ -71,6 +71,7 @@ export default function CategoryBrowserScreen() {
           <ActivityIndicator style={{ flex: 1 }} color={colors.primary} />
         ) : (
           <FlatList
+            key="sentence-list"
             data={presetSentences}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.sentenceList}
@@ -162,6 +163,7 @@ export default function CategoryBrowserScreen() {
       </View>
 
       <FlatList
+        key="category-grid"
         data={categories}
         keyExtractor={(item) => String(item.id)}
         numColumns={2}
