@@ -188,6 +188,9 @@ export interface Category {
   name_en: string;
   name_sv: string;
   name_de: string;
+  name_es: string;
+  name_fr: string;
+  name_pt: string;
   icon: string;
   sort_order: number;
   is_free: boolean;

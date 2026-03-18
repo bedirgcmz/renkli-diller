@@ -90,7 +90,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       const { uiLanguage, targetLanguage } = useSettingsStore.getState();
       let query = supabase
         .from("sentences")
-        .select("*, categories(name_tr, name_en, name_sv, name_de)")
+        .select("*, categories(name_tr, name_en, name_sv, name_de, name_es, name_fr, name_pt)")
         .order("sort_order");
 
       if (categoryId) {
