@@ -16,7 +16,8 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { parseKeywords, getPillColor, splitWords, stripMarkers } from "@/utils/keywords";
+import { stripMarkers } from "@/utils/keywords";
+import { KeywordText } from "@/components/KeywordText";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
 import { Sentence } from "@/types";
 
@@ -39,37 +40,6 @@ interface FBQuestion {
 
 type Question = MCQuestion | FBQuestion;
 
-function KeywordText({
-  text,
-  baseColor,
-  fontSize,
-  colorSeed,
-}: {
-  text: string;
-  baseColor: string;
-  fontSize: number;
-  colorSeed: string;
-}) {
-  const { isDark } = useTheme();
-  const segments = parseKeywords(text);
-  return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
-      {segments.flatMap((seg, i) => {
-        if (seg.isPill && seg.pillIndex !== null) {
-          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return [(
-            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
-              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-            </View>
-          )];
-        }
-        return splitWords(seg.text).map((word, j) => (
-          <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize, lineHeight: fontSize * 1.5 }}>{word}</Text>
-        ));
-      })}
-    </View>
-  );
-}
 
 function generateMCQuestion(sentence: Sentence, allSentences: Sentence[]): MCQuestion | null {
   const others = allSentences.filter((s) => s.id !== sentence.id);
@@ -373,6 +343,7 @@ export default function QuizScreen() {
                     text={currentQ.sentence.target_text}
                     baseColor={colors.text}
                     fontSize={18}
+                    lineHeight={27}
                     colorSeed={String(currentQ.sentence.id)}
                   />
                 )}

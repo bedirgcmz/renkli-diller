@@ -50,7 +50,7 @@ interface ThemeColors {
 
 const lightTheme: ThemeColors = {
   background: "#FAF8F4",
-  backgroundGradient: ["#FFF6E9", "#EAF4FF"],
+  backgroundGradient: ["#FFF6E9", "#F7DAF3"],
   backgroundSecondary: "#ECE7DF",
   backgroundTertiary: "#E6E0D7",
 

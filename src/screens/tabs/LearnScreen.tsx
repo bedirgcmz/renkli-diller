@@ -19,15 +19,14 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
-import { LinearGradient } from "expo-linear-gradient"; // bg diagonal gradient için
-import { parseKeywords, getPillColor, splitWords, textToColorIndex } from "@/utils/keywords";
+import { KeywordText } from "@/components/KeywordText";
 import { Sentence } from "@/types";
 
 type TabKey = "learning" | "learned";
 
 // ─── Küçük "Öğrenildi" liste kartı ────────────────────────────────────────────
 
-function LearnedCard({
+const LearnedCard = React.memo(function LearnedCard({
   sentence,
   onForgot,
   colors,
@@ -38,43 +37,25 @@ function LearnedCard({
   colors: any;
   t: (k: string) => string;
 }) {
-  const { isDark } = useTheme();
-  const sourceSegs = parseKeywords(sentence.source_text);
-  const targetSegs = parseKeywords(sentence.target_text);
-  const colorOffset = textToColorIndex(String(sentence.id));
-
-  function PillLine({ segs, baseColor, fontSize, fontWeight }: { segs: ReturnType<typeof parseKeywords>; baseColor: string; fontSize: number; fontWeight?: string }) {
-    return (
-      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
-        {segs.flatMap((seg, i) => {
-          if (seg.isPill && seg.pillIndex !== null) {
-            const color = getPillColor(colorOffset + seg.pillIndex, isDark);
-            return [(
-              <View key={i} style={{ backgroundColor: color.bg, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
-                <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-              </View>
-            )];
-          }
-          return splitWords(seg.text).map((word, j) => (
-            <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize, fontWeight: (fontWeight ?? "400") as any }}>{word}</Text>
-          ));
-        })}
-      </View>
-    );
-  }
-
+  const colorSeed = String(sentence.id);
   return (
     <View style={[learnedStyles.card, { backgroundColor: colors.cardBackground }]}>
-      <GradientView
-        colors={["#49C98A", "#6EE7B7"]}
-        style={learnedStyles.statusBar}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      />
+      <GradientView colors={["#49C98A", "#6EE7B7"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
       <View style={learnedStyles.body}>
-        <PillLine segs={sourceSegs} baseColor={colors.text} fontSize={15} fontWeight="500" />
+        <KeywordText
+          text={sentence.source_text}
+          baseColor={colors.text}
+          fontSize={15}
+          fontWeight="500"
+          colorSeed={colorSeed}
+        />
         <View style={{ marginTop: 4 }}>
-          <PillLine segs={targetSegs} baseColor={colors.textSecondary} fontSize={13} />
+          <KeywordText
+            text={sentence.target_text}
+            baseColor={colors.textSecondary}
+            fontSize={13}
+            colorSeed={colorSeed}
+          />
         </View>
         <View style={learnedStyles.cardFooter}>
           {sentence.category_name ? (
@@ -83,7 +64,7 @@ function LearnedCard({
                 {sentence.category_name}
               </Text>
             </View>
-          ) : <View />}
+          ) : null}
           <Pressable
             onPress={onForgot}
             style={({ pressed }) => ({
@@ -91,6 +72,7 @@ function LearnedCard({
               overflow: "hidden",
               transform: [{ scale: pressed ? 0.95 : 1 }],
               opacity: pressed ? 0.85 : 1,
+              marginLeft: "auto",
             })}
           >
             <GradientView
@@ -113,7 +95,7 @@ function LearnedCard({
       </View>
     </View>
   );
-}
+});
 
 const learnedStyles = StyleSheet.create({
   card: {
@@ -126,7 +108,6 @@ const learnedStyles = StyleSheet.create({
     elevation: 2,
     marginBottom: 10,
   },
-  statusBar: { height: 8 },
   body: {
     flexDirection: "column",
     padding: 12,
@@ -186,7 +167,9 @@ export default function LearnScreen() {
       }
     };
     init();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const learningList: Sentence[] = [
@@ -301,222 +284,228 @@ export default function LearnScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <LinearGradient
-        colors={colors.backgroundGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-    <SafeAreaView
-      style={{ flex: 1 }}
-      edges={["top"]}
-    >
-      {/* Başlık */}
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {activeTab === "learning" ? t("learn.title") : t("learn.learned_title")}
-        </Text>
-        {activeTab === "learning" && total > 0 && (
-          <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
-            <Text style={[styles.counterText, { color: colors.primary }]}>
-              {currentIndex + 1}/{total}
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+        {/* Başlık */}
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            {activeTab === "learning" ? t("learn.title") : t("learn.learned_title")}
+          </Text>
+          {activeTab === "learning" && total > 0 && (
+            <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
+              <Text style={[styles.counterText, { color: colors.primary }]}>
+                {currentIndex + 1}/{total}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Segment Control */}
+        <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
+          <TouchableOpacity
+            style={[styles.segmentTab, activeTab === "learning" && styles.segmentTabActiveWrapper]}
+            onPress={() => handleTabChange("learning")}
+            activeOpacity={0.8}
+          >
+            {activeTab === "learning" ? (
+              <GradientView
+                colors={["#4DA3FF", "#7CC4FF"]}
+                style={styles.segmentTabGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={[styles.segmentLabel, { color: "#fff" }]}>
+                  {t("sentences.filter_learning")}
+                </Text>
+                {learningList.length > 0 && (
+                  <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                    <Text style={styles.badgeText}>{learningList.length}</Text>
+                  </View>
+                )}
+              </GradientView>
+            ) : (
+              <View style={styles.segmentTabInner}>
+                <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
+                  {t("sentences.filter_learning")}
+                </Text>
+                {learningList.length > 0 && (
+                  <View style={[styles.badge, { backgroundColor: "#4DA3FF" }]}>
+                    <Text style={styles.badgeText}>{learningList.length}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.segmentTab, activeTab === "learned" && styles.segmentTabActiveWrapper]}
+            onPress={() => handleTabChange("learned")}
+            activeOpacity={0.8}
+          >
+            {activeTab === "learned" ? (
+              <GradientView
+                colors={["#4DA3FF", "#7CC4FF"]}
+                style={styles.segmentTabGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={[styles.segmentLabel, { color: "#fff" }]}>
+                  {t("sentences.filter_learned")}
+                </Text>
+                {learnedList.length > 0 && (
+                  <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
+                    <Text style={styles.badgeText}>{learnedList.length}</Text>
+                  </View>
+                )}
+              </GradientView>
+            ) : (
+              <View style={styles.segmentTabInner}>
+                <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
+                  {t("sentences.filter_learned")}
+                </Text>
+                {learnedList.length > 0 && (
+                  <View style={[styles.badge, { backgroundColor: "#49C98A" }]}>
+                    <Text style={styles.badgeText}>{learnedList.length}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Progress bar (sadece learning tab + veri varsa) ─────────────── */}
+        {activeTab === "learning" && initialized && total > 0 && (
+          <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
+            <View style={[styles.progressTrack, { backgroundColor: colors.backgroundTertiary }]}>
+              <GradientView
+                colors={["#4DA3FF", "#49C98A"]}
+                style={[
+                  styles.progressFill,
+                  { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as any },
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              />
+            </View>
+            <Text style={[styles.progressPercent, { color: colors.textSecondary }]}>
+              {Math.round(((currentIndex + 1) / total) * 100)}%
             </Text>
           </View>
         )}
-      </View>
 
-      {/* Segment Control */}
-      <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
-        <TouchableOpacity
-          style={[styles.segmentTab, activeTab === "learning" && styles.segmentTabActiveWrapper]}
-          onPress={() => handleTabChange("learning")}
-          activeOpacity={0.8}
-        >
-          {activeTab === "learning" ? (
-            <GradientView
-              colors={["#4DA3FF", "#7CC4FF"]}
-              style={styles.segmentTabGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text style={[styles.segmentLabel, { color: "#fff" }]}>
-                {t("sentences.filter_learning")}
-              </Text>
-              {learningList.length > 0 && (
-                <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
-                  <Text style={styles.badgeText}>{learningList.length}</Text>
-                </View>
-              )}
-            </GradientView>
-          ) : (
-            <View style={styles.segmentTabInner}>
-              <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
-                {t("sentences.filter_learning")}
-              </Text>
-              {learningList.length > 0 && (
-                <View style={[styles.badge, { backgroundColor: "#4DA3FF" }]}>
-                  <Text style={styles.badgeText}>{learningList.length}</Text>
-                </View>
-              )}
+        {/* ── Öğreniliyor sekmesi: swipeable kart ────────────────────────────── */}
+        {activeTab === "learning" &&
+          (!initialized ? (
+            <View style={styles.centered}>
+              <ActivityIndicator size="large" color={colors.primary} />
             </View>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.segmentTab, activeTab === "learned" && styles.segmentTabActiveWrapper]}
-          onPress={() => handleTabChange("learned")}
-          activeOpacity={0.8}
-        >
-          {activeTab === "learned" ? (
-            <GradientView
-              colors={["#4DA3FF", "#7CC4FF"]}
-              style={styles.segmentTabGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text style={[styles.segmentLabel, { color: "#fff" }]}>
-                {t("sentences.filter_learned")}
-              </Text>
-              {learnedList.length > 0 && (
-                <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
-                  <Text style={styles.badgeText}>{learnedList.length}</Text>
-                </View>
-              )}
-            </GradientView>
+          ) : total === 0 ? (
+            <EmptyState tab="learning" colors={colors} t={t} />
           ) : (
-            <View style={styles.segmentTabInner}>
-              <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
-                {t("sentences.filter_learned")}
-              </Text>
-              {learnedList.length > 0 && (
-                <View style={[styles.badge, { backgroundColor: "#49C98A" }]}>
-                  <Text style={styles.badgeText}>{learnedList.length}</Text>
-                </View>
-              )}
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
+            <>
+              <GestureDetector gesture={swipeGesture}>
+                <Animated.View
+                  style={[
+                    styles.cardWrapper,
+                    { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
+                  ]}
+                >
+                  {currentSentence && (
+                    <SentenceCard
+                      sentence={currentSentence}
+                      uiLanguage={uiLanguage}
+                      targetLanguage={targetLanguage}
+                      state={getEffectiveState(currentSentence)}
+                      onLearn={handleLearn}
+                      onMarkLearned={handleMarkLearned}
+                      onForgot={handleForgotCard}
+                    />
+                  )}
+                </Animated.View>
+              </GestureDetector>
 
-      {/* ── Progress bar (sadece learning tab + veri varsa) ─────────────── */}
-      {activeTab === "learning" && initialized && total > 0 && (
-        <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
-          <View style={[styles.progressTrack, { backgroundColor: colors.backgroundTertiary }]}>
-            <GradientView
-              colors={["#4DA3FF", "#49C98A"]}
-              style={[styles.progressFill, { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as any }]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            />
-          </View>
-          <Text style={[styles.progressPercent, { color: colors.textSecondary }]}>
-            {Math.round(((currentIndex + 1) / total) * 100)}%
-          </Text>
-        </View>
-      )}
-
-      {/* ── Öğreniliyor sekmesi: swipeable kart ────────────────────────────── */}
-      {activeTab === "learning" &&
-        (!initialized ? (
-          <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary} />
-          </View>
-        ) : total === 0 ? (
-          <EmptyState tab="learning" colors={colors} t={t} />
-        ) : (
-          <>
-            <GestureDetector gesture={swipeGesture}>
-              <Animated.View
-                style={[
-                  styles.cardWrapper,
-                  { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
-                ]}
-              >
-                {currentSentence && (
-                  <SentenceCard
-                    sentence={currentSentence}
-                    uiLanguage={uiLanguage}
-                    targetLanguage={targetLanguage}
-                    state={getEffectiveState(currentSentence)}
-                    onLearn={handleLearn}
-                    onMarkLearned={handleMarkLearned}
-                    onForgot={handleForgotCard}
+              <View style={styles.navRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.navBtn,
+                    { backgroundColor: colors.backgroundSecondary },
+                    currentIndex === 0 && styles.navBtnDisabled,
+                  ]}
+                  onPress={goPrev}
+                  disabled={currentIndex === 0}
+                  activeOpacity={0.7}
+                >
+                  <GradientView
+                    colors={["transparent", "rgba(236, 72, 153, 0.12)", "transparent"]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
-                )}
-              </Animated.View>
-            </GestureDetector>
-
-            <View style={styles.navRow}>
-              <TouchableOpacity
-                style={[
-                  styles.navBtn,
-                  { backgroundColor: colors.backgroundSecondary },
-                  currentIndex === 0 && styles.navBtnDisabled,
-                ]}
-                onPress={goPrev}
-                disabled={currentIndex === 0}
-                activeOpacity={0.7}
-              >
-                <Text
+                  <Text
+                    style={[
+                      styles.navBtnText,
+                      { color: currentIndex === 0 ? colors.textTertiary : colors.text },
+                    ]}
+                  >
+                    ‹ {t("learn.prev")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
-                    styles.navBtnText,
-                    { color: currentIndex === 0 ? colors.textTertiary : colors.text },
+                    styles.navBtn,
+                    { backgroundColor: colors.backgroundSecondary },
+                    currentIndex === total - 1 && styles.navBtnDisabled,
                   ]}
+                  onPress={goNext}
+                  disabled={currentIndex === total - 1}
+                  activeOpacity={0.7}
                 >
-                  ‹ {t("learn.prev")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.navBtn,
-                  { backgroundColor: colors.backgroundSecondary },
-                  currentIndex === total - 1 && styles.navBtnDisabled,
-                ]}
-                onPress={goNext}
-                disabled={currentIndex === total - 1}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.navBtnText,
-                    { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
-                  ]}
-                >
-                  {t("learn.next")} ›
-                </Text>
-              </TouchableOpacity>
-            </View>
+                  <GradientView
+                    colors={["transparent", "rgba(236, 72, 153, 0.12)", "transparent"]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+                  />
+                  <Text
+                    style={[
+                      styles.navBtnText,
+                      { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
+                    ]}
+                  >
+                    {t("learn.next")} ›
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
-            <MotivationBar
-              remaining={total - currentIndex - 1}
-              learnedCount={learnedList.length}
-              colors={colors}
-              t={t}
-            />
-          </>
-        ))}
-
-      {/* ── Öğrenildi sekmesi: FlatList ────────────────────────────────────── */}
-      {activeTab === "learned" &&
-        (learnedList.length === 0 ? (
-          <EmptyState tab="learned" colors={colors} t={t} />
-        ) : (
-          <FlatList
-            data={learnedList}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.learnedListContent}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <LearnedCard
-                sentence={item}
-                onForgot={() => handleForgotItem(item)}
+              <MotivationBar
+                remaining={total - currentIndex - 1}
+                learnedCount={learnedList.length}
                 colors={colors}
                 t={t}
               />
-            )}
-          />
-        ))}
-    </SafeAreaView>
+            </>
+          ))}
+
+        {/* ── Öğrenildi sekmesi: FlatList ────────────────────────────────────── */}
+        {activeTab === "learned" &&
+          (learnedList.length === 0 ? (
+            <EmptyState tab="learned" colors={colors} t={t} />
+          ) : (
+            <FlatList
+              data={learnedList}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.learnedListContent}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <LearnedCard
+                  sentence={item}
+                  onForgot={() => handleForgotItem(item)}
+                  colors={colors}
+                  t={t}
+                />
+              )}
+            />
+          ))}
+      </SafeAreaView>
     </View>
   );
 }
@@ -531,9 +520,7 @@ function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: strin
         {tab === "learning" ? t("learn.no_sentences") : t("learn.learned_title")}
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-        {tab === "learning"
-          ? t("learn.start_hint")
-          : t("learn.no_learned_sentences")}
+        {tab === "learning" ? t("learn.start_hint") : t("learn.no_learned_sentences")}
       </Text>
     </View>
   );
@@ -560,7 +547,18 @@ function MotivationBar({
   if (!message) return null;
 
   return (
-    <View style={[styles.motivationBar, { backgroundColor: colors.backgroundSecondary }]}>
+    <View
+      style={[
+        styles.motivationBar,
+        { backgroundColor: colors.backgroundSecondary, overflow: "hidden" },
+      ]}
+    >
+      <GradientView
+        colors={["transparent", "rgba(236, 72, 153, 0.12)", "transparent"]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+      />
       <Text style={[styles.motivationText, { color: colors.textSecondary }]}>{message}</Text>
     </View>
   );
@@ -648,6 +646,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   navBtnDisabled: { opacity: 0.4 },
   navBtnText: { fontSize: 15, fontWeight: "600" },

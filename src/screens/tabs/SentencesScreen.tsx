@@ -20,7 +20,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { parseKeywords, getPillColor, splitWords } from "@/utils/keywords";
+import { KeywordText } from "@/components/KeywordText";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -40,37 +40,6 @@ const STATUS_BAR_COLOR: Record<SentenceStatus, string> = {
   learned: "#2ECC71",
 };
 
-function KeywordLine({
-  text,
-  baseColor,
-  fontSize,
-  colorSeed,
-}: {
-  text: string;
-  baseColor: string;
-  fontSize: number;
-  colorSeed: string;
-}) {
-  const { isDark } = useTheme();
-  const segments = parseKeywords(text);
-  return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
-      {segments.flatMap((seg, i) => {
-        if (seg.isPill && seg.pillIndex !== null) {
-          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return [(
-            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
-              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-            </View>
-          )];
-        }
-        return splitWords(seg.text).map((word, j) => (
-          <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize }}>{word}</Text>
-        ));
-      })}
-    </View>
-  );
-}
 
 interface SentenceItemProps {
   sentence: Sentence & { effectiveStatus: SentenceStatus };
@@ -121,14 +90,14 @@ function SentenceItem({
           )}
         </View>
 
-        <KeywordLine
+        <KeywordText
           text={sentence.source_text}
           baseColor={colors.text}
           fontSize={15}
           colorSeed={String(sentence.id)}
         />
         <View style={itemStyles.targetRow}>
-          <KeywordLine
+          <KeywordText
             text={sentence.target_text}
             baseColor={colors.textSecondary}
             fontSize={13}
@@ -299,7 +268,7 @@ const itemStyles = StyleSheet.create({
     elevation: 3,
     marginBottom: 16,
   },
-  statusBar: { height: 6, width: "100%" },
+  statusBar: { height: 0, width: "100%" },
   body: { padding: 6, paddingHorizontal: 12 },
   iconRow: {
     flexDirection: "row",

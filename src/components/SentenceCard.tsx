@@ -4,9 +4,10 @@ import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
-import { parseKeywords, getPillColor, splitWords, stripMarkers } from "@/utils/keywords";
+import { stripMarkers } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
 import { GradientView } from "@/components/GradientView";
+import { KeywordText } from "@/components/KeywordText";
 import { Sentence, SupportedLanguage } from "@/types";
 
 // Status gradient colors
@@ -23,55 +24,6 @@ const LANG_CODE: Record<SupportedLanguage, string> = {
   de: "de-DE",
 };
 
-function KeywordText({
-  text,
-  baseColor,
-  fontSize,
-  lineHeight,
-  fontWeight,
-  colorSeed,
-}: {
-  text: string;
-  baseColor: string;
-  fontSize: number;
-  lineHeight: number;
-  fontWeight?: "400" | "500" | "600";
-  colorSeed: string;
-}) {
-  const { isDark } = useTheme();
-  const segments = parseKeywords(text);
-  return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
-      {segments.flatMap((seg, i) => {
-        if (seg.isPill && seg.pillIndex !== null) {
-          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return [
-            <View
-              key={i}
-              style={{
-                backgroundColor: color.bg,
-                borderRadius: 6,
-                paddingHorizontal: 6,
-                paddingVertical: 2,
-                marginRight: 1,
-              }}
-            >
-              <Text style={{ color: color.text, fontSize, fontWeight: "700" }}>{seg.text}</Text>
-            </View>,
-          ];
-        }
-        return splitWords(seg.text).map((word, j) => (
-          <Text
-            key={`${i}-${j}`}
-            style={{ color: baseColor, fontSize, lineHeight, fontWeight: fontWeight ?? "400" }}
-          >
-            {word}
-          </Text>
-        ));
-      })}
-    </View>
-  );
-}
 
 export interface SentenceCardProps {
   sentence: Sentence;
@@ -154,6 +106,13 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
 
   return (
     <View style={[styles.card, { backgroundColor: colors.cardBackground }]}>
+      {/* subtle pink center glow */}
+      <GradientView
+        colors={["transparent", "rgba(236, 72, 153, 0.08)", "transparent"]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+      />
       {/* 8px gradient status bar */}
       <GradientView
         colors={barGradient}

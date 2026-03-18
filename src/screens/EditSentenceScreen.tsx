@@ -19,31 +19,9 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { parseKeywords, getPillColor, splitWords } from "@/utils/keywords";
+import { KeywordText } from "@/components/KeywordText";
 import { MainStackParamList } from "@/types";
 
-function KeywordPreview({ text, baseColor, colorSeed }: { text: string; baseColor: string; colorSeed: string }) {
-  const { isDark } = useTheme();
-  if (!text) return null;
-  const segments = parseKeywords(text);
-  return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
-      {segments.flatMap((seg, i) => {
-        if (seg.isPill && seg.pillIndex !== null) {
-          const color = getPillColor(seg.pillIndex, isDark, colorSeed);
-          return [(
-            <View key={i} style={{ backgroundColor: color.bg, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginRight: 1 }}>
-              <Text style={{ color: color.text, fontSize: 14, fontWeight: "700" }}>{seg.text}</Text>
-            </View>
-          )];
-        }
-        return splitWords(seg.text).map((word, j) => (
-          <Text key={`${i}-${j}`} style={{ color: baseColor, fontSize: 14, lineHeight: 20 }}>{word}</Text>
-        ));
-      })}
-    </View>
-  );
-}
 
 export default function EditSentenceScreen() {
   const { t } = useTranslation();
@@ -174,7 +152,7 @@ export default function EditSentenceScreen() {
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
                   {t("add_sentence.preview")}
                 </Text>
-                <KeywordPreview text={sourceText} baseColor={colors.text} colorSeed={String(sentence.id)} />
+                <KeywordText text={sourceText} baseColor={colors.text} fontSize={14} lineHeight={20} colorSeed={String(sentence.id)} />
               </View>
             ) : null}
           </View>
@@ -205,7 +183,7 @@ export default function EditSentenceScreen() {
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>
                   {t("add_sentence.preview")}
                 </Text>
-                <KeywordPreview text={targetText} baseColor={colors.textSecondary} colorSeed={String(sentence.id)} />
+                <KeywordText text={targetText} baseColor={colors.textSecondary} fontSize={14} lineHeight={20} colorSeed={String(sentence.id)} />
               </View>
             ) : null}
           </View>
