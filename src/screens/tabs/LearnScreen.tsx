@@ -19,6 +19,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
+import { LinearGradient } from "expo-linear-gradient"; // bg diagonal gradient için
 import { parseKeywords, getPillColor, splitWords, textToColorIndex } from "@/utils/keywords";
 import { Sentence } from "@/types";
 
@@ -300,11 +301,11 @@ export default function LearnScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <GradientView
+      <LinearGradient
         colors={colors.backgroundGradient}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.55 }}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.7 }}
       />
     <SafeAreaView
       style={{ flex: 1 }}
