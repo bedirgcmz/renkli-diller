@@ -17,7 +17,6 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import PremiumGate from "@/components/PremiumGate";
 import { KeywordText } from "@/components/KeywordText";
 import { Category, MainStackParamList } from "@/types";
 
@@ -173,47 +172,43 @@ export default function CategoryBrowserScreen() {
         renderItem={({ item }) => {
           const isLocked = !item.is_free && !isPremium;
 
-          const cardContent = (
-            <View style={[styles.categoryCard, { backgroundColor: colors.cardBackground }]}>
-              <Text style={styles.categoryIcon}>{item.icon}</Text>
-              <Text
-                style={[styles.categoryName, { color: isLocked ? colors.textTertiary : colors.text }]}
-                numberOfLines={2}
-              >
-                {getCategoryName(item)}
-              </Text>
-              {isLocked ? (
-                <View style={[styles.lockBadge, { backgroundColor: colors.premiumAccent + "18" }]}>
-                  <Ionicons name="lock-closed" size={10} color={colors.premiumAccent} />
-                  <Text style={[styles.lockBadgeText, { color: colors.premiumAccent }]}>
-                    {t("common.premium_badge")}
-                  </Text>
-                </View>
-              ) : (
-                <View style={[styles.freeBadge, { backgroundColor: colors.success + "18" }]}>
-                  <Text style={[styles.freeBadgeText, { color: colors.success }]}>
-                    {t("common.free")}
-                  </Text>
-                </View>
-              )}
-            </View>
-          );
-
-          if (isLocked) {
-            return (
-              <PremiumGate onUpgradePress={() => navigation.navigate("Paywall")}>
-                {cardContent}
-              </PremiumGate>
-            );
-          }
-
           return (
             <TouchableOpacity
               style={styles.categoryCardWrapper}
               onPress={() => handleCategoryPress(item)}
               activeOpacity={0.8}
             >
-              {cardContent}
+              <View
+                style={[
+                  styles.categoryCard,
+                  { backgroundColor: colors.cardBackground },
+                  isLocked && { borderWidth: 1, borderColor: colors.premiumAccent + "40" },
+                ]}
+              >
+                <Text style={[styles.categoryIcon, isLocked && styles.categoryIconLocked]}>
+                  {item.icon}
+                </Text>
+                <Text
+                  style={[styles.categoryName, { color: colors.text }]}
+                  numberOfLines={2}
+                >
+                  {getCategoryName(item)}
+                </Text>
+                {isLocked ? (
+                  <View style={[styles.lockBadge, { backgroundColor: colors.premiumAccent + "18" }]}>
+                    <Ionicons name="lock-closed" size={10} color={colors.premiumAccent} />
+                    <Text style={[styles.lockBadgeText, { color: colors.premiumAccent }]}>
+                      {t("common.premium_badge")}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={[styles.freeBadge, { backgroundColor: colors.success + "18" }]}>
+                    <Text style={[styles.freeBadgeText, { color: colors.success }]}>
+                      {t("common.free")}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </TouchableOpacity>
           );
         }}
@@ -250,6 +245,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   categoryIcon: { fontSize: 32 },
+  categoryIconLocked: { opacity: 0.5 },
   categoryName: {
     fontSize: 13,
     fontWeight: "600",
