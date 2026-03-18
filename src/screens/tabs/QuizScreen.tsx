@@ -205,12 +205,6 @@ export default function QuizScreen() {
   const mcQ = currentQ?.type === "multiple_choice" ? (currentQ as MCQuestion) : null;
   // İpucu: cevabın ilk 3 kelimesi
   const hint = fbQ ? fbQ.answer.split(" ").slice(0, 3).join(" ") + "…" : "";
-  // Yön etiketi: "Türkçe → İsveççe" gibi
-  const directionLabel = fbQ
-    ? fbQ.direction === "source_to_target"
-      ? `${t(`languages.${uiLanguage}`)} → ${t(`languages.${targetLanguage}`)}`
-      : `${t(`languages.${targetLanguage}`)} → ${t(`languages.${uiLanguage}`)}`
-    : "";
 
   // Not enough sentences
   if (!initialized) {
@@ -337,9 +331,19 @@ export default function QuizScreen() {
 
               {/* FB: yön etiketi */}
               {fbQ && (
-                <Text style={[styles.directionLabel, { color: colors.primary }]}>
-                  {directionLabel}
-                </Text>
+                <View style={[styles.directionBadge, { backgroundColor: colors.primary + "14" }]}>
+                  <Text style={[styles.directionLang, { color: colors.textSecondary }]}>
+                    {fbQ.direction === "source_to_target"
+                      ? t(`languages.${uiLanguage}`)
+                      : t(`languages.${targetLanguage}`)}
+                  </Text>
+                  <Ionicons name="arrow-forward" size={12} color={colors.primary} />
+                  <Text style={[styles.directionLang, styles.directionLangTarget, { color: colors.primary }]}>
+                    {fbQ.direction === "source_to_target"
+                      ? t(`languages.${targetLanguage}`)
+                      : t(`languages.${uiLanguage}`)}
+                  </Text>
+                </View>
               )}
 
               {/* Soru metni: MC → hedef dil (renkli), FB → düz metin */}
@@ -633,11 +637,22 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   resultText: { fontSize: 14, fontWeight: "600", lineHeight: 20 },
-  directionLabel: {
+  directionBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  directionLang: {
     fontSize: 12,
+    fontWeight: "500",
+  },
+  directionLangTarget: {
     fontWeight: "700",
-    letterSpacing: 0.5,
-    marginBottom: 10,
   },
   fbQuestionText: {
     fontSize: 18,
