@@ -2,7 +2,7 @@
   "expo": {
     "name": "Renkli Diller",
     "slug": "renkli-diller",
-    "scheme": "renklidiller",
+    "scheme": "renkli-diller",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
