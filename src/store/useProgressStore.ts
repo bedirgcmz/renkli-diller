@@ -128,6 +128,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
   // Öğrenildi: learning → learned
   markAsLearned: async (sentenceId: string) => {
+    // Optimistic update so UI responds immediately
     set((state) => ({
       progressMap: { ...state.progressMap, [sentenceId]: "learned" },
     }));
@@ -147,6 +148,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         },
         { onConflict: "user_id,sentence_id" }
       );
+
+      // Refresh progress array + stats (streak, today's goal) after persistence
+      await get().loadProgress();
     } catch {
       console.error("markAsLearned failed");
     }
@@ -184,65 +188,70 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const now = new Date();
       const today = now.toISOString().split("T")[0];
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-      const { data: sessions } = await supabase
-        .from("study_sessions")
-        .select("*")
+      // Streak & learned counts come from user_progress (the table actually written to).
+      // study_sessions is a legacy table that is never written to in the current flow.
+      const { data: learnedRows } = await supabase
+        .from("user_progress")
+        .select("learned_at")
+        .eq("user_id", user.id)
+        .eq("state", "learned")
+        .not("learned_at", "is", null);
+
+      const { data: allProgressRows } = await supabase
+        .from("user_progress")
+        .select("state")
         .eq("user_id", user.id);
 
       const { data: quizResults } = await supabase
         .from("quiz_results")
-        .select("*")
+        .select("correct")
         .eq("user_id", user.id);
 
-      const totalSentencesStudied = sessions?.length || 0;
-      const totalSentencesLearned = sessions?.filter((s) => s.completed).length || 0;
-
-      const studyTimeToday =
-        sessions
-          ?.filter((s) => s.created_at.startsWith(today))
-          .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
-
-      const studyTimeThisWeek =
-        sessions
-          ?.filter((s) => s.created_at >= weekAgo)
-          .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
-
-      const studyTimeThisMonth =
-        sessions
-          ?.filter((s) => s.created_at >= monthAgo)
-          .reduce((total, s) => total + (s.duration_minutes || 0), 0) || 0;
+      const totalSentencesStudied = allProgressRows?.length || 0;
+      const totalSentencesLearned =
+        allProgressRows?.filter((r) => r.state === "learned").length || 0;
 
       const totalQuizQuestions = quizResults?.length || 0;
       const correctQuizAnswers = quizResults?.filter((q) => q.correct).length || 0;
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
-      const studyDates = [...new Set(sessions?.map((s) => s.created_at.split("T")[0]) || [])]
-        .sort()
-        .reverse();
+      // Distinct calendar days on which at least one sentence was marked learned,
+      // sorted newest-first — used for streak calculation.
+      const learnedDays = [
+        ...new Set((learnedRows || []).map((r) => r.learned_at!.split("T")[0])),
+      ].sort().reverse();
 
       let currentStreak = 0;
       let longestStreak = 0;
       let tempStreak = 0;
+      const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-      for (let i = 0; i < studyDates.length; i++) {
-        const date = new Date(studyDates[i]);
-        const prevDate = i > 0 ? new Date(studyDates[i - 1]) : null;
-
-        if (!prevDate || date.getTime() - prevDate.getTime() === 24 * 60 * 60 * 1000) {
-          tempStreak++;
-          if (i === 0) currentStreak = tempStreak;
-        } else {
-          longestStreak = Math.max(longestStreak, tempStreak);
+      for (let i = 0; i < learnedDays.length; i++) {
+        if (i === 0) {
+          // Streak is only "active" if user learned something today or yesterday
+          const dayDiff =
+            (new Date(today).getTime() - new Date(learnedDays[0]).getTime()) / MS_PER_DAY;
+          if (dayDiff > 1) break; // streak already broken before we start
           tempStreak = 1;
+          currentStreak = 1;
+        } else {
+          const diff =
+            (new Date(learnedDays[i - 1]).getTime() - new Date(learnedDays[i]).getTime()) /
+            MS_PER_DAY;
+          if (diff === 1) {
+            tempStreak++;
+            currentStreak = tempStreak;
+          } else {
+            longestStreak = Math.max(longestStreak, tempStreak);
+            tempStreak = 1;
+          }
         }
       }
       longestStreak = Math.max(longestStreak, tempStreak);
 
-      const lastStudyDate = studyDates.length > 0 ? studyDates[0] : null;
+      const lastStudyDate = learnedDays.length > 0 ? learnedDays[0] : null;
 
       set({
         stats: {
@@ -253,9 +262,9 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           quizAccuracy,
           totalQuizQuestions,
           correctQuizAnswers,
-          studyTimeToday,
-          studyTimeThisWeek,
-          studyTimeThisMonth,
+          studyTimeToday: 0,
+          studyTimeThisWeek: 0,
+          studyTimeThisMonth: 0,
           lastStudyDate,
         },
       });
