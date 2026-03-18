@@ -129,7 +129,12 @@
     "export_pdf": "Ladda ner PDF",
     "sign_out": "Logga ut",
     "confirm_signout": "Är du säker på att du vill logga ut?",
-    "learning": "Lärande"
+    "learning": "Lärande",
+    "activity": "Aktivitet",
+    "week": "Vecka",
+    "month": "Månad",
+    "sentences_in_period": "meningar inlärda",
+    "no_activity": "Ingen aktivitet under denna period"
   },
   "settings": {
     "title": "Inställningar",

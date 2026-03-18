@@ -20,6 +20,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { MainStackParamList } from "@/types";
 import PDFExportModal from "@/components/PDFExportModal";
+import ActivityChart from "@/components/ActivityChart";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -199,6 +200,9 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
+
+        {/* Activity chart */}
+        <ActivityChart progress={progress} />
 
         {/* Menu */}
         <View style={[styles.menuCard, { backgroundColor: colors.cardBackground }]}>

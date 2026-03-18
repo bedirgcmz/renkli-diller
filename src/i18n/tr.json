@@ -129,7 +129,12 @@
     "export_pdf": "PDF İndir",
     "sign_out": "Çıkış Yap",
     "confirm_signout": "Çıkış yapmak istediğinize emin misiniz?",
-    "learning": "Öğreniyor"
+    "learning": "Öğreniyor",
+    "activity": "Aktivite",
+    "week": "Hafta",
+    "month": "Ay",
+    "sentences_in_period": "cümle öğrenildi",
+    "no_activity": "Bu dönemde henüz aktivite yok"
   },
   "settings": {
     "title": "Ayarlar",

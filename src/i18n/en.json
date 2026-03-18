@@ -129,7 +129,12 @@
     "export_pdf": "Download PDF",
     "sign_out": "Sign Out",
     "confirm_signout": "Are you sure you want to sign out?",
-    "learning": "Learning"
+    "learning": "Learning",
+    "activity": "Activity",
+    "week": "Week",
+    "month": "Month",
+    "sentences_in_period": "sentences learned",
+    "no_activity": "No activity in this period yet"
   },
   "settings": {
     "title": "Settings",
