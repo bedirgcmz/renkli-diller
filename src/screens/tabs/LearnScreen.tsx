@@ -301,11 +301,19 @@ export default function LearnScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Sağ üst köşe ambient ışık — tam ekrana yayılmaz */}
       <LinearGradient
-        colors={colors.backgroundGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.7 }}
+        colors={[colors.backgroundGradient[1], "transparent"]}
+        start={{ x: 1, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: "65%",
+          height: "38%",
+          opacity: 0.65,
+        }}
       />
     <SafeAreaView
       style={{ flex: 1 }}
