@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
@@ -17,7 +19,7 @@ import {
   DELAY_PER_CHAR_MS,
   POST_READ_DELAY_MS,
 } from "@/utils/constants";
-import { SupportedLanguage } from "@/types";
+import { MainStackParamList, SupportedLanguage } from "@/types";
 
 type Phase = "idle" | "source" | "waiting" | "target" | "post" | "done";
 type Speed = 0.5 | 1 | 1.5 | 2;
@@ -35,6 +37,7 @@ const LANG_CODE: Record<SupportedLanguage, string> = {
 export default function AutoModeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage, autoModeSpeed } = useSettingsStore();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress } = useProgressStore();
@@ -258,6 +261,22 @@ export default function AutoModeScreen() {
           </Text>
         )}
       </View>
+
+      {/* Free session limit banner */}
+      {!isPremium && allLearning.length > FREE_AUTO_MODE_LIMIT && (
+        <View style={[styles.limitBanner, { backgroundColor: colors.warning + "22", borderColor: colors.warning }]}>
+          <Text style={[styles.limitBannerText, { color: colors.warning }]}>
+            {t("auto_mode.session_limit")} ({FREE_AUTO_MODE_LIMIT}/{allLearning.length})
+          </Text>
+          <TouchableOpacity
+            style={[styles.limitBannerBtn, { backgroundColor: colors.warning }]}
+            onPress={() => navigation.navigate("Paywall")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.limitBannerBtnText}>{t("premium.title")} →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Main card */}
       <View style={styles.cardArea}>
@@ -542,4 +561,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 10,
   },
+  limitBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  limitBannerText: { fontSize: 12, flex: 1, lineHeight: 17 },
+  limitBannerBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 7,
+  },
+  limitBannerBtnText: { color: "#fff", fontSize: 11, fontWeight: "700" },
 });

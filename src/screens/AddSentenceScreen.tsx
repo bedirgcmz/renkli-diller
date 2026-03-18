@@ -58,7 +58,10 @@ export default function AddSentenceScreen() {
       Alert.alert(
         t("add_sentence.limit_reached"),
         t("add_sentence.upgrade_to_add_more"),
-        [{ text: t("common.ok") }],
+        [
+          { text: t("common.cancel"), style: "cancel" },
+          { text: t("premium.title"), onPress: () => navigation.navigate("Paywall") },
+        ],
       );
       return;
     }

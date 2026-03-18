@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
@@ -19,7 +21,7 @@ import { usePremium } from "@/hooks/usePremium";
 import { stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
-import { Sentence } from "@/types";
+import { MainStackParamList, Sentence } from "@/types";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -100,6 +102,7 @@ function buildSession(
 export default function QuizScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
@@ -293,8 +296,15 @@ export default function QuizScreen() {
         {dailyLimitReached && (
           <View style={[styles.limitBanner, { backgroundColor: colors.warning + "22", borderColor: colors.warning }]}>
             <Text style={[styles.limitText, { color: colors.warning }]}>
-              {t("quiz.daily_limit_reached")} — {t("quiz.upgrade_for_unlimited")}
+              {t("quiz.daily_limit_reached")}
             </Text>
+            <TouchableOpacity
+              style={[styles.upgradeBannerBtn, { backgroundColor: colors.warning }]}
+              onPress={() => navigation.navigate("Paywall")}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.upgradeBannerBtnText}>{t("premium.title")} →</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -577,8 +587,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
   },
-  limitText: { fontSize: 13, lineHeight: 18 },
+  limitText: { fontSize: 13, lineHeight: 18, flex: 1 },
+  upgradeBannerBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  upgradeBannerBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   questionCard: {
     borderRadius: 16,
     padding: 20,
