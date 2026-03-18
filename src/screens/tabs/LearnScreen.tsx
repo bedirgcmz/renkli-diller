@@ -150,7 +150,7 @@ const learnedStyles = StyleSheet.create({
 
 export default function LearnScreen() {
   const { t } = useTranslation();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const {
     sentences: userSentences,
@@ -298,15 +298,11 @@ export default function LearnScreen() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const bgGradient: [string, string] = isDark
-    ? ["#09091E", "#1C0A3A"]
-    : ["#F5F1FF", "#E8F4FF"];
-
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <GradientView
-        colors={bgGradient}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+        colors={colors.backgroundGradient}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.55 }}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />

@@ -7,6 +7,7 @@ type ThemeMode = "light" | "dark";
 interface ThemeColors {
   // Background colors
   background: string;
+  backgroundGradient: [string, string];
   backgroundSecondary: string;
   backgroundTertiary: string;
 
@@ -49,6 +50,7 @@ interface ThemeColors {
 
 const lightTheme: ThemeColors = {
   background: "#FAF8F4",
+  backgroundGradient: ["#FFF6E9", "#EAF4FF"],
   backgroundSecondary: "#ECE7DF",
   backgroundTertiary: "#E6E0D7",
 
@@ -85,6 +87,7 @@ const lightTheme: ThemeColors = {
 
 const darkTheme: ThemeColors = {
   background: "#0B1020",
+  backgroundGradient: ["#121A33", "#0F2740"],
   backgroundSecondary: "#1D2642",
   backgroundTertiary: "#2A3558",
 
