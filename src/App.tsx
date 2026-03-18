@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -10,7 +10,14 @@ import { I18nProvider } from "@/providers/I18nProvider";
 // Navigation
 import AppNavigator from "@/navigation/AppNavigator";
 
+// Services
+import { initRevenueCat } from "@/services/revenueCat";
+
 export default function App() {
+  useEffect(() => {
+    initRevenueCat().catch(console.error);
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

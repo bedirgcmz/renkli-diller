@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
 
 interface User {
   id: string;
@@ -59,12 +60,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .eq("id", data.user.id)
           .single();
 
+        // RevenueCat login + premium check
+        await logInUser(data.user.id).catch(console.error);
+        const rcPremium = await isPremiumActive().catch(() => false);
+
         const user: User = {
           id: data.user.id,
           email: data.user.email!,
           full_name: profile?.full_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: profile?.is_premium || false,
+          is_premium: profile?.is_premium || rcPremium,
           created_at: data.user.created_at,
         };
 
@@ -139,6 +144,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await supabase.auth.signOut();
       await AsyncStorage.removeItem("supabase_session");
+      await logOutUser().catch(console.error);
       set({
         user: null,
         session: null,
@@ -213,12 +219,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .eq("id", user.id)
             .single();
 
+          // RevenueCat login + premium check
+          await logInUser(user.id).catch(console.error);
+          const rcPremium = await isPremiumActive().catch(() => false);
+
           const userData: User = {
             id: user.id,
             email: user.email!,
             full_name: profile?.full_name || "",
             avatar_url: profile?.avatar_url || "",
-            is_premium: profile?.is_premium || false,
+            is_premium: profile?.is_premium || rcPremium,
             created_at: user.created_at,
           };
 

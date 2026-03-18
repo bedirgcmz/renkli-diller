@@ -1,12 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { isPremiumActive } from "@/services/revenueCat";
 
 export function usePremium() {
-  const [isPremium, setIsPremium] = useState(false);
+  const user = useAuthStore((s) => s.user);
+  const updateProfile = useAuthStore((s) => s.updateProfile);
+
+  // useAuthStore'daki is_premium'u temel kaynak olarak kullan,
+  // ek olarak RevenueCat'ten anlık durum kontrolü yap.
+  const [isPremium, setIsPremium] = useState(user?.is_premium ?? false);
+  const [loading, setLoading] = useState(false);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const active = await isPremiumActive();
+      setIsPremium(active);
+
+      // Supabase profili ile senkron tut
+      if (user && active !== user.is_premium) {
+        await updateProfile({ is_premium: active });
+      }
+    } catch {
+      // RevenueCat erişilemezse mevcut store değerini kullan
+      setIsPremium(user?.is_premium ?? false);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, updateProfile]);
 
   useEffect(() => {
-    // Placeholder: connect to RevenueCat / local store
-    setIsPremium(false);
-  }, []);
+    if (user) {
+      refresh();
+    } else {
+      setIsPremium(false);
+    }
+  }, [user?.id]); // user değişince yeniden kontrol et
 
-  return { isPremium };
+  return { isPremium, loading, refresh };
 }

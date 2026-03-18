@@ -32,7 +32,9 @@ export const FREE_USER_SENTENCE_LIMIT = 30;
 export const FREE_QUIZ_DAILY_LIMIT = 5;
 export const FREE_AUTO_MODE_LIMIT = 10;
 export const FREE_CATEGORY_COUNT = 2;
-export const PREMIUM_PRICE = '$14.99';
+export const PREMIUM_PRICE_MONTHLY = '$2.99';
+export const PREMIUM_PRICE_ANNUAL = '$16.99';
+export const PREMIUM_PRICE_LIFETIME = '$24.99';
 
 export const MIN_DELAY_MS = 2000;
 export const DELAY_PER_CHAR_MS = 100;
