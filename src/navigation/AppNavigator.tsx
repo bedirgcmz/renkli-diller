@@ -43,7 +43,7 @@ export default function AppNavigator() {
           // User is not authenticated - show auth flow
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="Auth" component={AuthNavigator} />
+            <Stack.Screen name="AuthFlow" component={AuthNavigator} />
           </>
         )}
       </Stack.Navigator>

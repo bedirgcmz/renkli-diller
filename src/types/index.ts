@@ -87,7 +87,7 @@ export interface UserSettings {
 // Navigation types
 export type RootStackParamList = {
   Welcome: undefined;
-  Auth: undefined;
+  AuthFlow: undefined;
   Main: undefined;
 };
 

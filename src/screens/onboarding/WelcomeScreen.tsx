@@ -132,7 +132,7 @@ export default function WelcomeScreen() {
       );
       return;
     }
-    navigation.navigate("Auth");
+    navigation.navigate("AuthFlow");
   };
 
   return (
