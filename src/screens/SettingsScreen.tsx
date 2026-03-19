@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Switch,
   Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -72,39 +74,43 @@ function LangPicker({
   const selected = LANGUAGE_OPTIONS.find((o) => o.value === value);
 
   return (
-    <View>
+    <>
       <TouchableOpacity
         style={[sStyles.pickerBtn, { borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
-        onPress={() => setOpen((o) => !o)}
+        onPress={() => setOpen(true)}
         activeOpacity={0.8}
       >
         <Text style={[sStyles.pickerBtnText, { color: colors.text }]}>
           {selected?.flag} {selected?.label}
         </Text>
-        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={14} color={colors.textSecondary} />
+        <Ionicons name="chevron-down" size={14} color={colors.textSecondary} />
       </TouchableOpacity>
-      {open && (
-        <View style={[sStyles.pickerDropdown, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
-          {LANGUAGE_OPTIONS.map((opt) => (
-            <TouchableOpacity
-              key={opt.value}
-              style={[
-                sStyles.pickerOption,
-                opt.value === value && { backgroundColor: colors.primary + "15" },
-              ]}
-              onPress={() => { onChange(opt.value); setOpen(false); }}
-            >
-              <Text style={[sStyles.pickerOptionText, { color: opt.value === value ? colors.primary : colors.text }]}>
-                {opt.flag} {opt.label}
-              </Text>
-              {opt.value === value && (
-                <Ionicons name="checkmark" size={14} color={colors.primary} />
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-    </View>
+
+      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable style={sStyles.modalBackdrop} onPress={() => setOpen(false)}>
+          <Pressable style={[sStyles.modalSheet, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={[
+                  sStyles.pickerOption,
+                  opt.value === value && { backgroundColor: colors.primary + "15" },
+                ]}
+                onPress={() => { onChange(opt.value); setOpen(false); }}
+                activeOpacity={0.7}
+              >
+                <Text style={[sStyles.pickerOptionText, { color: opt.value === value ? colors.primary : colors.text }]}>
+                  {opt.flag} {opt.label}
+                </Text>
+                {opt.value === value && (
+                  <Ionicons name="checkmark" size={16} color={colors.primary} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
   );
 }
 
@@ -378,19 +384,22 @@ const sStyles = StyleSheet.create({
     paddingVertical: 6,
   },
   pickerBtnText: { fontSize: 13 },
-  pickerDropdown: {
-    position: "absolute",
-    right: 0,
-    top: 38,
-    minWidth: 150,
-    borderWidth: 1,
-    borderRadius: 10,
-    zIndex: 100,
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 32,
+  },
+  modalSheet: {
+    width: "100%",
+    borderRadius: 14,
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 12,
   },
   pickerOption: {
     flexDirection: "row",
