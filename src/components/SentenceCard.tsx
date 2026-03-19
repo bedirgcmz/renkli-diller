@@ -96,7 +96,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
     },
   }[state];
 
-  // ── Theme-aware tokens fefaff ────────────────────────────────────────────
+  // ── Theme-aware tokens  ────────────────────────────────────────────
   const cardBg: [string, string] = isDark
     ? ["#1E2130", "#181C28"] // v1 same — works well
     : ["#F4F1EB", "#fefaff"]; // ❌ was pure white → ✅ subtle cool-white
