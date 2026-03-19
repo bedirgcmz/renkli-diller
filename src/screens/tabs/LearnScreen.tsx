@@ -69,27 +69,26 @@ const LearnedCard = React.memo(function LearnedCard({
             onPress={onForgot}
             style={({ pressed }) => ({
               borderRadius: 8,
-              overflow: "hidden",
               transform: [{ scale: pressed ? 0.95 : 1 }],
-              opacity: pressed ? 0.85 : 1,
               marginLeft: "auto",
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              gap: 4,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.07,
+              shadowRadius: 3,
+              elevation: 2,
             })}
           >
-            <GradientView
-              colors={["#E85D5D", "#DC2626"]}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: 8,
-                gap: 4,
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
-                {t("learn.mark_unlearned")}
-              </Text>
-            </GradientView>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "600" }}>
+              {t("learn.mark_unlearned")}
+            </Text>
           </Pressable>
         </View>
       </View>
