@@ -266,6 +266,8 @@
     "quiz_start": "Kelimelerini Test Et",
     "quiz_finish": "Bitir",
     "quiz_next": "Sonraki",
-    "quiz_premium_only": "Premium özellik"
+    "quiz_premium_only": "Premium özellik",
+    "share": "Paylaş",
+    "share_text": "Bugün \"{title}\" metnini çalıştım - Renkli Diller ile dil öğren!"
   }
 }

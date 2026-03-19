@@ -266,6 +266,8 @@
     "quiz_start": "Probar tus palabras",
     "quiz_finish": "Terminar",
     "quiz_next": "Siguiente",
-    "quiz_premium_only": "Función premium"
+    "quiz_premium_only": "Función premium",
+    "share": "Compartir",
+    "share_text": "¡Estudié el texto \"{title}\" hoy — aprende idiomas con Renkli Diller!"
   }
 }

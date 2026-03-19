@@ -8,6 +8,7 @@ import {
   Modal,
   Pressable,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -543,6 +544,13 @@ export default function ReadingScreen() {
     [speaking, currentText],
   );
 
+  const handleShare = useCallback(async () => {
+    if (!currentText) return;
+    const textTitle = getField<string>(currentText, `title_${uiLanguage}`) ?? "";
+    const message = t("reading.share_text").replace("{title}", textTitle);
+    await Share.share({ message });
+  }, [currentText, uiLanguage, t]);
+
   const handleMarkLearned = async () => {
     if (!userId || !currentText) return;
     await markAsLearned(userId, currentText.id);
@@ -628,6 +636,15 @@ export default function ReadingScreen() {
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("reading.title")}</Text>
         <View style={styles.headerActions}>
+          {/* Share */}
+          <TouchableOpacity
+            style={[styles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
+            onPress={handleShare}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+
           {/* Keyword preview */}
           {keywords.length > 0 && (
             <TouchableOpacity

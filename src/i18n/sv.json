@@ -266,6 +266,8 @@
     "quiz_start": "Testa dina ord",
     "quiz_finish": "Avsluta",
     "quiz_next": "Nästa",
-    "quiz_premium_only": "Premiumfunktion"
+    "quiz_premium_only": "Premiumfunktion",
+    "share": "Dela",
+    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Renkli Diller!"
   }
 }

@@ -266,6 +266,8 @@
     "quiz_start": "Wörter testen",
     "quiz_finish": "Beenden",
     "quiz_next": "Weiter",
-    "quiz_premium_only": "Premium-Funktion"
+    "quiz_premium_only": "Premium-Funktion",
+    "share": "Teilen",
+    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Renkli Diller!"
   }
 }

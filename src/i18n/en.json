@@ -266,6 +266,8 @@
     "quiz_start": "Test Your Words",
     "quiz_finish": "Finish",
     "quiz_next": "Next",
-    "quiz_premium_only": "Premium feature"
+    "quiz_premium_only": "Premium feature",
+    "share": "Share",
+    "share_text": "I studied the text \"{title}\" today — learn languages with Renkli Diller!"
   }
 }
