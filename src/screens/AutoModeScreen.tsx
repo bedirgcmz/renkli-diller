@@ -343,9 +343,11 @@ export default function AutoModeScreen() {
                 />
               ) : (
                 <View style={[styles.hiddenTarget, { backgroundColor: colors.backgroundTertiary }]}>
-                  <Text style={[styles.hiddenTargetText, { color: colors.textTertiary }]}>
-                    {phase === "waiting" ? "···" : "—"}
-                  </Text>
+                  {phase === "waiting" ? (
+                    <Text style={[styles.hiddenTargetText, { color: colors.textTertiary }]}>···</Text>
+                  ) : (
+                    <Ionicons name="eye-off-outline" size={22} color={colors.textTertiary} />
+                  )}
                 </View>
               )}
             </View>
