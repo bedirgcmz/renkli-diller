@@ -182,21 +182,20 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
             onPress={actionConfig.handler}
             style={({ pressed }) => ({
               transform: [{ scale: pressed ? 0.95 : 1 }],
-              opacity: pressed ? 0.85 : 1,
               width: "80%",
             })}
           >
-            <GradientView
-              colors={actionConfig.gradient}
-              style={styles.actionBtn}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Ionicons name={actionConfig.icon} size={20} color="#fff" />
-              <Text numberOfLines={1} style={styles.actionBtnText}>
-                {actionConfig.label}
-              </Text>
-            </GradientView>
+            {({ pressed }) => (
+              <View style={[styles.actionBtn, {
+                backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
+                borderColor: colors.border,
+              }]}>
+                <Ionicons name={actionConfig.icon} size={20} color={colors.textSecondary} />
+                <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textSecondary }]}>
+                  {actionConfig.label}
+                </Text>
+              </View>
+            )}
           </Pressable>
         </View>
       </View>
@@ -265,14 +264,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 18,
     borderRadius: 8,
+    borderWidth: 1,
     gap: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
+    elevation: 2,
   },
   actionBtnText: {
-    color: "#fff",
-    fontWeight: "700",
+    fontWeight: "600",
     fontSize: 14,
   },
 });
