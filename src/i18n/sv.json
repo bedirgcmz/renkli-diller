@@ -233,5 +233,26 @@
     "es": "Spanska",
     "fr": "Franska",
     "pt": "Portugisiska"
+  },
+  "reading": {
+    "title": "Dagens Text",
+    "keywords_preview": "Nyckelord",
+    "mark_read": "Jag Läste Det",
+    "mark_learned": "Jag Lärde Mig",
+    "next_text": "Nästa",
+    "difficulty_beginner": "Nybörjare",
+    "difficulty_intermediate": "Mellannivå",
+    "difficulty_advanced": "Avancerad",
+    "min_read": "min läsning",
+    "no_more_texts": "Du har slutfört alla texter!",
+    "no_more_subtitle": "Nya texter läggs till snart.",
+    "category_daily_life": "Vardagsliv",
+    "category_travel": "Resor",
+    "category_work": "Arbete",
+    "loading": "Laddar...",
+    "keyword_in_source": "Källa",
+    "keyword_in_target": "Mål",
+    "listen_source": "Lyssna källa",
+    "listen_target": "Lyssna mål"
   }
 }

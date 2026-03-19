@@ -233,5 +233,26 @@
     "es": "Español",
     "fr": "Francés",
     "pt": "Portugués"
+  },
+  "reading": {
+    "title": "Texto del Día",
+    "keywords_preview": "Palabras Clave",
+    "mark_read": "Lo Leí",
+    "mark_learned": "Lo Aprendí",
+    "next_text": "Siguiente",
+    "difficulty_beginner": "Principiante",
+    "difficulty_intermediate": "Intermedio",
+    "difficulty_advanced": "Avanzado",
+    "min_read": "min de lectura",
+    "no_more_texts": "¡Completaste todos los textos!",
+    "no_more_subtitle": "Pronto se agregarán nuevos textos.",
+    "category_daily_life": "Vida Cotidiana",
+    "category_travel": "Viajes",
+    "category_work": "Trabajo",
+    "loading": "Cargando...",
+    "keyword_in_source": "Origen",
+    "keyword_in_target": "Destino",
+    "listen_source": "Escuchar origen",
+    "listen_target": "Escuchar destino"
   }
 }

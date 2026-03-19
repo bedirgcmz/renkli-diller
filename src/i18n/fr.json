@@ -233,5 +233,26 @@
     "es": "Espagnol",
     "fr": "Français",
     "pt": "Portugais"
+  },
+  "reading": {
+    "title": "Texte du Jour",
+    "keywords_preview": "Mots-clés",
+    "mark_read": "Je l'ai Lu",
+    "mark_learned": "Je l'ai Appris",
+    "next_text": "Suivant",
+    "difficulty_beginner": "Débutant",
+    "difficulty_intermediate": "Intermédiaire",
+    "difficulty_advanced": "Avancé",
+    "min_read": "min de lecture",
+    "no_more_texts": "Vous avez complété tous les textes !",
+    "no_more_subtitle": "De nouveaux textes seront ajoutés bientôt.",
+    "category_daily_life": "Vie Quotidienne",
+    "category_travel": "Voyages",
+    "category_work": "Travail",
+    "loading": "Chargement...",
+    "keyword_in_source": "Source",
+    "keyword_in_target": "Cible",
+    "listen_source": "Écouter source",
+    "listen_target": "Écouter cible"
   }
 }

@@ -233,5 +233,26 @@
     "es": "Spanisch",
     "fr": "Französisch",
     "pt": "Portugiesisch"
+  },
+  "reading": {
+    "title": "Text des Tages",
+    "keywords_preview": "Schlüsselwörter",
+    "mark_read": "Gelesen",
+    "mark_learned": "Gelernt",
+    "next_text": "Nächster",
+    "difficulty_beginner": "Anfänger",
+    "difficulty_intermediate": "Mittelstufe",
+    "difficulty_advanced": "Fortgeschritten",
+    "min_read": "Min. Lesezeit",
+    "no_more_texts": "Du hast alle Texte abgeschlossen!",
+    "no_more_subtitle": "Neue Texte werden bald hinzugefügt.",
+    "category_daily_life": "Alltag",
+    "category_travel": "Reisen",
+    "category_work": "Arbeit",
+    "loading": "Wird geladen...",
+    "keyword_in_source": "Quelle",
+    "keyword_in_target": "Ziel",
+    "listen_source": "Quelle anhören",
+    "listen_target": "Ziel anhören"
   }
 }

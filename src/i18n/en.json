@@ -233,5 +233,26 @@
     "es": "Spanish",
     "fr": "French",
     "pt": "Portuguese"
+  },
+  "reading": {
+    "title": "Today's Text",
+    "keywords_preview": "Keywords",
+    "mark_read": "I Read It",
+    "mark_learned": "I Learned It",
+    "next_text": "Next",
+    "difficulty_beginner": "Beginner",
+    "difficulty_intermediate": "Intermediate",
+    "difficulty_advanced": "Advanced",
+    "min_read": "min read",
+    "no_more_texts": "You completed all texts!",
+    "no_more_subtitle": "New texts will be added soon.",
+    "category_daily_life": "Daily Life",
+    "category_travel": "Travel",
+    "category_work": "Work",
+    "loading": "Loading...",
+    "keyword_in_source": "Source",
+    "keyword_in_target": "Target",
+    "listen_source": "Listen source",
+    "listen_target": "Listen target"
   }
 }

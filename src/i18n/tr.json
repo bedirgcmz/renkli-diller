@@ -233,5 +233,26 @@
     "es": "İspanyolca",
     "fr": "Fransızca",
     "pt": "Portekizce"
+  },
+  "reading": {
+    "title": "Günün Metni",
+    "keywords_preview": "Anahtar Kelimeler",
+    "mark_read": "Okudum",
+    "mark_learned": "Öğrendim",
+    "next_text": "Sonraki",
+    "difficulty_beginner": "Başlangıç",
+    "difficulty_intermediate": "Orta",
+    "difficulty_advanced": "İleri",
+    "min_read": "dk okuma",
+    "no_more_texts": "Tüm metinleri tamamladınız!",
+    "no_more_subtitle": "Yakında yeni metinler eklenecek.",
+    "category_daily_life": "Günlük Hayat",
+    "category_travel": "Seyahat",
+    "category_work": "İş Hayatı",
+    "loading": "Yükleniyor...",
+    "keyword_in_source": "Kaynak",
+    "keyword_in_target": "Hedef",
+    "listen_source": "Kaynak dinle",
+    "listen_target": "Hedef dinle"
   }
 }
