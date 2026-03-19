@@ -257,6 +257,15 @@
     "streak": "Tage in Folge",
     "texts_completed": "Texte abgeschlossen",
     "premium_required": "Dieser Text ist nur für Premium",
-    "unlock_premium": "Premium werden"
+    "unlock_premium": "Premium werden",
+    "quiz_title": "Vokabeltest",
+    "quiz_question": "Was ist das Zielsprachequivalent?",
+    "quiz_result": "{score}/{total} richtig",
+    "quiz_well_done": "Gut gemacht!",
+    "quiz_try_again": "Nochmal versuchen",
+    "quiz_start": "Wörter testen",
+    "quiz_finish": "Beenden",
+    "quiz_next": "Weiter",
+    "quiz_premium_only": "Premium-Funktion"
   }
 }

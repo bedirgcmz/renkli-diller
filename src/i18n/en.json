@@ -257,6 +257,15 @@
     "streak": "day streak",
     "texts_completed": "texts completed",
     "premium_required": "This text is Premium only",
-    "unlock_premium": "Go Premium"
+    "unlock_premium": "Go Premium",
+    "quiz_title": "Vocabulary Quiz",
+    "quiz_question": "What is the target language equivalent?",
+    "quiz_result": "{score}/{total} correct",
+    "quiz_well_done": "Well done!",
+    "quiz_try_again": "Try Again",
+    "quiz_start": "Test Your Words",
+    "quiz_finish": "Finish",
+    "quiz_next": "Next",
+    "quiz_premium_only": "Premium feature"
   }
 }

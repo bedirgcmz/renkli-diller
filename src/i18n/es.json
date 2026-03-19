@@ -257,6 +257,15 @@
     "streak": "días seguidos",
     "texts_completed": "textos completados",
     "premium_required": "Este texto es solo para Premium",
-    "unlock_premium": "Ir a Premium"
+    "unlock_premium": "Ir a Premium",
+    "quiz_title": "Test de Vocabulario",
+    "quiz_question": "¿Cuál es el equivalente en el idioma objetivo?",
+    "quiz_result": "{score}/{total} correctas",
+    "quiz_well_done": "¡Bien hecho!",
+    "quiz_try_again": "Intentar de nuevo",
+    "quiz_start": "Probar tus palabras",
+    "quiz_finish": "Terminar",
+    "quiz_next": "Siguiente",
+    "quiz_premium_only": "Función premium"
   }
 }

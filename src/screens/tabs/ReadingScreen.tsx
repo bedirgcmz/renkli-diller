@@ -229,6 +229,264 @@ const kStyles = StyleSheet.create({
   kwWord: { fontSize: 15, fontWeight: "600", flex: 1 },
 });
 
+// ── VocabQuizModal ────────────────────────────────────────────────────────────
+
+function buildQuizQuestions(
+  keywords: ReadingTextKeyword[],
+  uiLanguage: SupportedLanguage,
+  targetLanguage: SupportedLanguage,
+) {
+  // Build array of {question (source word), answer (target word), options}
+  const all = keywords.filter(
+    (kw) => getField<string>(kw, `keyword_${uiLanguage}`) && getField<string>(kw, `keyword_${targetLanguage}`),
+  );
+  if (all.length < 2) return [];
+
+  return all.map((kw) => {
+    const question = getField<string>(kw, `keyword_${uiLanguage}`) ?? "";
+    const correct = getField<string>(kw, `keyword_${targetLanguage}`) ?? "";
+    // Distractors: pick other keywords' target words
+    const distractors = all
+      .filter((k) => k.id !== kw.id)
+      .map((k) => getField<string>(k, `keyword_${targetLanguage}`) ?? "")
+      .filter(Boolean)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+    const options = [correct, ...distractors].sort(() => Math.random() - 0.5);
+    return { question, correct, options, color_index: kw.color_index };
+  });
+}
+
+type QuizQuestion = ReturnType<typeof buildQuizQuestions>[number];
+
+function VocabQuizModal({
+  visible,
+  onClose,
+  keywords,
+  uiLanguage,
+  targetLanguage,
+  isDark,
+  colors,
+  t,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  keywords: ReadingTextKeyword[];
+  uiLanguage: SupportedLanguage;
+  targetLanguage: SupportedLanguage;
+  isDark: boolean;
+  colors: any;
+  t: any;
+}) {
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      const qs = buildQuizQuestions(keywords, uiLanguage, targetLanguage);
+      setQuestions(qs);
+      setCurrentQ(0);
+      setSelected(null);
+      setScore(0);
+      setDone(false);
+    }
+  }, [visible, keywords, uiLanguage, targetLanguage]);
+
+  const handleSelect = (option: string) => {
+    if (selected) return;
+    setSelected(option);
+    const isCorrect = option === questions[currentQ].correct;
+    if (isCorrect) setScore((s) => s + 1);
+  };
+
+  const handleNext = () => {
+    if (currentQ < questions.length - 1) {
+      setCurrentQ((q) => q + 1);
+      setSelected(null);
+    } else {
+      setDone(true);
+    }
+  };
+
+  if (questions.length === 0) return null;
+  const q = questions[currentQ];
+  const palette = isDark ? KEYWORD_TEXT_COLORS.dark : KEYWORD_TEXT_COLORS.light;
+  const qColor = palette[q.color_index % palette.length];
+
+  return (
+    <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
+      <View style={qStyles.overlay}>
+        <View style={[qStyles.sheet, { backgroundColor: colors.cardBackground }]}>
+          {/* Header */}
+          <View style={[qStyles.header, { borderBottomColor: colors.divider }]}>
+            <Text style={[qStyles.title, { color: colors.text }]}>{t("reading.quiz_title")}</Text>
+            <Pressable onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </Pressable>
+          </View>
+
+          {done ? (
+            /* Result screen */
+            <View style={qStyles.resultContainer}>
+              <Text style={qStyles.resultEmoji}>
+                {score === questions.length ? "🎉" : score >= questions.length / 2 ? "👍" : "💪"}
+              </Text>
+              <Text style={[qStyles.resultTitle, { color: colors.text }]}>
+                {t("reading.quiz_well_done")}
+              </Text>
+              <Text style={[qStyles.resultScore, { color: colors.primary }]}>
+                {t("reading.quiz_result").replace("{score}", String(score)).replace("{total}", String(questions.length))}
+              </Text>
+              <TouchableOpacity
+                style={[qStyles.closeBtn, { backgroundColor: colors.primary }]}
+                onPress={onClose}
+                activeOpacity={0.85}
+              >
+                <Text style={qStyles.closeBtnText}>{t("reading.quiz_finish")}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            /* Question screen */
+            <View style={qStyles.questionContainer}>
+              {/* Progress */}
+              <Text style={[qStyles.progress, { color: colors.textTertiary }]}>
+                {currentQ + 1} / {questions.length}
+              </Text>
+
+              {/* Question word */}
+              <View style={[qStyles.questionBox, { backgroundColor: qColor + "15", borderColor: qColor + "30" }]}>
+                <Text style={[qStyles.questionWord, { color: qColor }]}>{q.question}</Text>
+                <Text style={[qStyles.questionHint, { color: colors.textTertiary }]}>
+                  {uiLanguage.toUpperCase()} → {targetLanguage.toUpperCase()}
+                </Text>
+              </View>
+
+              {/* Options */}
+              <View style={qStyles.optionsContainer}>
+                {q.options.map((opt, idx) => {
+                  const isSelected = selected === opt;
+                  const isCorrect = opt === q.correct;
+                  let bg = colors.backgroundSecondary;
+                  let border = colors.border;
+                  let textColor = colors.text;
+                  if (selected) {
+                    if (isCorrect) { bg = "#49C98A20"; border = "#49C98A"; textColor = "#49C98A"; }
+                    else if (isSelected) { bg = "#FF6B6B20"; border = "#FF6B6B"; textColor = "#FF6B6B"; }
+                  }
+                  return (
+                    <TouchableOpacity
+                      key={idx}
+                      style={[qStyles.option, { backgroundColor: bg, borderColor: border }]}
+                      onPress={() => handleSelect(opt)}
+                      activeOpacity={0.8}
+                      disabled={!!selected}
+                    >
+                      <Text style={[qStyles.optionText, { color: textColor }]}>{opt}</Text>
+                      {selected && isCorrect && (
+                        <Ionicons name="checkmark-circle" size={18} color="#49C98A" />
+                      )}
+                      {selected && isSelected && !isCorrect && (
+                        <Ionicons name="close-circle" size={18} color="#FF6B6B" />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Next button */}
+              {selected && (
+                <TouchableOpacity
+                  style={[qStyles.nextBtn, { backgroundColor: colors.primary }]}
+                  onPress={handleNext}
+                  activeOpacity={0.85}
+                >
+                  <Text style={qStyles.nextBtnText}>
+                    {currentQ < questions.length - 1 ? t("reading.quiz_next") : t("reading.quiz_finish")}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const qStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  title: { fontSize: 17, fontWeight: "700" },
+  questionContainer: { padding: 20, gap: 16 },
+  progress: { fontSize: 12, fontWeight: "600", textAlign: "right" },
+  questionBox: {
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 6,
+  },
+  questionWord: { fontSize: 26, fontWeight: "800" },
+  questionHint: { fontSize: 11, fontWeight: "500" },
+  optionsContainer: { gap: 10 },
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  optionText: { fontSize: 16, fontWeight: "500" },
+  nextBtn: {
+    marginTop: 4,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  nextBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  resultContainer: {
+    alignItems: "center",
+    padding: 32,
+    gap: 12,
+  },
+  resultEmoji: { fontSize: 52 },
+  resultTitle: { fontSize: 20, fontWeight: "700" },
+  resultScore: { fontSize: 16, fontWeight: "600" },
+  closeBtn: {
+    marginTop: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  closeBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+});
+
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function ReadingScreen() {
@@ -251,6 +509,7 @@ export default function ReadingScreen() {
   } = useReadingStore();
 
   const [kwModalVisible, setKwModalVisible] = useState(false);
+  const [quizVisible, setQuizVisible] = useState(false);
   const [speaking, setSpeaking] = useState<"source" | "target" | null>(null);
   const [markedThisSession, setMarkedThisSession] = useState(false);
 
@@ -417,6 +676,17 @@ export default function ReadingScreen() {
               color={speaking === "target" ? colors.primary : colors.textSecondary}
             />
           </TouchableOpacity>
+
+          {/* Vocab quiz (premium) */}
+          {isPremium && keywords.length >= 2 && (
+            <TouchableOpacity
+              style={[styles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
+              onPress={() => setQuizVisible(true)}
+              activeOpacity={0.75}
+            >
+              <Ionicons name="help-circle-outline" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -557,6 +827,18 @@ export default function ReadingScreen() {
       <KeywordPreviewModal
         visible={kwModalVisible}
         onClose={() => setKwModalVisible(false)}
+        keywords={keywords}
+        uiLanguage={uiLanguage}
+        targetLanguage={targetLanguage}
+        isDark={isDark}
+        colors={colors}
+        t={t}
+      />
+
+      {/* ── Vocabulary quiz modal (premium) ───────────────────────── */}
+      <VocabQuizModal
+        visible={quizVisible}
+        onClose={() => setQuizVisible(false)}
         keywords={keywords}
         uiLanguage={uiLanguage}
         targetLanguage={targetLanguage}

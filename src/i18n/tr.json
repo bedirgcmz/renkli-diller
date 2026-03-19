@@ -257,6 +257,15 @@
     "streak": "günlük seri",
     "texts_completed": "metin tamamlandı",
     "premium_required": "Bu metin Premium'a özel",
-    "unlock_premium": "Premium'a Geç"
+    "unlock_premium": "Premium'a Geç",
+    "quiz_title": "Kelime Testi",
+    "quiz_question": "Bu kelimenin hedef dildeki karşılığı nedir?",
+    "quiz_result": "{score}/{total} doğru",
+    "quiz_well_done": "Harika!",
+    "quiz_try_again": "Tekrar Dene",
+    "quiz_start": "Kelimelerini Test Et",
+    "quiz_finish": "Bitir",
+    "quiz_next": "Sonraki",
+    "quiz_premium_only": "Premium özellik"
   }
 }

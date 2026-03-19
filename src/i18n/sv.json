@@ -257,6 +257,15 @@
     "streak": "dagars serie",
     "texts_completed": "texter klara",
     "premium_required": "Den här texten är bara för Premium",
-    "unlock_premium": "Bli Premium"
+    "unlock_premium": "Bli Premium",
+    "quiz_title": "Ordförrådsquiz",
+    "quiz_question": "Vad är målspråkets motsvarighet?",
+    "quiz_result": "{score}/{total} rätt",
+    "quiz_well_done": "Bra jobbat!",
+    "quiz_try_again": "Försök igen",
+    "quiz_start": "Testa dina ord",
+    "quiz_finish": "Avsluta",
+    "quiz_next": "Nästa",
+    "quiz_premium_only": "Premiumfunktion"
   }
 }

@@ -257,6 +257,15 @@
     "streak": "jours consécutifs",
     "texts_completed": "textes terminés",
     "premium_required": "Ce texte est réservé aux Premium",
-    "unlock_premium": "Passer à Premium"
+    "unlock_premium": "Passer à Premium",
+    "quiz_title": "Test de Vocabulaire",
+    "quiz_question": "Quel est l'équivalent dans la langue cible?",
+    "quiz_result": "{score}/{total} correctes",
+    "quiz_well_done": "Bravo!",
+    "quiz_try_again": "Réessayer",
+    "quiz_start": "Tester vos mots",
+    "quiz_finish": "Terminer",
+    "quiz_next": "Suivant",
+    "quiz_premium_only": "Fonction premium"
   }
 }
