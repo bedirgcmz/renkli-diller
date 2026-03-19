@@ -106,9 +106,10 @@ function SentenceItem({
         </View>
 
         {keywordsText ? (
-          <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>
-            <Text style={{ fontSize: 10 }}>🔑 </Text> {keywordsText}
-          </Text>
+          <View style={itemStyles.keywordsRow}>
+            <Ionicons name="key-outline" size={11} color={colors.textTertiary} />
+            <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>{keywordsText}</Text>
+          </View>
         ) : null}
 
         {sentence.category_name ? (
@@ -219,7 +220,8 @@ const itemStyles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(0,0,0,0.06)",
   },
-  keywords: { fontSize: 12, marginTop: 6 },
+  keywordsRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 6 },
+  keywords: { fontSize: 12 },
   categoryChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 7,
