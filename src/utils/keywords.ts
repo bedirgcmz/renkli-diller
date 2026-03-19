@@ -1,5 +1,5 @@
 import { PillSegment } from '@/types';
-import { PILL_COLORS } from './constants';
+import { PILL_COLORS, KEYWORD_TEXT_COLORS } from './constants';
 
 const pillPattern = /\*\*(.*?)\*\*/g;
 
@@ -57,6 +57,15 @@ export function textToColorIndex(text: string): number {
  */
 export function getPillColor(pillIndex: number, isDark: boolean, seedText?: string): { bg: string; text: string } {
   const palette = isDark ? PILL_COLORS.dark : PILL_COLORS.light;
+  const offset = seedText ? textToColorIndex(seedText) : 0;
+  return palette[(offset + pillIndex) % palette.length];
+}
+
+/**
+ * Get keyword text color (no background — color is applied to the word itself).
+ */
+export function getKeywordColor(pillIndex: number, isDark: boolean, seedText?: string): string {
+  const palette = isDark ? KEYWORD_TEXT_COLORS.dark : KEYWORD_TEXT_COLORS.light;
   const offset = seedText ? textToColorIndex(seedText) : 0;
   return palette[(offset + pillIndex) % palette.length];
 }

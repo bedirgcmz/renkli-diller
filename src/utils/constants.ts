@@ -2,28 +2,58 @@ import { SupportedLanguage } from '@/types';
 
 export const PILL_COLORS = {
   light: [
-    { bg: '#FF6B6B', text: '#FFFFFF' }, // Mercan
-    { bg: '#FF9F43', text: '#FFFFFF' }, // Turuncu
-    { bg: '#FECA57', text: '#333333' }, // Altın (koyu text — sarı bg'de beyaz okunmaz)
-    { bg: '#2ED573', text: '#FFFFFF' }, // Zümrüt
-    { bg: '#1DD1A1', text: '#FFFFFF' }, // Turkuaz
-    { bg: '#54A0FF', text: '#FFFFFF' }, // Gök Mavi
-    { bg: '#8B5CF6', text: '#FFFFFF' }, // Mor
-    { bg: '#FF6B81', text: '#FFFFFF' }, // Pembe
-    { bg: '#A29BFE', text: '#FFFFFF' }, // Lavanta
-    { bg: '#0ABDE3', text: '#FFFFFF' }, // Okyanus
+    { bg: '#FF6B6B', text: '#FFFFFF' },
+    { bg: '#FF9F43', text: '#FFFFFF' },
+    { bg: '#FECA57', text: '#333333' },
+    { bg: '#2ED573', text: '#FFFFFF' },
+    { bg: '#1DD1A1', text: '#FFFFFF' },
+    { bg: '#54A0FF', text: '#FFFFFF' },
+    { bg: '#8B5CF6', text: '#FFFFFF' },
+    { bg: '#FF6B81', text: '#FFFFFF' },
+    { bg: '#A29BFE', text: '#FFFFFF' },
+    { bg: '#0ABDE3', text: '#FFFFFF' },
   ],
   dark: [
-    { bg: '#C0392B', text: '#FFFFFF' }, // Mercan
-    { bg: '#D35400', text: '#FFFFFF' }, // Turuncu
-    { bg: '#B7950B', text: '#FFFFFF' }, // Altın
-    { bg: '#1E8449', text: '#FFFFFF' }, // Zümrüt
-    { bg: '#148F77', text: '#FFFFFF' }, // Turkuaz
-    { bg: '#2E86C1', text: '#FFFFFF' }, // Gök Mavi
-    { bg: '#6C3483', text: '#FFFFFF' }, // Mor
-    { bg: '#C0392B', text: '#FFFFFF' }, // Pembe
-    { bg: '#6C5CE7', text: '#FFFFFF' }, // Lavanta
-    { bg: '#1A5276', text: '#FFFFFF' }, // Okyanus
+    { bg: '#C0392B', text: '#FFFFFF' },
+    { bg: '#D35400', text: '#FFFFFF' },
+    { bg: '#B7950B', text: '#FFFFFF' },
+    { bg: '#1E8449', text: '#FFFFFF' },
+    { bg: '#148F77', text: '#FFFFFF' },
+    { bg: '#2E86C1', text: '#FFFFFF' },
+    { bg: '#6C3483', text: '#FFFFFF' },
+    { bg: '#C0392B', text: '#FFFFFF' },
+    { bg: '#6C5CE7', text: '#FFFFFF' },
+    { bg: '#1A5276', text: '#FFFFFF' },
+  ],
+};
+
+// Keyword text colors — no background, color applied to the word itself
+export const KEYWORD_TEXT_COLORS = {
+  // Bright colors for dark backgrounds
+  dark: [
+    '#FF6B6B', // Coral
+    '#FFA94D', // Orange
+    '#FFD43B', // Yellow
+    '#69DB7C', // Green
+    '#38D9A9', // Teal
+    '#74C0FC', // Blue
+    '#B197FC', // Lavender
+    '#F783AC', // Pink
+    '#4FCBEA', // Cyan
+    '#A9E34B', // Lime
+  ],
+  // Deep colors for light backgrounds
+  light: [
+    '#E03131', // Red
+    '#D9480F', // Orange
+    '#B08600', // Amber
+    '#2F9E44', // Green
+    '#0C8599', // Teal
+    '#1971C2', // Blue
+    '#6741D9', // Violet
+    '#C2255C', // Pink
+    '#0B7285', // Cyan
+    '#5C940D', // Lime
   ],
 };
 

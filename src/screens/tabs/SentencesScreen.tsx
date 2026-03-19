@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   ScrollView,
   RefreshControl,
   Pressable,
+  Modal,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,7 +35,6 @@ const STATUS_FILTERS: Array<{ key: StatusFilter; labelKey: string }> = [
   { key: "learned", labelKey: "sentences.filter_learned" },
 ];
 
-// Durum bar renkleri: KIRMIZI=new, MAVİ=learning, YEŞİL=learned
 const STATUS_BAR_COLOR: Record<SentenceStatus, string> = {
   new: "#E53E3E",
   learning: "#3B8BD4",
@@ -118,9 +119,7 @@ function SentenceItem({
           </View>
         ) : null}
 
-        {/* Durum text (sol) + aksiyon butonu (sağ) */}
         <View style={itemStyles.actionRow}>
-          {/* Sol: durum text */}
           {sentence.effectiveStatus === "new" && (
             <Text style={{ color: colors.textTertiary, fontSize: 12 }}>
               {t("sentences.status_new")}
@@ -137,7 +136,6 @@ function SentenceItem({
             </Text>
           )}
 
-          {/* Sağ: aksiyon butonu */}
           {sentence.effectiveStatus === "new" && (
             <Pressable onPress={onLearn}>
               {({ pressed }) => (
@@ -161,12 +159,7 @@ function SentenceItem({
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={{
-                      marginLeft: 6,
-                      color: "#3B8BD4",
-                      fontSize: 13,
-                      fontWeight: "600",
-                    }}
+                    style={{ marginLeft: 6, color: "#3B8BD4", fontSize: 13, fontWeight: "600" }}
                   >
                     {t("learn.add_to_list")}
                   </Text>
@@ -198,12 +191,7 @@ function SentenceItem({
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={{
-                      marginLeft: 6,
-                      color: "#2ECC71",
-                      fontSize: 13,
-                      fontWeight: "600",
-                    }}
+                    style={{ marginLeft: 6, color: "#2ECC71", fontSize: 13, fontWeight: "600" }}
                   >
                     {t("learn.mark_learned")}
                   </Text>
@@ -235,12 +223,7 @@ function SentenceItem({
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={{
-                      marginLeft: 6,
-                      color: "#E53E3E",
-                      fontSize: 13,
-                      fontWeight: "600",
-                    }}
+                    style={{ marginLeft: 6, color: "#E53E3E", fontSize: 13, fontWeight: "600" }}
                   >
                     {t("learn.mark_unlearned")}
                   </Text>
@@ -298,18 +281,206 @@ const itemStyles = StyleSheet.create({
   },
 });
 
+// ─── Filter Modal ────────────────────────────────────────────────────────────
+
+interface FilterModalProps {
+  visible: boolean;
+  onClose: () => void;
+  statusFilter: StatusFilter;
+  setStatusFilter: (f: StatusFilter) => void;
+  categoryFilter: number | "all";
+  setCategoryFilter: (f: number | "all") => void;
+  categories: any[];
+  uiLanguage: string;
+  colors: any;
+  isDark: boolean;
+  t: (k: string) => string;
+  activeFilterCount: number;
+}
+
+function FilterModal({
+  visible,
+  onClose,
+  statusFilter,
+  setStatusFilter,
+  categoryFilter,
+  setCategoryFilter,
+  categories,
+  uiLanguage,
+  colors,
+  isDark,
+  t,
+  activeFilterCount,
+}: FilterModalProps) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(60)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }),
+        Animated.spring(slideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 0, duration: 140, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 60, duration: 140, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [visible]);
+
+  const chipActive = (active: boolean) => ({
+    backgroundColor: active ? colors.primary : (isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)"),
+    borderColor: active ? colors.primary : colors.border,
+  });
+
+  const chipTextColor = (active: boolean) =>
+    active ? "#fff" : colors.textSecondary;
+
+  return (
+    <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
+      <Animated.View style={[filterStyles.backdrop, { opacity: fadeAnim }]}>
+        <Pressable style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} onPress={onClose} />
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          filterStyles.panel,
+          {
+            backgroundColor: colors.cardBackground,
+            shadowColor: "#000",
+            transform: [{ translateY: slideAnim }],
+            opacity: fadeAnim,
+          },
+        ]}
+      >
+        {/* Header */}
+        <View style={filterStyles.panelHeader}>
+          <Text style={[filterStyles.panelTitle, { color: colors.text }]}>
+            {t("sentences.filter_title") || "Filtrele"}
+          </Text>
+          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+            {activeFilterCount > 0 && (
+              <Pressable
+                onPress={() => {
+                  setStatusFilter("all");
+                  setCategoryFilter("all");
+                }}
+              >
+                <Text style={{ color: colors.primary, fontSize: 13 }}>
+                  {t("sentences.clear_filters") || "Temizle"}
+                </Text>
+              </Pressable>
+            )}
+            <Pressable onPress={onClose} hitSlop={HIT}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Status chips */}
+        <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
+          {t("sentences.filter_status") || "Durum"}
+        </Text>
+        <View style={filterStyles.chipsWrap}>
+          {STATUS_FILTERS.map((f) => (
+            <TouchableOpacity
+              key={f.key}
+              style={[filterStyles.chip, chipActive(statusFilter === f.key)]}
+              onPress={() => setStatusFilter(f.key)}
+              activeOpacity={0.8}
+            >
+              <Text style={[filterStyles.chipText, { color: chipTextColor(statusFilter === f.key) }]}>
+                {t(f.labelKey)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Category chips */}
+        <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
+          {t("sentences.filter_category") || "Kategori"}
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={filterStyles.chipsRow}
+        >
+          <TouchableOpacity
+            style={[filterStyles.chip, chipActive(categoryFilter === "all")]}
+            onPress={() => setCategoryFilter("all")}
+            activeOpacity={0.8}
+          >
+            <Text style={[filterStyles.chipText, { color: chipTextColor(categoryFilter === "all") }]}>
+              {t("sentences.filter_all")}
+            </Text>
+          </TouchableOpacity>
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat.id}
+              style={[filterStyles.chip, chipActive(categoryFilter === cat.id)]}
+              onPress={() => setCategoryFilter(cat.id)}
+              activeOpacity={0.8}
+            >
+              <Text style={[filterStyles.chipText, { color: chipTextColor(categoryFilter === cat.id) }]}>
+                {cat[`name_${uiLanguage}` as keyof typeof cat] as string}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </Animated.View>
+    </Modal>
+  );
+}
+
+const filterStyles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  panel: {
+    position: "absolute",
+    top: 140,
+    left: 12,
+    right: 12,
+    borderRadius: 16,
+    padding: 16,
+    paddingBottom: 20,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  panelHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  panelTitle: { fontSize: 16, fontWeight: "700" },
+  sectionLabel: { fontSize: 11, fontWeight: "600", marginBottom: 8, letterSpacing: 0.5 },
+  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
+  chipsRow: { gap: 8, paddingBottom: 4 },
+  chip: {
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  chipText: { fontSize: 13, fontWeight: "500" },
+});
+
 // ─── Ana ekran ────────────────────────────────────────────────────────────────
 
 export default function SentencesScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage } = useSettingsStore();
   const {
     sentences,
     presetSentences,
     categories,
-    loading,
     loadSentences,
     loadPresetSentences,
     loadCategories,
@@ -325,6 +496,13 @@ export default function SentencesScreen() {
   const [categoryFilter, setCategoryFilter] = useState<number | "all">("all");
   const [searchText, setSearchText] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [filterVisible, setFilterVisible] = useState(false);
+
+  const activeFilterCount =
+    (statusFilter !== "all" ? 1 : 0) + (categoryFilter !== "all" ? 1 : 0);
+
+  // Tab underline color: primary for both modes (works well on dark & light)
+  const tabActiveColor = isDark ? colors.primary : colors.primaryDark;
 
   useEffect(() => {
     loadCategories();
@@ -339,7 +517,6 @@ export default function SentencesScreen() {
     setRefreshing(false);
   };
 
-  // Preset cümlelere progressMap'ten durum ekle
   const sourceList = useMemo(() => {
     const base = activeTab === "preset" ? presetSentences : sentences;
     return base.map((s) => ({
@@ -376,44 +553,58 @@ export default function SentencesScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       edges={["top"]}
     >
-      {/* ── Sabit üst alan (başlık + filtreler) ─────────────────────── */}
-      <View>
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t("sentences.title")}</Text>
-        </View>
-
-        {/* Arama */}
-        <View
-          style={[
-            styles.searchBar,
-            { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
-          ]}
+      {/* ── Başlık ───────────────────────────────────────────────────── */}
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{t("sentences.title")}</Text>
+        <TouchableOpacity
+          onPress={() => setFilterVisible(true)}
+          style={styles.filterBtn}
+          activeOpacity={0.7}
         >
-          <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t("sentences.search_placeholder")}
-            placeholderTextColor={colors.textTertiary}
-            value={searchText}
-            onChangeText={setSearchText}
-            clearButtonMode="while-editing"
+          <Ionicons
+            name="options-outline"
+            size={22}
+            color={activeFilterCount > 0 ? colors.primary : colors.textSecondary}
           />
-          {searchText ? (
-            <TouchableOpacity onPress={() => setSearchText("")}>
-              <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          ) : null}
-        </View>
+          {activeFilterCount > 0 && (
+            <View style={[styles.filterBadge, { backgroundColor: colors.primary }]}>
+              <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
 
-        {/* Segment: Hazır / Benim */}
-        <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
-          {(["preset", "mine"] as SentenceTab[]).map((tab) => (
+      {/* ── Arama ────────────────────────────────────────────────────── */}
+      <View
+        style={[
+          styles.searchBar,
+          { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+        ]}
+      >
+        <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: colors.text }]}
+          placeholder={t("sentences.search_placeholder")}
+          placeholderTextColor={colors.textTertiary}
+          value={searchText}
+          onChangeText={setSearchText}
+          clearButtonMode="while-editing"
+        />
+        {searchText ? (
+          <TouchableOpacity onPress={() => setSearchText("")}>
+            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
+      {/* ── Sekmeler (underline style) ────────────────────────────────── */}
+      <View style={[styles.tabRow, { borderBottomColor: colors.border }]}>
+        {(["preset", "mine"] as SentenceTab[]).map((tab) => {
+          const isActive = activeTab === tab;
+          return (
             <TouchableOpacity
               key={tab}
-              style={[
-                styles.segmentTab,
-                activeTab === tab && [styles.segmentTabActive, { backgroundColor: colors.surface }],
-              ]}
+              style={styles.tabItem}
               onPress={() => {
                 setActiveTab(tab);
                 setStatusFilter("all");
@@ -423,103 +614,22 @@ export default function SentencesScreen() {
             >
               <Text
                 style={[
-                  styles.segmentLabel,
-                  { color: activeTab === tab ? colors.text : colors.textSecondary },
+                  styles.tabLabel,
+                  { color: isActive ? colors.text : colors.textSecondary },
+                  isActive && styles.tabLabelActive,
                 ]}
               >
                 {tab === "preset" ? t("sentences.preset_sentences") : t("sentences.my_sentences")}
               </Text>
+              {isActive && (
+                <View style={[styles.tabUnderline, { backgroundColor: tabActiveColor }]} />
+              )}
             </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Durum filtreleri */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsRow}
-        >
-          {STATUS_FILTERS.map((f) => (
-            <TouchableOpacity
-              key={f.key}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor:
-                    statusFilter === f.key ? colors.primary : colors.backgroundSecondary,
-                  borderColor: statusFilter === f.key ? colors.primary : colors.border,
-                },
-              ]}
-              onPress={() => setStatusFilter(f.key)}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  { color: statusFilter === f.key ? "#fff" : colors.textSecondary },
-                ]}
-              >
-                {t(f.labelKey)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* Kategori filtreleri */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsRow}
-        >
-          <TouchableOpacity
-            style={[
-              styles.chip,
-              {
-                backgroundColor:
-                  categoryFilter === "all" ? colors.primary : colors.backgroundSecondary,
-                borderColor: categoryFilter === "all" ? colors.primary : colors.border,
-              },
-            ]}
-            onPress={() => setCategoryFilter("all")}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                { color: categoryFilter === "all" ? "#fff" : colors.textSecondary },
-              ]}
-            >
-              {t("sentences.filter_all")}
-            </Text>
-          </TouchableOpacity>
-          {categories.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor:
-                    categoryFilter === cat.id ? colors.primary : colors.backgroundSecondary,
-                  borderColor: categoryFilter === cat.id ? colors.primary : colors.border,
-                },
-              ]}
-              onPress={() => setCategoryFilter(cat.id)}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  { color: categoryFilter === cat.id ? "#fff" : colors.textSecondary },
-                ]}
-              >
-                {cat[`name_${uiLanguage}` as keyof typeof cat] as string}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+          );
+        })}
       </View>
 
-      {/* ── Scrollable cümle listesi ─────────────────────────────────── */}
+      {/* ── Cümle listesi ────────────────────────────────────────────── */}
       <FlatList
         data={displayed}
         keyExtractor={(item) => item.id}
@@ -548,7 +658,12 @@ export default function SentencesScreen() {
             onLearn={() => addToLearningList(item.id)}
             onMarkLearned={() => markAsLearned(item.id)}
             onForgot={() => markAsUnlearned(item.id)}
-            onEdit={() => navigation.navigate("EditSentence", { sentenceId: item.id, isPreset: item.is_preset })}
+            onEdit={() =>
+              navigation.navigate("EditSentence", {
+                sentenceId: item.id,
+                isPreset: item.is_preset,
+              })
+            }
             onDelete={() => handleDelete(item)}
             colors={colors}
             t={t}
@@ -564,19 +679,57 @@ export default function SentencesScreen() {
       >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={filterVisible}
+        onClose={() => setFilterVisible(false)}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        categories={categories}
+        uiLanguage={uiLanguage}
+        colors={colors}
+        isDark={isDark}
+        t={t}
+        activeFilterCount={activeFilterCount}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 10,
+  },
   headerTitle: { fontSize: 22, fontWeight: "700" },
+  filterBtn: {
+    position: "relative",
+    padding: 4,
+  },
+  filterBadge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterBadgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 16,
-    marginBottom: 10,
+    marginBottom: 4,
     borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: 12,
@@ -584,34 +737,30 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchInput: { flex: 1, fontSize: 15, padding: 0 },
-  segmentContainer: {
+  // Underline tabs
+  tabRow: {
     flexDirection: "row",
     marginHorizontal: 16,
-    borderRadius: 25,
-    padding: 4,
     marginBottom: 8,
+    marginTop: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  segmentTab: {
+  tabItem: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: 7,
-    borderRadius: 9,
+    paddingVertical: 10,
+    position: "relative",
   },
-  segmentTabActive: {
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+  tabLabel: { fontSize: 14, fontWeight: "500" },
+  tabLabelActive: { fontWeight: "700" },
+  tabUnderline: {
+    position: "absolute",
+    bottom: -1,
+    left: 12,
+    right: 12,
+    height: 2.5,
+    borderRadius: 2,
   },
-  segmentLabel: { fontSize: 13, fontWeight: "500" },
-  chipsRow: { paddingHorizontal: 16, paddingBottom: 8, gap: 6 },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  chipText: { fontSize: 12, fontWeight: "500" },
   list: { flex: 1 },
   listContent: { paddingHorizontal: 16, paddingBottom: 90, paddingTop: 4 },
   emptyContainer: { alignItems: "center", paddingTop: 60, gap: 10 },
