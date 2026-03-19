@@ -253,6 +253,10 @@
     "keyword_in_source": "Kaynak",
     "keyword_in_target": "Hedef",
     "listen_source": "Kaynak dinle",
-    "listen_target": "Hedef dinle"
+    "listen_target": "Hedef dinle",
+    "streak": "günlük seri",
+    "texts_completed": "metin tamamlandı",
+    "premium_required": "Bu metin Premium'a özel",
+    "unlock_premium": "Premium'a Geç"
   }
 }

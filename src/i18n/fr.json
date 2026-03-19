@@ -253,6 +253,10 @@
     "keyword_in_source": "Source",
     "keyword_in_target": "Cible",
     "listen_source": "Écouter source",
-    "listen_target": "Écouter cible"
+    "listen_target": "Écouter cible",
+    "streak": "jours consécutifs",
+    "texts_completed": "textes terminés",
+    "premium_required": "Ce texte est réservé aux Premium",
+    "unlock_premium": "Passer à Premium"
   }
 }

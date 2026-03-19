@@ -13,6 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -20,7 +22,7 @@ import { useReadingStore } from "@/store/useReadingStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KEYWORD_TEXT_COLORS } from "@/utils/constants";
 import { stripMarkers } from "@/utils/keywords";
-import { ReadingTextKeyword, SupportedLanguage } from "@/types";
+import { ReadingTextKeyword, SupportedLanguage, MainStackParamList } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -235,8 +237,18 @@ export default function ReadingScreen() {
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
-  const { currentText, keywords, loading, fetchNextText, fetchProgress, markAsRead, markAsLearned } =
-    useReadingStore();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const {
+    currentText,
+    keywords,
+    loading,
+    fetchNextText,
+    fetchProgress,
+    markAsRead,
+    markAsLearned,
+    getLearnedCount,
+    getReadingStreak,
+  } = useReadingStore();
 
   const [kwModalVisible, setKwModalVisible] = useState(false);
   const [speaking, setSpeaking] = useState<"source" | "target" | null>(null);
@@ -307,6 +319,10 @@ export default function ReadingScreen() {
     travel: t("reading.category_travel"),
     work: t("reading.category_work"),
   };
+
+  const streak = getReadingStreak();
+  const learnedCount = getLearnedCount();
+  const isPaywalled = !!(currentText?.is_premium && !isPremium);
 
   const difficulty = currentText?.difficulty ?? 1;
   const diffColor = DIFFICULTY_COLORS[difficulty];
@@ -404,6 +420,28 @@ export default function ReadingScreen() {
         </View>
       </View>
 
+      {/* ── Stats strip ───────────────────────────────────────────── */}
+      {(streak > 0 || learnedCount > 0) && (
+        <View style={[styles.statsStrip, { borderBottomColor: colors.divider }]}>
+          {streak > 0 && (
+            <View style={styles.statItem}>
+              <Text style={styles.statEmoji}>🔥</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{streak}</Text>
+              <Text style={[styles.statLabel, { color: colors.textTertiary }]}>
+                {t("reading.streak")}
+              </Text>
+            </View>
+          )}
+          <View style={styles.statItem}>
+            <Text style={styles.statEmoji}>📖</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{learnedCount}</Text>
+            <Text style={[styles.statLabel, { color: colors.textTertiary }]}>
+              {t("reading.texts_completed")}
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* ── Body ───────────────────────────────────────────────────── */}
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -471,7 +509,23 @@ export default function ReadingScreen() {
           },
         ]}
       >
-        {markedThisSession ? (
+        {isPaywalled ? (
+          <View style={styles.actionRow}>
+            <View style={[styles.paywallBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "40" }]}>
+              <Ionicons name="lock-closed-outline" size={16} color={colors.premiumAccent} />
+              <Text style={[styles.paywallText, { color: colors.text }]}>
+                {t("reading.premium_required")}
+              </Text>
+              <TouchableOpacity
+                style={[styles.paywallBtn, { backgroundColor: colors.premiumAccent }]}
+                onPress={() => navigation.navigate("Paywall")}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.paywallBtnText}>{t("reading.unlock_premium")}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : markedThisSession ? (
           <View style={styles.successRow}>
             <Ionicons name="checkmark-circle" size={22} color="#49C98A" />
             <Text style={[styles.successText, { color: "#49C98A" }]}>{t("reading.mark_learned")} ✓</Text>
@@ -629,4 +683,33 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   successText: { fontSize: 15, fontWeight: "700" },
+
+  statsStrip: {
+    flexDirection: "row",
+    gap: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  statItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  statEmoji: { fontSize: 14 },
+  statValue: { fontSize: 13, fontWeight: "700" },
+  statLabel: { fontSize: 12 },
+
+  paywallBanner: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  paywallText: { flex: 1, fontSize: 13, fontWeight: "500" },
+  paywallBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  paywallBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
 });

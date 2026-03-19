@@ -253,6 +253,10 @@
     "keyword_in_source": "Källa",
     "keyword_in_target": "Mål",
     "listen_source": "Lyssna källa",
-    "listen_target": "Lyssna mål"
+    "listen_target": "Lyssna mål",
+    "streak": "dagars serie",
+    "texts_completed": "texter klara",
+    "premium_required": "Den här texten är bara för Premium",
+    "unlock_premium": "Bli Premium"
   }
 }

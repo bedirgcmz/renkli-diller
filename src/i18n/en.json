@@ -253,6 +253,10 @@
     "keyword_in_source": "Source",
     "keyword_in_target": "Target",
     "listen_source": "Listen source",
-    "listen_target": "Listen target"
+    "listen_target": "Listen target",
+    "streak": "day streak",
+    "texts_completed": "texts completed",
+    "premium_required": "This text is Premium only",
+    "unlock_premium": "Go Premium"
   }
 }

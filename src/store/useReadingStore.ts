@@ -14,6 +14,7 @@ interface ReadingState {
   markAsRead: (userId: string, textId: string) => Promise<void>;
   markAsLearned: (userId: string, textId: string) => Promise<void>;
   getLearnedCount: () => number;
+  getReadingStreak: () => number;
 }
 
 export const useReadingStore = create<ReadingState>((set, get) => ({
@@ -110,5 +111,34 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
   getLearnedCount: () => {
     return get().progress.filter((p) => p.status === "learned").length;
+  },
+
+  getReadingStreak: () => {
+    const prog = get().progress;
+    if (prog.length === 0) return 0;
+    // Unique dates with at least one completed reading, descending
+    const days = [
+      ...new Set(prog.map((p) => p.completed_at.split("T")[0])),
+    ].sort().reverse();
+
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+    // Streak must start from today or yesterday
+    if (days[0] !== today && days[0] !== yesterday) return 0;
+
+    let streak = 0;
+    let expected = days[0];
+    for (const day of days) {
+      if (day === expected) {
+        streak++;
+        const d = new Date(expected);
+        d.setDate(d.getDate() - 1);
+        expected = d.toISOString().split("T")[0];
+      } else {
+        break;
+      }
+    }
+    return streak;
   },
 }));

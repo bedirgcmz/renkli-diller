@@ -253,6 +253,10 @@
     "keyword_in_source": "Origem",
     "keyword_in_target": "Destino",
     "listen_source": "Ouvir origem",
-    "listen_target": "Ouvir destino"
+    "listen_target": "Ouvir destino",
+    "streak": "dias seguidos",
+    "texts_completed": "textos concluídos",
+    "premium_required": "Este texto é somente para Premium",
+    "unlock_premium": "Ir para Premium"
   }
 }

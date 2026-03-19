@@ -253,6 +253,10 @@
     "keyword_in_source": "Quelle",
     "keyword_in_target": "Ziel",
     "listen_source": "Quelle anhören",
-    "listen_target": "Ziel anhören"
+    "listen_target": "Ziel anhören",
+    "streak": "Tage in Folge",
+    "texts_completed": "Texte abgeschlossen",
+    "premium_required": "Dieser Text ist nur für Premium",
+    "unlock_premium": "Premium werden"
   }
 }
