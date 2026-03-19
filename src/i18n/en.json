@@ -47,13 +47,12 @@
     "correct": "Correct!",
     "incorrect": "Incorrect!",
     "correct_answer_is": "Correct answer is:",
-    "next_question": "Next Question",
+    "next_question": "Next Question →",
     "score": "Score",
     "daily_limit_reached": "Daily quiz limit reached",
     "upgrade_for_unlimited": "Upgrade to Premium for unlimited quizzes",
     "hint": "Hint",
     "submit": "Submit",
-    "next_question": "Next Question →",
     "questions_remaining": "questions remaining",
     "fill_blank_instruction": "Write the full translation of the sentence:",
     "fill_blank_help": "Use the sentence pairs from your learning cards. Translate the shown sentence completely. The direction is indicated by the arrow — sometimes source to target, sometimes the reverse.",
@@ -78,7 +77,11 @@
     "category": "Category",
     "status_new": "New ✨",
     "status_learning": "Learning..",
-    "status_learned": "Learned ✔"
+    "status_learned": "Learned ✔",
+    "filter_title": "Filter",
+    "filter_status": "Status",
+    "filter_category": "Category",
+    "clear_filters": "Clear"
   },
   "add_sentence": {
     "title": "Add New Sentence",

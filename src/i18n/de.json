@@ -47,13 +47,12 @@
     "correct": "Richtig!",
     "incorrect": "Falsch!",
     "correct_answer_is": "Die richtige Antwort ist:",
-    "next_question": "Nächste Frage",
+    "next_question": "Nächste Frage →",
     "score": "Punktzahl",
     "daily_limit_reached": "Tägliches Quiz-Limit erreicht",
     "upgrade_for_unlimited": "Upgrade auf Premium für unbegrenzte Quiz",
     "hint": "Hinweis",
     "submit": "Absenden",
-    "next_question": "Nächste Frage →",
     "questions_remaining": "Fragen übrig",
     "fill_blank_instruction": "Schreiben Sie die vollständige Übersetzung des Satzes:",
     "fill_blank_help": "Verwenden Sie die Satzpaare aus Ihren Lernkarten. Übersetzen Sie den angezeigten Satz vollständig. Die Richtung wird durch den Pfeil angegeben — manchmal Quelle zu Ziel, manchmal umgekehrt.",
@@ -78,7 +77,11 @@
     "category": "Kategorie",
     "status_new": "Neu ✨",
     "status_learning": "Lernst du..",
-    "status_learned": "Gelernt ✔"
+    "status_learned": "Gelernt ✔",
+    "filter_title": "Filtern",
+    "filter_status": "Status",
+    "filter_category": "Kategorie",
+    "clear_filters": "Zurücksetzen"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",

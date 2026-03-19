@@ -77,7 +77,11 @@
     "category": "Categoria",
     "status_new": "Nova ✨",
     "status_learning": "Aprendendo..",
-    "status_learned": "Aprendida ✔"
+    "status_learned": "Aprendida ✔",
+    "filter_title": "Filtrar",
+    "filter_status": "Status",
+    "filter_category": "Categoria",
+    "clear_filters": "Limpar"
   },
   "add_sentence": {
     "title": "Nova frase",

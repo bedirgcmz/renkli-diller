@@ -77,7 +77,11 @@
     "category": "Catégorie",
     "status_new": "Nouvelle ✨",
     "status_learning": "En cours..",
-    "status_learned": "Apprise ✔"
+    "status_learned": "Apprise ✔",
+    "filter_title": "Filtrer",
+    "filter_status": "Statut",
+    "filter_category": "Catégorie",
+    "clear_filters": "Effacer"
   },
   "add_sentence": {
     "title": "Nouvelle phrase",

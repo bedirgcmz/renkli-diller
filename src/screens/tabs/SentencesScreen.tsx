@@ -582,11 +582,7 @@ export default function SentencesScreen() {
             <TouchableOpacity
               key={tab}
               style={styles.tabItem}
-              onPress={() => {
-                setActiveTab(tab);
-                setStatusFilter("all");
-                setCategoryFilter("all");
-              }}
+              onPress={() => setActiveTab(tab)}
               activeOpacity={0.8}
             >
               <Text
@@ -689,7 +685,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: "700" },
   filterBtn: {
     position: "relative",
-    padding: 4,
+    padding: 8,
   },
   filterBadge: {
     position: "absolute",

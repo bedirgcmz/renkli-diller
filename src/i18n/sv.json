@@ -47,13 +47,12 @@
     "correct": "Rätt!",
     "incorrect": "Fel!",
     "correct_answer_is": "Rätt svar är:",
-    "next_question": "Nästa fråga",
+    "next_question": "Nästa fråga →",
     "score": "Poäng",
     "daily_limit_reached": "Daglig quizgräns nådd",
     "upgrade_for_unlimited": "Uppgradera till Premium för obegränsade quiz",
     "hint": "Ledtråd",
     "submit": "Skicka",
-    "next_question": "Nästa fråga →",
     "questions_remaining": "frågor kvar",
     "fill_blank_instruction": "Skriv den fullständiga översättningen av meningen:",
     "fill_blank_help": "Använd meningsparen från dina inlärningskort. Översätt den visade meningen helt. Riktningen anges med pilen — ibland källa till mål, ibland omvänt.",
@@ -78,7 +77,11 @@
     "category": "Kategori",
     "status_new": "Ny ✨",
     "status_learning": "Lär dig..",
-    "status_learned": "Lärt dig ✔"
+    "status_learned": "Lärt dig ✔",
+    "filter_title": "Filtrera",
+    "filter_status": "Status",
+    "filter_category": "Kategori",
+    "clear_filters": "Rensa"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",
