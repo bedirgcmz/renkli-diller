@@ -108,7 +108,9 @@ function SentenceItem({
         {keywordsText ? (
           <View style={itemStyles.keywordsRow}>
             <Ionicons name="key-outline" size={11} color={colors.textTertiary} />
-            <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>{keywordsText}</Text>
+            <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>
+              {keywordsText}
+            </Text>
           </View>
         ) : null}
 
@@ -140,13 +142,23 @@ function SentenceItem({
           {sentence.effectiveStatus === "new" && (
             <Pressable onPress={onLearn}>
               {({ pressed }) => (
-                <View style={[itemStyles.actionBtn, {
-                  borderColor: colors.border,
-                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
-                  transform: [{ scale: pressed ? 0.95 : 1 }],
-                }]}>
+                <View
+                  style={[
+                    itemStyles.actionBtn,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: pressed
+                        ? colors.backgroundTertiary
+                        : colors.backgroundSecondary,
+                      transform: [{ scale: pressed ? 0.95 : 1 }],
+                    },
+                  ]}
+                >
                   <Ionicons name="add-circle-outline" size={15} color={colors.textSecondary} />
-                  <Text numberOfLines={1} style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}>
+                  <Text
+                    numberOfLines={1}
+                    style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}
+                  >
                     {t("learn.add_to_list")}
                   </Text>
                 </View>
@@ -157,13 +169,27 @@ function SentenceItem({
           {sentence.effectiveStatus === "learning" && (
             <Pressable onPress={onMarkLearned}>
               {({ pressed }) => (
-                <View style={[itemStyles.actionBtn, {
-                  borderColor: colors.border,
-                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
-                  transform: [{ scale: pressed ? 0.95 : 1 }],
-                }]}>
-                  <Ionicons name="checkmark-circle-outline" size={15} color={colors.textSecondary} />
-                  <Text numberOfLines={1} style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}>
+                <View
+                  style={[
+                    itemStyles.actionBtn,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: pressed
+                        ? colors.backgroundTertiary
+                        : colors.backgroundSecondary,
+                      transform: [{ scale: pressed ? 0.95 : 1 }],
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={15}
+                    color={colors.textSecondary}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}
+                  >
                     {t("learn.mark_learned")}
                   </Text>
                 </View>
@@ -174,13 +200,23 @@ function SentenceItem({
           {sentence.effectiveStatus === "learned" && (
             <Pressable onPress={onForgot}>
               {({ pressed }) => (
-                <View style={[itemStyles.actionBtn, {
-                  borderColor: colors.border,
-                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
-                  transform: [{ scale: pressed ? 0.95 : 1 }],
-                }]}>
+                <View
+                  style={[
+                    itemStyles.actionBtn,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: pressed
+                        ? colors.backgroundTertiary
+                        : colors.backgroundSecondary,
+                      transform: [{ scale: pressed ? 0.95 : 1 }],
+                    },
+                  ]}
+                >
                   <Ionicons name="refresh-outline" size={15} color={colors.textSecondary} />
-                  <Text numberOfLines={1} style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}>
+                  <Text
+                    numberOfLines={1}
+                    style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}
+                  >
                     {t("learn.mark_unlearned")}
                   </Text>
                 </View>
@@ -296,7 +332,12 @@ function FilterModal({
     if (visible) {
       Animated.parallel([
         Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }),
-        Animated.spring(slideAnim, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 80,
+          friction: 10,
+          useNativeDriver: true,
+        }),
       ]).start();
     } else {
       Animated.parallel([
@@ -307,17 +348,23 @@ function FilterModal({
   }, [visible]);
 
   const chipActive = (active: boolean) => ({
-    backgroundColor: active ? colors.primary : (isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)"),
+    backgroundColor: active
+      ? colors.primary
+      : isDark
+        ? "rgba(255,255,255,0.07)"
+        : "rgba(0,0,0,0.05)",
     borderColor: active ? colors.primary : colors.border,
   });
 
-  const chipTextColor = (active: boolean) =>
-    active ? "#fff" : colors.textSecondary;
+  const chipTextColor = (active: boolean) => (active ? "#fff" : colors.textSecondary);
 
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
       <Animated.View style={[filterStyles.backdrop, { opacity: fadeAnim }]}>
-        <Pressable style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} onPress={onClose} />
+        <Pressable
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+          onPress={onClose}
+        />
       </Animated.View>
 
       <Animated.View
@@ -367,7 +414,9 @@ function FilterModal({
               onPress={() => setStatusFilter(f.key)}
               activeOpacity={0.8}
             >
-              <Text style={[filterStyles.chipText, { color: chipTextColor(statusFilter === f.key) }]}>
+              <Text
+                style={[filterStyles.chipText, { color: chipTextColor(statusFilter === f.key) }]}
+              >
                 {t(f.labelKey)}
               </Text>
             </TouchableOpacity>
@@ -388,7 +437,9 @@ function FilterModal({
             onPress={() => setCategoryFilter("all")}
             activeOpacity={0.8}
           >
-            <Text style={[filterStyles.chipText, { color: chipTextColor(categoryFilter === "all") }]}>
+            <Text
+              style={[filterStyles.chipText, { color: chipTextColor(categoryFilter === "all") }]}
+            >
               {t("sentences.filter_all")}
             </Text>
           </TouchableOpacity>
@@ -399,7 +450,9 @@ function FilterModal({
               onPress={() => setCategoryFilter(cat.id)}
               activeOpacity={0.8}
             >
-              <Text style={[filterStyles.chipText, { color: chipTextColor(categoryFilter === cat.id) }]}>
+              <Text
+                style={[filterStyles.chipText, { color: chipTextColor(categoryFilter === cat.id) }]}
+              >
                 {cat[`name_${uiLanguage}` as keyof typeof cat] as string}
               </Text>
             </TouchableOpacity>
@@ -475,8 +528,7 @@ export default function SentencesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
 
-  const activeFilterCount =
-    (statusFilter !== "all" ? 1 : 0) + (categoryFilter !== "all" ? 1 : 0);
+  const activeFilterCount = (statusFilter !== "all" ? 1 : 0) + (categoryFilter !== "all" ? 1 : 0);
 
   // Tab underline color: primary for both modes (works well on dark & light)
   const tabActiveColor = isDark ? colors.primary : colors.primaryDark;
@@ -540,7 +592,7 @@ export default function SentencesScreen() {
         >
           <Ionicons
             name="options-outline"
-            size={22}
+            size={24}
             color={activeFilterCount > 0 ? colors.primary : colors.textSecondary}
           />
           {activeFilterCount > 0 && (
@@ -685,7 +737,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: "700" },
   filterBtn: {
     position: "relative",
-    padding: 8,
+    padding: 6,
   },
   filterBadge: {
     position: "absolute",
