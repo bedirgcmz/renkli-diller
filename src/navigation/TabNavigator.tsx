@@ -11,14 +11,14 @@ import { Ionicons } from "@expo/vector-icons";
 import LearnScreen from "@/screens/tabs/LearnScreen";
 import QuizScreen from "@/screens/tabs/QuizScreen";
 import SentencesScreen from "@/screens/tabs/SentencesScreen";
-import AutoModeScreen from "@/screens/AutoModeScreen";
+import ReadingScreen from "@/screens/tabs/ReadingScreen";
 import ProfileScreen from "@/screens/tabs/ProfileScreen";
 
 export type TabParamList = {
   Learn: undefined;
   Quiz: undefined;
   Sentences: undefined;
-  AutoMode: undefined;
+  Read: undefined;
   Profile: undefined;
 };
 
@@ -65,8 +65,8 @@ export default function TabNavigator() {
             case "Sentences":
               iconName = focused ? "list" : "list-outline";
               break;
-            case "AutoMode":
-              iconName = focused ? "play-circle" : "play-circle-outline";
+            case "Read":
+              iconName = focused ? "newspaper" : "newspaper-outline";
               break;
             case "Profile":
               iconName = focused ? "person" : "person-outline";
@@ -101,10 +101,10 @@ export default function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="AutoMode"
-        component={AutoModeScreen}
+        name="Read"
+        component={ReadingScreen}
         options={{
-          tabBarLabel: t("auto_mode.title"),
+          tabBarLabel: t("tabs.read"),
         }}
       />
       <Tab.Screen

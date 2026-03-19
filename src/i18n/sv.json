@@ -21,7 +21,8 @@
     "learn": "Lär",
     "quiz": "Quiz",
     "sentences": "Meningar",
-    "profile": "Profil"
+    "profile": "Profil",
+    "read": "Läs"
   },
   "learn": {
     "title": "Meningar att lära",
@@ -137,7 +138,9 @@
     "week": "Vecka",
     "month": "Månad",
     "sentences_in_period": "meningar inlärda",
-    "no_activity": "Ingen aktivitet under denna period"
+    "no_activity": "Ingen aktivitet under denna period",
+    "auto_mode": "Auto-läge",
+    "auto_mode_desc": "Studera med automatiskt lyssnande"
   },
   "settings": {
     "title": "Inställningar",

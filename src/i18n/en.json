@@ -21,7 +21,8 @@
     "learn": "Learn",
     "quiz": "Quiz",
     "sentences": "Sentences",
-    "profile": "Profile"
+    "profile": "Profile",
+    "read": "Read"
   },
   "learn": {
     "title": "Sentences to Learn",
@@ -137,7 +138,9 @@
     "week": "Week",
     "month": "Month",
     "sentences_in_period": "sentences learned",
-    "no_activity": "No activity in this period yet"
+    "no_activity": "No activity in this period yet",
+    "auto_mode": "Auto Mode",
+    "auto_mode_desc": "Study with automatic listening"
   },
   "settings": {
     "title": "Settings",

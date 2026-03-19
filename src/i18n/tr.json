@@ -21,7 +21,8 @@
     "learn": "Öğren",
     "quiz": "Quiz",
     "sentences": "Cümleler",
-    "profile": "Profil"
+    "profile": "Profil",
+    "read": "Oku"
   },
   "learn": {
     "title": "Öğrenilecek Cümleler",
@@ -47,13 +48,12 @@
     "correct": "Doğru!",
     "incorrect": "Yanlış!",
     "correct_answer_is": "Doğru cevap:",
-    "next_question": "Sonraki Soru",
+    "next_question": "Sonraki Soru →",
     "score": "Skor",
     "daily_limit_reached": "Günlük quiz limitine ulaştınız",
     "upgrade_for_unlimited": "Sınırsız quiz için Premium'a geçin",
     "hint": "İpucu",
     "submit": "Gönder",
-    "next_question": "Sonraki Soru →",
     "questions_remaining": "kalan soru",
     "fill_blank_instruction": "Verilen cümlenin tam çevirisini yazın:",
     "fill_blank_help": "Öğrenme kartlarındaki cümle çiftlerini kullanın. Gösterilen cümleyi tam olarak çevirin. Yön ok ile belirtilir — bazen kaynaktan hedefe, bazen hedefe kaynağa sorulur.",
@@ -138,7 +138,9 @@
     "week": "Hafta",
     "month": "Ay",
     "sentences_in_period": "cümle öğrenildi",
-    "no_activity": "Bu dönemde henüz aktivite yok"
+    "no_activity": "Bu dönemde henüz aktivite yok",
+    "auto_mode": "Otomatik Mod",
+    "auto_mode_desc": "Otomatik dinleme ile çalış"
   },
   "settings": {
     "title": "Ayarlar",

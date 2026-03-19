@@ -98,6 +98,7 @@ export type MainStackParamList = {
   Settings: undefined;
   Paywall: undefined;
   CategoryBrowser: undefined;
+  AutoMode: undefined;
 };
 
 export type AuthStackParamList = {
@@ -109,7 +110,7 @@ export type TabParamList = {
   Learn: undefined;
   Quiz: undefined;
   Sentences: undefined;
-  AutoMode: undefined;
+  Read: undefined;
   Profile: undefined;
 };
 
@@ -171,6 +172,55 @@ export interface ThemeColors {
   surfaceSecondary: string;
   keyword: string;
   keywordBg: string;
+}
+
+// Reading Text types
+export interface ReadingTextKeyword {
+  id: string;
+  reading_text_id: string;
+  position_index: number;
+  color_index: number;
+  keyword_tr: string | null;
+  keyword_en: string | null;
+  keyword_sv: string | null;
+  keyword_de: string | null;
+  keyword_es: string | null;
+  keyword_fr: string | null;
+  keyword_pt: string | null;
+}
+
+export interface ReadingText {
+  id: string;
+  slug: string;
+  category: string;
+  difficulty: 1 | 2 | 3;
+  is_premium: boolean;
+  order_index: number;
+  estimated_reading_seconds: number | null;
+  title_tr: string | null;
+  title_en: string | null;
+  title_sv: string | null;
+  title_de: string | null;
+  title_es: string | null;
+  title_fr: string | null;
+  title_pt: string | null;
+  body_tr: string | null;
+  body_en: string | null;
+  body_sv: string | null;
+  body_de: string | null;
+  body_es: string | null;
+  body_fr: string | null;
+  body_pt: string | null;
+  keywords?: ReadingTextKeyword[];
+  created_at: string;
+}
+
+export interface UserReadingProgress {
+  id: string;
+  user_id: string;
+  reading_text_id: string;
+  status: "read" | "learned";
+  completed_at: string;
 }
 
 // Legacy types (for backward compatibility)

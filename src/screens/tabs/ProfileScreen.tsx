@@ -90,6 +90,11 @@ export default function ProfileScreen() {
       badge: isPremium ? undefined : t("common.premium_badge"),
     },
     {
+      icon: "play-circle-outline",
+      label: t("profile.auto_mode"),
+      onPress: () => navigation.navigate("AutoMode"),
+    },
+    {
       icon: "settings-outline",
       label: t("profile.settings"),
       onPress: () => navigation.navigate("Settings"),

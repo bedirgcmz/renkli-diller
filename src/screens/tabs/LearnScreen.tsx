@@ -13,6 +13,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
@@ -20,7 +23,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
-import { Sentence } from "@/types";
+import { Sentence, MainStackParamList } from "@/types";
 
 type TabKey = "learning" | "learned";
 
@@ -131,6 +134,7 @@ const learnedStyles = StyleSheet.create({
 export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const {
     sentences: userSentences,
@@ -503,6 +507,19 @@ export default function LearnScreen() {
               )}
             />
           ))}
+
+        {/* ── Otomatik Mod kısayolu ────────────────────────────────────────── */}
+        <TouchableOpacity
+          style={[styles.autoModeShortcut, { borderTopColor: colors.divider }]}
+          onPress={() => navigation.navigate("AutoMode")}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="play-circle-outline" size={16} color={colors.textTertiary} />
+          <Text style={[styles.autoModeShortcutText, { color: colors.textTertiary }]}>
+            {t("profile.auto_mode")}
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} style={{ marginLeft: "auto" }} />
+        </TouchableOpacity>
       </SafeAreaView>
     </View>
   );
@@ -701,5 +718,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     minWidth: 36,
     textAlign: "right",
+  },
+  autoModeShortcut: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  autoModeShortcutText: {
+    fontSize: 13,
   },
 });

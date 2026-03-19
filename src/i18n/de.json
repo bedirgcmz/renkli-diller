@@ -21,7 +21,8 @@
     "learn": "Lernen",
     "quiz": "Quiz",
     "sentences": "Sätze",
-    "profile": "Profil"
+    "profile": "Profil",
+    "read": "Lesen"
   },
   "learn": {
     "title": "Zu lernende Sätze",
@@ -137,7 +138,9 @@
     "week": "Woche",
     "month": "Monat",
     "sentences_in_period": "Sätze gelernt",
-    "no_activity": "Noch keine Aktivität in diesem Zeitraum"
+    "no_activity": "Noch keine Aktivität in diesem Zeitraum",
+    "auto_mode": "Auto-Modus",
+    "auto_mode_desc": "Mit automatischem Hören lernen"
   },
   "settings": {
     "title": "Einstellungen",

@@ -21,7 +21,8 @@
     "learn": "Aprender",
     "quiz": "Quiz",
     "sentences": "Frases",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "read": "Ler"
   },
   "learn": {
     "title": "Frases para aprender",
@@ -137,7 +138,9 @@
     "week": "Semana",
     "month": "Mês",
     "sentences_in_period": "frases aprendidas",
-    "no_activity": "Nenhuma atividade neste período"
+    "no_activity": "Nenhuma atividade neste período",
+    "auto_mode": "Modo Auto",
+    "auto_mode_desc": "Estude com escuta automática"
   },
   "settings": {
     "title": "Configurações",

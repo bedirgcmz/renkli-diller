@@ -7,6 +7,7 @@ import EditSentenceScreen from "@/screens/EditSentenceScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import PaywallScreen from "@/screens/PaywallScreen";
 import CategoryBrowserScreen from "@/screens/CategoryBrowserScreen";
+import AutoModeScreen from "@/screens/AutoModeScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -38,6 +39,11 @@ export default function MainNavigator() {
         name="CategoryBrowser"
         component={CategoryBrowserScreen}
         options={{ presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="AutoMode"
+        component={AutoModeScreen}
+        options={{ presentation: "fullScreenModal" }}
       />
     </Stack.Navigator>
   );
