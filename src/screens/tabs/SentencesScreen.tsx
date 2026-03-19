@@ -139,28 +139,13 @@ function SentenceItem({
           {sentence.effectiveStatus === "new" && (
             <Pressable onPress={onLearn}>
               {({ pressed }) => (
-                <View
-                  style={{
-                    alignSelf: "flex-start",
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: "#3B8BD4",
-                    overflow: "hidden",
-                    paddingHorizontal: 6,
-                    paddingVertical: 4,
-                    backgroundColor: pressed ? "#3B8BD418" : "transparent",
-                    transform: [{ scale: pressed ? 0.95 : 1 }],
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="add-circle-outline" size={15} color="#3B8BD4" />
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={{ marginLeft: 6, color: "#3B8BD4", fontSize: 13, fontWeight: "600" }}
-                  >
+                <View style={[itemStyles.actionBtn, {
+                  borderColor: colors.border,
+                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                }]}>
+                  <Ionicons name="add-circle-outline" size={15} color={colors.textSecondary} />
+                  <Text numberOfLines={1} style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}>
                     {t("learn.add_to_list")}
                   </Text>
                 </View>
@@ -171,28 +156,13 @@ function SentenceItem({
           {sentence.effectiveStatus === "learning" && (
             <Pressable onPress={onMarkLearned}>
               {({ pressed }) => (
-                <View
-                  style={{
-                    alignSelf: "flex-start",
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: "#2ECC71",
-                    overflow: "hidden",
-                    paddingHorizontal: 6,
-                    paddingVertical: 4,
-                    backgroundColor: pressed ? "#2ECC7118" : "transparent",
-                    transform: [{ scale: pressed ? 0.95 : 1 }],
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="checkmark-circle-outline" size={15} color="#2ECC71" />
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={{ marginLeft: 6, color: "#2ECC71", fontSize: 13, fontWeight: "600" }}
-                  >
+                <View style={[itemStyles.actionBtn, {
+                  borderColor: colors.border,
+                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                }]}>
+                  <Ionicons name="checkmark-circle-outline" size={15} color={colors.textSecondary} />
+                  <Text numberOfLines={1} style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}>
                     {t("learn.mark_learned")}
                   </Text>
                 </View>
@@ -203,28 +173,13 @@ function SentenceItem({
           {sentence.effectiveStatus === "learned" && (
             <Pressable onPress={onForgot}>
               {({ pressed }) => (
-                <View
-                  style={{
-                    alignSelf: "flex-start",
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: "#E53E3E",
-                    overflow: "hidden",
-                    paddingHorizontal: 6,
-                    paddingVertical: 4,
-                    backgroundColor: pressed ? "#E53E3E18" : "transparent",
-                    transform: [{ scale: pressed ? 0.95 : 1 }],
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="refresh-outline" size={15} color="#E53E3E" />
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={{ marginLeft: 6, color: "#E53E3E", fontSize: 13, fontWeight: "600" }}
-                  >
+                <View style={[itemStyles.actionBtn, {
+                  borderColor: colors.border,
+                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                }]}>
+                  <Ionicons name="refresh-outline" size={15} color={colors.textSecondary} />
+                  <Text numberOfLines={1} style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}>
                     {t("learn.mark_unlearned")}
                   </Text>
                 </View>
@@ -278,6 +233,26 @@ const itemStyles = StyleSheet.create({
     marginTop: 10,
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  actionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    gap: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
 });
 
