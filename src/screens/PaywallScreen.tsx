@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import type { PurchasesPackage, PurchasesOffering } from "react-native-purchases";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { usePremium } from "@/hooks/usePremium";
 import {
@@ -19,14 +20,6 @@ import {
   purchasePackage,
   restorePurchases,
 } from "@/services/revenueCat";
-
-const FEATURES = [
-  "Sınırsız özel cümle ekle",
-  "Sınırsız quiz",
-  "Tüm kategorilere erişim",
-  "Auto-mode sınırsız kullan",
-  "Kaynak dil TTS desteği",
-];
 
 interface PackageOption {
   pkg: PurchasesPackage;
@@ -36,6 +29,7 @@ interface PackageOption {
 
 export default function PaywallScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { refresh } = usePremium();
 
@@ -70,9 +64,9 @@ export default function PaywallScreen() {
         (p) => p.packageType === "LIFETIME" || p.identifier.includes("lifetime")
       );
 
-      if (monthly) opts.push({ pkg: monthly, label: "Aylık" });
-      if (annual) opts.push({ pkg: annual, label: "Yıllık", badge: "En Popüler" });
-      if (lifetime) opts.push({ pkg: lifetime, label: "Ömürlük", badge: "En İyi Değer" });
+      if (monthly) opts.push({ pkg: monthly, label: t("premium.pkg_monthly") });
+      if (annual) opts.push({ pkg: annual, label: t("premium.pkg_annual"), badge: t("premium.badge_popular") });
+      if (lifetime) opts.push({ pkg: lifetime, label: t("premium.pkg_lifetime"), badge: t("premium.badge_best_value") });
 
       setPackages(opts);
       // Varsayılan seçim: yıllık
@@ -95,12 +89,12 @@ export default function PaywallScreen() {
       } else if (result.success) {
         await refresh();
         Alert.alert(
-          "Premium Aktif!",
-          "Tüm premium özelliklere erişebilirsin.",
-          [{ text: "Harika!", onPress: () => navigation.goBack() }]
+          t("premium.success_title"),
+          t("premium.success_body"),
+          [{ text: t("premium.success_btn"), onPress: () => navigation.goBack() }]
         );
       } else {
-        Alert.alert("Hata", result.error ?? "Satın alma başarısız oldu.");
+        Alert.alert(t("common.error"), result.error ?? t("premium.error_purchase"));
       }
     } finally {
       setPurchasing(false);
@@ -114,15 +108,15 @@ export default function PaywallScreen() {
       if (result.isPremium) {
         await refresh();
         Alert.alert(
-          "Geri Yüklendi!",
-          "Premium satın alman geri yüklendi.",
-          [{ text: "Tamam", onPress: () => navigation.goBack() }]
+          t("premium.restored_title"),
+          t("premium.restored_body"),
+          [{ text: t("common.ok"), onPress: () => navigation.goBack() }]
         );
       } else {
-        Alert.alert("Bulunamadı", "Bu hesapta aktif bir premium satın alma bulunamadı.");
+        Alert.alert(t("premium.not_found_title"), t("premium.not_found_body"));
       }
     } catch {
-      Alert.alert("Hata", "Satın almalar geri yüklenirken bir sorun oluştu.");
+      Alert.alert(t("common.error"), t("premium.error_restore"));
     } finally {
       setRestoring(false);
     }
@@ -156,15 +150,15 @@ export default function PaywallScreen() {
           <Text style={s.badgeTxt}>PREMIUM</Text>
         </LinearGradient>
 
-        <Text style={s.title}>Renkli Diller'i{"\n"}tam açıkla</Text>
-        <Text style={s.subtitle}>Dil öğrenmeye sınır yok</Text>
+        <Text style={s.title}>{t("premium.paywall_title")}</Text>
+        <Text style={s.subtitle}>{t("premium.paywall_subtitle")}</Text>
 
         {/* Özellik listesi */}
         <View style={s.featureList}>
-          {FEATURES.map((f) => (
-            <View key={f} style={s.featureRow}>
+          {(["feature_unlimited_add", "feature_quiz", "feature_categories", "feature_auto", "feature_tts"] as const).map((key) => (
+            <View key={key} style={s.featureRow}>
               <Text style={s.featureCheck}>✓</Text>
-              <Text style={s.featureText}>{f}</Text>
+              <Text style={s.featureText}>{t(`premium.${key}`)}</Text>
             </View>
           ))}
         </View>
@@ -194,7 +188,7 @@ export default function PaywallScreen() {
                   </Text>
                   {pkg.product.subscriptionPeriod && (
                     <Text style={s.packagePeriod}>
-                      {pkg.packageType === "ANNUAL" ? "/yıl" : pkg.packageType === "MONTHLY" ? "/ay" : "tek seferlik"}
+                      {pkg.packageType === "ANNUAL" ? t("premium.period_annual") : pkg.packageType === "MONTHLY" ? t("premium.period_monthly") : t("premium.period_once")}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -203,9 +197,7 @@ export default function PaywallScreen() {
           </View>
         ) : (
           <View style={s.offlineNote}>
-            <Text style={s.offlineNoteTxt}>
-              Fiyat bilgisi yüklenemedi. İnternet bağlantını kontrol et.
-            </Text>
+            <Text style={s.offlineNoteTxt}>{t("premium.offline_note")}</Text>
           </View>
         )}
 
@@ -225,7 +217,7 @@ export default function PaywallScreen() {
             {purchasing ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={s.purchaseBtnTxt}>Premium'a Geç</Text>
+              <Text style={s.purchaseBtnTxt}>{t("premium.purchase_btn")}</Text>
             )}
           </LinearGradient>
         </TouchableOpacity>
@@ -235,14 +227,12 @@ export default function PaywallScreen() {
           {restoring ? (
             <ActivityIndicator size="small" color={colors.textSecondary} />
           ) : (
-            <Text style={s.restoreTxt}>Satın almayı geri yükle</Text>
+            <Text style={s.restoreTxt}>{t("premium.restore_btn")}</Text>
           )}
         </TouchableOpacity>
 
         {/* Yasal notlar */}
-        <Text style={s.legalTxt}>
-          Abonelikler her dönem sonunda otomatik yenilenir. İstediğin zaman App Store veya Google Play üzerinden iptal edebilirsin.
-        </Text>
+        <Text style={s.legalTxt}>{t("premium.legal")}</Text>
       </ScrollView>
     </SafeAreaView>
   );
