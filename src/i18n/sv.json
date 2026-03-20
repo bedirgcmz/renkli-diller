@@ -1,7 +1,7 @@
 {
-  "app_name": "Renkli Diller",
+  "app_name": "Parlio",
   "onboarding": {
-    "welcome_title": "Välkommen till Renkli Diller",
+    "welcome_title": "Välkommen till Parlio",
     "welcome_subtitle": "Det mest färgrika sättet att lära sig språk med meningar",
     "select_ui_language": "Välj gränssnittsspråk",
     "select_target_language": "Välj språk att lära",
@@ -178,7 +178,7 @@
     "purchase": "Köp",
     "restore": "Återställ köp",
     "already_premium": "Du är redan Premium!",
-    "paywall_title": "Använd Renkli Diller\nFritt",
+    "paywall_title": "Använd Parlio\nFritt",
     "paywall_subtitle": "Full tillgång till alla premiumfunktioner",
     "pkg_monthly": "Månadsvis",
     "pkg_annual": "Årsvis",
@@ -295,6 +295,6 @@
     "quiz_next": "Nästa",
     "quiz_premium_only": "Premiumfunktion",
     "share": "Dela",
-    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Renkli Diller!"
+    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!"
   }
 }

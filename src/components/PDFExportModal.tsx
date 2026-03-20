@@ -56,7 +56,7 @@ function buildHtml(sentences: Sentence[], title: string, filterLabel: string): s
 </style>
 </head>
 <body>
-  <h1>Renkli Diller</h1>
+  <h1>Parlio</h1>
   <div class="subtitle">${title} — ${filterLabel} (${sentences.length})</div>
   <table>
     <thead>
@@ -68,7 +68,7 @@ function buildHtml(sentences: Sentence[], title: string, filterLabel: string): s
     </thead>
     <tbody>${rows}</tbody>
   </table>
-  <div class="footer">Renkli Diller • ${new Date().toLocaleDateString()}</div>
+  <div class="footer">Parlio • ${new Date().toLocaleDateString()}</div>
 </body>
 </html>`;
 }

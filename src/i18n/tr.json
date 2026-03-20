@@ -1,7 +1,7 @@
 {
-  "app_name": "Renkli Diller",
+  "app_name": "Parlio",
   "onboarding": {
-    "welcome_title": "Renkli Diller'e Hoş Geldiniz",
+    "welcome_title": "Parlio'ya Hoş Geldiniz",
     "welcome_subtitle": "Cümlelerle dil öğrenmenin en renkli yolu",
     "select_ui_language": "Arayüz dilini seçin",
     "select_target_language": "Öğrenmek istediğiniz dili seçin",
@@ -178,7 +178,7 @@
     "purchase": "Satın Al",
     "restore": "Satın Almayı Geri Yükle",
     "already_premium": "Zaten Premium üyesiniz!",
-    "paywall_title": "Renkli Diller'i\nÖzgürce Kullan",
+    "paywall_title": "Parlio'yu\nÖzgürce Kullan",
     "paywall_subtitle": "Tüm premium özelliklere tam erişim",
     "pkg_monthly": "Aylık",
     "pkg_annual": "Yıllık",
@@ -295,6 +295,6 @@
     "quiz_next": "Sonraki",
     "quiz_premium_only": "Premium özellik",
     "share": "Paylaş",
-    "share_text": "Bugün \"{title}\" metnini çalıştım - Renkli Diller ile dil öğren!"
+    "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!"
   }
 }

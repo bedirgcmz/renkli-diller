@@ -1,7 +1,7 @@
 {
-  "app_name": "Renkli Diller",
+  "app_name": "Parlio",
   "onboarding": {
-    "welcome_title": "Willkommen bei Renkli Diller",
+    "welcome_title": "Willkommen bei Parlio",
     "welcome_subtitle": "Der bunteste Weg, Sprachen mit Sätzen zu lernen",
     "select_ui_language": "Schnittstellensprache auswählen",
     "select_target_language": "Zu lernende Sprache auswählen",
@@ -178,7 +178,7 @@
     "purchase": "Kaufen",
     "restore": "Kauf wiederherstellen",
     "already_premium": "Sie sind bereits Premium!",
-    "paywall_title": "Renkli Diller\nFrei Nutzen",
+    "paywall_title": "Parlio\nFrei Nutzen",
     "paywall_subtitle": "Voller Zugriff auf alle Premium-Funktionen",
     "pkg_monthly": "Monatlich",
     "pkg_annual": "Jährlich",
@@ -295,6 +295,6 @@
     "quiz_next": "Weiter",
     "quiz_premium_only": "Premium-Funktion",
     "share": "Teilen",
-    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Renkli Diller!"
+    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!"
   }
 }

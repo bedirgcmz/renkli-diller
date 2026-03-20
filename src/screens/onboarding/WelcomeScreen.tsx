@@ -98,7 +98,7 @@ export default function WelcomeScreen() {
   const [warning, setWarning] = useState<string | null>(null);
 
   const appName = useMemo(() => {
-    const letters = "Renkli Diller".split("");
+    const letters = "Parlio".split("");
     const palette = [
       colors.accent,
       colors.premiumAccent,

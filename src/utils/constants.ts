@@ -69,11 +69,11 @@ export const DELAY_PER_CHAR_MS = 100;
 export const POST_READ_DELAY_MS = 2000;
 
 export const APP_NAMES: Record<SupportedLanguage, string> = {
-  tr: 'Renkli Diller',
-  en: 'Colorful Languages',
-  sv: 'Färgglada Språk',
-  de: 'Bunte Sprachen',
-  es: 'Lenguas Coloridas',
-  fr: 'Langues Colorées',
-  pt: 'Línguas Coloridas',
+  tr: 'Parlio',
+  en: 'Parlio',
+  sv: 'Parlio',
+  de: 'Parlio',
+  es: 'Parlio',
+  fr: 'Parlio',
+  pt: 'Parlio',
 };
