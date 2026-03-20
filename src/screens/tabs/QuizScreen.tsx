@@ -124,7 +124,7 @@ export default function QuizScreen() {
   const [initialized, setInitialized] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const DAILY_KEY = "@renkli_quiz_daily";
+  const DAILY_KEY = "@parlio_quiz_daily";
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {

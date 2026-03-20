@@ -131,7 +131,7 @@ export default function PDFExportModal({ visible, onClose }: Props) {
     try {
       const filterLabel = FILTERS.find((f) => f.key === filter)?.label ?? "";
       const html = buildHtml(filtered, t("pdf_export.title"), filterLabel);
-      await createAndSharePdf(html, `renkli_diller_${filter}`);
+      await createAndSharePdf(html, `parlio_${filter}`);
       onClose();
     } catch (err) {
       Alert.alert(t("common.error"), String(err));

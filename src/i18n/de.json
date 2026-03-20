@@ -94,6 +94,8 @@
     "target_sentence": "Zielsprache Satz",
     "keywords": "Zielwörter",
     "keyword_hint": "Markierungen für Farbcodierung verwenden: *rot* #grün# %gelb%",
+    "keyword_guide_instruction": "Umschließe das Wort oder die Phrase mit **doppelten Sternchen**:",
+    "keyword_guide_shown_as": "wird als buntes Badge angezeigt",
     "select_category": "Kategorie auswählen",
     "save": "Speichern",
     "cancel": "Abbrechen",

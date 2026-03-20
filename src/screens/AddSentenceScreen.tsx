@@ -132,8 +132,7 @@ export default function AddSentenceScreen() {
           {guideOpen && (
             <View style={[styles.guideBody, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
               <Text style={[styles.guideMarker, { color: colors.text }]}>
-                Vurgulamak istediğin kelime veya kelime grubunu{" "}
-                <Text style={{ fontWeight: "700" }}>**çift yıldız**</Text> içine al:
+                {t("add_sentence.keyword_guide_instruction")}
               </Text>
               <View style={[styles.guideRow, { marginTop: 8 }]}>
                 <Text style={[styles.guideMarker, { color: colors.textSecondary }]}>
@@ -146,7 +145,7 @@ export default function AddSentenceScreen() {
                   <Text style={[styles.guideSampleText, { color: "#fff" }]}>get used to</Text>
                 </View>
                 <Text style={[{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }]}>
-                  renkli badge olarak gösterilir
+                  {t("add_sentence.keyword_guide_shown_as")}
                 </Text>
               </View>
             </View>

@@ -94,6 +94,8 @@
     "target_sentence": "Frase en idioma destino",
     "keywords": "Palabras clave",
     "keyword_hint": "Usa marcadores para colorear: *rojo* #verde# %amarillo%",
+    "keyword_guide_instruction": "Encierra la palabra o frase entre **dobles asteriscos**:",
+    "keyword_guide_shown_as": "se muestra como una insignia de color",
     "select_category": "Seleccionar categoría",
     "save": "Guardar",
     "cancel": "Cancelar",

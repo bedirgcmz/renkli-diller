@@ -94,6 +94,8 @@
     "target_sentence": "Målspråksmening",
     "keywords": "Målord",
     "keyword_hint": "Använd markörer för färgning: *röd* #grön# %gul%",
+    "keyword_guide_instruction": "Omge det ord eller fras du vill markera med **dubbla asterisker**:",
+    "keyword_guide_shown_as": "visas som ett färgglatt märke",
     "select_category": "Välj kategori",
     "save": "Spara",
     "cancel": "Avbryt",

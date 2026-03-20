@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "renkli-diller://auth/callback",
+          redirectTo: "parlio://auth/callback",
         },
       });
 
@@ -160,7 +160,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "renkli-diller://auth/reset-password",
+        redirectTo: "parlio://auth/reset-password",
       });
 
       if (error) {

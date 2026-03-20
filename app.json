@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Parlio",
-    "slug": "renkli-diller",
-    "scheme": "renkli-diller",
+    "slug": "parlio",
+    "scheme": "parlio",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,10 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.renklidiller.app"
+      "bundleIdentifier": "com.parlio.app"
     },
     "android": {
-      "package": "com.renklidiller.app",
+      "package": "com.parlio.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
