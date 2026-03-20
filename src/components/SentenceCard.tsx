@@ -238,10 +238,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           {hasMismatch && (
             <Pressable
               onPress={onEdit}
-              style={({ pressed }) => [
-                styles.mismatchStrip,
-                { opacity: pressed ? 0.7 : 1 },
-              ]}
+              style={({ pressed }) => [styles.mismatchStrip, { opacity: pressed ? 0.7 : 1 }]}
             >
               <Ionicons name="warning-outline" size={13} color="#B45309" />
               <Text style={styles.mismatchText}>
@@ -329,11 +326,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: "rgba(245,158,11,0.10)",
+    alignSelf: "stretch",
   },
   mismatchText: {
     fontSize: 12,
     fontWeight: "500",
     color: "#B45309",
-    flex: 1,
+    flexShrink: 1,
+    flexWrap: "wrap",
   },
 });
