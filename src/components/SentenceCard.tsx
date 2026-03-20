@@ -35,6 +35,7 @@ export interface SentenceCardProps {
   onLearn: () => void;
   onMarkLearned: () => void;
   onForgot: () => void;
+  onEdit?: () => void;
   showTarget?: boolean;
 }
 
@@ -46,12 +47,20 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   onLearn,
   onMarkLearned,
   onForgot,
+  onEdit,
   showTarget = true,
 }) => {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const { isPremium } = usePremium();
   const [speaking, setSpeaking] = useState(false);
+
+  const hasMismatch =
+    !sentence.is_preset &&
+    sentence.source_lang &&
+    sentence.target_lang &&
+    onEdit &&
+    (sentence.source_lang !== uiLanguage || sentence.target_lang !== targetLanguage);
 
   const handleAudio = async () => {
     if (speaking) {
@@ -225,6 +234,23 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
               )}
             </Pressable>
           </View>
+
+          {hasMismatch && (
+            <Pressable
+              onPress={onEdit}
+              style={({ pressed }) => [
+                styles.mismatchStrip,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Ionicons name="warning-outline" size={13} color="#B45309" />
+              <Text style={styles.mismatchText}>
+                {t(`languages.${sentence.source_lang}`)} → {t(`languages.${sentence.target_lang}`)}
+                {"  ·  "}
+                {t("sentences.lang_mismatch_edit")} →
+              </Text>
+            </Pressable>
+          )}
         </View>
       </View>
     </View>
@@ -293,5 +319,21 @@ const styles = StyleSheet.create({
   actionBtnText: {
     fontWeight: "600",
     fontSize: 13,
+  },
+  mismatchStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: "rgba(245,158,11,0.10)",
+  },
+  mismatchText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#B45309",
+    flex: 1,
   },
 });

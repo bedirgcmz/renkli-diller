@@ -420,6 +420,12 @@ export default function LearnScreen() {
                       onLearn={handleLearn}
                       onMarkLearned={handleMarkLearned}
                       onForgot={handleForgotCard}
+                      onEdit={() =>
+                        navigation.navigate("EditSentence", {
+                          sentenceId: currentSentence.id,
+                          isPreset: currentSentence.is_preset,
+                        })
+                      }
                     />
                   )}
                 </Animated.View>
