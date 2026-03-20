@@ -82,7 +82,10 @@
     "filter_title": "Filtrera",
     "filter_status": "Status",
     "filter_category": "Kategori",
-    "clear_filters": "Rensa"
+    "clear_filters": "Rensa",
+    "lang_mismatch_title": "Lades till med ett annat språkpar",
+    "lang_mismatch_body": "Du lade till den här meningen för {{sourceLang}} → {{targetLang}}. Det matchar inte dina nuvarande inställningar ({{currentSource}} → {{currentTarget}}). Du kan redigera den för att uppdatera.",
+    "lang_mismatch_edit": "Redigera"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",

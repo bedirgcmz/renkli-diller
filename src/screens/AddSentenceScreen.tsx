@@ -72,6 +72,8 @@ export default function AddSentenceScreen() {
       target_text: targetText.trim(),
       keywords: keywords.filter((k) => k.trim() !== ""),
       category_id: categoryId,
+      source_lang: uiLanguage,
+      target_lang: targetLanguage,
     });
     setSaving(false);
 

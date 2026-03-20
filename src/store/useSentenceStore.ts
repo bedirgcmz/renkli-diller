@@ -45,6 +45,8 @@ interface SentenceState {
     target_text: string;
     keywords: string[];
     category_id?: number;
+    source_lang?: string;
+    target_lang?: string;
   }) => Promise<{ success: boolean; error?: string }>;
   updateSentence: (
     id: string,
@@ -185,6 +187,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
             : "",
           status: (row.state || "new") as SentenceStatus,
           is_preset: false,
+          source_lang: row.source_lang ?? undefined,
+          target_lang: row.target_lang ?? undefined,
           created_at: row.created_at,
           updated_at: row.updated_at,
         };
@@ -196,7 +200,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     }
   },
 
-  addSentence: async ({ source_text, target_text, keywords, category_id }) => {
+  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang }) => {
     set({ loading: true, error: null });
     try {
       const {
@@ -216,6 +220,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           keywords,
           category_id,
           state: "learning",
+          source_lang: source_lang ?? null,
+          target_lang: target_lang ?? null,
         })
         .select()
         .single();
@@ -240,6 +246,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           : "",
         status: "learning",
         is_preset: false,
+        source_lang: source_lang as Sentence["source_lang"],
+        target_lang: target_lang as Sentence["target_lang"],
         created_at: data.created_at,
       };
 

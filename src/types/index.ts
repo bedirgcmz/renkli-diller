@@ -26,6 +26,8 @@ export interface Sentence {
   category_name?: string;
   status: SentenceStatus;
   is_preset: boolean;
+  source_lang?: SupportedLanguage;
+  target_lang?: SupportedLanguage;
   created_at?: string;
   updated_at?: string;
 }

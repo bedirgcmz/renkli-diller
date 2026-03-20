@@ -45,18 +45,22 @@ const STATUS_BAR_COLOR: Record<SentenceStatus, string> = {
 interface SentenceItemProps {
   sentence: Sentence & { effectiveStatus: SentenceStatus };
   isUserSentence: boolean;
+  uiLanguage: string;
+  targetLanguage: string;
   onLearn: () => void;
   onMarkLearned: () => void;
   onForgot: () => void;
   onEdit: () => void;
   onDelete: () => void;
   colors: any;
-  t: (k: string) => string;
+  t: (k: string, opts?: Record<string, string>) => string;
 }
 
 function SentenceItem({
   sentence,
   isUserSentence,
+  uiLanguage,
+  targetLanguage,
   onLearn,
   onMarkLearned,
   onForgot,
@@ -65,6 +69,27 @@ function SentenceItem({
   colors,
   t,
 }: SentenceItemProps) {
+  const hasMismatch =
+    isUserSentence &&
+    sentence.source_lang &&
+    sentence.target_lang &&
+    (sentence.source_lang !== uiLanguage || sentence.target_lang !== targetLanguage);
+
+  const handleMismatchPress = () => {
+    Alert.alert(
+      t("sentences.lang_mismatch_title"),
+      t("sentences.lang_mismatch_body", {
+        sourceLang: t(`languages.${sentence.source_lang}`),
+        targetLang: t(`languages.${sentence.target_lang}`),
+        currentSource: t(`languages.${uiLanguage}`),
+        currentTarget: t(`languages.${targetLanguage}`),
+      }),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("sentences.lang_mismatch_edit"), onPress: onEdit },
+      ],
+    );
+  };
   const barColor = STATUS_BAR_COLOR[sentence.effectiveStatus];
   const keywordsText = sentence.keywords.filter(Boolean).join(", ");
 
@@ -73,6 +98,15 @@ function SentenceItem({
       <View style={[itemStyles.statusBar, { backgroundColor: barColor }]} />
       <View style={itemStyles.body}>
         <View style={itemStyles.iconRow}>
+          {hasMismatch && (
+            <Pressable
+              onPress={handleMismatchPress}
+              hitSlop={HIT}
+              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+            >
+              <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
+            </Pressable>
+          )}
           <Pressable
             onPress={onEdit}
             hitSlop={HIT}
@@ -694,6 +728,8 @@ export default function SentencesScreen() {
               })
             }
             onDelete={() => handleDelete(item)}
+            uiLanguage={uiLanguage}
+            targetLanguage={targetLanguage}
             colors={colors}
             t={t}
           />

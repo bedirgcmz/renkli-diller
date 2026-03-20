@@ -82,7 +82,10 @@
     "filter_title": "Filtrar",
     "filter_status": "Status",
     "filter_category": "Categoria",
-    "clear_filters": "Limpar"
+    "clear_filters": "Limpar",
+    "lang_mismatch_title": "Adicionada com outro par de idiomas",
+    "lang_mismatch_body": "Você adicionou esta frase para {{sourceLang}} → {{targetLang}}. Não corresponde às suas configurações atuais ({{currentSource}} → {{currentTarget}}). Você pode editá-la para atualizar.",
+    "lang_mismatch_edit": "Editar"
   },
   "add_sentence": {
     "title": "Nova frase",

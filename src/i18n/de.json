@@ -82,7 +82,10 @@
     "filter_title": "Filtern",
     "filter_status": "Status",
     "filter_category": "Kategorie",
-    "clear_filters": "Zurücksetzen"
+    "clear_filters": "Zurücksetzen",
+    "lang_mismatch_title": "Mit einem anderen Sprachpaar hinzugefügt",
+    "lang_mismatch_body": "Du hast diesen Satz für {{sourceLang}} → {{targetLang}} hinzugefügt. Das stimmt nicht mit deinen aktuellen Einstellungen ({{currentSource}} → {{currentTarget}}) überein. Du kannst ihn bearbeiten, um ihn zu aktualisieren.",
+    "lang_mismatch_edit": "Bearbeiten"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",
