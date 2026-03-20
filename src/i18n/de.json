@@ -85,7 +85,8 @@
     "clear_filters": "Zurücksetzen",
     "lang_mismatch_title": "Mit einem anderen Sprachpaar hinzugefügt",
     "lang_mismatch_body": "Du hast diesen Satz für {{sourceLang}} → {{targetLang}} hinzugefügt. Das stimmt nicht mit deinen aktuellen Einstellungen ({{currentSource}} → {{currentTarget}}) überein. Du kannst ihn bearbeiten, um ihn zu aktualisieren.",
-    "lang_mismatch_edit": "Bearbeiten"
+    "lang_mismatch_edit": "Bearbeiten",
+    "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",

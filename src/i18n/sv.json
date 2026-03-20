@@ -85,7 +85,8 @@
     "clear_filters": "Rensa",
     "lang_mismatch_title": "Lades till med ett annat språkpar",
     "lang_mismatch_body": "Du lade till den här meningen för {{sourceLang}} → {{targetLang}}. Det matchar inte dina nuvarande inställningar ({{currentSource}} → {{currentTarget}}). Du kan redigera den för att uppdatera.",
-    "lang_mismatch_edit": "Redigera"
+    "lang_mismatch_edit": "Redigera",
+    "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",

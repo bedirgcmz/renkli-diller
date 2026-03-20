@@ -85,7 +85,8 @@
     "clear_filters": "Limpiar",
     "lang_mismatch_title": "Añadida con otro par de idiomas",
     "lang_mismatch_body": "Añadiste esta frase para {{sourceLang}} → {{targetLang}}. No coincide con tu configuración actual ({{currentSource}} → {{currentTarget}}). Puedes editarla para actualizarla.",
-    "lang_mismatch_edit": "Editar"
+    "lang_mismatch_edit": "Editar",
+    "lang_mismatch_strip": "Configuración de idioma cambiada  ·  Editar"
   },
   "add_sentence": {
     "title": "Nueva frase",

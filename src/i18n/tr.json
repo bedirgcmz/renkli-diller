@@ -85,7 +85,8 @@
     "clear_filters": "Temizle",
     "lang_mismatch_title": "Farklı dil çiftiyle eklendi",
     "lang_mismatch_body": "Bu cümleyi {{sourceLang}} → {{targetLang}} dil çifti için eklediniz. Şu anki ayarlarınız ({{currentSource}} → {{currentTarget}}) ile eşleşmiyor. Düzenleyerek güncelleyebilirsiniz.",
-    "lang_mismatch_edit": "Düzenle"
+    "lang_mismatch_edit": "Düzenle",
+    "lang_mismatch_strip": "Dil ayarları değişti  ·  Düzenle"
   },
   "add_sentence": {
     "title": "Yeni Cümle Ekle",
