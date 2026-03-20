@@ -38,7 +38,7 @@ interface SentenceState {
   error: string | null;
 
   loadSentences: (filters?: SentenceFilters) => Promise<void>;
-  loadPresetSentences: (categoryId?: number) => Promise<void>;
+  loadPresetSentences: (categoryId?: number, isPremium?: boolean) => Promise<void>;
   loadCategories: () => Promise<void>;
   addSentence: (data: {
     source_text: string;
@@ -84,7 +84,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     }
   },
 
-  loadPresetSentences: async (categoryId?: number) => {
+  loadPresetSentences: async (categoryId?: number, isPremium: boolean = true) => {
     set({ loading: true, error: null });
     try {
       const { uiLanguage, targetLanguage } = useSettingsStore.getState();
@@ -95,6 +95,19 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
 
       if (categoryId) {
         query = query.eq("category_id", categoryId);
+      } else if (!isPremium) {
+        // Free users: only load sentences from free categories
+        const { data: freeCats } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("is_free", true);
+        const freeCatIds = freeCats?.map((c: any) => c.id) ?? [];
+        if (freeCatIds.length > 0) {
+          query = query.in("category_id", freeCatIds);
+        } else {
+          set({ presetSentences: [], loading: false });
+          return;
+        }
       }
 
       const { data, error } = await query;

@@ -22,6 +22,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
@@ -507,6 +508,7 @@ export default function SentencesScreen() {
   const { colors, isDark } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage } = useSettingsStore();
+  const { isPremium } = usePremium();
   const {
     sentences,
     presetSentences,
@@ -520,6 +522,8 @@ export default function SentencesScreen() {
     deleteSentence,
   } = useSentenceStore();
   const { progressMap, loadProgress } = useProgressStore();
+
+  const visibleCategories = isPremium ? categories : categories.filter((c) => c.is_free);
 
   const [activeTab, setActiveTab] = useState<SentenceTab>("preset");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -535,14 +539,14 @@ export default function SentencesScreen() {
 
   useEffect(() => {
     loadCategories();
-    loadPresetSentences();
+    loadPresetSentences(undefined, isPremium);
     loadSentences();
     loadProgress();
-  }, []);
+  }, [isPremium]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadPresetSentences(), loadSentences(), loadProgress()]);
+    await Promise.all([loadPresetSentences(undefined, isPremium), loadSentences(), loadProgress()]);
     setRefreshing(false);
   };
 
@@ -713,7 +717,7 @@ export default function SentencesScreen() {
         setStatusFilter={setStatusFilter}
         categoryFilter={categoryFilter}
         setCategoryFilter={setCategoryFilter}
-        categories={categories}
+        categories={visibleCategories}
         uiLanguage={uiLanguage}
         colors={colors}
         isDark={isDark}

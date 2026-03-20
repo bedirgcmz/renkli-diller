@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -123,7 +124,16 @@ export default function QuizScreen() {
   const [initialized, setInitialized] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const DAILY_KEY = "@renkli_quiz_daily";
+  const today = new Date().toISOString().split("T")[0];
+
   useEffect(() => {
+    AsyncStorage.getItem(DAILY_KEY).then((raw) => {
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setDailyCount(parsed.date === today ? parsed.count : 0);
+      }
+    });
     Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
       setInitialized(true),
     );
@@ -176,7 +186,11 @@ export default function QuizScreen() {
     setShowResult(true);
     setSelectedOption(answer);
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
-    setDailyCount((c) => c + 1);
+    setDailyCount((c) => {
+      const next = c + 1;
+      AsyncStorage.setItem(DAILY_KEY, JSON.stringify({ count: next, date: today }));
+      return next;
+    });
 
     recordQuizResult({
       user_id: "",

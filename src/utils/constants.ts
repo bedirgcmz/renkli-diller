@@ -57,11 +57,9 @@ export const KEYWORD_TEXT_COLORS = {
   ],
 };
 
-export const FREE_SENTENCE_LIMIT = 30;
 export const FREE_USER_SENTENCE_LIMIT = 30;
 export const FREE_QUIZ_DAILY_LIMIT = 5;
 export const FREE_AUTO_MODE_LIMIT = 10;
-export const FREE_CATEGORY_COUNT = 2;
 export const PREMIUM_PRICE_MONTHLY = '$2.99';
 export const PREMIUM_PRICE_ANNUAL = '$16.99';
 export const PREMIUM_PRICE_LIFETIME = '$24.99';
