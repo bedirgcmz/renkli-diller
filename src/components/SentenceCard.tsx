@@ -236,17 +236,14 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           </View>
 
           {hasMismatch && (
-            <Pressable
-              onPress={onEdit}
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, marginTop: 16 })}
-            >
-              <View style={styles.mismatchStrip}>
-                <Ionicons name="warning-outline" size={13} color="#B45309" />
-                <Text style={styles.mismatchText}>
-                  {t("sentences.lang_mismatch_strip")}
-                </Text>
-              </View>
-            </Pressable>
+            <View style={{ marginTop: 8 }}>
+              <Pressable onPress={onEdit} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+                <View style={styles.mismatchStrip}>
+                  <Ionicons name="warning-outline" size={13} color="#B45309" />
+                  <Text style={styles.mismatchText}>{t("sentences.lang_mismatch_strip")}</Text>
+                </View>
+              </Pressable>
+            </View>
           )}
         </View>
       </View>
@@ -301,7 +298,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 16,
-    marginBottom: 2,
   },
   actionBtn: {
     flexDirection: "row",
