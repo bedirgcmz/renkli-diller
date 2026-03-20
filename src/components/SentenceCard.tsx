@@ -238,14 +238,16 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           {hasMismatch && (
             <Pressable
               onPress={onEdit}
-              style={({ pressed }) => [styles.mismatchStrip, { opacity: pressed ? 0.7 : 1 }]}
+              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, marginTop: 10 })}
             >
-              <Ionicons name="warning-outline" size={13} color="#B45309" />
-              <Text style={styles.mismatchText}>
-                {t(`languages.${sentence.source_lang}`)} → {t(`languages.${sentence.target_lang}`)}
-                {"  ·  "}
-                {t("sentences.lang_mismatch_edit")} →
-              </Text>
+              <View style={styles.mismatchStrip}>
+                <Ionicons name="warning-outline" size={13} color="#B45309" />
+                <Text style={styles.mismatchText}>
+                  {t(`languages.${sentence.source_lang}`)} → {t(`languages.${sentence.target_lang}`)}
+                  {"  ·  "}
+                  {t("sentences.lang_mismatch_edit")} →
+                </Text>
+              </View>
             </Pressable>
           )}
         </View>
@@ -321,18 +323,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    marginTop: 10,
-    paddingVertical: 7,
+    paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: "rgba(245,158,11,0.10)",
-    alignSelf: "stretch",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(180,83,9,0.30)",
   },
   mismatchText: {
     fontSize: 12,
     fontWeight: "500",
     color: "#B45309",
-    flexShrink: 1,
-    flexWrap: "wrap",
   },
 });
