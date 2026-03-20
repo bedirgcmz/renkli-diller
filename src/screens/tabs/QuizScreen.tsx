@@ -134,13 +134,16 @@ export default function QuizScreen() {
         setDailyCount(parsed.date === today ? parsed.count : 0);
       }
     });
-    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
-      setInitialized(true),
-    );
     return () => {
       if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+      setInitialized(true),
+    );
+  }, [targetLanguage, uiLanguage]);
 
   // Tüm cümleler: user sentences + öğreniliyor/öğrenildi preset cümleler
   const allSentences: Sentence[] = [

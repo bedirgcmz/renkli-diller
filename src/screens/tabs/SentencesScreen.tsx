@@ -507,7 +507,7 @@ export default function SentencesScreen() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const { uiLanguage } = useSettingsStore();
+  const { uiLanguage, targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
   const {
     sentences,
@@ -542,7 +542,7 @@ export default function SentencesScreen() {
     loadPresetSentences(undefined, isPremium);
     loadSentences();
     loadProgress();
-  }, [isPremium]);
+  }, [isPremium, targetLanguage, uiLanguage]);
 
   const onRefresh = async () => {
     setRefreshing(true);

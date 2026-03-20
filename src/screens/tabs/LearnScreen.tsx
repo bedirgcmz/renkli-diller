@@ -172,7 +172,7 @@ export default function LearnScreen() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [targetLanguage, uiLanguage]);
 
   const learningList: Sentence[] = [
     ...userSentences.filter((s) => s.status === "learning"),
