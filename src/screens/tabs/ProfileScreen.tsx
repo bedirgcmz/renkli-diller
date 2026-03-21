@@ -197,6 +197,16 @@ export default function ProfileScreen() {
       onPress: () => navigation.navigate("EditProfile"),
     },
     {
+      icon: "mail-outline",
+      label: t("profile.change_email"),
+      onPress: () => navigation.navigate("ChangeEmail"),
+    },
+    {
+      icon: "lock-closed-outline",
+      label: t("profile.change_password"),
+      onPress: () => navigation.navigate("ChangePassword"),
+    },
+    {
       icon: "settings-outline",
       label: t("profile.settings"),
       onPress: () => navigation.navigate("Settings"),
