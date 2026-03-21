@@ -29,6 +29,7 @@ export type PackageType = keyof typeof PACKAGE_IDS;
 
 export async function initRevenueCat(userId?: string): Promise<void> {
   if (isExpoGo) return;
+  if (await Purchases.isConfigured()) return;
 
   const apiKey = Platform.OS === "ios" ? API_KEYS.ios : API_KEYS.android;
 
