@@ -151,6 +151,8 @@
     "change_photo": "Fotoğraf Değiştir",
     "photo_source": "Fotoğraf Kaynağı",
     "photo_camera": "Kamera",
+    "photo_remove": "Fotoğrafı Kaldır",
+    "photo_remove_confirm": "Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?",
     "photo_gallery": "Galeri",
     "uploading_photo": "Yükleniyor...",
     "photo_upload_error": "Fotoğraf yüklenemedi.",

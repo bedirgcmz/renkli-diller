@@ -151,6 +151,8 @@
     "change_photo": "Foto Ändern",
     "photo_source": "Fotoquelle",
     "photo_camera": "Kamera",
+    "photo_remove": "Foto entfernen",
+    "photo_remove_confirm": "Möchten Sie Ihr Profilfoto wirklich entfernen?",
     "photo_gallery": "Galerie",
     "uploading_photo": "Wird hochgeladen...",
     "photo_upload_error": "Foto konnte nicht hochgeladen werden.",

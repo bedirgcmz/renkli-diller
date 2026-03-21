@@ -30,6 +30,7 @@ interface AuthState {
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
   uploadAvatar: (uri: string, base64?: string) => Promise<{ success: boolean; url?: string; error?: string }>;
+  removeAvatar: () => Promise<{ success: boolean; error?: string }>;
   updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   initialize: () => Promise<void>;
@@ -242,6 +243,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error: any) {
       console.error("[uploadAvatar] exception:", error);
       return { success: false, error: error.message ?? "Upload failed" };
+    }
+  },
+
+  removeAvatar: async () => {
+    const { user } = get();
+    if (!user) return { success: false, error: "No user logged in" };
+    try {
+      const filePath = `${user.id}/avatar.jpg`;
+      await supabase.storage.from("user_profile_img").remove([filePath]);
+      const result = await get().updateProfile({ avatar_url: "" });
+      if (!result.success) return result;
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "Remove failed" };
     }
   },
 

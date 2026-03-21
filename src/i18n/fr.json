@@ -151,6 +151,8 @@
     "change_photo": "Changer la Photo",
     "photo_source": "Source Photo",
     "photo_camera": "Caméra",
+    "photo_remove": "Supprimer la photo",
+    "photo_remove_confirm": "Êtes-vous sûr de vouloir supprimer votre photo de profil ?",
     "photo_gallery": "Galerie",
     "uploading_photo": "Téléchargement...",
     "photo_upload_error": "Impossible de télécharger la photo.",

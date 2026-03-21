@@ -151,6 +151,8 @@
     "change_photo": "Ändra Foto",
     "photo_source": "Fotokälla",
     "photo_camera": "Kamera",
+    "photo_remove": "Ta bort foto",
+    "photo_remove_confirm": "Är du säker på att du vill ta bort din profilbild?",
     "photo_gallery": "Galleri",
     "uploading_photo": "Laddar upp...",
     "photo_upload_error": "Kunde inte ladda upp foto.",

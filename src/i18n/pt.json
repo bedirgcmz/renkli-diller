@@ -151,6 +151,8 @@
     "change_photo": "Alterar Foto",
     "photo_source": "Fonte da Foto",
     "photo_camera": "Câmera",
+    "photo_remove": "Remover foto",
+    "photo_remove_confirm": "Tem certeza de que deseja remover sua foto de perfil?",
     "photo_gallery": "Galeria",
     "uploading_photo": "Enviando...",
     "photo_upload_error": "Falha ao enviar foto.",

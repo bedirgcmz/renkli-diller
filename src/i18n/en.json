@@ -151,6 +151,8 @@
     "change_photo": "Change Photo",
     "photo_source": "Photo Source",
     "photo_camera": "Camera",
+    "photo_remove": "Remove Photo",
+    "photo_remove_confirm": "Are you sure you want to remove your profile photo?",
     "photo_gallery": "Gallery",
     "uploading_photo": "Uploading...",
     "photo_upload_error": "Failed to upload photo.",

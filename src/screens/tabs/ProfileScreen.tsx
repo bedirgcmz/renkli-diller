@@ -29,7 +29,7 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const { user, signOut, uploadAvatar } = useAuthStore();
+  const { user, signOut, uploadAvatar, removeAvatar } = useAuthStore();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const { sentences, loadSentences } = useSentenceStore();
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
@@ -72,8 +72,39 @@ export default function ProfileScreen() {
   };
 
   const handleAvatarPress = () => {
-    Alert.alert(t("profile.change_photo"), t("profile.photo_source"), [
+    const buttons: any[] = [
       { text: t("common.cancel"), style: "cancel" },
+    ];
+
+    if (user?.avatar_url) {
+      buttons.push({
+        text: t("profile.photo_remove"),
+        style: "destructive",
+        onPress: () => {
+          Alert.alert(t("profile.photo_remove"), t("profile.photo_remove_confirm"), [
+            { text: t("common.cancel"), style: "cancel" },
+            {
+              text: t("common.yes"),
+              style: "destructive",
+              onPress: async () => {
+                setAvatarUploading(true);
+                const res = await removeAvatar();
+                setAvatarUploading(false);
+                if (res.success) {
+                  setAvatarLoadError(false);
+                  setAvatarKey(0);
+                } else {
+                  Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
+                }
+              },
+            },
+          ]);
+        },
+      });
+    }
+
+    Alert.alert(t("profile.change_photo"), t("profile.photo_source"), [
+      ...buttons,
       {
         text: t("profile.photo_camera"),
         onPress: async () => {
