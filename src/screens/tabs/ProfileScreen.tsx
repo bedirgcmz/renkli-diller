@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,8 +32,12 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const { user, signOut, uploadAvatar, removeAvatar } = useAuthStore();
+  const { user, signOut, uploadAvatar, removeAvatar, updateProfile } = useAuthStore();
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState(user?.full_name || "");
+  const [nameSaving, setNameSaving] = useState(false);
+  const nameInputRef = useRef<TextInput>(null);
   const { sentences, loadSentences } = useSentenceStore();
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
@@ -62,6 +67,25 @@ export default function ProfileScreen() {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const startEditName = () => {
+    setNameValue(user?.full_name || "");
+    setEditingName(true);
+    setTimeout(() => nameInputRef.current?.focus(), 50);
+  };
+
+  const saveName = async () => {
+    const trimmed = nameValue.trim();
+    if (!trimmed || trimmed === user?.full_name) {
+      setEditingName(false);
+      return;
+    }
+    setNameSaving(true);
+    const res = await updateProfile({ full_name: trimmed });
+    setNameSaving(false);
+    setEditingName(false);
+    if (!res.success) Alert.alert(t("common.error"), res.error);
+  };
 
   const handleSignOut = () => {
     Alert.alert(
@@ -203,7 +227,20 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Text style={[styles.screenTitle, { color: colors.text }]}>{t("profile.title")}</Text>
+        <View style={styles.screenTitleRow}>
+          <Text style={[styles.screenTitle, { color: colors.text }]}>{t("profile.title")}</Text>
+          <TouchableOpacity onPress={editingName ? saveName : startEditName} hitSlop={12} disabled={nameSaving}>
+            {nameSaving ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Ionicons
+                name={editingName ? "checkmark-circle" : "pencil-outline"}
+                size={22}
+                color={editingName ? colors.primary : colors.textSecondary}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
 
         {/* Avatar + user info */}
         <View style={[styles.userCard, { backgroundColor: colors.cardBackground }]}>
@@ -233,10 +270,23 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           <View style={styles.userInfo}>
             <View style={styles.nameRow}>
-              <Text style={[styles.userName, { color: colors.text }]} numberOfLines={1}>
-                {user?.full_name || t("profile.title")}
-              </Text>
-              {isPremium && (
+              {editingName ? (
+                <TextInput
+                  ref={nameInputRef}
+                  style={[styles.nameInput, { color: colors.text, borderBottomColor: colors.primary }]}
+                  value={nameValue}
+                  onChangeText={setNameValue}
+                  onSubmitEditing={saveName}
+                  returnKeyType="done"
+                  autoCapitalize="words"
+                  maxLength={40}
+                />
+              ) : (
+                <Text style={[styles.userName, { color: colors.text }]} numberOfLines={1}>
+                  {user?.full_name || user?.email?.split("@")[0] || "—"}
+                </Text>
+              )}
+              {isPremium && !editingName && (
                 <View style={[styles.premiumBadge, { backgroundColor: colors.premiumAccent + "22" }]}>
                   <Text style={[styles.premiumBadgeText, { color: colors.premiumAccent }]}>
                     ✨ {t("common.premium_badge")}
@@ -401,7 +451,21 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 20, gap: 0 },
-  screenTitle: { fontSize: 22, fontWeight: "700", marginBottom: 16 },
+  screenTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  screenTitle: { fontSize: 22, fontWeight: "700" },
+  nameInput: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: "600",
+    borderBottomWidth: 1.5,
+    paddingBottom: 2,
+    marginRight: 8,
+  },
   userCard: {
     flexDirection: "row",
     alignItems: "center",
