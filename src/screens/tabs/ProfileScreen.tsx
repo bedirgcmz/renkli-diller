@@ -185,7 +185,7 @@ export default function ProfileScreen() {
             activeOpacity={0.8}
           >
             {user?.avatar_url ? (
-              <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
+              <Image source={{ uri: `${user.avatar_url}?t=${Date.now()}` }} style={styles.avatarImage} />
             ) : (
               <Text style={styles.avatarText}>{initials}</Text>
             )}

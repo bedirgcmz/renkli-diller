@@ -213,32 +213,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const filePath = `${user.id}/avatar.${ext}`;
       const contentType = `image/${ext === "jpg" ? "jpeg" : ext}`;
 
-      console.log("[uploadAvatar] uri:", uri);
-      console.log("[uploadAvatar] filePath:", filePath);
-      console.log("[uploadAvatar] contentType:", contentType);
-
       const response = await fetch(uri);
       const blob = await response.blob();
-      console.log("[uploadAvatar] blob size:", blob.size, "type:", blob.type);
 
       const { error: uploadError } = await supabase.storage
         .from("user_profile_img")
         .upload(filePath, blob, { contentType, upsert: true });
 
-      if (uploadError) {
-        console.error("[uploadAvatar] storage error:", uploadError.message, uploadError);
-        return { success: false, error: uploadError.message };
-      }
+      if (uploadError) return { success: false, error: uploadError.message };
 
       const { data } = supabase.storage.from("user_profile_img").getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
-      console.log("[uploadAvatar] publicUrl:", publicUrl);
 
       const result = await get().updateProfile({ avatar_url: publicUrl });
-      if (!result.success) {
-        console.error("[uploadAvatar] updateProfile error:", result.error);
-        return result;
-      }
+      if (!result.success) return result;
 
       return { success: true, url: publicUrl };
     } catch (error: any) {
