@@ -195,8 +195,7 @@ export default function ProfileScreen() {
           >
             {user?.avatar_url && !avatarLoadError ? (
               <Image
-                key={avatarKey}
-                source={{ uri: user.avatar_url }}
+                source={{ uri: avatarKey > 0 ? `${user.avatar_url}?v=${avatarKey}` : user.avatar_url }}
                 style={styles.avatarImage}
                 onError={() => setAvatarLoadError(true)}
               />
