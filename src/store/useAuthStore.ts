@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
-import * as ImagePicker from "expo-image-picker";
 
 interface User {
   id: string;
@@ -97,7 +96,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signUp: async (email: string, password: string, fullName?: string) => {
     set({ loading: true });
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -123,7 +122,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signInWithGoogle: async () => {
     set({ loading: true });
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: "parlio://auth/callback",
@@ -218,12 +217,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const blob = await response.blob();
 
       const { error: uploadError } = await supabase.storage
-        .from("avatars")
+        .from("user_profile_img")
         .upload(filePath, blob, { contentType, upsert: true });
 
       if (uploadError) return { success: false, error: uploadError.message };
 
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const { data } = supabase.storage.from("user_profile_img").getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
 
       const result = await get().updateProfile({ avatar_url: publicUrl });
