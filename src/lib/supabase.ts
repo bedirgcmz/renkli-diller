@@ -25,30 +25,23 @@ export type Database = {
       profiles: {
         Row: {
           id: string;
-          email: string;
-          full_name: string | null;
+          display_name: string | null;
           avatar_url: string | null;
           is_premium: boolean;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id: string;
-          email: string;
-          full_name?: string | null;
+          display_name?: string | null;
           avatar_url?: string | null;
           is_premium?: boolean;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
-          email?: string;
-          full_name?: string | null;
+          display_name?: string | null;
           avatar_url?: string | null;
           is_premium?: boolean;
-          created_at?: string;
-          updated_at?: string;
         };
       };
       sentences: {

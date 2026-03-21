@@ -6,7 +6,7 @@ import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
 interface User {
   id: string;
   email: string;
-  full_name?: string;
+  display_name?: string;
   avatar_url?: string;
   is_premium: boolean;
   created_at: string;
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const user: User = {
           id: data.user.id,
           email: data.user.email!,
-          full_name: profile?.full_name || "",
+          display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
           is_premium: profile?.is_premium || rcPremium,
           created_at: data.user.created_at,
@@ -305,7 +305,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           const userData: User = {
             id: user.id,
             email: user.email!,
-            full_name: profile?.full_name || "",
+            display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
             is_premium: profile?.is_premium || rcPremium,
             created_at: user.created_at,
@@ -333,7 +333,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           const user: User = {
             id: session.user.id,
             email: session.user.email!,
-            full_name: profile?.full_name || "",
+            display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
             is_premium: profile?.is_premium || false,
             created_at: session.user.created_at,

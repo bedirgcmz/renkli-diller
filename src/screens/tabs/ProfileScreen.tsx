@@ -35,7 +35,7 @@ export default function ProfileScreen() {
   const { user, signOut, uploadAvatar, removeAvatar, updateProfile } = useAuthStore();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
-  const [nameValue, setNameValue] = useState(user?.full_name || "");
+  const [nameValue, setNameValue] = useState(user?.display_name || "");
   const [nameSaving, setNameSaving] = useState(false);
   const nameInputRef = useRef<TextInput>(null);
   const { sentences, loadSentences } = useSentenceStore();
@@ -61,7 +61,7 @@ export default function ProfileScreen() {
   ).length;
   const dailyGoalProgress = Math.min(todayLearned / dailyGoal, 1);
 
-  const initials = (user?.full_name || user?.email || "?")
+  const initials = (user?.display_name || user?.email || "?")
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -69,19 +69,19 @@ export default function ProfileScreen() {
     .slice(0, 2);
 
   const startEditName = () => {
-    setNameValue(user?.full_name || "");
+    setNameValue(user?.display_name || "");
     setEditingName(true);
     setTimeout(() => nameInputRef.current?.focus(), 50);
   };
 
   const saveName = async () => {
     const trimmed = nameValue.trim();
-    if (!trimmed || trimmed === user?.full_name) {
+    if (!trimmed || trimmed === user?.display_name) {
       setEditingName(false);
       return;
     }
     setNameSaving(true);
-    const res = await updateProfile({ full_name: trimmed });
+    const res = await updateProfile({ display_name: trimmed });
     setNameSaving(false);
     setEditingName(false);
     if (!res.success) Alert.alert(t("common.error"), res.error);
@@ -227,20 +227,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.screenTitleRow}>
-          <Text style={[styles.screenTitle, { color: colors.text }]}>{t("profile.title")}</Text>
-          <TouchableOpacity onPress={editingName ? saveName : startEditName} hitSlop={12} disabled={nameSaving}>
-            {nameSaving ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : (
-              <Ionicons
-                name={editingName ? "checkmark-circle" : "pencil-outline"}
-                size={22}
-                color={editingName ? colors.primary : colors.textSecondary}
-              />
-            )}
-          </TouchableOpacity>
-        </View>
+        <Text style={[styles.screenTitle, { color: colors.text }]}>{t("profile.title")}</Text>
 
         {/* Avatar + user info */}
         <View style={[styles.userCard, { backgroundColor: colors.cardBackground }]}>
@@ -283,9 +270,20 @@ export default function ProfileScreen() {
                 />
               ) : (
                 <Text style={[styles.userName, { color: colors.text }]} numberOfLines={1}>
-                  {user?.full_name || user?.email?.split("@")[0] || "—"}
+                  {user?.display_name || user?.email?.split("@")[0] || "—"}
                 </Text>
               )}
+              <TouchableOpacity onPress={editingName ? saveName : startEditName} hitSlop={10} disabled={nameSaving} style={styles.nameEditBtn}>
+                {nameSaving ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <Ionicons
+                    name={editingName ? "checkmark-circle" : "pencil-outline"}
+                    size={18}
+                    color={editingName ? colors.primary : colors.textSecondary}
+                  />
+                )}
+              </TouchableOpacity>
               {isPremium && !editingName && (
                 <View style={[styles.premiumBadge, { backgroundColor: colors.premiumAccent + "22" }]}>
                   <Text style={[styles.premiumBadgeText, { color: colors.premiumAccent }]}>
@@ -451,21 +449,15 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 20, gap: 0 },
-  screenTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  screenTitle: { fontSize: 22, fontWeight: "700" },
+  screenTitle: { fontSize: 22, fontWeight: "700", marginBottom: 16 },
   nameInput: {
     flex: 1,
     fontSize: 17,
     fontWeight: "600",
     borderBottomWidth: 1.5,
     paddingBottom: 2,
-    marginRight: 8,
   },
+  nameEditBtn: { marginLeft: 6 },
   userCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -509,8 +501,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   userInfo: { flex: 1 },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
-  userName: { fontSize: 17, fontWeight: "600", flexShrink: 1 },
+  nameRow: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+  userName: { fontSize: 17, fontWeight: "600", flex: 1 },
   premiumBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   premiumBadgeText: { fontSize: 11, fontWeight: "700" },
   userEmail: { fontSize: 13 },
