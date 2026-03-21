@@ -29,7 +29,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
-  uploadAvatar: (uri: string) => Promise<{ success: boolean; url?: string; error?: string }>;
+  uploadAvatar: (uri: string, base64?: string) => Promise<{ success: boolean; url?: string; error?: string }>;
   updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   initialize: () => Promise<void>;
@@ -204,7 +204,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  uploadAvatar: async (uri: string) => {
+  uploadAvatar: async (uri: string, base64?: string) => {
     const { user } = get();
     if (!user) return { success: false, error: "No user logged in" };
 
@@ -213,12 +213,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const filePath = `${user.id}/avatar.${ext}`;
       const contentType = `image/${ext === "jpg" ? "jpeg" : ext}`;
 
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      let uploadData: Blob | Uint8Array;
+      if (base64) {
+        const binaryStr = atob(base64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+          bytes[i] = binaryStr.charCodeAt(i);
+        }
+        uploadData = bytes;
+      } else {
+        const response = await fetch(uri);
+        uploadData = await response.blob();
+      }
 
       const { error: uploadError } = await supabase.storage
         .from("user_profile_img")
-        .upload(filePath, blob, { contentType, upsert: true });
+        .upload(filePath, uploadData, { contentType, upsert: true });
 
       if (uploadError) return { success: false, error: uploadError.message };
 

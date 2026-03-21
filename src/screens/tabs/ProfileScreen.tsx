@@ -36,6 +36,8 @@ export default function ProfileScreen() {
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [avatarKey, setAvatarKey] = useState(0);
+  const [avatarLoadError, setAvatarLoadError] = useState(false);
 
   useEffect(() => {
     loadSentences();
@@ -82,8 +84,9 @@ export default function ProfileScreen() {
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.7,
+            base64: true,
           });
-          if (!result.canceled) await doUpload(result.assets[0].uri);
+          if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
         },
       },
       {
@@ -96,18 +99,24 @@ export default function ProfileScreen() {
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.7,
+            base64: true,
           });
-          if (!result.canceled) await doUpload(result.assets[0].uri);
+          if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
         },
       },
     ]);
   };
 
-  const doUpload = async (uri: string) => {
+  const doUpload = async (uri: string, base64?: string) => {
     setAvatarUploading(true);
-    const res = await uploadAvatar(uri);
+    setAvatarLoadError(false);
+    const res = await uploadAvatar(uri, base64);
     setAvatarUploading(false);
-    if (!res.success) Alert.alert(t("common.error"), t("profile.photo_upload_error"));
+    if (res.success) {
+      setAvatarKey((k) => k + 1);
+    } else {
+      Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
+    }
   };
 
   const menuItems: Array<{
@@ -184,8 +193,13 @@ export default function ProfileScreen() {
             onPress={handleAvatarPress}
             activeOpacity={0.8}
           >
-            {user?.avatar_url ? (
-              <Image source={{ uri: `${user.avatar_url}?t=${Date.now()}` }} style={styles.avatarImage} />
+            {user?.avatar_url && !avatarLoadError ? (
+              <Image
+                key={avatarKey}
+                source={{ uri: user.avatar_url }}
+                style={styles.avatarImage}
+                onError={() => setAvatarLoadError(true)}
+              />
             ) : (
               <Text style={styles.avatarText}>{initials}</Text>
             )}
