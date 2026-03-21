@@ -101,7 +101,6 @@ export type MainStackParamList = {
   Paywall: undefined;
   CategoryBrowser: undefined;
   AutoMode: undefined;
-  EditProfile: undefined;
   ChangeEmail: undefined;
   ChangePassword: undefined;
 };

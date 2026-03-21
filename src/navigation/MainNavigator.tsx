@@ -8,7 +8,6 @@ import SettingsScreen from "@/screens/SettingsScreen";
 import PaywallScreen from "@/screens/PaywallScreen";
 import CategoryBrowserScreen from "@/screens/CategoryBrowserScreen";
 import AutoModeScreen from "@/screens/AutoModeScreen";
-import EditProfileScreen from "@/screens/EditProfileScreen";
 import ChangeEmailScreen from "@/screens/ChangeEmailScreen";
 import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
 
@@ -47,11 +46,6 @@ export default function MainNavigator() {
         name="AutoMode"
         component={AutoModeScreen}
         options={{ presentation: "fullScreenModal" }}
-      />
-      <Stack.Screen
-        name="EditProfile"
-        component={EditProfileScreen}
-        options={{ presentation: "modal" }}
       />
       <Stack.Screen
         name="ChangeEmail"

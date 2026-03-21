@@ -192,11 +192,6 @@ export default function ProfileScreen() {
       onPress: () => navigation.navigate("AutoMode"),
     },
     {
-      icon: "person-outline",
-      label: t("profile.edit_profile"),
-      onPress: () => navigation.navigate("EditProfile"),
-    },
-    {
       icon: "mail-outline",
       label: t("profile.change_email"),
       onPress: () => navigation.navigate("ChangeEmail"),
