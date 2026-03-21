@@ -581,14 +581,8 @@ function MotivationBar({
   if (!message) return null;
 
   return (
-    <View style={[styles.motivationBar, { overflow: "hidden" }]}>
-      <GradientView
-        colors={colors.backgroundGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <Text style={[styles.motivationText, { color: colors.textSecondary }]}>{message}</Text>
+    <View style={[styles.motivationBar, { backgroundColor: colors.backgroundSecondary }]}>
+      <Text style={[styles.motivationText, { color: colors.textTertiary }]}>{message}</Text>
     </View>
   );
 }
