@@ -445,7 +445,7 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["transparent", "rgba(236, 72, 153, 0.28)", "transparent"]}
+                    colors={["transparent", "rgba(139, 92, 246, 0.28)", "transparent"]}
                     start={{ x: 0, y: 0.5 }}
                     end={{ x: 1, y: 0.5 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
@@ -470,7 +470,7 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["transparent", "rgba(236, 72, 153, 0.28)", "transparent"]}
+                    colors={["transparent", "rgba(139, 92, 246, 0.28)", "transparent"]}
                     start={{ x: 0, y: 0.5 }}
                     end={{ x: 1, y: 0.5 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
