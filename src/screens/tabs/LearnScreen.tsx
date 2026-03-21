@@ -437,19 +437,22 @@ export default function LearnScreen() {
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
-                    { backgroundColor: colors.backgroundSecondary },
+                    {
+                      backgroundColor: colors.cardBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 3,
+                      elevation: 2,
+                    },
                     currentIndex === 0 && styles.navBtnDisabled,
                   ]}
                   onPress={goPrev}
                   disabled={currentIndex === 0}
                   activeOpacity={0.7}
                 >
-                  <GradientView
-                    colors={["transparent", "rgba(139, 92, 246, 0.28)", "transparent"]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-                  />
                   <Text
                     style={[
                       styles.navBtnText,
@@ -462,19 +465,22 @@ export default function LearnScreen() {
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
-                    { backgroundColor: colors.backgroundSecondary },
+                    {
+                      backgroundColor: colors.cardBackground,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 3,
+                      elevation: 2,
+                    },
                     currentIndex === total - 1 && styles.navBtnDisabled,
                   ]}
                   onPress={goNext}
                   disabled={currentIndex === total - 1}
                   activeOpacity={0.7}
                 >
-                  <GradientView
-                    colors={["transparent", "rgba(139, 92, 246, 0.28)", "transparent"]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-                  />
                   <Text
                     style={[
                       styles.navBtnText,
@@ -575,12 +581,7 @@ function MotivationBar({
   if (!message) return null;
 
   return (
-    <View
-      style={[
-        styles.motivationBar,
-        { overflow: "hidden" },
-      ]}
-    >
+    <View style={[styles.motivationBar, { overflow: "hidden" }]}>
       <GradientView
         colors={colors.backgroundGradient}
         start={{ x: 0, y: 0 }}
