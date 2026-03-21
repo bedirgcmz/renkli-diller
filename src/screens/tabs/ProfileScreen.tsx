@@ -6,12 +6,15 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
+import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSentenceStore } from "@/store/useSentenceStore";
@@ -26,7 +29,8 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, uploadAvatar } = useAuthStore();
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const { sentences, loadSentences } = useSentenceStore();
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
@@ -65,6 +69,47 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleAvatarPress = () => {
+    Alert.alert(t("profile.change_photo"), t("profile.photo_source"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("profile.photo_camera"),
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") return;
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+          });
+          if (!result.canceled) await doUpload(result.assets[0].uri);
+        },
+      },
+      {
+        text: t("profile.photo_gallery"),
+        onPress: async () => {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") return;
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+          });
+          if (!result.canceled) await doUpload(result.assets[0].uri);
+        },
+      },
+    ]);
+  };
+
+  const doUpload = async (uri: string) => {
+    setAvatarUploading(true);
+    const res = await uploadAvatar(uri);
+    setAvatarUploading(false);
+    if (!res.success) Alert.alert(t("common.error"), t("profile.photo_upload_error"));
+  };
+
   const menuItems: Array<{
     icon: keyof typeof Ionicons.glyphMap;
     label: string;
@@ -93,6 +138,11 @@ export default function ProfileScreen() {
       icon: "play-circle-outline",
       label: t("profile.auto_mode"),
       onPress: () => navigation.navigate("AutoMode"),
+    },
+    {
+      icon: "person-outline",
+      label: t("profile.edit_profile"),
+      onPress: () => navigation.navigate("EditProfile"),
     },
     {
       icon: "settings-outline",
@@ -129,9 +179,26 @@ export default function ProfileScreen() {
 
         {/* Avatar + user info */}
         <View style={[styles.userCard, { backgroundColor: colors.cardBackground }]}>
-          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <Text style={styles.avatarText}>{initials}</Text>
-          </View>
+          <TouchableOpacity
+            style={[styles.avatar, { backgroundColor: colors.primary }]}
+            onPress={handleAvatarPress}
+            activeOpacity={0.8}
+          >
+            {user?.avatar_url ? (
+              <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{initials}</Text>
+            )}
+            {avatarUploading ? (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator color="#fff" size="small" />
+              </View>
+            ) : (
+              <View style={styles.avatarCameraIcon}>
+                <Ionicons name="camera" size={12} color="#fff" />
+              </View>
+            )}
+          </TouchableOpacity>
           <View style={styles.userInfo}>
             <View style={styles.nameRow}>
               <Text style={[styles.userName, { color: colors.text }]} numberOfLines={1}>
@@ -286,6 +353,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarText: { color: "#fff", fontSize: 20, fontWeight: "700" },
+  avatarImage: { width: 54, height: 54, borderRadius: 27 },
+  avatarOverlay: {
+    position: "absolute",
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarCameraIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#555",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   userInfo: { flex: 1 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
   userName: { fontSize: 17, fontWeight: "600", flexShrink: 1 },

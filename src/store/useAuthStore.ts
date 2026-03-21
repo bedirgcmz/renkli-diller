@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
+import * as ImagePicker from "expo-image-picker";
 
 interface User {
   id: string;
@@ -29,6 +30,9 @@ interface AuthState {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
+  uploadAvatar: (uri: string) => Promise<{ success: boolean; url?: string; error?: string }>;
+  updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>;
+  updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   initialize: () => Promise<void>;
   clear: () => void;
 }
@@ -198,6 +202,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       set({ loading: false });
       return { success: false, error: "An unexpected error occurred" };
+    }
+  },
+
+  uploadAvatar: async (uri: string) => {
+    const { user } = get();
+    if (!user) return { success: false, error: "No user logged in" };
+
+    try {
+      const ext = uri.split(".").pop()?.toLowerCase() ?? "jpg";
+      const filePath = `${user.id}/avatar.${ext}`;
+      const contentType = `image/${ext === "jpg" ? "jpeg" : ext}`;
+
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, blob, { contentType, upsert: true });
+
+      if (uploadError) return { success: false, error: uploadError.message };
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const publicUrl = data.publicUrl;
+
+      const result = await get().updateProfile({ avatar_url: publicUrl });
+      if (!result.success) return result;
+
+      return { success: true, url: publicUrl };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "Upload failed" };
+    }
+  },
+
+  updateEmail: async (newEmail: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "Update failed" };
+    }
+  },
+
+  updatePassword: async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "Update failed" };
     }
   },
 

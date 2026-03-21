@@ -30,7 +30,14 @@
     },
     "plugins": [
       "expo-sharing",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Parlio, profil fotoğrafı seçmek için fotoğraflara erişim istiyor.",
+          "cameraPermission": "Parlio, profil fotoğrafı çekmek için kameraya erişim istiyor."
+        }
+      ]
     ]
   }
 }
