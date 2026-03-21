@@ -437,7 +437,7 @@ export default function LearnScreen() {
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
-                    { backgroundColor: colors.primary },
+                    { backgroundColor: colors.backgroundSecondary },
                     currentIndex === 0 && styles.navBtnDisabled,
                   ]}
                   onPress={goPrev}
@@ -445,19 +445,24 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["rgba(255,255,255,0.18)", "rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
+                    colors={["transparent", "rgba(236, 72, 153, 0.28)", "transparent"]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
-                  <Text style={[styles.navBtnText, { color: "#fff" }]}>
+                  <Text
+                    style={[
+                      styles.navBtnText,
+                      { color: currentIndex === 0 ? colors.textTertiary : colors.text },
+                    ]}
+                  >
                     ‹ {t("learn.prev")}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
-                    { backgroundColor: colors.primary },
+                    { backgroundColor: colors.backgroundSecondary },
                     currentIndex === total - 1 && styles.navBtnDisabled,
                   ]}
                   onPress={goNext}
@@ -465,12 +470,17 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["rgba(255,255,255,0.18)", "rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
+                    colors={["transparent", "rgba(236, 72, 153, 0.28)", "transparent"]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
-                  <Text style={[styles.navBtnText, { color: "#fff" }]}>
+                  <Text
+                    style={[
+                      styles.navBtnText,
+                      { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
+                    ]}
+                  >
                     {t("learn.next")} ›
                   </Text>
                 </TouchableOpacity>
