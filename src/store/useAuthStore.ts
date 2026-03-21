@@ -33,6 +33,7 @@ interface AuthState {
   removeAvatar: () => Promise<{ success: boolean; error?: string }>;
   updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  verifyAndUpdatePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; wrongPassword?: boolean; error?: string }>;
   initialize: () => Promise<void>;
   clear: () => void;
 }
@@ -272,6 +273,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   updatePassword: async (newPassword: string) => {
     try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "Update failed" };
+    }
+  },
+
+  verifyAndUpdatePassword: async (currentPassword: string, newPassword: string) => {
+    const { user } = get();
+    if (!user) return { success: false, error: "No user logged in" };
+    try {
+      // Verify current password by re-authenticating
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (signInError) return { success: false, wrongPassword: true };
+
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) return { success: false, error: error.message };
       return { success: true };

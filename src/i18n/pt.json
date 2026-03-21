@@ -168,7 +168,15 @@
     "password_too_short": "A senha deve ter pelo menos 6 caracteres.",
     "password_updated": "Senha atualizada com sucesso.",
     "password_update_error": "Falha ao atualizar senha.",
-    "save_changes": "Salvar Alterações"
+    "save_changes": "Salvar Alterações",
+    "wrong_password": "A senha atual está incorreta.",
+    "email_confirmation_note": "Um e-mail de confirmação será enviado para o novo endereço. A alteração entra em vigor após a confirmação.",
+    "password_strength_weak": "Fraca",
+    "password_strength_medium": "Média",
+    "password_strength_strong": "Forte",
+    "password_min_length": "Mínimo 8 caracteres",
+    "password_has_number": "Contém um número",
+    "password_has_upper": "Contém letra maiúscula"
   },
   "settings": {
     "title": "Configurações",

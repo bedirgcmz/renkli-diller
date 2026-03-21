@@ -168,7 +168,15 @@
     "password_too_short": "Le mot de passe doit comporter au moins 6 caractères.",
     "password_updated": "Mot de passe mis à jour avec succès.",
     "password_update_error": "Impossible de mettre à jour le mot de passe.",
-    "save_changes": "Enregistrer les Modifications"
+    "save_changes": "Enregistrer les Modifications",
+    "wrong_password": "Le mot de passe actuel est incorrect.",
+    "email_confirmation_note": "Un e-mail de confirmation sera envoyé à la nouvelle adresse. La modification prend effet après confirmation.",
+    "password_strength_weak": "Faible",
+    "password_strength_medium": "Moyen",
+    "password_strength_strong": "Fort",
+    "password_min_length": "Au moins 8 caractères",
+    "password_has_number": "Contient un chiffre",
+    "password_has_upper": "Contient une majuscule"
   },
   "settings": {
     "title": "Paramètres",

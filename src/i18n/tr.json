@@ -168,7 +168,15 @@
     "password_too_short": "Şifre en az 6 karakter olmalıdır.",
     "password_updated": "Şifre başarıyla güncellendi.",
     "password_update_error": "Şifre güncellenemedi.",
-    "save_changes": "Değişiklikleri Kaydet"
+    "save_changes": "Değişiklikleri Kaydet",
+    "wrong_password": "Mevcut şifre hatalı.",
+    "email_confirmation_note": "Yeni adrese bir onay e-postası gönderilecek. Değişiklik onaylandıktan sonra aktif olur.",
+    "password_strength_weak": "Zayıf",
+    "password_strength_medium": "Orta",
+    "password_strength_strong": "Güçlü",
+    "password_min_length": "En az 8 karakter",
+    "password_has_number": "Rakam içermeli",
+    "password_has_upper": "Büyük harf içermeli"
   },
   "settings": {
     "title": "Ayarlar",

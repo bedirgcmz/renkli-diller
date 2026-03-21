@@ -168,7 +168,15 @@
     "password_too_short": "Passwort muss mindestens 6 Zeichen lang sein.",
     "password_updated": "Passwort erfolgreich aktualisiert.",
     "password_update_error": "Passwort konnte nicht aktualisiert werden.",
-    "save_changes": "Änderungen Speichern"
+    "save_changes": "Änderungen Speichern",
+    "wrong_password": "Aktuelles Passwort ist falsch.",
+    "email_confirmation_note": "Eine Bestätigungs-E-Mail wird an die neue Adresse gesendet. Die Änderung wird nach Bestätigung wirksam.",
+    "password_strength_weak": "Schwach",
+    "password_strength_medium": "Mittel",
+    "password_strength_strong": "Stark",
+    "password_min_length": "Mindestens 8 Zeichen",
+    "password_has_number": "Enthält eine Zahl",
+    "password_has_upper": "Enthält Großbuchstaben"
   },
   "settings": {
     "title": "Einstellungen",

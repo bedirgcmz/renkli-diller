@@ -168,7 +168,15 @@
     "password_too_short": "Lösenordet måste vara minst 6 tecken.",
     "password_updated": "Lösenordet uppdaterades.",
     "password_update_error": "Kunde inte uppdatera lösenord.",
-    "save_changes": "Spara Ändringar"
+    "save_changes": "Spara Ändringar",
+    "wrong_password": "Nuvarande lösenord är felaktigt.",
+    "email_confirmation_note": "Ett bekräftelsemail skickas till den nya adressen. Ändringen aktiveras efter bekräftelse.",
+    "password_strength_weak": "Svagt",
+    "password_strength_medium": "Medel",
+    "password_strength_strong": "Starkt",
+    "password_min_length": "Minst 8 tecken",
+    "password_has_number": "Innehåller en siffra",
+    "password_has_upper": "Innehåller stor bokstav"
   },
   "settings": {
     "title": "Inställningar",
