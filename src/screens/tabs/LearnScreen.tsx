@@ -76,16 +76,18 @@ const LearnedCard = React.memo(function LearnedCard({
             })}
           >
             {({ pressed }) => (
-              <View style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
-              }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
+                }}
+              >
                 <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "600" }}>
                   {t("learn.mark_unlearned")}
                 </Text>
@@ -435,7 +437,6 @@ export default function LearnScreen() {
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
-                    { backgroundColor: colors.backgroundSecondary },
                     currentIndex === 0 && styles.navBtnDisabled,
                   ]}
                   onPress={goPrev}
@@ -443,24 +444,18 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["transparent", "rgba(236, 72, 153, 0.12)", "transparent"]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
+                    colors={["#4DA3FF", "#7CC4FF"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
-                  <Text
-                    style={[
-                      styles.navBtnText,
-                      { color: currentIndex === 0 ? colors.textTertiary : colors.text },
-                    ]}
-                  >
+                  <Text style={[styles.navBtnText, { color: "#fff" }]}>
                     ‹ {t("learn.prev")}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
-                    { backgroundColor: colors.backgroundSecondary },
                     currentIndex === total - 1 && styles.navBtnDisabled,
                   ]}
                   onPress={goNext}
@@ -468,17 +463,12 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["transparent", "rgba(236, 72, 153, 0.12)", "transparent"]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
+                    colors={["#4DA3FF", "#7CC4FF"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
-                  <Text
-                    style={[
-                      styles.navBtnText,
-                      { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
-                    ]}
-                  >
+                  <Text style={[styles.navBtnText, { color: "#fff" }]}>
                     {t("learn.next")} ›
                   </Text>
                 </TouchableOpacity>
@@ -524,7 +514,12 @@ export default function LearnScreen() {
           <Text style={[styles.autoModeShortcutText, { color: colors.textTertiary }]}>
             {t("profile.auto_mode")}
           </Text>
-          <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} style={{ marginLeft: "auto" }} />
+          <Ionicons
+            name="chevron-forward"
+            size={14}
+            color={colors.textTertiary}
+            style={{ marginLeft: "auto" }}
+          />
         </TouchableOpacity>
       </SafeAreaView>
     </View>
@@ -571,13 +566,13 @@ function MotivationBar({
     <View
       style={[
         styles.motivationBar,
-        { backgroundColor: colors.backgroundSecondary, overflow: "hidden" },
+        { overflow: "hidden" },
       ]}
     >
       <GradientView
-        colors={["transparent", "rgba(236, 72, 153, 0.12)", "transparent"]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
+        colors={colors.backgroundGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
         style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
       />
       <Text style={[styles.motivationText, { color: colors.textSecondary }]}>{message}</Text>
