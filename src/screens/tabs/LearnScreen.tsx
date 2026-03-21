@@ -437,6 +437,7 @@ export default function LearnScreen() {
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
+                    { backgroundColor: colors.primary },
                     currentIndex === 0 && styles.navBtnDisabled,
                   ]}
                   onPress={goPrev}
@@ -444,9 +445,9 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["#4DA3FF", "#7CC4FF"]}
+                    colors={["rgba(255,255,255,0.18)", "rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]}
                     start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
+                    end={{ x: 0, y: 1 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
                   <Text style={[styles.navBtnText, { color: "#fff" }]}>
@@ -456,6 +457,7 @@ export default function LearnScreen() {
                 <TouchableOpacity
                   style={[
                     styles.navBtn,
+                    { backgroundColor: colors.primary },
                     currentIndex === total - 1 && styles.navBtnDisabled,
                   ]}
                   onPress={goNext}
@@ -463,9 +465,9 @@ export default function LearnScreen() {
                   activeOpacity={0.7}
                 >
                   <GradientView
-                    colors={["#4DA3FF", "#7CC4FF"]}
+                    colors={["rgba(255,255,255,0.18)", "rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]}
                     start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
+                    end={{ x: 0, y: 1 }}
                     style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                   />
                   <Text style={[styles.navBtnText, { color: "#fff" }]}>
