@@ -22,7 +22,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useReadingStore } from "@/store/useReadingStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KEYWORD_TEXT_COLORS } from "@/utils/constants";
-import { stripMarkers } from "@/utils/keywords";
+import { parseKeywords, stripMarkers } from "@/utils/keywords";
 import { ReadingTextKeyword, SupportedLanguage, MainStackParamList } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -50,17 +50,11 @@ type Segment =
   | { isKeyword: true; text: string; positionIndex: number };
 
 function parseBody(body: string): Segment[] {
-  const parts = body.split(/\*\*(.+?)\*\*/g);
-  const segments: Segment[] = [];
-  let kwIndex = 0;
-  parts.forEach((part, i) => {
-    if (i % 2 === 0) {
-      if (part) segments.push({ isKeyword: false, text: part });
-    } else {
-      segments.push({ isKeyword: true, text: part, positionIndex: kwIndex++ });
-    }
-  });
-  return segments;
+  return parseKeywords(body).map((seg) =>
+    seg.isPill
+      ? { isKeyword: true as const, text: seg.text, positionIndex: seg.pillIndex ?? 0 }
+      : { isKeyword: false as const, text: seg.text }
+  );
 }
 
 function kwColor(posIdx: number, keywords: ReadingTextKeyword[], isDark: boolean): string {

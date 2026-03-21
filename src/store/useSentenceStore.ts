@@ -146,7 +146,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return;
       }
 
-      const { uiLanguage } = useSettingsStore.getState();
+      const { uiLanguage, targetLanguage } = useSettingsStore.getState();
       const { categories } = get();
 
       let query = supabase
@@ -187,8 +187,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
             : "",
           status: (row.state || "new") as SentenceStatus,
           is_preset: false,
-          source_lang: row.source_lang ?? undefined,
-          target_lang: row.target_lang ?? undefined,
+          source_lang: row.source_lang ?? uiLanguage,
+          target_lang: row.target_lang ?? targetLanguage,
           created_at: row.created_at,
           updated_at: row.updated_at,
         };

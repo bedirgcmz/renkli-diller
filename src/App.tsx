@@ -10,6 +10,7 @@ import { I18nProvider } from "@/providers/I18nProvider";
 
 // Navigation
 import AppNavigator from "@/navigation/AppNavigator";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Services
 import { initRevenueCat } from "@/services/revenueCat";
@@ -52,15 +53,17 @@ export default function App() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <I18nProvider>
-          <ThemeProvider>
-            <AppNavigator />
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </I18nProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <I18nProvider>
+            <ThemeProvider>
+              <AppNavigator />
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </I18nProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }

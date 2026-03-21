@@ -191,7 +191,7 @@ export default function ProfileScreen() {
             { label: t("profile.sentences_learned"), value: learnedCount, icon: "✅" },
             {
               label: t("profile.quiz_accuracy"),
-              value: `${Math.round(stats.quizAccuracy)}%`,
+              value: stats.totalQuizQuestions > 0 ? `${Math.round(stats.quizAccuracy)}%` : "—",
               icon: "🎯",
             },
             { label: t("profile.learning"), value: learningCount, icon: "📝" },

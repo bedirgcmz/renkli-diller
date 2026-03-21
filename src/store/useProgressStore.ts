@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { UserProgress, QuizResult, StudySession } from "@/types";
 
+// TODO: daily_stats tablosuna yazma — şu an streak user_progress.learned_at'tan hesaplanıyor.
+// daily_stats tablosu şu an kullanılmıyor; gerekirse her öğrenme/quiz sonrası güncellenebilir.
 interface ProgressStats {
   totalSentencesStudied: number;
   totalSentencesLearned: number;
