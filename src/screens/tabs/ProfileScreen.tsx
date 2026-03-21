@@ -8,6 +8,8 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  Modal,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,6 +40,7 @@ export default function ProfileScreen() {
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
   const [avatarKey, setAvatarKey] = useState(0);
   const [avatarLoadError, setAvatarLoadError] = useState(false);
+  const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
   useEffect(() => {
     loadSentences();
@@ -71,68 +74,53 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleAvatarPress = () => {
-    const buttons: any[] = [
+  const handleAvatarPress = () => setPhotoSheetVisible(true);
+
+  const pickFromCamera = async () => {
+    setPhotoSheetVisible(false);
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") return;
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
+  };
+
+  const pickFromGallery = async () => {
+    setPhotoSheetVisible(false);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoSheetVisible(false);
+    Alert.alert(t("profile.photo_remove"), t("profile.photo_remove_confirm"), [
       { text: t("common.cancel"), style: "cancel" },
-    ];
-
-    if (user?.avatar_url) {
-      buttons.push({
-        text: t("profile.photo_remove"),
+      {
+        text: t("common.yes"),
         style: "destructive",
-        onPress: () => {
-          Alert.alert(t("profile.photo_remove"), t("profile.photo_remove_confirm"), [
-            { text: t("common.cancel"), style: "cancel" },
-            {
-              text: t("common.yes"),
-              style: "destructive",
-              onPress: async () => {
-                setAvatarUploading(true);
-                const res = await removeAvatar();
-                setAvatarUploading(false);
-                if (res.success) {
-                  setAvatarLoadError(false);
-                  setAvatarKey(0);
-                } else {
-                  Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
-                }
-              },
-            },
-          ]);
-        },
-      });
-    }
-
-    Alert.alert(t("profile.change_photo"), t("profile.photo_source"), [
-      ...buttons,
-      {
-        text: t("profile.photo_camera"),
         onPress: async () => {
-          const { status } = await ImagePicker.requestCameraPermissionsAsync();
-          if (status !== "granted") return;
-          const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ["images"],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.7,
-            base64: true,
-          });
-          if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
-        },
-      },
-      {
-        text: t("profile.photo_gallery"),
-        onPress: async () => {
-          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-          if (status !== "granted") return;
-          const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ["images"],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.7,
-            base64: true,
-          });
-          if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
+          setAvatarUploading(true);
+          const res = await removeAvatar();
+          setAvatarUploading(false);
+          if (res.success) {
+            setAvatarLoadError(false);
+            setAvatarKey(0);
+          } else {
+            Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
+          }
         },
       },
     ]);
@@ -368,6 +356,44 @@ export default function ProfileScreen() {
       </ScrollView>
 
       <PDFExportModal visible={pdfModalVisible} onClose={() => setPdfModalVisible(false)} />
+
+      {/* Photo action sheet */}
+      <Modal
+        visible={photoSheetVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setPhotoSheetVisible(false)}
+      >
+        <Pressable style={styles.sheetBackdrop} onPress={() => setPhotoSheetVisible(false)}>
+          <Pressable style={[styles.sheet, { backgroundColor: colors.cardBackground }]}>
+            <Text style={[styles.sheetTitle, { color: colors.textSecondary }]}>
+              {t("profile.change_photo")}
+            </Text>
+            <TouchableOpacity style={styles.sheetItem} onPress={pickFromCamera}>
+              <Ionicons name="camera-outline" size={22} color={colors.text} />
+              <Text style={[styles.sheetItemText, { color: colors.text }]}>{t("profile.photo_camera")}</Text>
+            </TouchableOpacity>
+            <View style={[styles.sheetDivider, { backgroundColor: colors.divider }]} />
+            <TouchableOpacity style={styles.sheetItem} onPress={pickFromGallery}>
+              <Ionicons name="image-outline" size={22} color={colors.text} />
+              <Text style={[styles.sheetItemText, { color: colors.text }]}>{t("profile.photo_gallery")}</Text>
+            </TouchableOpacity>
+            {!!user?.avatar_url && (
+              <>
+                <View style={[styles.sheetDivider, { backgroundColor: colors.divider }]} />
+                <TouchableOpacity style={styles.sheetItem} onPress={handleRemovePhoto}>
+                  <Ionicons name="trash-outline" size={22} color={colors.error} />
+                  <Text style={[styles.sheetItemText, { color: colors.error }]}>{t("profile.photo_remove")}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            <View style={[styles.sheetDivider, { backgroundColor: colors.divider }]} />
+            <TouchableOpacity style={styles.sheetItem} onPress={() => setPhotoSheetVisible(false)}>
+              <Text style={[styles.sheetItemText, { color: colors.textSecondary }]}>{t("common.cancel")}</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -497,4 +523,29 @@ const styles = StyleSheet.create({
   menuBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 5 },
   menuBadgeText: { fontSize: 11, fontWeight: "700" },
   menuDivider: { height: StyleSheet.hairlineWidth, marginLeft: 50 },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 32,
+    paddingTop: 8,
+  },
+  sheetTitle: {
+    textAlign: "center",
+    fontSize: 13,
+    paddingVertical: 12,
+  },
+  sheetDivider: { height: StyleSheet.hairlineWidth },
+  sheetItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  sheetItemText: { fontSize: 16 },
 });
