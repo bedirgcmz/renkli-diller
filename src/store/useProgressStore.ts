@@ -37,7 +37,7 @@ interface ProgressState {
   forgot: (sentenceId: string) => Promise<void>;
   // Legacy quiz tracking
   recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
-  recordQuizResult: (result: Omit<QuizResult, "id" | "created_at">) => Promise<void>;
+  recordQuizResult: (result: Omit<QuizResult, "id" | "answered_at">) => Promise<void>;
   updateSentenceProgress: (sentenceId: string, correct: boolean) => Promise<void>;
   getTodayProgress: () => UserProgress[];
   getWeekProgress: () => UserProgress[];
@@ -213,12 +213,12 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const { data: quizResults } = await supabase
         .from("quiz_results")
-        .select("correct, created_at, question_type")
+        .select("is_correct, answered_at, quiz_type")
         .eq("user_id", user.id);
 
       const { data: quizWithCategory } = await supabase
         .from("quiz_results")
-        .select("correct, question_type, sentences(category)")
+        .select("is_correct, quiz_type, sentences(category)")
         .eq("user_id", user.id);
 
       const { data: studySessionRows } = await supabase
@@ -231,7 +231,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         allProgressRows?.filter((r) => r.state === "learned").length || 0;
 
       const totalQuizQuestions = quizResults?.length || 0;
-      const correctQuizAnswers = quizResults?.filter((q) => q.correct).length || 0;
+      const correctQuizAnswers = quizResults?.filter((q) => q.is_correct).length || 0;
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
@@ -240,10 +240,10 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         fill_blank: { correct: 0, total: 0 },
       };
       for (const q of quizResults || []) {
-        const mode = q.question_type as "multiple_choice" | "fill_blank";
+        const mode = q.quiz_type as "multiple_choice" | "fill_blank";
         if (quizByMode[mode]) {
           quizByMode[mode].total++;
-          if (q.correct) quizByMode[mode].correct++;
+          if (q.is_correct) quizByMode[mode].correct++;
         }
       }
 
@@ -252,14 +252,14 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         const cat = (q.sentences as { category?: string } | null)?.category ?? "other";
         if (!quizByCategory[cat]) quizByCategory[cat] = { correct: 0, total: 0 };
         quizByCategory[cat].total++;
-        if (q.correct) quizByCategory[cat].correct++;
+        if (q.is_correct) quizByCategory[cat].correct++;
       }
 
       // Distinct calendar days with ANY activity: learned + quiz answered + auto mode session
       const learnedDays = [
         ...new Set([
           ...(learnedRows || []).map((r) => r.learned_at!.split("T")[0]),
-          ...(quizResults || []).map((r) => r.created_at.split("T")[0]),
+          ...(quizResults || []).map((r) => r.answered_at.split("T")[0]),
           ...(studySessionRows || []).map((r) => r.created_at.split("T")[0]),
         ]),
       ].sort().reverse();
@@ -356,7 +356,13 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       await supabase
         .from("quiz_results")
-        .insert({ ...result, user_id: user.id, created_at: new Date().toISOString() })
+        .insert({
+          user_id: user.id,
+          sentence_id: result.sentence_id,
+          is_correct: result.is_correct,
+          quiz_type: result.quiz_type,
+          answered_at: new Date().toISOString(),
+        })
         .select()
         .single();
 

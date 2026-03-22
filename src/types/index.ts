@@ -56,9 +56,9 @@ export interface QuizResult {
   id: string;
   user_id: string;
   sentence_id: string;
-  correct: boolean;
-  question_type: "multiple_choice" | "fill_blank";
-  created_at: string;
+  is_correct: boolean;
+  quiz_type: "multiple_choice" | "fill_blank";
+  answered_at: string;
 }
 
 // Quiz types

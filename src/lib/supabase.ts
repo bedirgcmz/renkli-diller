@@ -133,28 +133,31 @@ export type Database = {
       };
       quiz_results: {
         Row: {
-          id: string;
+          id: number;
           user_id: string;
-          sentence_id: string;
-          correct: boolean;
-          question_type: "multiple_choice" | "fill_blank";
-          created_at: string;
+          sentence_id: string | null;
+          user_sentence_id: number | null;
+          is_correct: boolean;
+          quiz_type: "multiple_choice" | "fill_blank";
+          answered_at: string;
         };
         Insert: {
-          id?: string;
+          id?: number;
           user_id: string;
-          sentence_id: string;
-          correct: boolean;
-          question_type: "multiple_choice" | "fill_blank";
-          created_at?: string;
+          sentence_id?: string | null;
+          user_sentence_id?: number | null;
+          is_correct: boolean;
+          quiz_type: "multiple_choice" | "fill_blank";
+          answered_at?: string;
         };
         Update: {
-          id?: string;
+          id?: number;
           user_id?: string;
-          sentence_id?: string;
-          correct?: boolean;
-          question_type?: "multiple_choice" | "fill_blank";
-          created_at?: string;
+          sentence_id?: string | null;
+          user_sentence_id?: number | null;
+          is_correct?: boolean;
+          quiz_type?: "multiple_choice" | "fill_blank";
+          answered_at?: string;
         };
       };
       user_settings: {

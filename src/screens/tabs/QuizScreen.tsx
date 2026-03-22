@@ -139,7 +139,7 @@ export default function QuizScreen() {
         .from("quiz_results")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .gte("created_at", todayStart.toISOString());
+        .gte("answered_at", todayStart.toISOString());
 
       setDailyCount(count ?? 0);
     };
@@ -220,8 +220,8 @@ export default function QuizScreen() {
       recordQuizResult({
         user_id: "",
         sentence_id: currentQ.sentence.id,
-        correct,
-        question_type: currentQ.type,
+        is_correct: correct,
+        quiz_type: currentQ.type,
       });
     }
   };
