@@ -230,21 +230,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       let tempStreak = 0;
       const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+      // Calculate longestStreak across all history (consecutive day groups)
       for (let i = 0; i < learnedDays.length; i++) {
         if (i === 0) {
-          // Streak is only "active" if user learned something today or yesterday
-          const dayDiff =
-            (new Date(today).getTime() - new Date(learnedDays[0]).getTime()) / MS_PER_DAY;
-          if (dayDiff > 1) break; // streak already broken before we start
           tempStreak = 1;
-          currentStreak = 1;
         } else {
           const diff =
             (new Date(learnedDays[i - 1]).getTime() - new Date(learnedDays[i]).getTime()) /
             MS_PER_DAY;
           if (diff === 1) {
             tempStreak++;
-            currentStreak = tempStreak;
           } else {
             longestStreak = Math.max(longestStreak, tempStreak);
             tempStreak = 1;
@@ -252,6 +247,23 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         }
       }
       longestStreak = Math.max(longestStreak, tempStreak);
+
+      // currentStreak is only active if user learned today or yesterday
+      if (learnedDays.length > 0) {
+        const dayDiff =
+          (new Date(today).getTime() - new Date(learnedDays[0]).getTime()) / MS_PER_DAY;
+        if (dayDiff <= 1) {
+          let streak = 1;
+          for (let i = 1; i < learnedDays.length; i++) {
+            const diff =
+              (new Date(learnedDays[i - 1]).getTime() - new Date(learnedDays[i]).getTime()) /
+              MS_PER_DAY;
+            if (diff === 1) streak++;
+            else break;
+          }
+          currentStreak = streak;
+        }
+      }
 
       const lastStudyDate = learnedDays.length > 0 ? learnedDays[0] : null;
 
