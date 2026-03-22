@@ -43,7 +43,7 @@ export default function AutoModeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage, autoModeSpeed } = useSettingsStore();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, loadProgress } = useProgressStore();
+  const { progressMap, loadProgress, recordStudySession } = useProgressStore();
   const { isPremium } = usePremium();
 
   const [speed, setSpeed] = useState<Speed>((autoModeSpeed as Speed) ?? 1);
@@ -172,6 +172,10 @@ export default function AutoModeScreen() {
     setIsPlaying(true);
     setShowTarget(false);
     setPhase("source");
+    // Record activity so auto mode sessions count toward streak
+    if (sentence) {
+      recordStudySession({ user_id: "", sentence_id: sentence.id, duration_minutes: 0, completed: false });
+    }
   };
 
   const handlePause = () => {

@@ -207,7 +207,12 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const { data: quizResults } = await supabase
         .from("quiz_results")
-        .select("correct")
+        .select("correct, created_at")
+        .eq("user_id", user.id);
+
+      const { data: studySessionRows } = await supabase
+        .from("study_sessions")
+        .select("created_at")
         .eq("user_id", user.id);
 
       const totalSentencesStudied = allProgressRows?.length || 0;
@@ -219,10 +224,13 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
-      // Distinct calendar days on which at least one sentence was marked learned,
-      // sorted newest-first — used for streak calculation.
+      // Distinct calendar days with ANY activity: learned + quiz answered + auto mode session
       const learnedDays = [
-        ...new Set((learnedRows || []).map((r) => r.learned_at!.split("T")[0])),
+        ...new Set([
+          ...(learnedRows || []).map((r) => r.learned_at!.split("T")[0]),
+          ...(quizResults || []).map((r) => r.created_at.split("T")[0]),
+          ...(studySessionRows || []).map((r) => r.created_at.split("T")[0]),
+        ]),
       ].sort().reverse();
 
       let currentStreak = 0;
