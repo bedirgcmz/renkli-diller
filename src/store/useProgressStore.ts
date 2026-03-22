@@ -4,6 +4,8 @@ import { UserProgress, QuizResult, StudySession } from "@/types";
 
 // TODO: daily_stats tablosuna yazma — şu an streak user_progress.learned_at'tan hesaplanıyor.
 // daily_stats tablosu şu an kullanılmıyor; gerekirse her öğrenme/quiz sonrası güncellenebilir.
+interface ModeStats { correct: number; total: number }
+
 interface ProgressStats {
   totalSentencesStudied: number;
   totalSentencesLearned: number;
@@ -16,6 +18,8 @@ interface ProgressStats {
   studyTimeThisWeek: number;
   studyTimeThisMonth: number;
   lastStudyDate: string | null;
+  quizByMode: { multiple_choice: ModeStats; fill_blank: ModeStats };
+  quizByCategory: Record<string, ModeStats>;
 }
 
 interface ProgressState {
@@ -54,6 +58,8 @@ const DEFAULT_STATS: ProgressStats = {
   studyTimeThisWeek: 0,
   studyTimeThisMonth: 0,
   lastStudyDate: null,
+  quizByMode: { multiple_choice: { correct: 0, total: 0 }, fill_blank: { correct: 0, total: 0 } },
+  quizByCategory: {},
 };
 
 export const useProgressStore = create<ProgressState>((set, get) => ({
@@ -207,7 +213,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const { data: quizResults } = await supabase
         .from("quiz_results")
-        .select("correct, created_at")
+        .select("correct, created_at, question_type, sentences(category)")
         .eq("user_id", user.id);
 
       const { data: studySessionRows } = await supabase
@@ -223,6 +229,23 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const correctQuizAnswers = quizResults?.filter((q) => q.correct).length || 0;
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
+
+      const quizByMode: ProgressStats["quizByMode"] = {
+        multiple_choice: { correct: 0, total: 0 },
+        fill_blank: { correct: 0, total: 0 },
+      };
+      const quizByCategory: ProgressStats["quizByCategory"] = {};
+      for (const q of quizResults || []) {
+        const mode = q.question_type as "multiple_choice" | "fill_blank";
+        if (quizByMode[mode]) {
+          quizByMode[mode].total++;
+          if (q.correct) quizByMode[mode].correct++;
+        }
+        const cat = (q.sentences as { category?: string } | null)?.category ?? "other";
+        if (!quizByCategory[cat]) quizByCategory[cat] = { correct: 0, total: 0 };
+        quizByCategory[cat].total++;
+        if (q.correct) quizByCategory[cat].correct++;
+      }
 
       // Distinct calendar days with ANY activity: learned + quiz answered + auto mode session
       const learnedDays = [
@@ -288,6 +311,8 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           studyTimeThisWeek: 0,
           studyTimeThisMonth: 0,
           lastStudyDate,
+          quizByMode,
+          quizByCategory,
         },
       });
     } catch (error) {

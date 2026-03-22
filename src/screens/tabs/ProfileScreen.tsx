@@ -371,6 +371,58 @@ export default function ProfileScreen() {
           ))}
         </View>
 
+        {/* Quiz breakdown */}
+        {stats.totalQuizQuestions > 0 && (
+          <View style={[styles.quizCard, { backgroundColor: colors.cardBackground }]}>
+            <Text style={[styles.quizCardTitle, { color: colors.text }]}>
+              {t("profile.quiz_breakdown")}
+            </Text>
+
+            {/* Mode rows */}
+            {(["multiple_choice", "fill_blank"] as const).map((mode) => {
+              const s = stats.quizByMode[mode];
+              if (s.total === 0) return null;
+              const pct = Math.round((s.correct / s.total) * 100);
+              return (
+                <View key={mode} style={styles.quizRow}>
+                  <Text style={[styles.quizRowLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+                    {t(`quiz.${mode}`)}
+                  </Text>
+                  <View style={[styles.quizBar, { backgroundColor: colors.border }]}>
+                    <View style={[styles.quizBarFill, { backgroundColor: colors.primary, width: `${pct}%` }]} />
+                  </View>
+                  <Text style={[styles.quizRowPct, { color: colors.text }]}>{pct}%</Text>
+                </View>
+              );
+            })}
+
+            {/* Divider */}
+            {Object.keys(stats.quizByCategory).length > 0 && (
+              <View style={[styles.quizDivider, { backgroundColor: colors.divider }]} />
+            )}
+
+            {/* Category rows — sorted by total desc, top 5 */}
+            {Object.entries(stats.quizByCategory)
+              .sort((a, b) => b[1].total - a[1].total)
+              .slice(0, 5)
+              .map(([cat, s]) => {
+                const pct = Math.round((s.correct / s.total) * 100);
+                const label = t(`categories.${cat}`, { defaultValue: cat });
+                return (
+                  <View key={cat} style={styles.quizRow}>
+                    <Text style={[styles.quizRowLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+                      {label}
+                    </Text>
+                    <View style={[styles.quizBar, { backgroundColor: colors.border }]}>
+                      <View style={[styles.quizBarFill, { backgroundColor: colors.success, width: `${pct}%` }]} />
+                    </View>
+                    <Text style={[styles.quizRowPct, { color: colors.text }]}>{pct}%</Text>
+                  </View>
+                );
+              })}
+          </View>
+        )}
+
         {/* Activity chart */}
         <ActivityChart progress={progress} />
 
@@ -579,6 +631,24 @@ const styles = StyleSheet.create({
   statIcon: { fontSize: 22 },
   statValue: { fontSize: 22, fontWeight: "700" },
   statLabel: { fontSize: 11, textAlign: "center" },
+  quizCard: {
+    borderRadius: 14,
+    padding: 16,
+    gap: 10,
+    marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  quizCardTitle: { fontSize: 13, fontWeight: "700", marginBottom: 2 },
+  quizRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  quizRowLabel: { fontSize: 12, width: 110 },
+  quizBar: { flex: 1, height: 5, borderRadius: 3, overflow: "hidden" },
+  quizBarFill: { height: 5, borderRadius: 3 },
+  quizRowPct: { fontSize: 12, fontWeight: "600", width: 34, textAlign: "right" },
+  quizDivider: { height: StyleSheet.hairlineWidth, marginVertical: 2 },
   menuCard: {
     borderRadius: 16,
     overflow: "hidden",
