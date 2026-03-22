@@ -200,7 +200,11 @@
     "delete_account": "Hesabı Sil",
     "about": "Hakkında",
     "version": "Versiyon",
-    "delete_account_warning": "Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz silinecek."
+    "delete_account_warning": "Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz silinecek.",
+    "notif_title": "Çalışma zamanı! 📚",
+    "notif_body": "Bugünkü hedefine ulaşmak için birkaç cümle öğren.",
+    "notif_permission_denied": "Bildirim izni verilmedi. Lütfen uygulama ayarlarından izin ver.",
+    "notif_scheduled": "Bildirim ayarlandı"
   },
   "premium": {
     "title": "Premium'a Geç",

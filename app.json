@@ -32,6 +32,13 @@
       "expo-sharing",
       "expo-secure-store",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#4DA3FF"
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Parlio, profil fotoğrafı seçmek için fotoğraflara erişim istiyor.",

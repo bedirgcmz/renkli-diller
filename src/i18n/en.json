@@ -200,7 +200,11 @@
     "delete_account": "Delete Account",
     "about": "About",
     "version": "Version",
-    "delete_account_warning": "This action cannot be undone. Your account and all data will be deleted."
+    "delete_account_warning": "This action cannot be undone. Your account and all data will be deleted.",
+    "notif_title": "Study time! 📚",
+    "notif_body": "Learn a few sentences to reach your daily goal.",
+    "notif_permission_denied": "Notification permission denied. Please enable it in app settings.",
+    "notif_scheduled": "Notification set"
   },
   "premium": {
     "title": "Go Premium",

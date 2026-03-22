@@ -199,7 +199,11 @@
     "delete_account": "Ta bort konto",
     "about": "Om",
     "version": "Version",
-    "delete_account_warning": "Den här åtgärden kan inte ångras. Ditt konto och all data kommer att raderas."
+    "delete_account_warning": "Den här åtgärden kan inte ångras. Ditt konto och all data kommer att raderas.",
+    "notif_title": "Studietid! 📚",
+    "notif_body": "Lär dig några meningar för att nå ditt dagliga mål.",
+    "notif_permission_denied": "Aviseringsbehörighet nekad. Aktivera den i appinställningarna.",
+    "notif_scheduled": "Avisering inställd"
   },
   "premium": {
     "title": "Gå Premium",

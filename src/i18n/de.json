@@ -199,7 +199,11 @@
     "delete_account": "Konto löschen",
     "about": "Über",
     "version": "Version",
-    "delete_account_warning": "Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle Daten werden gelöscht."
+    "delete_account_warning": "Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle Daten werden gelöscht.",
+    "notif_title": "Lernzeit! 📚",
+    "notif_body": "Lerne ein paar Sätze, um dein Tagesziel zu erreichen.",
+    "notif_permission_denied": "Benachrichtigungsberechtigung verweigert. Bitte in den App-Einstellungen aktivieren.",
+    "notif_scheduled": "Benachrichtigung gesetzt"
   },
   "premium": {
     "title": "Premium werden",

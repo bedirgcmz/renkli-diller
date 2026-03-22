@@ -199,7 +199,11 @@
     "delete_account": "Eliminar cuenta",
     "about": "Acerca de",
     "version": "Versión",
-    "delete_account_warning": "Esta acción es irreversible. Tu cuenta y todos tus datos serán eliminados."
+    "delete_account_warning": "Esta acción es irreversible. Tu cuenta y todos tus datos serán eliminados.",
+    "notif_title": "¡Hora de estudiar! 📚",
+    "notif_body": "Aprende algunas frases para alcanzar tu objetivo diario.",
+    "notif_permission_denied": "Permiso de notificación denegado. Actívalo en la configuración de la app.",
+    "notif_scheduled": "Notificación configurada"
   },
   "premium": {
     "title": "Ir a Premium",

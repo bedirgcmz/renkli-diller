@@ -20,6 +20,12 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useI18n } from "@/providers/I18nProvider";
 import { MainStackParamList, SupportedLanguage } from "@/types";
+import {
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  cancelDailyReminder,
+  parseReminderTime,
+} from "@/services/notifications";
 
 const LANGUAGE_OPTIONS: Array<{ value: SupportedLanguage; label: string; flag: string }> = [
   { value: "tr", label: "Türkçe", flag: "🇹🇷" },
@@ -58,6 +64,58 @@ function SettingRow({
       </View>
       <View style={sStyles.rowRight}>{children}</View>
     </View>
+  );
+}
+
+const TIME_OPTIONS = [
+  "07:00","08:00","09:00","10:00","12:00","14:00",
+  "16:00","17:00","18:00","19:00","20:00","21:00","22:00",
+];
+
+function TimePicker({
+  value,
+  onChange,
+  colors,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  colors: any;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <TouchableOpacity
+        style={[sStyles.pickerBtn, { borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+        onPress={() => setOpen(true)}
+        activeOpacity={0.8}
+      >
+        <Text style={[sStyles.pickerBtnText, { color: colors.text }]}>{value}</Text>
+        <Ionicons name="chevron-down" size={14} color={colors.textSecondary} />
+      </TouchableOpacity>
+
+      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable style={sStyles.modalBackdrop} onPress={() => setOpen(false)}>
+          <Pressable style={[sStyles.modalSheet, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
+            {TIME_OPTIONS.map((opt) => (
+              <TouchableOpacity
+                key={opt}
+                style={[
+                  sStyles.pickerOption,
+                  opt === value && { backgroundColor: colors.primary + "15" },
+                ]}
+                onPress={() => { onChange(opt); setOpen(false); }}
+                activeOpacity={0.7}
+              >
+                <Text style={[sStyles.pickerOptionText, { color: opt === value ? colors.primary : colors.text }]}>
+                  {opt}
+                </Text>
+                {opt === value && <Ionicons name="checkmark" size={16} color={colors.primary} />}
+              </TouchableOpacity>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
   );
 }
 
@@ -124,11 +182,13 @@ export default function SettingsScreen() {
     targetLanguage,
     dailyGoal,
     notifications,
+    reminderTime,
     setUILanguage,
     setTargetLanguage,
     setTheme,
     setDailyGoal,
     setNotifications,
+    setReminderTime,
   } = useSettingsStore();
   const { user, signOut } = useAuthStore();
 
@@ -144,6 +204,30 @@ export default function SettingsScreen() {
     const newTheme = isDark ? "light" : "dark";
     setTheme(newTheme);
     toggleTheme();
+  };
+
+  const handleNotificationsToggle = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        Alert.alert(t("settings.notifications"), t("settings.notif_permission_denied"));
+        return;
+      }
+      const { hour, minute } = parseReminderTime(reminderTime);
+      await scheduleDailyReminder(hour, minute, t("settings.notif_title"), t("settings.notif_body"));
+      setNotifications(true);
+    } else {
+      await cancelDailyReminder();
+      setNotifications(false);
+    }
+  };
+
+  const handleReminderTimeChange = async (time: string) => {
+    await setReminderTime(time);
+    if (notifications) {
+      const { hour, minute } = parseReminderTime(time);
+      await scheduleDailyReminder(hour, minute, t("settings.notif_title"), t("settings.notif_body"));
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -265,7 +349,7 @@ export default function SettingsScreen() {
         {/* ── Bildirimler ───────────────────────────────── */}
         <SectionTitle label={t("settings.notifications").toUpperCase()} colors={colors} />
         <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
+          <View style={[sStyles.row, { borderBottomColor: notifications ? colors.divider : "transparent" }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>🔔</Text>
               <Text style={[sStyles.rowLabel, { color: colors.text }]}>
@@ -274,11 +358,28 @@ export default function SettingsScreen() {
             </View>
             <Switch
               value={notifications}
-              onValueChange={(v) => setNotifications(v)}
+              onValueChange={handleNotificationsToggle}
               trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor="#fff"
             />
           </View>
+          {notifications && (
+            <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
+              <View style={sStyles.rowLeft}>
+                <Text style={sStyles.rowIcon}>🕐</Text>
+                <Text style={[sStyles.rowLabel, { color: colors.text }]}>
+                  {t("settings.reminder_time")}
+                </Text>
+              </View>
+              <View style={sStyles.rowRight}>
+                <TimePicker
+                  value={reminderTime}
+                  onChange={handleReminderTimeChange}
+                  colors={colors}
+                />
+              </View>
+            </View>
+          )}
         </View>
 
         {/* ── Hesap ─────────────────────────────────────── */}
