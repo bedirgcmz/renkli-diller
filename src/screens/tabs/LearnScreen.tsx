@@ -560,7 +560,7 @@ export default function LearnScreen() {
                 end={{ x: 1, y: 0 }}
               >
                 <Text style={[styles.segmentLabel, { color: "#fff" }]}>
-                  {t("sentences.filter_learning")}
+                  {t("learn.tab_study")}
                 </Text>
                 {learningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
@@ -571,7 +571,7 @@ export default function LearnScreen() {
             ) : (
               <View style={styles.segmentTabInner}>
                 <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
-                  {t("sentences.filter_learning")}
+                  {t("learn.tab_study")}
                 </Text>
                 {learningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "#4DA3FF" }]}>
