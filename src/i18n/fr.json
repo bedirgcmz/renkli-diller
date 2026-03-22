@@ -65,7 +65,10 @@
     "fill_blank_help": "Utilisez les paires de phrases de vos cartes. Traduisez la phrase affichée en entier. La direction est indiquée par une flèche.",
     "min_sentences": "Au moins 2 phrases sont nécessaires pour le quiz.",
     "new_session": "Nouvelle session",
-    "answer_placeholder": "Écrivez votre réponse..."
+    "answer_placeholder": "Écrivez votre réponse...",
+    "reviewing_wrong": "Révision de {{count}} mauvaises réponses",
+    "first_round": "Premier tour",
+    "retry_round": "Tour de révision"
   },
   "sentences": {
     "title": "Toutes les phrases",

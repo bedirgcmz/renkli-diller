@@ -66,7 +66,10 @@
     "no_keywords": "Anahtar kelime işaretçisi olan cümle bulunamadı.\nCümlelerinize **işaretçi** ekleyerek bu modu kullanın.",
     "min_sentences": "Quiz için en az 2 cümle gereklidir.",
     "new_session": "Yeni Oturum",
-    "answer_placeholder": "Cevabınızı yazın..."
+    "answer_placeholder": "Cevabınızı yazın...",
+    "reviewing_wrong": "{{count}} yanlış cevap tekrar ediliyor",
+    "first_round": "İlk Tur",
+    "retry_round": "Tekrar Turu"
   },
   "sentences": {
     "title": "Tüm Cümleler",

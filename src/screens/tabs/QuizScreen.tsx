@@ -119,6 +119,9 @@ export default function QuizScreen() {
   const [sessionComplete, setSessionComplete] = useState(false);
   const [dailyCount, setDailyCount] = useState(0);
   const [initialized, setInitialized] = useState(false);
+  const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
+  const [isRetryPhase, setIsRetryPhase] = useState(false);
+  const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -175,6 +178,9 @@ export default function QuizScreen() {
     setShowHint(false);
     setScore({ correct: 0, total: 0 });
     setSessionComplete(false);
+    setWrongQuestions([]);
+    setIsRetryPhase(false);
+    setMainScore({ correct: 0, total: 0 });
   };
 
   useEffect(() => {
@@ -195,6 +201,9 @@ export default function QuizScreen() {
     setIsCorrect(correct);
     setShowResult(true);
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
+    if (!correct) {
+      setWrongQuestions((prev) => [...prev, currentQ]);
+    }
     setDailyCount((c) => {
       const next = c + 1;
       AsyncStorage.setItem(DAILY_KEY, JSON.stringify({ count: next, date: today }));
@@ -227,7 +236,20 @@ export default function QuizScreen() {
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     const next = currentIdx + 1;
     if (next >= questions.length) {
-      setSessionComplete(true);
+      if (!isRetryPhase && wrongQuestions.length > 0) {
+        setMainScore(score);
+        setQuestions([...wrongQuestions]);
+        setWrongQuestions([]);
+        setCurrentIdx(0);
+        setSelectedOption(null);
+        setShowResult(false);
+        setKeywordInputs([]);
+        setShowHint(false);
+        setScore({ correct: 0, total: 0 });
+        setIsRetryPhase(true);
+      } else {
+        setSessionComplete(true);
+      }
     } else {
       setCurrentIdx(next);
       setSelectedOption(null);
@@ -318,6 +340,21 @@ export default function QuizScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       {renderHeader()}
 
+      {/* Retry phase banner */}
+      {isRetryPhase && (
+        <View
+          style={[
+            styles.retryBanner,
+            { backgroundColor: colors.warning + "22", borderColor: colors.warning + "60" },
+          ]}
+        >
+          <Ionicons name="refresh-circle-outline" size={16} color={colors.warning} />
+          <Text style={[styles.retryBannerText, { color: colors.warning }]}>
+            {t("quiz.reviewing_wrong", { count: questions.length })}
+          </Text>
+        </View>
+      )}
+
       {/* Progress bar */}
       {questions.length > 0 && (
         <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
@@ -363,13 +400,39 @@ export default function QuizScreen() {
         {sessionComplete ? (
           <View style={[styles.doneCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.doneIcon}>🎉</Text>
-            <Text style={[styles.doneTitle, { color: colors.text }]}>
-              {score.correct}/{score.total} {t("quiz.score")}
-            </Text>
-            <Text style={[styles.doneSubtitle, { color: colors.textSecondary }]}>
-              {Math.round((score.correct / Math.max(score.total, 1)) * 100)}%{" "}
-              {t("quiz.correct").toLowerCase()}
-            </Text>
+            {isRetryPhase ? (
+              <>
+                <View style={styles.doneScoreRow}>
+                  <View style={styles.doneScoreBlock}>
+                    <Text style={[styles.doneScoreLabel, { color: colors.textTertiary }]}>
+                      {t("quiz.first_round")}
+                    </Text>
+                    <Text style={[styles.doneScoreNum, { color: colors.text }]}>
+                      {mainScore.correct}/{mainScore.total}
+                    </Text>
+                  </View>
+                  <View style={[styles.doneScoreDivider, { backgroundColor: colors.border }]} />
+                  <View style={styles.doneScoreBlock}>
+                    <Text style={[styles.doneScoreLabel, { color: colors.textTertiary }]}>
+                      {t("quiz.retry_round")}
+                    </Text>
+                    <Text style={[styles.doneScoreNum, { color: colors.primary }]}>
+                      {score.correct}/{score.total}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.doneTitle, { color: colors.text }]}>
+                  {score.correct}/{score.total} {t("quiz.score")}
+                </Text>
+                <Text style={[styles.doneSubtitle, { color: colors.textSecondary }]}>
+                  {Math.round((score.correct / Math.max(score.total, 1)) * 100)}%{" "}
+                  {t("quiz.correct").toLowerCase()}
+                </Text>
+              </>
+            )}
             <TouchableOpacity
               style={[styles.restartBtn, { backgroundColor: colors.primary }]}
               onPress={startSession}
@@ -904,4 +967,26 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   restartBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  retryBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginHorizontal: 16,
+    marginBottom: 8,
+  },
+  retryBannerText: { fontSize: 13, fontWeight: "600" },
+  doneScoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginVertical: 4,
+  },
+  doneScoreBlock: { alignItems: "center", gap: 4 },
+  doneScoreLabel: { fontSize: 11, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 },
+  doneScoreNum: { fontSize: 22, fontWeight: "700" },
+  doneScoreDivider: { width: 1, height: 40 },
 });

@@ -65,7 +65,10 @@
     "fill_blank_help": "Använd meningsparen från dina inlärningskort. Översätt den visade meningen helt. Riktningen anges med pilen — ibland källa till mål, ibland omvänt.",
     "min_sentences": "Minst 2 meningar krävs för quiz.",
     "new_session": "Ny session",
-    "answer_placeholder": "Skriv ditt svar..."
+    "answer_placeholder": "Skriv ditt svar...",
+    "reviewing_wrong": "Granskar {{count}} felaktiga svar",
+    "first_round": "Första omgången",
+    "retry_round": "Repetitionsomgång"
   },
   "sentences": {
     "title": "Alla meningar",

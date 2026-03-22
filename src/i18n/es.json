@@ -65,7 +65,10 @@
     "fill_blank_help": "Usa los pares de frases de tus tarjetas. Traduce la frase mostrada completa. La dirección se indica con una flecha.",
     "min_sentences": "Se necesitan al menos 2 frases para el quiz.",
     "new_session": "Nueva sesión",
-    "answer_placeholder": "Escribe tu respuesta..."
+    "answer_placeholder": "Escribe tu respuesta...",
+    "reviewing_wrong": "Repasando {{count}} respuestas incorrectas",
+    "first_round": "Primera ronda",
+    "retry_round": "Ronda de repaso"
   },
   "sentences": {
     "title": "Todas las frases",

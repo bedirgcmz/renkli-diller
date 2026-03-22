@@ -66,7 +66,10 @@
     "no_keywords": "No sentences with keyword markers found.\nAdd **markers** to your sentences to use this mode.",
     "min_sentences": "At least 2 sentences are required for the quiz.",
     "new_session": "New Session",
-    "answer_placeholder": "Write your answer..."
+    "answer_placeholder": "Write your answer...",
+    "reviewing_wrong": "Reviewing {{count}} wrong answers",
+    "first_round": "First Round",
+    "retry_round": "Retry Round"
   },
   "sentences": {
     "title": "All Sentences",

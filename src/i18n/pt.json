@@ -65,7 +65,10 @@
     "fill_blank_help": "Use os pares de frases dos seus cartões. Traduza a frase exibida por completo. A direção é indicada por uma seta.",
     "min_sentences": "São necessárias pelo menos 2 frases para o quiz.",
     "new_session": "Nova sessão",
-    "answer_placeholder": "Escreva sua resposta..."
+    "answer_placeholder": "Escreva sua resposta...",
+    "reviewing_wrong": "Revisando {{count}} respostas erradas",
+    "first_round": "Primeira rodada",
+    "retry_round": "Rodada de revisão"
   },
   "sentences": {
     "title": "Todas as frases",
