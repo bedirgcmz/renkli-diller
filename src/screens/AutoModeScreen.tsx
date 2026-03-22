@@ -224,7 +224,15 @@ export default function AutoModeScreen() {
       <View style={styles.topBar}>
         <View style={{ width: 26 }} />
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
-        <View style={{ width: 26 }} />
+        <TouchableOpacity
+          onPress={() => {
+            Speech.stop();
+            navigation.goBack();
+          }}
+          hitSlop={12}
+        >
+          <Ionicons name="close" size={24} color={colors.text} />
+        </TouchableOpacity>
       </View>
 
       {/* Progress bar */}
