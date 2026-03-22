@@ -39,7 +39,13 @@
     "listen": "Anhören",
     "show_translation": "Übersetzung anzeigen",
     "start_hint": "Sie können beginnen, indem Sie auf 'Zur Lernliste hinzufügen' auf dem Sätze-Bildschirm tippen.",
-    "no_learned_sentences": "Noch keine gelernten Sätze."
+    "no_learned_sentences": "Noch keine gelernten Sätze.",
+    "tab_study": "Üben",
+    "tab_listen": "Hören",
+    "listen_select": "Wähle die richtige Bedeutung:",
+    "tap_to_reveal": "Auge tippen zum Anzeigen",
+    "replay": "Wiederholen",
+    "no_listen_sentences": "Füge Sätze zu deiner Lernliste hinzu, um Hörübungen zu beginnen."
   },
   "quiz": {
     "title": "Quiz",

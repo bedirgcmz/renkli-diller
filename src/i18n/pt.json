@@ -39,7 +39,13 @@
     "listen": "Ouvir",
     "show_translation": "Mostrar tradução",
     "start_hint": "Vá à tela de Frases e toque em 'Adicionar à minha lista' para começar.",
-    "no_learned_sentences": "Nenhuma frase aprendida ainda."
+    "no_learned_sentences": "Nenhuma frase aprendida ainda.",
+    "tab_study": "Estudar",
+    "tab_listen": "Ouvir",
+    "listen_select": "Selecione o significado correto:",
+    "tap_to_reveal": "Toque no olho para revelar",
+    "replay": "Repetir",
+    "no_listen_sentences": "Adicione frases à sua lista de aprendizagem para começar a praticar a escuta."
   },
   "quiz": {
     "title": "Quiz",

@@ -39,7 +39,13 @@
     "listen": "Lyssna",
     "show_translation": "Visa översättning",
     "start_hint": "Du kan börja genom att trycka på 'Lägg till i min lärlista' på Meningar-skärmen.",
-    "no_learned_sentences": "Inga inlärda meningar ännu."
+    "no_learned_sentences": "Inga inlärda meningar ännu.",
+    "tab_study": "Öva",
+    "tab_listen": "Lyssna",
+    "listen_select": "Välj rätt betydelse:",
+    "tap_to_reveal": "Tryck på ögat för att visa",
+    "replay": "Spela igen",
+    "no_listen_sentences": "Lägg till meningar i din inlärningslista för att börja lyssningsövning."
   },
   "quiz": {
     "title": "Quiz",
