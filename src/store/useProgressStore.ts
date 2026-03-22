@@ -213,7 +213,12 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const { data: quizResults } = await supabase
         .from("quiz_results")
-        .select("correct, created_at, question_type, sentences(category)")
+        .select("correct, created_at, question_type")
+        .eq("user_id", user.id);
+
+      const { data: quizWithCategory } = await supabase
+        .from("quiz_results")
+        .select("correct, question_type, sentences(category)")
         .eq("user_id", user.id);
 
       const { data: studySessionRows } = await supabase
@@ -234,13 +239,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         multiple_choice: { correct: 0, total: 0 },
         fill_blank: { correct: 0, total: 0 },
       };
-      const quizByCategory: ProgressStats["quizByCategory"] = {};
       for (const q of quizResults || []) {
         const mode = q.question_type as "multiple_choice" | "fill_blank";
         if (quizByMode[mode]) {
           quizByMode[mode].total++;
           if (q.correct) quizByMode[mode].correct++;
         }
+      }
+
+      const quizByCategory: ProgressStats["quizByCategory"] = {};
+      for (const q of quizWithCategory || []) {
         const cat = (q.sentences as { category?: string } | null)?.category ?? "other";
         if (!quizByCategory[cat]) quizByCategory[cat] = { correct: 0, total: 0 };
         quizByCategory[cat].total++;
