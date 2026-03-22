@@ -39,7 +39,12 @@
     "listen": "Listen",
     "show_translation": "Show Translation",
     "start_hint": "You can start by pressing 'Add to My Learning List' in the Sentences screen.",
-    "no_learned_sentences": "No learned sentences yet."
+    "no_learned_sentences": "No learned sentences yet.",
+    "tab_listen": "Listening",
+    "listen_select": "Select the correct meaning:",
+    "tap_to_reveal": "Tap eye to reveal",
+    "replay": "Replay",
+    "no_listen_sentences": "Add sentences to your learning list to start listening practice."
   },
   "quiz": {
     "title": "Quiz",
@@ -141,6 +146,7 @@
     "sign_out": "Sign Out",
     "confirm_signout": "Are you sure you want to sign out?",
     "learning": "Learning",
+    "learned_sentences": "Learned Sentences",
     "activity": "Activity",
     "week": "Week",
     "month": "Month",

@@ -39,7 +39,12 @@
     "listen": "Dinle",
     "show_translation": "Çeviriyi Göster",
     "start_hint": "Cümleler ekranından 'Öğrenme Listeme Ekle' butonuna basarak başlayabilirsiniz.",
-    "no_learned_sentences": "Henüz öğrenilen cümle yok."
+    "no_learned_sentences": "Henüz öğrenilen cümle yok.",
+    "tab_listen": "Dinleme",
+    "listen_select": "Doğru anlamı seçin:",
+    "tap_to_reveal": "Görmek için göze dokun",
+    "replay": "Tekrar Dinle",
+    "no_listen_sentences": "Dinleme pratiği yapmak için öğrenme listene cümle ekle."
   },
   "quiz": {
     "title": "Quiz",
@@ -141,6 +146,7 @@
     "sign_out": "Çıkış Yap",
     "confirm_signout": "Çıkış yapmak istediğinize emin misiniz?",
     "learning": "Öğreniyor",
+    "learned_sentences": "Öğrenilen Cümleler",
     "activity": "Aktivite",
     "week": "Hafta",
     "month": "Ay",
