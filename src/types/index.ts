@@ -103,6 +103,7 @@ export type MainStackParamList = {
   AutoMode: undefined;
   ChangeEmail: undefined;
   ChangePassword: undefined;
+  LearnedSentences: undefined;
 };
 
 export type AuthStackParamList = {
