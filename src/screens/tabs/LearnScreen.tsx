@@ -559,6 +559,7 @@ export default function LearnScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
+                <Ionicons name="book-outline" size={14} color="#fff" />
                 <Text style={[styles.segmentLabel, { color: "#fff" }]}>
                   {t("learn.tab_study")}
                 </Text>
@@ -570,6 +571,7 @@ export default function LearnScreen() {
               </GradientView>
             ) : (
               <View style={styles.segmentTabInner}>
+                <Ionicons name="book-outline" size={14} color={colors.textSecondary} />
                 <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
                   {t("learn.tab_study")}
                 </Text>
