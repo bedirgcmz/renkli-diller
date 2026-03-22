@@ -318,6 +318,14 @@ export default function ProfileScreen() {
             <Text style={[styles.streakLabel, { color: colors.textSecondary }]}>
               {t("profile.streak")}
             </Text>
+            {stats.longestStreak > 0 && (
+              <View style={styles.streakBestRow}>
+                <Text style={styles.streakBestIcon}>🏆</Text>
+                <Text style={[styles.streakBestText, { color: colors.textTertiary }]}>
+                  {stats.longestStreak} {t("profile.days")}
+                </Text>
+              </View>
+            )}
           </View>
 
           <View style={[styles.goalCard, { backgroundColor: colors.cardBackground }]}>
@@ -532,6 +540,9 @@ const styles = StyleSheet.create({
   streakIcon: { fontSize: 28 },
   streakNumber: { fontSize: 28, fontWeight: "800" },
   streakLabel: { fontSize: 12 },
+  streakBestRow: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 4 },
+  streakBestIcon: { fontSize: 10 },
+  streakBestText: { fontSize: 11, fontWeight: "600" },
   goalCard: {
     flex: 1,
     borderRadius: 14,
