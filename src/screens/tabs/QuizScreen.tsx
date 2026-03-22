@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,10 +20,10 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { stripMarkers } from "@/utils/keywords";
+import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
-import { MainStackParamList, Sentence } from "@/types";
+import { MainStackParamList, PillSegment, Sentence } from "@/types";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -36,13 +37,12 @@ interface MCQuestion {
 interface FBQuestion {
   type: "fill_blank";
   sentence: Sentence;
-  questionText: string;   // gösterilecek cümle (düz metin)
-  answer: string;         // beklenen çeviri (düz metin)
-  direction: "source_to_target" | "target_to_source";
+  contextText: string;           // source text (stripped) — shown as context
+  targetSegments: PillSegment[]; // parsed target_text for rendering with blanks
+  keywords: string[];            // expected keyword answers (in order)
 }
 
 type Question = MCQuestion | FBQuestion;
-
 
 function generateMCQuestion(sentence: Sentence, allSentences: Sentence[]): MCQuestion | null {
   const others = allSentences.filter((s) => s.id !== sentence.id);
@@ -62,29 +62,25 @@ function normalize(s: string): string {
   return s
     .toLowerCase()
     .trim()
-    .replace(/[.,!?;:'"«»„"]/g, "")  // noktalama kaldır
-    .replace(/\s+/g, " ");            // fazla boşluk normalize
+    .replace(/[.,!?;:'"«»„"]/g, "")
+    .replace(/\s+/g, " ");
 }
 
-function generateFBQuestion(sentence: Sentence): FBQuestion {
-  const direction: FBQuestion["direction"] =
-    Math.random() > 0.5 ? "source_to_target" : "target_to_source";
-  const questionText =
-    direction === "source_to_target"
-      ? stripMarkers(sentence.source_text)
-      : stripMarkers(sentence.target_text);
-  const answer =
-    direction === "source_to_target"
-      ? stripMarkers(sentence.target_text)
-      : stripMarkers(sentence.source_text);
-  return { type: "fill_blank", sentence, questionText, answer, direction };
+function generateFBQuestion(sentence: Sentence): FBQuestion | null {
+  const targetSegments = parseKeywords(sentence.target_text);
+  const keywords = targetSegments.filter((s) => s.isPill).map((s) => s.text.trim());
+  if (keywords.length === 0) return null; // skip sentences without keyword markers
+
+  return {
+    type: "fill_blank",
+    sentence,
+    contextText: stripMarkers(sentence.source_text),
+    targetSegments,
+    keywords,
+  };
 }
 
-function buildSession(
-  sentences: Sentence[],
-  mode: QuizMode,
-  count: number,
-): Question[] {
+function buildSession(sentences: Sentence[], mode: QuizMode, count: number): Question[] {
   const shuffled = [...sentences].sort(() => Math.random() - 0.5);
   const questions: Question[] = [];
 
@@ -103,6 +99,8 @@ function buildSession(
 export default function QuizScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
@@ -116,13 +114,13 @@ export default function QuizScreen() {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState({ correct: 0, total: 0 });
-  const [input, setInput] = useState("");
+  const [keywordInputs, setKeywordInputs] = useState<string[]>([]);
   const [showHint, setShowHint] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [dailyCount, setDailyCount] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
   const DAILY_KEY = "@parlio_quiz_daily";
   const today = new Date().toISOString().split("T")[0];
@@ -145,13 +143,19 @@ export default function QuizScreen() {
     );
   }, [targetLanguage, uiLanguage]);
 
-  // Tüm cümleler: user sentences + öğreniliyor/öğrenildi preset cümleler
+  // Auto-focus first keyword input on fill_blank question load
+  useEffect(() => {
+    const q = questions[currentIdx];
+    if (mode !== "fill_blank" || !q || q.type !== "fill_blank") return;
+    const timer = setTimeout(() => kwInputRefs.current[0]?.focus(), 150);
+    return () => clearTimeout(timer);
+  }, [currentIdx, mode, questions]);
+
   const allSentences: Sentence[] = [
     ...sentences,
     ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
   ];
 
-  // Usable sentences: prefer learning, fallback to all
   const learningSentences = allSentences.filter(
     (s) => s.status === "learning" || progressMap[s.id] === "learning",
   );
@@ -167,7 +171,7 @@ export default function QuizScreen() {
     setCurrentIdx(0);
     setSelectedOption(null);
     setShowResult(false);
-    setInput("");
+    setKeywordInputs([]);
     setShowHint(false);
     setScore({ correct: 0, total: 0 });
     setSessionComplete(false);
@@ -178,29 +182,45 @@ export default function QuizScreen() {
   }, [mode, sentences.length]);
 
   const currentQ = questions[currentIdx];
+  const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
+  const mcQ = currentQ?.type === "multiple_choice" ? (currentQ as MCQuestion) : null;
 
-  const handleAnswer = (answer: string) => {
-    if (showResult) return;
-    const correct = currentQ.type === "fill_blank"
-      ? normalize(answer) === normalize((currentQ as FBQuestion).answer)
-      : answer === (currentQ as MCQuestion).correctAnswer;
+  // Per-keyword correctness after result reveal
+  const kwCorrectness =
+    fbQ && showResult
+      ? fbQ.keywords.map((kw, idx) => normalize(keywordInputs[idx] ?? "") === normalize(kw))
+      : [];
 
+  const commitAnswer = (correct: boolean) => {
     setIsCorrect(correct);
     setShowResult(true);
-    setSelectedOption(answer);
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
     setDailyCount((c) => {
       const next = c + 1;
       AsyncStorage.setItem(DAILY_KEY, JSON.stringify({ count: next, date: today }));
       return next;
     });
-
     recordQuizResult({
       user_id: "",
       sentence_id: currentQ.sentence.id,
       correct,
       question_type: currentQ.type,
     });
+  };
+
+  const handleMCAnswer = (answer: string) => {
+    if (showResult) return;
+    setSelectedOption(answer);
+    commitAnswer(answer === (currentQ as MCQuestion).correctAnswer);
+  };
+
+  const handleFBSubmit = () => {
+    if (showResult || dailyLimitReached) return;
+    const q = currentQ as FBQuestion;
+    const correct = q.keywords.every((kw, idx) =>
+      normalize(keywordInputs[idx] ?? "") === normalize(kw),
+    );
+    commitAnswer(correct);
   };
 
   const goNext = () => {
@@ -212,18 +232,12 @@ export default function QuizScreen() {
       setCurrentIdx(next);
       setSelectedOption(null);
       setShowResult(false);
-      setInput("");
+      setKeywordInputs([]);
       setShowHint(false);
-      setShowHelp(false);
     }
   };
 
-  const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
-  const mcQ = currentQ?.type === "multiple_choice" ? (currentQ as MCQuestion) : null;
-  // İpucu: cevabın ilk 3 kelimesi
-  const hint = fbQ ? fbQ.answer.split(" ").slice(0, 3).join(" ") + "…" : "";
-
-  // Not enough sentences
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (!initialized) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
@@ -247,9 +261,9 @@ export default function QuizScreen() {
     );
   }
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      {/* Header */}
+  // ── Shared Header + Segment ───────────────────────────────────────────────
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
         <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
@@ -259,7 +273,6 @@ export default function QuizScreen() {
         </View>
       </View>
 
-      {/* Mode selector */}
       <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
         {(["multiple_choice", "fill_blank"] as QuizMode[]).map((m) => (
           <TouchableOpacity
@@ -282,6 +295,28 @@ export default function QuizScreen() {
           </TouchableOpacity>
         ))}
       </View>
+    </>
+  );
+
+  // No keyword sentences for fill_blank
+  if (mode === "fill_blank" && initialized && questions.length === 0 && !sessionComplete) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+        {renderHeader()}
+        <View style={[styles.centered, { paddingHorizontal: 32 }]}>
+          <Text style={{ fontSize: 40, marginBottom: 12 }}>✏️</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary, textAlign: "center" }]}>
+            {t("quiz.no_keywords")}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ── Main Render ───────────────────────────────────────────────────────────
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      {renderHeader()}
 
       {/* Progress bar */}
       {questions.length > 0 && (
@@ -305,7 +340,12 @@ export default function QuizScreen() {
       >
         {/* Daily limit banner */}
         {dailyLimitReached && (
-          <View style={[styles.limitBanner, { backgroundColor: colors.warning + "22", borderColor: colors.warning }]}>
+          <View
+            style={[
+              styles.limitBanner,
+              { backgroundColor: colors.warning + "22", borderColor: colors.warning },
+            ]}
+          >
             <Text style={[styles.limitText, { color: colors.warning }]}>
               {t("quiz.daily_limit_reached")}
             </Text>
@@ -340,36 +380,34 @@ export default function QuizScreen() {
           </View>
         ) : currentQ ? (
           <>
-            {/* Question card */}
+            {/* ── Question card ─────────────────────────────────── */}
             <View style={[styles.questionCard, { backgroundColor: colors.cardBackground }]}>
               <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
                 {currentIdx + 1}/{questions.length}
               </Text>
 
-              {/* FB: yön etiketi */}
+              {/* FB: direction badge */}
               {fbQ && (
                 <View style={[styles.directionBadge, { backgroundColor: colors.primary + "14" }]}>
                   <Text style={[styles.directionLang, { color: colors.textSecondary }]}>
-                    {fbQ.direction === "source_to_target"
-                      ? t(`languages.${uiLanguage}`)
-                      : t(`languages.${targetLanguage}`)}
+                    {t(`languages.${uiLanguage}`)}
                   </Text>
                   <Ionicons name="arrow-forward" size={12} color={colors.primary} />
-                  <Text style={[styles.directionLang, styles.directionLangTarget, { color: colors.primary }]}>
-                    {fbQ.direction === "source_to_target"
-                      ? t(`languages.${targetLanguage}`)
-                      : t(`languages.${uiLanguage}`)}
+                  <Text
+                    style={[
+                      styles.directionLang,
+                      styles.directionLangTarget,
+                      { color: colors.primary },
+                    ]}
+                  >
+                    {t(`languages.${targetLanguage}`)}
                   </Text>
                 </View>
               )}
 
-              {/* Soru metni: MC → hedef dil (renkli), FB → düz metin */}
-              <View style={styles.questionPrompt}>
-                {fbQ ? (
-                  <Text style={[styles.fbQuestionText, { color: colors.text }]}>
-                    {fbQ.questionText}
-                  </Text>
-                ) : (
+              {/* MC: target sentence with keyword colors */}
+              {mcQ && (
+                <View style={styles.questionPrompt}>
                   <KeywordText
                     text={currentQ.sentence.target_text}
                     baseColor={colors.text}
@@ -377,30 +415,138 @@ export default function QuizScreen() {
                     lineHeight={27}
                     colorSeed={String(currentQ.sentence.id)}
                   />
-                )}
-              </View>
-
-              {/* FB: yönlendirme + yardım ikonu */}
-              {fbQ && (
-                <View style={styles.fbInstructionRow}>
-                  <Text style={[styles.fbInstructionText, { color: colors.textSecondary }]}>
-                    {t("quiz.fill_blank_instruction")}
-                  </Text>
-                  <TouchableOpacity onPress={() => setShowHelp((v) => !v)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
-                  </TouchableOpacity>
                 </View>
               )}
-              {fbQ && showHelp && (
-                <View style={[styles.helpBox, { backgroundColor: colors.primary + "15" }]}>
-                  <Text style={[styles.helpText, { color: colors.primary }]}>
-                    {t("quiz.fill_blank_help")}
+
+              {/* FB: source context + inline fill-blank target */}
+              {fbQ && (
+                <>
+                  {/* Source sentence as context — keywords colored, same seed as target */}
+                  <View style={styles.fbContextWrapper}>
+                    <KeywordText
+                      text={fbQ.sentence.source_text}
+                      baseColor={colors.textSecondary}
+                      fontSize={16}
+                      lineHeight={24}
+                      colorSeed={String(fbQ.sentence.id)}
+                    />
+                  </View>
+
+                  {/* Divider */}
+                  <View style={[styles.fbDivider, { backgroundColor: colors.border }]} />
+
+                  {/* Instruction */}
+                  <Text style={[styles.fbInstruction, { color: colors.textTertiary }]}>
+                    {t("quiz.fill_blank_instruction")}
                   </Text>
-                </View>
+
+                  {/* Target sentence with inline keyword inputs */}
+                  <View style={styles.fbSentenceRow}>
+                    {fbQ.targetSegments.flatMap((seg, segIdx) => {
+                      if (!seg.isPill) {
+                        return splitWords(seg.text).map((word, wordIdx) => (
+                          <Text
+                            key={`txt-${segIdx}-${wordIdx}`}
+                            style={[styles.fbWord, { color: colors.text }]}
+                          >
+                            {word}
+                          </Text>
+                        ));
+                      }
+
+                      const kwIdx = seg.pillIndex!;
+                      const kwColor = getKeywordColor(kwIdx, isDark, String(fbQ.sentence.id));
+                      const kwIsCorrect = showResult ? kwCorrectness[kwIdx] : null;
+                      const borderColor = showResult
+                        ? kwIsCorrect
+                          ? "#2ECC71"
+                          : "#E53E3E"
+                        : kwColor;
+                      const textColor = showResult
+                        ? kwIsCorrect
+                          ? "#2ECC71"
+                          : "#E53E3E"
+                        : colors.text;
+                      return [
+                        <View key={`kw-${segIdx}`} style={styles.kwWrapper}>
+                          {/* Hint: first 3 chars of expected keyword */}
+                          {showHint && (
+                            <Text style={[styles.kwHint, { color: kwColor }]}>
+                              {seg.text.slice(0, 3)}…
+                            </Text>
+                          )}
+
+                          {/*
+                           * kwSizer: ghost text sizes the container, input fills it absolutely.
+                           * This makes the input auto-fit any keyword length (1–4 words).
+                           */}
+                          <View style={styles.kwSizer}>
+                            {/* Invisible text that drives the container width */}
+                            <Text style={styles.kwSizerText}>{seg.text}</Text>
+
+                            <TextInput
+                              ref={(ref) => {
+                                kwInputRefs.current[kwIdx] = ref;
+                              }}
+                              style={[
+                                styles.kwInput,
+                                {
+                                  borderBottomColor: borderColor,
+                                  color: textColor,
+                                },
+                              ]}
+                            value={keywordInputs[kwIdx] ?? ""}
+                            onChangeText={(val) => {
+                              const next = [...keywordInputs];
+                              next[kwIdx] = val;
+                              setKeywordInputs(next);
+                            }}
+                            editable={!showResult && !dailyLimitReached}
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            spellCheck={false}
+                            returnKeyType={
+                              kwIdx < fbQ.keywords.length - 1 ? "next" : "done"
+                            }
+                            onSubmitEditing={() => {
+                              if (kwIdx < fbQ.keywords.length - 1) {
+                                kwInputRefs.current[kwIdx + 1]?.focus();
+                              } else {
+                                handleFBSubmit();
+                              }
+                            }}
+                          />
+                          </View>
+                        </View>,
+                      ];
+                    })}
+                  </View>
+
+                  {/* Correct answer box (shown when wrong) */}
+                  {showResult && !isCorrect && (
+                    <View
+                      style={[
+                        styles.fbCorrectBox,
+                        { backgroundColor: colors.success + "18", borderColor: colors.success + "40" },
+                      ]}
+                    >
+                      <Text style={[styles.fbCorrectLabel, { color: colors.success }]}>
+                        ✓ {t("quiz.correct_answer_is")}
+                      </Text>
+                      <KeywordText
+                        text={fbQ.sentence.target_text}
+                        baseColor={colors.text}
+                        fontSize={15}
+                        lineHeight={22}
+                        colorSeed={String(fbQ.sentence.id)}
+                      />
+                    </View>
+                  )}
+                </>
               )}
             </View>
 
-            {/* Multiple choice options */}
+            {/* ── MC options ────────────────────────────────────── */}
             {mcQ && (
               <View style={styles.optionsContainer}>
                 {mcQ.options.map((opt, idx) => {
@@ -427,7 +573,7 @@ export default function QuizScreen() {
                     <TouchableOpacity
                       key={idx}
                       style={[styles.optionBtn, { backgroundColor: bg, borderColor }]}
-                      onPress={() => handleAnswer(opt)}
+                      onPress={() => handleMCAnswer(opt)}
                       disabled={showResult || dailyLimitReached}
                       activeOpacity={0.8}
                     >
@@ -444,51 +590,22 @@ export default function QuizScreen() {
               </View>
             )}
 
-            {/* Fill blank input */}
+            {/* ── FB: result banner + hint + action buttons ─────── */}
             {fbQ && (
               <View style={styles.fbContainer}>
-                {showHint && (
-                  <Text style={[styles.hintText, { color: colors.primary }]}>
-                    💡 {t("quiz.hint")}: {hint}
-                  </Text>
-                )}
-
-                <TextInput
-                  style={[
-                    styles.fbInput,
-                    {
-                      backgroundColor: showResult
-                        ? isCorrect
-                          ? "#2ECC7122"
-                          : "#E53E3E22"
-                        : colors.backgroundSecondary,
-                      borderColor: showResult
-                        ? isCorrect
-                          ? "#2ECC71"
-                          : "#E53E3E"
-                        : colors.border,
-                      color: colors.text,
-                    },
-                  ]}
-                  value={input}
-                  onChangeText={setInput}
-                  placeholder={t("quiz.answer_placeholder")}
-                  placeholderTextColor={colors.textTertiary}
-                  editable={!showResult}
-                  autoCapitalize="none"
-                  returnKeyType="done"
-                  onSubmitEditing={() => { if (!showResult && input.trim()) handleAnswer(input); }}
-                />
-
                 {showResult && (
-                  <Text
+                  <View
                     style={[
-                      styles.feedbackText,
-                      { color: isCorrect ? "#2ECC71" : "#E53E3E" },
+                      styles.resultBanner,
+                      { backgroundColor: isCorrect ? "#2ECC7118" : "#E53E3E18" },
                     ]}
                   >
-                    {isCorrect ? t("quiz.correct") : `${t("quiz.incorrect")} ${t("quiz.correct_answer_is")} "${fbQ.answer}"`}
-                  </Text>
+                    <Text
+                      style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}
+                    >
+                      {isCorrect ? `🎉 ${t("quiz.correct")}` : `✗ ${t("quiz.incorrect")}`}
+                    </Text>
+                  </View>
                 )}
 
                 <View style={styles.fbButtonRow}>
@@ -508,10 +625,20 @@ export default function QuizScreen() {
                     <TouchableOpacity
                       style={[
                         styles.submitBtn,
-                        { backgroundColor: colors.primary, opacity: input.trim() ? 1 : 0.5 },
+                        {
+                          backgroundColor: colors.primary,
+                          opacity: fbQ.keywords.some((_, i) =>
+                            (keywordInputs[i] ?? "").trim(),
+                          )
+                            ? 1
+                            : 0.45,
+                        },
                       ]}
-                      onPress={() => { if (input.trim()) handleAnswer(input); }}
-                      disabled={!input.trim() || dailyLimitReached}
+                      onPress={handleFBSubmit}
+                      disabled={
+                        !fbQ.keywords.some((_, i) => (keywordInputs[i] ?? "").trim()) ||
+                        dailyLimitReached
+                      }
                       activeOpacity={0.85}
                     >
                       <Text style={styles.submitBtnText}>{t("quiz.submit")}</Text>
@@ -529,7 +656,7 @@ export default function QuizScreen() {
               </View>
             )}
 
-            {/* MC result feedback + Next button */}
+            {/* ── MC: result banner + Next button ──────────────── */}
             {mcQ && showResult && (
               <>
                 <View
@@ -538,8 +665,12 @@ export default function QuizScreen() {
                     { backgroundColor: isCorrect ? "#2ECC7118" : "#E53E3E18" },
                   ]}
                 >
-                  <Text style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}>
-                    {isCorrect ? t("quiz.correct") : `${t("quiz.incorrect")} ${t("quiz.correct_answer_is")} "${mcQ.correctAnswer}"`}
+                  <Text
+                    style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}
+                  >
+                    {isCorrect
+                      ? `🎉 ${t("quiz.correct")}`
+                      : `✗ ${t("quiz.incorrect")} ${t("quiz.correct_answer_is")} "${mcQ.correctAnswer}"`}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -562,7 +693,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
   emptyIcon: { fontSize: 44 },
-  emptyText: { fontSize: 15, textAlign: "center", paddingHorizontal: 32 },
+  emptyText: { fontSize: 15, textAlign: "center" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -614,11 +745,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   limitText: { fontSize: 13, lineHeight: 18, flex: 1 },
-  upgradeBannerBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
+  upgradeBannerBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   upgradeBannerBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   questionCard: {
     borderRadius: 16,
@@ -632,28 +759,6 @@ const styles = StyleSheet.create({
   },
   questionNum: { fontSize: 12, marginBottom: 10 },
   questionPrompt: { marginBottom: 12 },
-  blankBox: {
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 8,
-  },
-  blankText: { fontSize: 15, lineHeight: 22 },
-  optionsContainer: { gap: 10, marginBottom: 12 },
-  optionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1.5,
-    borderRadius: 12,
-    padding: 14,
-  },
-  optionText: { fontSize: 15, flex: 1 },
-  resultBanner: {
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 4,
-  },
-  resultText: { fontSize: 14, fontWeight: "600", lineHeight: 20 },
   directionBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -664,41 +769,104 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 12,
   },
-  directionLang: {
-    fontSize: 12,
+  directionLang: { fontSize: 12, fontWeight: "500" },
+  directionLangTarget: { fontWeight: "700" },
+
+  // ── Fill-blank styles ──────────────────────────────────────────────────
+  fbContextWrapper: {
+    marginBottom: 14,
+  },
+  fbDivider: {
+    height: 1,
+    marginBottom: 12,
+  },
+  fbInstruction: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+  fbSentenceRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-end",
+    gap: 0,
+  },
+  fbWord: {
+    fontSize: 17,
+    lineHeight: 30,
     fontWeight: "500",
   },
-  directionLangTarget: {
+  kwWrapper: {
+    alignItems: "center",
+    marginHorizontal: 2,
+    marginBottom: 4,
+  },
+  kwHint: {
+    fontSize: 10,
     fontWeight: "700",
+    marginBottom: 2,
+    letterSpacing: 0.3,
   },
-  fbQuestionText: {
-    fontSize: 18,
-    lineHeight: 27,
-    fontWeight: "500",
+  // Ghost text drives the container width; input fills it absolutely
+  kwSizer: {
+    position: "relative",
   },
-  fbInstructionRow: {
+  kwSizerText: {
+    fontSize: 17,
+    fontWeight: "700",
+    paddingHorizontal: 10,
+    paddingBottom: 5,
+    paddingTop: 2,
+    lineHeight: 30,
+    color: "transparent",
+  },
+  kwInput: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    fontSize: 17,
+    fontWeight: "700",
+    borderBottomWidth: 2.5,
+    paddingHorizontal: 4,
+    paddingBottom: 3,
+    paddingTop: 2,
+    textAlign: "center",
+    backgroundColor: "transparent",
+  },
+  fbCorrectBox: {
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 6,
+  },
+  fbCorrectLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  // ── MC options ──────────────────────────────────────────────────────────
+  optionsContainer: { gap: 10, marginBottom: 12 },
+  optionBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 12,
-    gap: 8,
-  },
-  fbInstructionText: { fontSize: 13, flex: 1 },
-  helpBox: {
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 8,
-  },
-  helpText: { fontSize: 13, lineHeight: 18 },
-  fbContainer: { gap: 10 },
-  hintText: { fontSize: 13, fontWeight: "500" },
-  fbInput: {
     borderWidth: 1.5,
     borderRadius: 12,
     padding: 14,
-    fontSize: 16,
   },
-  feedbackText: { fontSize: 14, fontWeight: "600", lineHeight: 20 },
+  optionText: { fontSize: 15, flex: 1 },
+
+  // ── Shared result / action ──────────────────────────────────────────────
+  resultBanner: { borderRadius: 10, padding: 12, marginTop: 4 },
+  resultText: { fontSize: 14, fontWeight: "600", lineHeight: 20 },
+  fbContainer: { gap: 10 },
   fbButtonRow: { flexDirection: "row", gap: 10, justifyContent: "flex-end" },
   hintBtn: {
     borderWidth: 1,

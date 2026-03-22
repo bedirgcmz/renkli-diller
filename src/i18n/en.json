@@ -55,8 +55,9 @@
     "hint": "Hint",
     "submit": "Submit",
     "questions_remaining": "questions remaining",
-    "fill_blank_instruction": "Write the full translation of the sentence:",
-    "fill_blank_help": "Use the sentence pairs from your learning cards. Translate the shown sentence completely. The direction is indicated by the arrow — sometimes source to target, sometimes the reverse.",
+    "fill_blank_instruction": "Fill in the highlighted words",
+    "fill_blank_help": "Type the target language equivalent of each colored keyword. Case doesn't matter.",
+    "no_keywords": "No sentences with keyword markers found.\nAdd **markers** to your sentences to use this mode.",
     "min_sentences": "At least 2 sentences are required for the quiz.",
     "new_session": "New Session",
     "answer_placeholder": "Write your answer..."

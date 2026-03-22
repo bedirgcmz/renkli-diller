@@ -55,8 +55,9 @@
     "hint": "İpucu",
     "submit": "Gönder",
     "questions_remaining": "kalan soru",
-    "fill_blank_instruction": "Verilen cümlenin tam çevirisini yazın:",
-    "fill_blank_help": "Öğrenme kartlarındaki cümle çiftlerini kullanın. Gösterilen cümleyi tam olarak çevirin. Yön ok ile belirtilir — bazen kaynaktan hedefe, bazen hedefe kaynağa sorulur.",
+    "fill_blank_instruction": "Renkli kelimeleri doldurun",
+    "fill_blank_help": "Her renkli keyword'ün hedef dildeki karşılığını yazın. Büyük/küçük harf fark etmez.",
+    "no_keywords": "Anahtar kelime işaretçisi olan cümle bulunamadı.\nCümlelerinize **işaretçi** ekleyerek bu modu kullanın.",
     "min_sentences": "Quiz için en az 2 cümle gereklidir.",
     "new_session": "Yeni Oturum",
     "answer_placeholder": "Cevabınızı yazın..."
