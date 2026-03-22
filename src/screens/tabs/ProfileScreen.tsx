@@ -27,7 +27,6 @@ import { usePremium } from "@/hooks/usePremium";
 import { MainStackParamList } from "@/types";
 import PDFExportModal from "@/components/PDFExportModal";
 import ActivityChart from "@/components/ActivityChart";
-import { LearnedCard } from "@/components/LearnedCard";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -39,8 +38,8 @@ export default function ProfileScreen() {
   const [nameValue, setNameValue] = useState(user?.display_name || "");
   const [nameSaving, setNameSaving] = useState(false);
   const nameInputRef = useRef<TextInput>(null);
-  const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { stats, progressMap, progress, loadProgress, forgot } = useProgressStore();
+  const { sentences, loadSentences } = useSentenceStore();
+  const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
@@ -51,20 +50,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     loadSentences();
     loadProgress();
-    loadPresetSentences(undefined, isPremium);
-  }, [isPremium]);
-
-  const seenIds = new Set<string>();
-  const allSentences = [...sentences, ...presetSentences].filter((s) => {
-    if (seenIds.has(s.id)) return false;
-    seenIds.add(s.id);
-    return true;
-  });
-  const learnedList = allSentences.filter((s) => progressMap[s.id] === "learned");
-
-  const handleForgotItem = async (id: string) => {
-    await forgot(id);
-  };
+  }, []);
 
   const totalStudied = Object.keys(progressMap).length;
   const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
@@ -199,6 +185,11 @@ export default function ProfileScreen() {
         setPdfModalVisible(true);
       },
       badge: isPremium ? undefined : t("common.premium_badge"),
+    },
+    {
+      icon: "checkmark-done-outline",
+      label: t("profile.learned_sentences"),
+      onPress: () => navigation.navigate("LearnedSentences"),
     },
     {
       icon: "play-circle-outline",
@@ -374,24 +365,6 @@ export default function ProfileScreen() {
 
         {/* Activity chart */}
         <ActivityChart progress={progress} />
-
-        {/* Learned Sentences */}
-        {learnedList.length > 0 && (
-          <View style={styles.learnedSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t("profile.learned_sentences")}
-            </Text>
-            {learnedList.map((sentence) => (
-              <LearnedCard
-                key={sentence.id}
-                sentence={sentence}
-                onForgot={() => handleForgotItem(sentence.id)}
-                colors={colors}
-                t={t}
-              />
-            ))}
-          </View>
-        )}
 
         {/* Menu */}
         <View style={[styles.menuCard, { backgroundColor: colors.cardBackground }]}>
@@ -595,14 +568,6 @@ const styles = StyleSheet.create({
   statIcon: { fontSize: 22 },
   statValue: { fontSize: 22, fontWeight: "700" },
   statLabel: { fontSize: 11, textAlign: "center" },
-  learnedSection: {
-    marginBottom: 14,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 10,
-  },
   menuCard: {
     borderRadius: 16,
     overflow: "hidden",
