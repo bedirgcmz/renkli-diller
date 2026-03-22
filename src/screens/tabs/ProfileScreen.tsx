@@ -54,7 +54,12 @@ export default function ProfileScreen() {
     loadPresetSentences(undefined, isPremium);
   }, [isPremium]);
 
-  const allSentences = [...sentences, ...presetSentences];
+  const seenIds = new Set<string>();
+  const allSentences = [...sentences, ...presetSentences].filter((s) => {
+    if (seenIds.has(s.id)) return false;
+    seenIds.add(s.id);
+    return true;
+  });
   const learnedList = allSentences.filter((s) => progressMap[s.id] === "learned");
 
   const handleForgotItem = async (id: string) => {
