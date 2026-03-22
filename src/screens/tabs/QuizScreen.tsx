@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "@/lib/supabase";
 import {
   View,
   Text,
@@ -125,16 +125,26 @@ export default function QuizScreen() {
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
-  const DAILY_KEY = "@parlio_quiz_daily";
-  const today = new Date().toISOString().split("T")[0];
-
   useEffect(() => {
-    AsyncStorage.getItem(DAILY_KEY).then((raw) => {
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setDailyCount(parsed.date === today ? parsed.count : 0);
-      }
-    });
+    const loadTodayCount = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const { count } = await supabase
+        .from("quiz_results")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", todayStart.toISOString());
+
+      setDailyCount(count ?? 0);
+    };
+
+    loadTodayCount();
     return () => {
       if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
     };
@@ -204,17 +214,16 @@ export default function QuizScreen() {
     if (!correct) {
       setWrongQuestions((prev) => [...prev, currentQ]);
     }
-    setDailyCount((c) => {
-      const next = c + 1;
-      AsyncStorage.setItem(DAILY_KEY, JSON.stringify({ count: next, date: today }));
-      return next;
-    });
-    recordQuizResult({
-      user_id: "",
-      sentence_id: currentQ.sentence.id,
-      correct,
-      question_type: currentQ.type,
-    });
+    // Daily limit and persistence only apply to the main session, not the retry round
+    if (!isRetryPhase) {
+      setDailyCount((c) => c + 1);
+      recordQuizResult({
+        user_id: "",
+        sentence_id: currentQ.sentence.id,
+        correct,
+        question_type: currentQ.type,
+      });
+    }
   };
 
   const handleMCAnswer = (answer: string) => {
