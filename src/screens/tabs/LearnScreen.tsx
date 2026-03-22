@@ -6,8 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
-  FlatList,
-  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
@@ -23,111 +21,222 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
+import { speak, stopSpeaking } from "@/services/tts";
+import { stripMarkers } from "@/utils/keywords";
 import { Sentence, MainStackParamList } from "@/types";
 
-type TabKey = "learning" | "learned";
+type TabKey = "learning" | "listening";
 
-// ─── Küçük "Öğrenildi" liste kartı ────────────────────────────────────────────
+interface ListenOption {
+  text: string;
+  isCorrect: boolean;
+}
 
-const LearnedCard = React.memo(function LearnedCard({
+function generateListenOptions(sentence: Sentence, pool: Sentence[]): ListenOption[] {
+  const correctText = stripMarkers(sentence.source_text);
+  const others = pool
+    .filter((s) => s.id !== sentence.id)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 2)
+    .map((s) => ({ text: stripMarkers(s.source_text), isCorrect: false as const }));
+  return [...others, { text: correctText, isCorrect: true as const }].sort(
+    () => Math.random() - 0.5,
+  );
+}
+
+// ─── Listening card ────────────────────────────────────────────────────────────
+
+function ListenCard({
   sentence,
-  onForgot,
+  showTarget,
+  onToggleTarget,
+  options,
+  selected,
+  onSelectOption,
+  onReplay,
   colors,
   t,
 }: {
   sentence: Sentence;
-  onForgot: () => void;
+  showTarget: boolean;
+  onToggleTarget: () => void;
+  options: ListenOption[];
+  selected: string | null;
+  onSelectOption: (opt: ListenOption) => void;
+  onReplay: () => void;
   colors: any;
   t: (k: string) => string;
 }) {
-  const colorSeed = String(sentence.id);
   return (
-    <View style={[learnedStyles.card, { backgroundColor: colors.cardBackground }]}>
-      <GradientView colors={["#49C98A", "#6EE7B7"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
-      <View style={learnedStyles.body}>
-        <KeywordText
-          text={sentence.source_text}
-          baseColor={colors.text}
-          fontSize={15}
-          fontWeight="500"
-          colorSeed={colorSeed}
-        />
-        <View style={{ marginTop: 4 }}>
-          <KeywordText
-            text={sentence.target_text}
-            baseColor={colors.textSecondary}
-            fontSize={13}
-            colorSeed={colorSeed}
-          />
-        </View>
-        <View style={learnedStyles.cardFooter}>
-          {sentence.category_name ? (
-            <View style={[learnedStyles.chip, { backgroundColor: colors.backgroundTertiary }]}>
-              <Text style={{ fontSize: 11, color: colors.textSecondary }}>
-                {sentence.category_name}
+    <View style={[listenStyles.card, { backgroundColor: colors.cardBackground }]}>
+      {/* ── Target sentence area ── */}
+      <View style={listenStyles.targetRow}>
+        <View style={listenStyles.targetContent}>
+          {showTarget ? (
+            <KeywordText
+              text={sentence.target_text}
+              baseColor={colors.text}
+              fontSize={18}
+              lineHeight={27}
+              fontWeight="600"
+              colorSeed={String(sentence.id)}
+            />
+          ) : (
+            <View
+              style={[
+                listenStyles.hiddenBox,
+                { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+              ]}
+            >
+              <Ionicons name="headset-outline" size={18} color={colors.primary} />
+              <Text style={[listenStyles.hiddenText, { color: colors.textSecondary }]}>
+                {t("learn.tap_to_reveal")}
               </Text>
             </View>
-          ) : null}
-          <Pressable
-            onPress={onForgot}
-            style={({ pressed }) => ({
-              transform: [{ scale: pressed ? 0.95 : 1 }],
-              marginLeft: "auto",
-            })}
-          >
-            {({ pressed }) => (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  backgroundColor: pressed ? colors.backgroundTertiary : colors.backgroundSecondary,
-                }}
-              >
-                <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "600" }}>
-                  {t("learn.mark_unlearned")}
-                </Text>
-              </View>
-            )}
-          </Pressable>
+          )}
         </View>
+
+        {/* Action icons: eye toggle + replay */}
+        <View style={listenStyles.iconCol}>
+          <TouchableOpacity
+            style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
+            onPress={onToggleTarget}
+            activeOpacity={0.75}
+          >
+            <Ionicons
+              name={showTarget ? "eye-outline" : "eye-off-outline"}
+              size={18}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "18" }]}
+            onPress={onReplay}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Divider */}
+      <View style={[listenStyles.divider, { backgroundColor: colors.border }]} />
+
+      {/* Instruction */}
+      <Text style={[listenStyles.prompt, { color: colors.textTertiary }]}>
+        {t("learn.listen_select")}
+      </Text>
+
+      {/* Options */}
+      <View style={listenStyles.optionsContainer}>
+        {options.map((opt, idx) => {
+          let bg = colors.surface ?? colors.backgroundSecondary;
+          let borderColor = colors.border;
+          let textColor = colors.text;
+
+          if (selected !== null) {
+            if (opt.isCorrect) {
+              bg = "#2ECC7122";
+              borderColor = "#2ECC71";
+              textColor = "#2ECC71";
+            } else if (opt.text === selected && !opt.isCorrect) {
+              bg = "#E53E3E22";
+              borderColor = "#E53E3E";
+              textColor = "#E53E3E";
+            }
+          }
+
+          return (
+            <TouchableOpacity
+              key={idx}
+              style={[listenStyles.option, { backgroundColor: bg, borderColor }]}
+              onPress={() => onSelectOption(opt)}
+              disabled={selected !== null}
+              activeOpacity={0.8}
+            >
+              <Text style={[listenStyles.optionText, { color: textColor }]}>{opt.text}</Text>
+              {selected !== null && opt.isCorrect && (
+                <Ionicons name="checkmark-circle" size={18} color="#2ECC71" />
+              )}
+              {selected !== null && opt.text === selected && !opt.isCorrect && (
+                <Ionicons name="close-circle" size={18} color="#E53E3E" />
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
-});
+}
 
-const learnedStyles = StyleSheet.create({
+const listenStyles = StyleSheet.create({
   card: {
-    borderRadius: 12,
-    overflow: "hidden",
+    borderRadius: 20,
+    padding: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  targetRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginBottom: 16,
+  },
+  targetContent: {
+    flex: 1,
+  },
+  hiddenBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  hiddenText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  iconCol: {
+    gap: 8,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  divider: {
+    height: 1,
+    marginBottom: 14,
+  },
+  prompt: {
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
     marginBottom: 10,
   },
-  body: {
-    flexDirection: "column",
-    padding: 12,
-    gap: 0,
+  optionsContainer: {
+    gap: 8,
   },
-  cardFooter: {
+  option: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 8,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    padding: 14,
   },
-  chip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 5,
-    marginTop: 5,
+  optionText: {
+    fontSize: 15,
+    flex: 1,
+    lineHeight: 21,
   },
 });
 
@@ -156,6 +265,12 @@ export default function LearnScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
 
+  // ── Listening state ──────────────────────────────────────────────────────────
+  const [listenIdx, setListenIdx] = useState(0);
+  const [showTarget, setShowTarget] = useState(false);
+  const [listenSelected, setListenSelected] = useState<string | null>(null);
+  const [listenOptions, setListenOptions] = useState<ListenOption[]>([]);
+
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const cardTranslateX = useRef(new Animated.Value(0)).current;
 
@@ -164,15 +279,15 @@ export default function LearnScreen() {
     const init = async () => {
       try {
         await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
-      } catch (e) {
-        // show screen regardless of error
-      } finally {
+      } catch {}
+      finally {
         if (mounted) setInitialized(true);
       }
     };
     init();
     return () => {
       mounted = false;
+      stopSpeaking();
     };
   }, [targetLanguage, uiLanguage]);
 
@@ -187,18 +302,47 @@ export default function LearnScreen() {
   ];
 
   const total = learningList.length;
+  const listenTotal = learningList.length;
   const currentSentence = learningList[currentIndex] ?? null;
 
-  // index sınırı koru
+  // index guard
   useEffect(() => {
-    if (currentIndex >= total && total > 0) {
-      setCurrentIndex(total - 1);
-    }
+    if (currentIndex >= total && total > 0) setCurrentIndex(total - 1);
   }, [total]);
 
+  useEffect(() => {
+    if (listenIdx >= listenTotal && listenTotal > 0) setListenIdx(listenTotal - 1);
+  }, [listenTotal]);
+
+  // ── Auto-TTS + option generation when listening card changes ─────────────────
+  useEffect(() => {
+    if (activeTab !== "listening") return;
+    const sentence = learningList[listenIdx];
+    if (!sentence) return;
+
+    setShowTarget(false);
+    setListenSelected(null);
+
+    // Build option pool: prefer learningList, pad with all sentences if needed
+    const allPool = [...userSentences, ...presetSentences];
+    const pool = allPool.length >= 3 ? allPool : learningList;
+    setListenOptions(generateListenOptions(sentence, pool));
+
+    const timer = setTimeout(() => {
+      speak(stripMarkers(sentence.target_text), targetLanguage);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      stopSpeaking();
+    };
+  }, [listenIdx, activeTab, initialized]);
+
   const handleTabChange = (tab: TabKey) => {
+    stopSpeaking();
     setActiveTab(tab);
     setCurrentIndex(0);
+    setListenIdx(0);
   };
 
   const getEffectiveState = (s: Sentence): "new" | "learning" | "learned" => {
@@ -206,7 +350,7 @@ export default function LearnScreen() {
     return s.status as "new" | "learning" | "learned";
   };
 
-  // ── Animasyon ──────────────────────────────────────────────────────────────
+  // ── Shared animation ─────────────────────────────────────────────────────────
 
   const animateAndGo = useCallback(
     (direction: "next" | "prev", callback: () => void) => {
@@ -227,6 +371,7 @@ export default function LearnScreen() {
     [cardOpacity, cardTranslateX],
   );
 
+  // Learning tab navigation
   const goNext = useCallback(() => {
     if (currentIndex < total - 1) animateAndGo("next", () => setCurrentIndex((i) => i + 1));
   }, [currentIndex, total, animateAndGo]);
@@ -235,6 +380,15 @@ export default function LearnScreen() {
     if (currentIndex > 0) animateAndGo("prev", () => setCurrentIndex((i) => i - 1));
   }, [currentIndex, animateAndGo]);
 
+  // Listening tab navigation
+  const listenGoNext = useCallback(() => {
+    if (listenIdx < listenTotal - 1) animateAndGo("next", () => setListenIdx((i) => i + 1));
+  }, [listenIdx, listenTotal, animateAndGo]);
+
+  const listenGoPrev = useCallback(() => {
+    if (listenIdx > 0) animateAndGo("prev", () => setListenIdx((i) => i - 1));
+  }, [listenIdx, animateAndGo]);
+
   const swipeGesture = Gesture.Pan()
     .activeOffsetX([-20, 20])
     .onEnd((e) => {
@@ -242,7 +396,14 @@ export default function LearnScreen() {
       else if (e.translationX > 50) runOnJS(goPrev)();
     });
 
-  // ── Aksiyonlar ─────────────────────────────────────────────────────────────
+  const listenSwipeGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .onEnd((e) => {
+      if (e.translationX < -50) runOnJS(listenGoNext)();
+      else if (e.translationX > 50) runOnJS(listenGoPrev)();
+    });
+
+  // ── Learning actions ─────────────────────────────────────────────────────────
 
   const handleLearn = async () => {
     if (!currentSentence) return;
@@ -275,25 +436,95 @@ export default function LearnScreen() {
     }
   };
 
-  const handleForgotItem = async (sentence: Sentence) => {
-    if (sentence.is_preset) {
-      await forgot(sentence.id);
-    } else {
-      await useSentenceStore.getState().updateSentence(sentence.id, { status: "new" });
-      await loadSentences();
-    }
+  // ── Listening actions ────────────────────────────────────────────────────────
+
+  const handleListenOption = (opt: ListenOption) => {
+    if (listenSelected !== null) return;
+    setListenSelected(opt.text);
+    setShowTarget(true); // auto-reveal after answering
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const handleReplay = () => {
+    const s = learningList[listenIdx];
+    if (s) speak(stripMarkers(s.target_text), targetLanguage);
+  };
+
+  // ── Shared nav button renderer ───────────────────────────────────────────────
+
+  const renderNavButtons = (
+    onPrev: () => void,
+    onNext: () => void,
+    prevDisabled: boolean,
+    nextDisabled: boolean,
+  ) => (
+    <View style={styles.navRow}>
+      <TouchableOpacity
+        style={[
+          styles.navBtn,
+          {
+            backgroundColor: colors.cardBackground,
+            borderWidth: 1,
+            borderColor: colors.border,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.08,
+            shadowRadius: 3,
+            elevation: 2,
+          },
+          prevDisabled && styles.navBtnDisabled,
+        ]}
+        onPress={onPrev}
+        disabled={prevDisabled}
+        activeOpacity={0.7}
+      >
+        <Text
+          style={[
+            styles.navBtnText,
+            { color: prevDisabled ? colors.textTertiary : colors.text },
+          ]}
+        >
+          ‹ {t("learn.prev")}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.navBtn,
+          {
+            backgroundColor: colors.cardBackground,
+            borderWidth: 1,
+            borderColor: colors.border,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.08,
+            shadowRadius: 3,
+            elevation: 2,
+          },
+          nextDisabled && styles.navBtnDisabled,
+        ]}
+        onPress={onNext}
+        disabled={nextDisabled}
+        activeOpacity={0.7}
+      >
+        <Text
+          style={[
+            styles.navBtnText,
+            { color: nextDisabled ? colors.textTertiary : colors.text },
+          ]}
+        >
+          {t("learn.next")} ›
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-        {/* Başlık */}
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            {activeTab === "learning" ? t("learn.title") : t("learn.learned_title")}
-          </Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t("learn.title")}</Text>
           {activeTab === "learning" && total > 0 && (
             <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
               <Text style={[styles.counterText, { color: colors.primary }]}>
@@ -301,12 +532,23 @@ export default function LearnScreen() {
               </Text>
             </View>
           )}
+          {activeTab === "listening" && listenTotal > 0 && (
+            <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
+              <Text style={[styles.counterText, { color: colors.primary }]}>
+                {listenIdx + 1}/{listenTotal}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* Segment Control */}
+        {/* Segment control */}
         <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
+          {/* Learning tab */}
           <TouchableOpacity
-            style={[styles.segmentTab, activeTab === "learning" && styles.segmentTabActiveWrapper]}
+            style={[
+              styles.segmentTab,
+              activeTab === "learning" && styles.segmentTabActiveWrapper,
+            ]}
             onPress={() => handleTabChange("learning")}
             activeOpacity={0.8}
           >
@@ -340,43 +582,39 @@ export default function LearnScreen() {
             )}
           </TouchableOpacity>
 
+          {/* Listening tab */}
           <TouchableOpacity
-            style={[styles.segmentTab, activeTab === "learned" && styles.segmentTabActiveWrapper]}
-            onPress={() => handleTabChange("learned")}
+            style={[
+              styles.segmentTab,
+              activeTab === "listening" && styles.segmentTabActiveWrapper,
+            ]}
+            onPress={() => handleTabChange("listening")}
             activeOpacity={0.8}
           >
-            {activeTab === "learned" ? (
+            {activeTab === "listening" ? (
               <GradientView
                 colors={["#4DA3FF", "#7CC4FF"]}
                 style={styles.segmentTabGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
+                <Ionicons name="headset-outline" size={14} color="#fff" />
                 <Text style={[styles.segmentLabel, { color: "#fff" }]}>
-                  {t("sentences.filter_learned")}
+                  {t("learn.tab_listen")}
                 </Text>
-                {learnedList.length > 0 && (
-                  <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
-                    <Text style={styles.badgeText}>{learnedList.length}</Text>
-                  </View>
-                )}
               </GradientView>
             ) : (
               <View style={styles.segmentTabInner}>
+                <Ionicons name="headset-outline" size={14} color={colors.textSecondary} />
                 <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
-                  {t("sentences.filter_learned")}
+                  {t("learn.tab_listen")}
                 </Text>
-                {learnedList.length > 0 && (
-                  <View style={[styles.badge, { backgroundColor: "#49C98A" }]}>
-                    <Text style={styles.badgeText}>{learnedList.length}</Text>
-                  </View>
-                )}
               </View>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* ── Progress bar (sadece learning tab + veri varsa) ─────────────── */}
+        {/* Progress bar — only on learning tab */}
         {activeTab === "learning" && initialized && total > 0 && (
           <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
             <View style={[styles.progressTrack, { backgroundColor: colors.backgroundTertiary }]}>
@@ -396,7 +634,7 @@ export default function LearnScreen() {
           </View>
         )}
 
-        {/* ── Öğreniliyor sekmesi: swipeable kart ────────────────────────────── */}
+        {/* ── LEARNING TAB ──────────────────────────────────────────────────────── */}
         {activeTab === "learning" &&
           (!initialized ? (
             <View style={styles.centered}>
@@ -433,64 +671,7 @@ export default function LearnScreen() {
                 </Animated.View>
               </GestureDetector>
 
-              <View style={styles.navRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.navBtn,
-                    {
-                      backgroundColor: colors.cardBackground,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 3,
-                      elevation: 2,
-                    },
-                    currentIndex === 0 && styles.navBtnDisabled,
-                  ]}
-                  onPress={goPrev}
-                  disabled={currentIndex === 0}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.navBtnText,
-                      { color: currentIndex === 0 ? colors.textTertiary : colors.text },
-                    ]}
-                  >
-                    ‹ {t("learn.prev")}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.navBtn,
-                    {
-                      backgroundColor: colors.cardBackground,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 3,
-                      elevation: 2,
-                    },
-                    currentIndex === total - 1 && styles.navBtnDisabled,
-                  ]}
-                  onPress={goNext}
-                  disabled={currentIndex === total - 1}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.navBtnText,
-                      { color: currentIndex === total - 1 ? colors.textTertiary : colors.text },
-                    ]}
-                  >
-                    {t("learn.next")} ›
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              {renderNavButtons(goPrev, goNext, currentIndex === 0, currentIndex === total - 1)}
 
               <MotivationBar
                 remaining={total - currentIndex - 1}
@@ -501,28 +682,47 @@ export default function LearnScreen() {
             </>
           ))}
 
-        {/* ── Öğrenildi sekmesi: FlatList ────────────────────────────────────── */}
-        {activeTab === "learned" &&
-          (learnedList.length === 0 ? (
-            <EmptyState tab="learned" colors={colors} t={t} />
+        {/* ── LISTENING TAB ─────────────────────────────────────────────────────── */}
+        {activeTab === "listening" &&
+          (!initialized ? (
+            <View style={styles.centered}>
+              <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+          ) : listenTotal === 0 ? (
+            <EmptyState tab="listening" colors={colors} t={t} />
           ) : (
-            <FlatList
-              data={learnedList}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.learnedListContent}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <LearnedCard
-                  sentence={item}
-                  onForgot={() => handleForgotItem(item)}
-                  colors={colors}
-                  t={t}
-                />
+            <>
+              <GestureDetector gesture={listenSwipeGesture}>
+                <Animated.View
+                  style={[
+                    styles.cardWrapper,
+                    { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
+                  ]}
+                >
+                  <ListenCard
+                    sentence={learningList[listenIdx]}
+                    showTarget={showTarget}
+                    onToggleTarget={() => setShowTarget((v) => !v)}
+                    options={listenOptions}
+                    selected={listenSelected}
+                    onSelectOption={handleListenOption}
+                    onReplay={handleReplay}
+                    colors={colors}
+                    t={t}
+                  />
+                </Animated.View>
+              </GestureDetector>
+
+              {renderNavButtons(
+                listenGoPrev,
+                listenGoNext,
+                listenIdx === 0,
+                listenIdx === listenTotal - 1,
               )}
-            />
+            </>
           ))}
 
-        {/* ── Otomatik Mod kısayolu ────────────────────────────────────────── */}
+        {/* Auto Mode shortcut */}
         <TouchableOpacity
           style={[styles.autoModeShortcut, { borderTopColor: colors.divider }]}
           onPress={() => navigation.navigate("AutoMode")}
@@ -549,12 +749,12 @@ export default function LearnScreen() {
 function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: string) => string }) {
   return (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>{tab === "learning" ? "📚" : "🎉"}</Text>
+      <Text style={styles.emptyIcon}>{tab === "listening" ? "🎧" : "📚"}</Text>
       <Text style={[styles.emptyTitle, { color: colors.text }]}>
-        {tab === "learning" ? t("learn.no_sentences") : t("learn.learned_title")}
+        {t("learn.no_sentences")}
       </Text>
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-        {tab === "learning" ? t("learn.start_hint") : t("learn.no_learned_sentences")}
+        {tab === "listening" ? t("learn.no_listen_sentences") : t("learn.start_hint")}
       </Text>
     </View>
   );
@@ -613,12 +813,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 22,
     overflow: "hidden",
-  },
-  segmentTabActive: {
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
   },
   segmentTabActiveWrapper: {
     shadowOffset: { width: 0, height: 1 },
@@ -682,10 +876,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   motivationText: { fontSize: 13, fontWeight: "500" },
-  learnedListContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
@@ -735,7 +925,5 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-  autoModeShortcutText: {
-    fontSize: 13,
-  },
+  autoModeShortcutText: { fontSize: 13 },
 });
