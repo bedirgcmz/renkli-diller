@@ -95,6 +95,9 @@ export type RootStackParamList = {
 
 export type MainStackParamList = {
   Tabs: undefined;
+  Learn: undefined;
+  Quiz: undefined;
+  Reading: undefined;
   AddSentence: undefined;
   EditSentence: { sentenceId: string; isPreset: boolean };
   Settings: undefined;
@@ -112,11 +115,10 @@ export type AuthStackParamList = {
 };
 
 export type TabParamList = {
-  Learn: undefined;
-  Quiz: undefined;
+  Home: undefined;
   Sentences: undefined;
-  Read: undefined;
-  Profile: undefined;
+  Me: undefined;
+  More: undefined;
 };
 
 // API Response types
