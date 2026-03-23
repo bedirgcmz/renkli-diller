@@ -35,7 +35,6 @@
     "mark_unlearned": "Als ungelernt markieren",
     "remove_from_list": "Aus Liste entfernen",
     "add_to_list": "Zur Lernliste hinzufügen",
-    "remove_from_list": "Aus Liste entfernen",
     "prev": "Vorherige",
     "next": "Nächste",
     "sentences_to_learn": "Sätze zu lernen",
@@ -360,6 +359,13 @@
     "card_auto_title": "Auto-Modus",
     "card_auto_desc": "Freihändig wiederholen",
     "card_explore_title": "Entdecken",
-    "card_explore_desc": "Voreingestellte Sätze"
+    "card_explore_desc": "Voreingestellte Sätze",
+    "greeting_morning": "Guten Morgen",
+    "greeting_afternoon": "Guten Tag",
+    "greeting_evening": "Guten Abend",
+    "streak_days": "Tage",
+    "daily_goal": "Tagesziel",
+    "goal_hint": "Erreich dein heutiges Ziel",
+    "goal_done": "Tagesziel erreicht 🎉"
   }
 }

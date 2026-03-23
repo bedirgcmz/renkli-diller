@@ -35,7 +35,6 @@
     "mark_unlearned": "Markera som oinlärd",
     "remove_from_list": "Ta bort från lista",
     "add_to_list": "Lägg till i min lärlista",
-    "remove_from_list": "Ta bort från lista",
     "prev": "Föregående",
     "next": "Nästa",
     "sentences_to_learn": "meningar att lära",
@@ -360,6 +359,13 @@
     "card_auto_title": "Auto-läge",
     "card_auto_desc": "Handsfree repetition",
     "card_explore_title": "Utforska",
-    "card_explore_desc": "Bläddra meningar"
+    "card_explore_desc": "Bläddra meningar",
+    "greeting_morning": "God morgon",
+    "greeting_afternoon": "God dag",
+    "greeting_evening": "God kväll",
+    "streak_days": "dagar",
+    "daily_goal": "Dagligt mål",
+    "goal_hint": "Slutför ditt mål för idag",
+    "goal_done": "Mål nått idag 🎉"
   }
 }

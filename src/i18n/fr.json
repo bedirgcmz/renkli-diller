@@ -35,7 +35,6 @@
     "mark_unlearned": "Réapprendre",
     "remove_from_list": "Retirer de la liste",
     "add_to_list": "Ajouter à ma liste",
-    "remove_from_list": "Retirer de la liste",
     "prev": "Précédent",
     "next": "Suivant",
     "sentences_to_learn": "phrases à apprendre",
@@ -360,6 +359,13 @@
     "card_auto_title": "Mode Auto",
     "card_auto_desc": "Pratique mains libres",
     "card_explore_title": "Explorer",
-    "card_explore_desc": "Parcourir les phrases"
+    "card_explore_desc": "Parcourir les phrases",
+    "greeting_morning": "Bonjour",
+    "greeting_afternoon": "Bon après-midi",
+    "greeting_evening": "Bonsoir",
+    "streak_days": "jours",
+    "daily_goal": "Objectif quotidien",
+    "goal_hint": "Complète ton objectif du jour",
+    "goal_done": "Objectif atteint aujourd'hui 🎉"
   }
 }

@@ -361,6 +361,13 @@
     "card_auto_title": "Otomatik Mod",
     "card_auto_desc": "Eller serbest tekrar",
     "card_explore_title": "Keşfet",
-    "card_explore_desc": "Hazır cümleleri bul"
+    "card_explore_desc": "Hazır cümleleri bul",
+    "greeting_morning": "Günaydın",
+    "greeting_afternoon": "İyi günler",
+    "greeting_evening": "İyi akşamlar",
+    "streak_days": "gün",
+    "daily_goal": "Günlük hedef",
+    "goal_hint": "Bugünkü hedefini tamamla",
+    "goal_done": "Bugünkü hedefine ulaştın 🎉"
   }
 }

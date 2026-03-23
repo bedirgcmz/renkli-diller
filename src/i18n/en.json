@@ -35,7 +35,6 @@
     "mark_unlearned": "Mark as Unlearned",
     "remove_from_list": "Remove from List",
     "add_to_list": "Add to My Learning List",
-    "remove_from_list": "Remove from List",
     "prev": "Previous",
     "next": "Next",
     "sentences_to_learn": "sentences to learn",
@@ -361,6 +360,13 @@
     "card_auto_title": "Auto Mode",
     "card_auto_desc": "Hands-free practice",
     "card_explore_title": "Explore",
-    "card_explore_desc": "Browse preset sentences"
+    "card_explore_desc": "Browse preset sentences",
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "streak_days": "days",
+    "daily_goal": "Daily goal",
+    "goal_hint": "Complete your goal for today",
+    "goal_done": "Goal reached today 🎉"
   }
 }

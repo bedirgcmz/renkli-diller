@@ -35,7 +35,6 @@
     "mark_unlearned": "Aprender novamente",
     "remove_from_list": "Remover da lista",
     "add_to_list": "Adicionar à minha lista",
-    "remove_from_list": "Remover da lista",
     "prev": "Anterior",
     "next": "Próximo",
     "sentences_to_learn": "frases para aprender",
@@ -360,6 +359,13 @@
     "card_auto_title": "Modo Auto",
     "card_auto_desc": "Prática sem as mãos",
     "card_explore_title": "Explorar",
-    "card_explore_desc": "Frases predefinidas"
+    "card_explore_desc": "Frases predefinidas",
+    "greeting_morning": "Bom dia",
+    "greeting_afternoon": "Boa tarde",
+    "greeting_evening": "Boa noite",
+    "streak_days": "dias",
+    "daily_goal": "Meta diária",
+    "goal_hint": "Complete sua meta de hoje",
+    "goal_done": "Meta alcançada hoje 🎉"
   }
 }
