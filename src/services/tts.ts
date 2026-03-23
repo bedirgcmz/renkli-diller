@@ -1,7 +1,7 @@
 import * as Speech from "expo-speech";
 
-export function speak(text: string, language?: string) {
-  Speech.speak(text, { language });
+export function speak(text: string, language?: string, rate?: number) {
+  Speech.speak(text, { language, rate });
 }
 
 export function stopSpeaking() {

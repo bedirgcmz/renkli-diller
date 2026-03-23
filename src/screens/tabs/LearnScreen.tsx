@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
@@ -56,6 +56,7 @@ function ListenCard({
   selected,
   onSelectOption,
   onReplay,
+  onReplaySlow,
   colors,
   t,
 }: {
@@ -66,6 +67,7 @@ function ListenCard({
   selected: string | null;
   onSelectOption: (opt: ListenOption) => void;
   onReplay: () => void;
+  onReplaySlow: () => void;
   colors: any;
   t: (k: string) => string;
 }) {
@@ -117,6 +119,13 @@ function ListenCard({
             activeOpacity={0.75}
           >
             <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "10" }]}
+            onPress={onReplaySlow}
+            activeOpacity={0.75}
+          >
+            <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -285,6 +294,7 @@ export default function LearnScreen() {
   const cardTranslateY = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(1)).current;
   const successOverlayOpacity = useRef(new Animated.Value(0)).current;
+  const removeOverlayOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let mounted = true;
@@ -383,7 +393,31 @@ export default function LearnScreen() {
     [cardOpacity, cardTranslateX],
   );
 
-  // Success animation: scale up + green overlay → fly right → next card
+  // Remove animation: show undo overlay → shrink + fly down → next card
+  const animateRemove = useCallback(
+    (callback: () => void) => {
+      Animated.timing(removeOverlayOpacity, { toValue: 1, duration: 100, useNativeDriver: true }).start(() => {
+        Animated.parallel([
+          Animated.timing(cardOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+          Animated.timing(cardTranslateY, { toValue: 120, duration: 220, useNativeDriver: true }),
+          Animated.timing(cardScale, { toValue: 0.7, duration: 220, useNativeDriver: true }),
+        ]).start(() => {
+          cardTranslateX.setValue(-40);
+          cardTranslateY.setValue(0);
+          cardScale.setValue(1);
+          removeOverlayOpacity.setValue(0);
+          callback();
+          Animated.parallel([
+            Animated.timing(cardOpacity, { toValue: 1, duration: 180, useNativeDriver: true }),
+            Animated.timing(cardTranslateX, { toValue: 0, duration: 180, useNativeDriver: true }),
+          ]).start();
+        });
+      });
+    },
+    [cardOpacity, cardTranslateX, cardTranslateY, cardScale, removeOverlayOpacity],
+  );
+
+  // Success animation: scale up + green overlay → shrink + fly up → next card
   const animateSuccess = useCallback(
     (callback: () => void) => {
       // Phase 1: scale up + show overlay (120ms)
@@ -480,7 +514,7 @@ export default function LearnScreen() {
 
   const handleRemoveFromList = async () => {
     if (!currentSentence) return;
-    animateAndGo("next", () => {});
+    animateRemove(() => {});
     await useSentenceStore.getState().removeFromLearningList(currentSentence.id);
     if (!currentSentence.is_preset) await loadSentences();
   };
@@ -496,6 +530,11 @@ export default function LearnScreen() {
   const handleReplay = () => {
     const s = learningList[listenIdx];
     if (s) speak(stripMarkers(s.target_text), targetLanguage);
+  };
+
+  const handleReplaySlow = () => {
+    const s = learningList[listenIdx];
+    if (s) speak(stripMarkers(s.target_text), targetLanguage, 0.5);
   };
 
   // ── Shared nav button renderer ───────────────────────────────────────────────
@@ -718,6 +757,13 @@ export default function LearnScreen() {
                   >
                     <Ionicons name="checkmark-circle" size={72} color="#49C98A" />
                   </Animated.View>
+                  {/* Remove overlay */}
+                  <Animated.View
+                    style={[styles.successOverlay, { opacity: removeOverlayOpacity }]}
+                    pointerEvents="none"
+                  >
+                    <Ionicons name="arrow-undo-circle" size={72} color="#E07B39" />
+                  </Animated.View>
                 </Animated.View>
               </GestureDetector>
 
@@ -759,6 +805,7 @@ export default function LearnScreen() {
                     selected={listenSelected}
                     onSelectOption={handleListenOption}
                     onReplay={handleReplay}
+                    onReplaySlow={handleReplaySlow}
                     colors={colors}
                     t={t}
                   />

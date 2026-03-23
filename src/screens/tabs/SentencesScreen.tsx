@@ -14,7 +14,7 @@ import {
   Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
@@ -169,9 +169,12 @@ function SentenceItem({
             </Text>
           )}
           {sentence.effectiveStatus === "learned" && (
-            <Text style={{ color: "#2ECC71", fontSize: 12, fontWeight: "500" }}>
-              {t("sentences.status_learned")}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Text style={{ color: "#2ECC71", fontSize: 12, fontWeight: "500" }}>
+                {t("sentences.status_learned")}
+              </Text>
+              <Feather name="check" size={13} color="#2ECC71" />
+            </View>
           )}
 
           {sentence.effectiveStatus === "new" && (
@@ -709,8 +712,22 @@ export default function SentencesScreen() {
                 >
                   {tab === "preset" ? t("sentences.preset_sentences") : t("sentences.my_sentences")}
                 </Text>
-                <View style={[styles.tabCount, { backgroundColor: isActive ? colors.primary + "22" : colors.backgroundSecondary }]}>
-                  <Text style={[styles.tabCountText, { color: isActive ? colors.primary : colors.textTertiary }]}>
+                <View
+                  style={[
+                    styles.tabCount,
+                    {
+                      backgroundColor: isActive
+                        ? colors.primary + "22"
+                        : colors.backgroundSecondary,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.tabCountText,
+                      { color: isActive ? colors.primary : colors.textTertiary },
+                    ]}
+                  >
                     {tabCounts[tab]}
                   </Text>
                 </View>
