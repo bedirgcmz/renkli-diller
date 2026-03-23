@@ -71,67 +71,78 @@ function HeroHeader() {
   const progressBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)";
 
   return (
+    // Outer: shadow only — no overflow:hidden (Android elevation compat)
     <View
       style={[
-        heroStyles.card,
+        heroStyles.cardOuter,
         {
           borderColor,
           shadowColor: isDark ? "#8B5CF6" : "#4DA3FF",
         },
       ]}
     >
-      <GradientView
-        colors={cardGradient}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
+      {/* Inner: overflow:hidden clips the gradient */}
+      <View style={heroStyles.cardInner}>
+        <GradientView
+          colors={cardGradient}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
 
-      {/* Greeting row */}
-      <View style={heroStyles.topRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={[heroStyles.greeting, { color: colors.text }]}>
-            {greetingEmoji} {t(greetingKey)}{firstName ? `, ${firstName}` : ""}!
-          </Text>
-          <Text style={[heroStyles.subtitle, { color: colors.textTertiary }]}>
-            {todayLearned >= dailyGoal
-              ? t("home.goal_done")
-              : t("home.goal_hint")}
-          </Text>
-        </View>
-
-        {/* Streak badge */}
-        {stats.currentStreak > 0 && (
-          <View style={[heroStyles.streakBadge, { backgroundColor: isDark ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.12)" }]}>
-            <Text style={heroStyles.streakFire}>🔥</Text>
-            <Text style={[heroStyles.streakCount, { color: "#F59E0B" }]}>
-              {stats.currentStreak}
+        {/* Greeting row */}
+        <View style={heroStyles.topRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={[heroStyles.greeting, { color: colors.text }]}>
+              {greetingEmoji} {t(greetingKey)}{firstName ? `, ${firstName}` : ""}!
             </Text>
-            <Text style={[heroStyles.streakLabel, { color: "#F59E0B" }]}>
-              {t("home.streak_days")}
+            <Text style={[heroStyles.subtitle, { color: colors.textTertiary }]}>
+              {todayLearned >= dailyGoal ? t("home.goal_done") : t("home.goal_hint")}
             </Text>
           </View>
-        )}
-      </View>
 
-      {/* Progress bar */}
-      <View style={heroStyles.progressSection}>
-        <View style={heroStyles.progressLabelRow}>
-          <Text style={[heroStyles.progressLabel, { color: colors.textSecondary }]}>
-            {t("home.daily_goal")}
-          </Text>
-          <Text style={[heroStyles.progressCount, { color: colors.textSecondary }]}>
-            <Text style={{ color: colors.primary, fontWeight: "700" }}>{todayLearned}</Text>
-            {" / "}{dailyGoal}
-          </Text>
+          {/* Streak badge */}
+          {stats.currentStreak > 0 && (
+            <View
+              style={[
+                heroStyles.streakBadge,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(245,158,11,0.18)"
+                    : "rgba(245,158,11,0.12)",
+                },
+              ]}
+            >
+              <Text style={heroStyles.streakFire}>🔥</Text>
+              <Text style={[heroStyles.streakCount, { color: "#F59E0B" }]}>
+                {stats.currentStreak}
+              </Text>
+              <Text style={[heroStyles.streakLabel, { color: "#F59E0B" }]}>
+                {t("home.streak_days")}
+              </Text>
+            </View>
+          )}
         </View>
-        <View style={[heroStyles.progressTrack, { backgroundColor: progressBg }]}>
-          <GradientView
-            colors={["#4DA3FF", "#49C98A"]}
-            style={[heroStyles.progressFill, { width: progressPct as any }]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          />
+
+        {/* Progress bar */}
+        <View style={heroStyles.progressSection}>
+          <View style={heroStyles.progressLabelRow}>
+            <Text style={[heroStyles.progressLabel, { color: colors.textSecondary }]}>
+              {t("home.daily_goal")}
+            </Text>
+            <Text style={[heroStyles.progressCount, { color: colors.textSecondary }]}>
+              <Text style={{ color: colors.primary, fontWeight: "700" }}>{todayLearned}</Text>
+              {" / "}{dailyGoal}
+            </Text>
+          </View>
+          <View style={[heroStyles.progressTrack, { backgroundColor: progressBg }]}>
+            <GradientView
+              colors={["#4DA3FF", "#49C98A"]}
+              style={[heroStyles.progressFill, { width: progressPct as any }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -139,16 +150,21 @@ function HeroHeader() {
 }
 
 const heroStyles = StyleSheet.create({
-  card: {
+  // Outer: shadow, border — no overflow:hidden
+  cardOuter: {
     borderRadius: 20,
     borderWidth: 1,
-    overflow: "hidden",
-    padding: 18,
     marginBottom: 20,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 4,
+  },
+  // Inner: clips gradient to rounded corners
+  cardInner: {
+    borderRadius: 19,
+    overflow: "hidden",
+    padding: 18,
   },
   topRow: {
     flexDirection: "row",
@@ -286,9 +302,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   scroll: {
     paddingHorizontal: 16,
     paddingTop: 8,
