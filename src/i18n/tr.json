@@ -22,7 +22,10 @@
     "quiz": "Quiz",
     "sentences": "Cümleler",
     "profile": "Profil",
-    "read": "Oku"
+    "read": "Oku",
+    "home": "Anasayfa",
+    "me": "Ben",
+    "more": "Daha"
   },
   "learn": {
     "title": "Öğrenilecek Cümleler",
@@ -344,5 +347,19 @@
     "quiz_premium_only": "Premium özellik",
     "share": "Paylaş",
     "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!"
+  },
+  "home": {
+    "card_learn_title": "Çalış",
+    "card_learn_desc": "Cümle kartlarını çevir",
+    "card_quiz_title": "Quiz",
+    "card_quiz_desc": "Bilgini test et",
+    "card_listen_title": "Dinleme",
+    "card_listen_desc": "Sesli alıştırma yap",
+    "card_read_title": "Oku",
+    "card_read_desc": "Günlük metin oku",
+    "card_auto_title": "Otomatik Mod",
+    "card_auto_desc": "Eller serbest tekrar",
+    "card_explore_title": "Keşfet",
+    "card_explore_desc": "Hazır cümleleri bul"
   }
 }

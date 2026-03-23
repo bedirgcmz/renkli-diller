@@ -22,7 +22,10 @@
     "quiz": "Quiz",
     "sentences": "Sentences",
     "profile": "Profile",
-    "read": "Read"
+    "read": "Read",
+    "home": "Home",
+    "me": "Me",
+    "more": "More"
   },
   "learn": {
     "title": "Sentences to Learn",
@@ -344,5 +347,19 @@
     "quiz_premium_only": "Premium feature",
     "share": "Share",
     "share_text": "I studied the text \"{title}\" today — learn languages with Parlio!"
+  },
+  "home": {
+    "card_learn_title": "Study",
+    "card_learn_desc": "Flip sentence cards",
+    "card_quiz_title": "Quiz",
+    "card_quiz_desc": "Test your knowledge",
+    "card_listen_title": "Listening",
+    "card_listen_desc": "Practice with audio",
+    "card_read_title": "Read",
+    "card_read_desc": "Read daily texts",
+    "card_auto_title": "Auto Mode",
+    "card_auto_desc": "Hands-free practice",
+    "card_explore_title": "Explore",
+    "card_explore_desc": "Browse preset sentences"
   }
 }

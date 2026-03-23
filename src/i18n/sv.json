@@ -22,7 +22,10 @@
     "quiz": "Quiz",
     "sentences": "Meningar",
     "profile": "Profil",
-    "read": "Läs"
+    "read": "Läs",
+    "home": "Hem",
+    "me": "Jag",
+    "more": "Mer"
   },
   "learn": {
     "title": "Meningar att lära",
@@ -343,5 +346,19 @@
     "quiz_premium_only": "Premiumfunktion",
     "share": "Dela",
     "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!"
+  },
+  "home": {
+    "card_learn_title": "Studera",
+    "card_learn_desc": "Vänd meningskort",
+    "card_quiz_title": "Quiz",
+    "card_quiz_desc": "Testa dina kunskaper",
+    "card_listen_title": "Lyssna",
+    "card_listen_desc": "Öva med ljud",
+    "card_read_title": "Läs",
+    "card_read_desc": "Läs dagliga texter",
+    "card_auto_title": "Auto-läge",
+    "card_auto_desc": "Handsfree repetition",
+    "card_explore_title": "Utforska",
+    "card_explore_desc": "Bläddra meningar"
   }
 }

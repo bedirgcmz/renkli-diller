@@ -22,7 +22,10 @@
     "quiz": "Quiz",
     "sentences": "Phrases",
     "profile": "Profil",
-    "read": "Lire"
+    "read": "Lire",
+    "home": "Accueil",
+    "me": "Moi",
+    "more": "Plus"
   },
   "learn": {
     "title": "Phrases à apprendre",
@@ -343,5 +346,19 @@
     "quiz_premium_only": "Fonction premium",
     "share": "Partager",
     "share_text": "J'ai étudié le texte \"{title}\" aujourd'hui — apprenez les langues avec Parlio !"
+  },
+  "home": {
+    "card_learn_title": "Étudier",
+    "card_learn_desc": "Retourner les cartes",
+    "card_quiz_title": "Quiz",
+    "card_quiz_desc": "Tester tes connaissances",
+    "card_listen_title": "Écouter",
+    "card_listen_desc": "Pratiquer avec l'audio",
+    "card_read_title": "Lire",
+    "card_read_desc": "Lire les textes du jour",
+    "card_auto_title": "Mode Auto",
+    "card_auto_desc": "Pratique mains libres",
+    "card_explore_title": "Explorer",
+    "card_explore_desc": "Parcourir les phrases"
   }
 }
