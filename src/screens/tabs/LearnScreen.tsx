@@ -282,6 +282,7 @@ export default function LearnScreen() {
 
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const cardTranslateX = useRef(new Animated.Value(0)).current;
+  const cardTranslateY = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(1)).current;
   const successOverlayOpacity = useRef(new Animated.Value(0)).current;
 
@@ -399,14 +400,15 @@ export default function LearnScreen() {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        // Phase 2: fly right + fade out (200ms)
+        // Phase 2: fly up + shrink + fade out (220ms)
         Animated.parallel([
-          Animated.timing(cardOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-          Animated.timing(cardTranslateX, { toValue: 80, duration: 200, useNativeDriver: true }),
-          Animated.timing(cardScale, { toValue: 1.06, duration: 200, useNativeDriver: true }),
+          Animated.timing(cardOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+          Animated.timing(cardTranslateY, { toValue: -120, duration: 220, useNativeDriver: true }),
+          Animated.timing(cardScale, { toValue: 0.7, duration: 220, useNativeDriver: true }),
         ]).start(() => {
           // Reset values, run callback, slide in next card from left
           cardTranslateX.setValue(-40);
+          cardTranslateY.setValue(0);
           cardScale.setValue(1);
           successOverlayOpacity.setValue(0);
           callback();
@@ -417,7 +419,7 @@ export default function LearnScreen() {
         });
       });
     },
-    [cardOpacity, cardTranslateX, cardScale, successOverlayOpacity],
+    [cardOpacity, cardTranslateX, cardTranslateY, cardScale, successOverlayOpacity],
   );
 
   // Learning tab navigation
@@ -685,9 +687,11 @@ export default function LearnScreen() {
                     styles.cardWrapper,
                     {
                       opacity: cardOpacity,
-                      transform: [{ translateX: cardTranslateX }, { scale: cardScale }],
+                      transform: [{ translateX: cardTranslateX }, { translateY: cardTranslateY }, { scale: cardScale }],
                     },
                   ]}
+                  shouldRasterizeIOS
+                  renderToHardwareTextureAndroid
                 >
                   {currentSentence && (
                     <SentenceCard
@@ -744,6 +748,8 @@ export default function LearnScreen() {
                     styles.cardWrapper,
                     { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
                   ]}
+                  shouldRasterizeIOS
+                  renderToHardwareTextureAndroid
                 >
                   <ListenCard
                     sentence={learningList[listenIdx]}

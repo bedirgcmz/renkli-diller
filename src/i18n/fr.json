@@ -75,7 +75,8 @@
     "empty_title": "Liste d'apprentissage vide",
     "empty_hint": "Ajoute des phrases à ta liste d'apprentissage pour démarrer un quiz.",
     "go_to_sentences": "Voir les phrases",
-    "no_keywords_title": "Aucune phrase à compléter"
+    "no_keywords_title": "Aucune phrase à compléter",
+    "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode."
   },
   "sentences": {
     "title": "Toutes les phrases",

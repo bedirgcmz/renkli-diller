@@ -75,7 +75,8 @@
     "empty_title": "Lernliste ist leer",
     "empty_hint": "Füge Sätze zu deiner Lernliste hinzu, um ein Quiz zu starten.",
     "go_to_sentences": "Zu Sätzen",
-    "no_keywords_title": "Keine Sätze für Lückentext"
+    "no_keywords_title": "Keine Sätze für Lückentext",
+    "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen."
   },
   "sentences": {
     "title": "Alle Sätze",

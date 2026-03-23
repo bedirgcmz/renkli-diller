@@ -604,6 +604,30 @@ export default function SentencesScreen() {
       );
   }, [sourceList, statusFilter, categoryFilter, searchText]);
 
+  const tabCounts = useMemo(() => {
+    const applyFilters = (base: typeof presetSentences, isPreset: boolean) =>
+      base
+        .map((s) => ({
+          effectiveStatus: (isPreset ? (progressMap[s.id] ?? "new") : s.status) as SentenceStatus,
+          category_id: s.category_id,
+          source_text: s.source_text,
+          target_text: s.target_text,
+        }))
+        .filter((s) => statusFilter === "all" || s.effectiveStatus === statusFilter)
+        .filter((s) => categoryFilter === "all" || s.category_id === categoryFilter)
+        .filter(
+          (s) =>
+            !searchText ||
+            s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
+            s.target_text.toLowerCase().includes(searchText.toLowerCase()),
+        ).length;
+
+    return {
+      preset: applyFilters(presetSentences, true),
+      mine: applyFilters(sentences, false),
+    };
+  }, [presetSentences, sentences, progressMap, statusFilter, categoryFilter, searchText]);
+
   const handleDelete = (sentence: Sentence) => {
     Alert.alert(t("sentences.delete"), t("sentences.delete_confirm"), [
       { text: t("common.cancel"), style: "cancel" },
@@ -675,15 +699,22 @@ export default function SentencesScreen() {
               onPress={() => setActiveTab(tab)}
               activeOpacity={0.8}
             >
-              <Text
-                style={[
-                  styles.tabLabel,
-                  { color: isActive ? colors.text : colors.textSecondary },
-                  isActive && styles.tabLabelActive,
-                ]}
-              >
-                {tab === "preset" ? t("sentences.preset_sentences") : t("sentences.my_sentences")}
-              </Text>
+              <View style={styles.tabInner}>
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    { color: isActive ? colors.text : colors.textSecondary },
+                    isActive && styles.tabLabelActive,
+                  ]}
+                >
+                  {tab === "preset" ? t("sentences.preset_sentences") : t("sentences.my_sentences")}
+                </Text>
+                <View style={[styles.tabCount, { backgroundColor: isActive ? colors.primary + "22" : colors.backgroundSecondary }]}>
+                  <Text style={[styles.tabCountText, { color: isActive ? colors.primary : colors.textTertiary }]}>
+                    {tabCounts[tab]}
+                  </Text>
+                </View>
+              </View>
               {isActive && (
                 <View style={[styles.tabUnderline, { backgroundColor: tabActiveColor }]} />
               )}
@@ -816,8 +847,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     position: "relative",
   },
+  tabInner: { flexDirection: "row", alignItems: "center", gap: 6 },
   tabLabel: { fontSize: 14, fontWeight: "500" },
   tabLabelActive: { fontWeight: "700" },
+  tabCount: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 10 },
+  tabCountText: { fontSize: 11, fontWeight: "600" },
   tabUnderline: {
     position: "absolute",
     bottom: -1,

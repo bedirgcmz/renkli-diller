@@ -326,8 +326,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   },
 
   addToLearningList: async (id) => {
-    const { presetSentences } = get();
-    if (presetSentences.find((s) => s.id === id)) {
+    const isPreset = get().presetSentences.some((s) => s.id === id);
+    if (isPreset) {
       await useProgressStore.getState().addToLearning(id);
     } else {
       await get().updateSentence(id, { status: "learning" });
@@ -335,8 +335,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   },
 
   removeFromLearningList: async (id) => {
-    const { presetSentences } = get();
-    if (presetSentences.find((s) => s.id === id)) {
+    const isPreset = get().presetSentences.some((s) => s.id === id);
+    if (isPreset) {
       await useProgressStore.getState().forgot(id);
     } else {
       await get().updateSentence(id, { status: "new" });
@@ -344,8 +344,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   },
 
   markAsLearned: async (id) => {
-    const { presetSentences } = get();
-    if (presetSentences.find((s) => s.id === id)) {
+    const isPreset = get().presetSentences.some((s) => s.id === id);
+    if (isPreset) {
       await useProgressStore.getState().markAsLearned(id);
     } else {
       await get().updateSentence(id, { status: "learned" });
@@ -353,8 +353,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   },
 
   markAsUnlearned: async (id) => {
-    const { presetSentences } = get();
-    if (presetSentences.find((s) => s.id === id)) {
+    const isPreset = get().presetSentences.some((s) => s.id === id);
+    if (isPreset) {
       await useProgressStore.getState().addToLearning(id);
     } else {
       await get().updateSentence(id, { status: "learning" });

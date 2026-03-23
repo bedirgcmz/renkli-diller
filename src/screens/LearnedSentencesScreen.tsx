@@ -39,7 +39,7 @@ export default function LearnedSentencesScreen() {
       seenIds.add(s.id);
       return true;
     })
-    .filter((s) => progressMap[s.id] === "learned");
+    .filter((s) => (s.is_preset ? progressMap[s.id] === "learned" : s.status === "learned"));
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>

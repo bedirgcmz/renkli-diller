@@ -75,7 +75,8 @@
     "empty_title": "Lista de aprendizado vazia",
     "empty_hint": "Adicione frases à sua lista de aprendizado para iniciar um quiz.",
     "go_to_sentences": "Ir para Frases",
-    "no_keywords_title": "Sem frases para preencher"
+    "no_keywords_title": "Sem frases para preencher",
+    "no_keywords": "Nenhuma frase com marcadores de palavras-chave encontrada.\nAdicione **marcadores** às suas frases para usar este modo."
   },
   "sentences": {
     "title": "Todas as frases",

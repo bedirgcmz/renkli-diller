@@ -82,7 +82,7 @@ function generateFBQuestion(sentence: Sentence): FBQuestion | null {
   };
 }
 
-function buildSession(sentences: Sentence[], mode: QuizMode, count: number): Question[] {
+function buildSession(sentences: Sentence[], mode: QuizMode, count: number, distractors?: Sentence[]): Question[] {
   const shuffled = [...sentences].sort(() => Math.random() - 0.5);
   const questions: Question[] = [];
 
@@ -90,7 +90,7 @@ function buildSession(sentences: Sentence[], mode: QuizMode, count: number): Que
     if (questions.length >= count) break;
     const q =
       mode === "multiple_choice"
-        ? generateMCQuestion(sentence, sentences)
+        ? generateMCQuestion(sentence, distractors ?? sentences)
         : generateFBQuestion(sentence);
     if (q) questions.push(q);
   }
@@ -184,14 +184,13 @@ export default function QuizScreen() {
   const learningSentences = allSentences.filter(
     (s) => s.status === "learning" || progressMap[s.id] === "learning",
   );
-  const quizSentences = learningSentences.length >= 4 ? learningSentences : allSentences;
 
   const sessionSize = isPremium ? 20 : FREE_QUIZ_DAILY_LIMIT;
   const dailyLimitReached = !isPremium && dailyCount >= FREE_QUIZ_DAILY_LIMIT;
 
   const startSession = () => {
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
-    const qs = buildSession(quizSentences, mode, sessionSize);
+    const qs = buildSession(learningSentences, mode, sessionSize, allSentences);
     setQuestions(qs);
     setCurrentIdx(0);
     setSelectedOption(null);
@@ -206,7 +205,7 @@ export default function QuizScreen() {
   };
 
   useEffect(() => {
-    if (quizSentences.length > 0) startSession();
+    if (learningSentences.length > 0) startSession();
   }, [mode, sentences.length]);
 
   const currentQ = questions[currentIdx];
@@ -291,7 +290,7 @@ export default function QuizScreen() {
     );
   }
 
-  if (quizSentences.length < 2) {
+  if (learningSentences.length < 2) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
         <View style={styles.header}>
