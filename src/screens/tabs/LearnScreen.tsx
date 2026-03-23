@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -246,6 +246,8 @@ export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const route = useRoute<RouteProp<MainStackParamList, "Learn">>();
+  const initialTab: TabKey = route.params?.initialTab === "listening" ? "listening" : "learning";
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const {
     sentences: userSentences,
@@ -261,7 +263,7 @@ export default function LearnScreen() {
     forgot,
   } = useProgressStore();
 
-  const [activeTab, setActiveTab] = useState<TabKey>("learning");
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
 
