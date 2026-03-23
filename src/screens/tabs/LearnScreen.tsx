@@ -247,10 +247,13 @@ const listenStyles = StyleSheet.create({
 export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const navigation = useNavigation<CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList>,
-    NativeStackNavigationProp<MainStackParamList>
-  >>();
+  const navigation =
+    useNavigation<
+      CompositeNavigationProp<
+        NativeStackNavigationProp<HomeStackParamList>,
+        NativeStackNavigationProp<MainStackParamList>
+      >
+    >();
   const route = useRoute<RouteProp<HomeStackParamList, "Learn">>();
   const initialTab: TabKey = route.params?.initialTab === "listening" ? "listening" : "learning";
   const { uiLanguage, targetLanguage } = useSettingsStore();
@@ -288,8 +291,8 @@ export default function LearnScreen() {
     const init = async () => {
       try {
         await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
-      } catch {}
-      finally {
+      } catch {
+      } finally {
         if (mounted) setInitialized(true);
       }
     };
@@ -385,8 +388,17 @@ export default function LearnScreen() {
     (callback: () => void) => {
       // Phase 1: scale up + show overlay (120ms)
       Animated.parallel([
-        Animated.spring(cardScale, { toValue: 1.04, useNativeDriver: true, speed: 30, bounciness: 4 }),
-        Animated.timing(successOverlayOpacity, { toValue: 1, duration: 120, useNativeDriver: true }),
+        Animated.spring(cardScale, {
+          toValue: 1.04,
+          useNativeDriver: true,
+          speed: 30,
+          bounciness: 4,
+        }),
+        Animated.timing(successOverlayOpacity, {
+          toValue: 1,
+          duration: 120,
+          useNativeDriver: true,
+        }),
       ]).start(() => {
         // Phase 2: fly right + fade out (200ms)
         Animated.parallel([
@@ -517,10 +529,7 @@ export default function LearnScreen() {
         activeOpacity={0.7}
       >
         <Text
-          style={[
-            styles.navBtnText,
-            { color: prevDisabled ? colors.textTertiary : colors.text },
-          ]}
+          style={[styles.navBtnText, { color: prevDisabled ? colors.textTertiary : colors.text }]}
         >
           ‹ {t("learn.prev")}
         </Text>
@@ -545,10 +554,7 @@ export default function LearnScreen() {
         activeOpacity={0.7}
       >
         <Text
-          style={[
-            styles.navBtnText,
-            { color: nextDisabled ? colors.textTertiary : colors.text },
-          ]}
+          style={[styles.navBtnText, { color: nextDisabled ? colors.textTertiary : colors.text }]}
         >
           {t("learn.next")} ›
         </Text>
@@ -584,10 +590,7 @@ export default function LearnScreen() {
         <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
           {/* Learning tab */}
           <TouchableOpacity
-            style={[
-              styles.segmentTab,
-              activeTab === "learning" && styles.segmentTabActiveWrapper,
-            ]}
+            style={[styles.segmentTab, activeTab === "learning" && styles.segmentTabActiveWrapper]}
             onPress={() => handleTabChange("learning")}
             activeOpacity={0.8}
           >
@@ -599,9 +602,7 @@ export default function LearnScreen() {
                 end={{ x: 1, y: 0 }}
               >
                 <Ionicons name="book-outline" size={14} color="#fff" />
-                <Text style={[styles.segmentLabel, { color: "#fff" }]}>
-                  {t("learn.tab_study")}
-                </Text>
+                <Text style={[styles.segmentLabel, { color: "#fff" }]}>{t("learn.tab_study")}</Text>
                 {learningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
                     <Text style={styles.badgeText}>{learningList.length}</Text>
@@ -625,10 +626,7 @@ export default function LearnScreen() {
 
           {/* Listening tab */}
           <TouchableOpacity
-            style={[
-              styles.segmentTab,
-              activeTab === "listening" && styles.segmentTabActiveWrapper,
-            ]}
+            style={[styles.segmentTab, activeTab === "listening" && styles.segmentTabActiveWrapper]}
             onPress={() => handleTabChange("listening")}
             activeOpacity={0.8}
           >
@@ -717,7 +715,7 @@ export default function LearnScreen() {
                     style={[styles.successOverlay, { opacity: successOverlayOpacity }]}
                     pointerEvents="none"
                   >
-                    <Ionicons name="checkmark-circle" size={72} color="#fff" />
+                    <Ionicons name="checkmark-circle" size={72} color="#49C98A" />
                   </Animated.View>
                 </Animated.View>
               </GestureDetector>
@@ -772,7 +770,6 @@ export default function LearnScreen() {
               )}
             </>
           ))}
-
       </SafeAreaView>
     </View>
   );
@@ -784,9 +781,7 @@ function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: strin
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>{tab === "listening" ? "🎧" : "📚"}</Text>
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>
-        {t("learn.no_sentences")}
-      </Text>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>{t("learn.no_sentences")}</Text>
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
         {tab === "listening" ? t("learn.no_listen_sentences") : t("learn.start_hint")}
       </Text>
@@ -908,7 +903,7 @@ const styles = StyleSheet.create({
     right: 20,
     bottom: 0,
     borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.32)",
+    // backgroundColor: "rgba(0,0,0,0.32)",
     alignItems: "center",
     justifyContent: "center",
   },
