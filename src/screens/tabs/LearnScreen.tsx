@@ -726,23 +726,6 @@ export default function LearnScreen() {
             </>
           ))}
 
-        {/* Auto Mode shortcut */}
-        <TouchableOpacity
-          style={[styles.autoModeShortcut, { borderTopColor: colors.divider }]}
-          onPress={() => navigation.navigate("AutoMode")}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="play-circle-outline" size={16} color={colors.textTertiary} />
-          <Text style={[styles.autoModeShortcutText, { color: colors.textTertiary }]}>
-            {t("profile.auto_mode")}
-          </Text>
-          <Ionicons
-            name="chevron-forward"
-            size={14}
-            color={colors.textTertiary}
-            style={{ marginLeft: "auto" }}
-          />
-        </TouchableOpacity>
       </SafeAreaView>
     </View>
   );

@@ -230,10 +230,10 @@ export default function AutoModeScreen() {
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
         <TouchableOpacity
           onPress={() => {
-            Speech.stop();
+            try { Speech.stop(); } catch {}
             navigation.goBack();
           }}
-          hitSlop={12}
+          hitSlop={{ top: 16, right: 16, bottom: 16, left: 16 }}
         >
           <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
