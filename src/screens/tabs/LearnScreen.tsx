@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -286,22 +286,25 @@ export default function LearnScreen() {
   const cardScale = useRef(new Animated.Value(1)).current;
   const successOverlayOpacity = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    let mounted = true;
-    const init = async () => {
-      try {
-        await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
-      } catch {
-      } finally {
-        if (mounted) setInitialized(true);
-      }
-    };
-    init();
-    return () => {
-      mounted = false;
-      stopSpeaking();
-    };
-  }, [targetLanguage, uiLanguage]);
+  // Reload data every time screen comes into focus (handles back-navigation refresh)
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      const init = async () => {
+        try {
+          await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
+        } catch {
+        } finally {
+          if (mounted) setInitialized(true);
+        }
+      };
+      init();
+      return () => {
+        mounted = false;
+        stopSpeaking();
+      };
+    }, [targetLanguage, uiLanguage]),
+  );
 
   const learningList: Sentence[] = [
     ...userSentences.filter((s) => s.status === "learning"),
