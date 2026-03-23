@@ -95,7 +95,7 @@ export type RootStackParamList = {
 
 export type MainStackParamList = {
   Tabs: undefined;
-  Learn: undefined;
+  Learn: { initialTab?: "study" | "listening" } | undefined;
   Quiz: undefined;
   Reading: undefined;
   AddSentence: undefined;
