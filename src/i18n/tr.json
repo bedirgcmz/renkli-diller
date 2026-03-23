@@ -35,7 +35,6 @@
     "mark_unlearned": "Tekrar Öğren",
     "remove_from_list": "Listeden Çıkar",
     "add_to_list": "Öğrenme Listeme Ekle",
-    "remove_from_list": "Listeden Çıkar",
     "prev": "Önceki",
     "next": "Sonraki",
     "sentences_to_learn": "öğrenilecek cümlen var",
@@ -73,7 +72,11 @@
     "answer_placeholder": "Cevabınızı yazın...",
     "reviewing_wrong": "{{count}} yanlış cevap tekrar ediliyor",
     "first_round": "İlk Tur",
-    "retry_round": "Tekrar Turu"
+    "retry_round": "Tekrar Turu",
+    "empty_title": "Öğrenme listesi boş",
+    "empty_hint": "Cümleler ekranından öğrenme listenize cümle ekleyerek quiz başlatabilirsiniz.",
+    "go_to_sentences": "Cümlelere Git",
+    "no_keywords_title": "Boşluk doldurma için cümle yok"
   },
   "sentences": {
     "title": "Tüm Cümleler",

@@ -71,7 +71,11 @@
     "answer_placeholder": "Écrivez votre réponse...",
     "reviewing_wrong": "Révision de {{count}} mauvaises réponses",
     "first_round": "Premier tour",
-    "retry_round": "Tour de révision"
+    "retry_round": "Tour de révision",
+    "empty_title": "Liste d'apprentissage vide",
+    "empty_hint": "Ajoute des phrases à ta liste d'apprentissage pour démarrer un quiz.",
+    "go_to_sentences": "Voir les phrases",
+    "no_keywords_title": "Aucune phrase à compléter"
   },
   "sentences": {
     "title": "Toutes les phrases",

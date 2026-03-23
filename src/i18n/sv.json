@@ -71,7 +71,11 @@
     "answer_placeholder": "Skriv ditt svar...",
     "reviewing_wrong": "Granskar {{count}} felaktiga svar",
     "first_round": "Första omgången",
-    "retry_round": "Repetitionsomgång"
+    "retry_round": "Repetitionsomgång",
+    "empty_title": "Inlärningslistan är tom",
+    "empty_hint": "Lägg till meningar i din inlärningslista för att starta ett quiz.",
+    "go_to_sentences": "Gå till Meningar",
+    "no_keywords_title": "Inga meningar för ifyllnad"
   },
   "sentences": {
     "title": "Alla meningar",

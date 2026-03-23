@@ -72,7 +72,11 @@
     "answer_placeholder": "Write your answer...",
     "reviewing_wrong": "Reviewing {{count}} wrong answers",
     "first_round": "First Round",
-    "retry_round": "Retry Round"
+    "retry_round": "Retry Round",
+    "empty_title": "Learning list is empty",
+    "empty_hint": "Add sentences to your learning list from the Sentences screen to start a quiz.",
+    "go_to_sentences": "Go to Sentences",
+    "no_keywords_title": "No sentences for fill-in-the-blank"
   },
   "sentences": {
     "title": "All Sentences",

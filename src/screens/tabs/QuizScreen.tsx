@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  RefreshControl,
   useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -126,6 +127,7 @@ export default function QuizScreen() {
   const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
   const [isRetryPhase, setIsRetryPhase] = useState(false);
   const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
+  const [refreshing, setRefreshing] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -159,6 +161,12 @@ export default function QuizScreen() {
       setInitialized(true),
     );
   }, [targetLanguage, uiLanguage]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
+    setRefreshing(false);
+  };
 
   // Auto-focus first keyword input on fill_blank question load
   useEffect(() => {
@@ -286,12 +294,39 @@ export default function QuizScreen() {
   if (quizSentences.length < 2) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
-        <View style={styles.centered}>
-          <Text style={styles.emptyIcon}>📚</Text>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            {t("quiz.min_sentences")}
-          </Text>
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
         </View>
+        <ScrollView
+          contentContainerStyle={styles.emptyScroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
+        >
+          <View style={[styles.emptyCard, { backgroundColor: colors.cardBackground }]}>
+            <Text style={styles.emptyIcon}>📚</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {t("quiz.empty_title")}
+            </Text>
+            <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
+              {t("quiz.empty_hint")}
+            </Text>
+            <TouchableOpacity
+              style={[styles.emptyBtn, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.getParent()?.navigate("Sentences" as never)}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="list-outline" size={16} color="#fff" />
+              <Text style={styles.emptyBtnText}>{t("quiz.go_to_sentences")}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -338,12 +373,28 @@ export default function QuizScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
         {renderHeader()}
-        <View style={[styles.centered, { paddingHorizontal: 32 }]}>
-          <Text style={{ fontSize: 40, marginBottom: 12 }}>✏️</Text>
-          <Text style={[styles.emptyText, { color: colors.textSecondary, textAlign: "center" }]}>
-            {t("quiz.no_keywords")}
-          </Text>
-        </View>
+        <ScrollView
+          contentContainerStyle={styles.emptyScroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
+        >
+          <View style={[styles.emptyCard, { backgroundColor: colors.cardBackground }]}>
+            <Text style={styles.emptyIcon}>✏️</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {t("quiz.no_keywords_title")}
+            </Text>
+            <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
+              {t("quiz.no_keywords")}
+            </Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -387,6 +438,14 @@ export default function QuizScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
       >
         {/* Daily limit banner */}
         {dailyLimitReached && (
@@ -1002,4 +1061,30 @@ const styles = StyleSheet.create({
   doneScoreLabel: { fontSize: 11, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 },
   doneScoreNum: { fontSize: 22, fontWeight: "700" },
   doneScoreDivider: { width: 1, height: 40 },
+
+  // ── Empty state ────────────────────────────────────────────────────────────
+  emptyScroll: { flexGrow: 1, justifyContent: "center", padding: 20 },
+  emptyCard: {
+    borderRadius: 20,
+    padding: 28,
+    alignItems: "center",
+    gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  emptyTitle: { fontSize: 17, fontWeight: "700", textAlign: "center" },
+  emptyHint: { fontSize: 14, textAlign: "center", lineHeight: 20, paddingHorizontal: 8 },
+  emptyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 11,
+    borderRadius: 12,
+  },
+  emptyBtnText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

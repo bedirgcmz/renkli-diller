@@ -71,7 +71,11 @@
     "answer_placeholder": "Escreva sua resposta...",
     "reviewing_wrong": "Revisando {{count}} respostas erradas",
     "first_round": "Primeira rodada",
-    "retry_round": "Rodada de revisão"
+    "retry_round": "Rodada de revisão",
+    "empty_title": "Lista de aprendizado vazia",
+    "empty_hint": "Adicione frases à sua lista de aprendizado para iniciar um quiz.",
+    "go_to_sentences": "Ir para Frases",
+    "no_keywords_title": "Sem frases para preencher"
   },
   "sentences": {
     "title": "Todas as frases",

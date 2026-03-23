@@ -71,7 +71,11 @@
     "answer_placeholder": "Schreiben Sie Ihre Antwort...",
     "reviewing_wrong": "{{count}} falsche Antworten werden wiederholt",
     "first_round": "Erste Runde",
-    "retry_round": "Wiederholungsrunde"
+    "retry_round": "Wiederholungsrunde",
+    "empty_title": "Lernliste ist leer",
+    "empty_hint": "Füge Sätze zu deiner Lernliste hinzu, um ein Quiz zu starten.",
+    "go_to_sentences": "Zu Sätzen",
+    "no_keywords_title": "Keine Sätze für Lückentext"
   },
   "sentences": {
     "title": "Alle Sätze",
