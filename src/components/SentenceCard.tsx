@@ -74,6 +74,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
     const speakTarget = () => {
       Speech.speak(stripMarkers(sentence.target_text), {
         language: LANG_CODE[targetLanguage],
+        rate: 0.85,
         onDone: () => setSpeaking(false),
         onStopped: () => setSpeaking(false),
         onError: () => setSpeaking(false),
@@ -82,6 +83,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
     if (isPremium) {
       Speech.speak(stripMarkers(sentence.source_text), {
         language: LANG_CODE[uiLanguage],
+        rate: 0.85,
         onDone: () => {
           setTimeout(speakTarget, 1000);
         },

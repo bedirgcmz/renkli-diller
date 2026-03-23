@@ -11,7 +11,7 @@ import {
   Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -509,7 +509,7 @@ export default function ReadingScreen() {
 
   const [kwModalVisible, setKwModalVisible] = useState(false);
   const [quizVisible, setQuizVisible] = useState(false);
-  const [speaking, setSpeaking] = useState<"source" | "target" | null>(null);
+  const [speaking, setSpeaking] = useState<"source" | "target" | "slow" | null>(null);
   const [markedThisSession, setMarkedThisSession] = useState(false);
 
   const userId = user?.id ?? "";
@@ -534,12 +534,34 @@ export default function ReadingScreen() {
       setSpeaking(type);
       Speech.speak(stripMarkers(raw), {
         language: LANG_CODE[lang],
+        rate: 0.85,
         onDone: () => setSpeaking(null),
         onStopped: () => setSpeaking(null),
         onError: () => setSpeaking(null),
       });
     },
     [speaking, currentText],
+  );
+
+  const speakTextSlow = useCallback(
+    async () => {
+      if (speaking) {
+        await Speech.stop();
+        setSpeaking(null);
+        return;
+      }
+      const raw = getField<string>(currentText, `body_${targetLanguage}`);
+      if (!raw) return;
+      setSpeaking("slow");
+      Speech.speak(stripMarkers(raw), {
+        language: LANG_CODE[targetLanguage],
+        rate: 0.4,
+        onDone: () => setSpeaking(null),
+        onStopped: () => setSpeaking(null),
+        onError: () => setSpeaking(null),
+      });
+    },
+    [speaking, currentText, targetLanguage],
   );
 
   const handleShare = useCallback(async () => {
@@ -690,6 +712,25 @@ export default function ReadingScreen() {
               size={20}
               color={speaking === "target" ? colors.primary : colors.textSecondary}
             />
+          </TouchableOpacity>
+
+          {/* Slow TTS */}
+          <TouchableOpacity
+            style={[
+              styles.iconBtn,
+              {
+                backgroundColor:
+                  speaking === "slow" ? colors.primary + "20" : colors.backgroundSecondary,
+              },
+            ]}
+            onPress={speakTextSlow}
+            activeOpacity={0.75}
+          >
+            {speaking === "slow" ? (
+              <Ionicons name="stop-circle" size={20} color={colors.primary} />
+            ) : (
+              <MaterialIcons name="slow-motion-video" size={20} color={colors.textSecondary} />
+            )}
           </TouchableOpacity>
 
           {/* Vocab quiz (premium) */}
@@ -882,8 +923,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 12,
   },
-  headerTitle: { fontSize: 22, fontWeight: "700" },
-  headerActions: { flexDirection: "row", gap: 8 },
+  headerTitle: { fontSize: 22, fontWeight: "700", flexShrink: 1 },
+  headerActions: { flexDirection: "row", gap: 6 },
   iconBtn: {
     width: 36,
     height: 36,

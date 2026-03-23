@@ -90,9 +90,21 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { uiLanguage, targetLanguage } = useSettingsStore.getState();
+
+      // Only fetch columns needed for the active language pair + fallback columns
+      const sentenceCols = [...new Set([
+        "id", "category_id", "sort_order",
+        `text_${uiLanguage}`,
+        `text_${targetLanguage}`,
+        "text_en",   // getLangText fallback
+        "text_tr",   // getLangText fallback
+        `keywords_${targetLanguage}`,
+      ])].join(", ");
+      const catCols = [...new Set([`name_${uiLanguage}`, "name_en"])].join(", ");
+
       let query = supabase
         .from("sentences")
-        .select("*, categories(name_tr, name_en, name_sv, name_de, name_es, name_fr, name_pt)")
+        .select(`${sentenceCols}, categories(${catCols})`)
         .order("sort_order");
 
       if (categoryId) {

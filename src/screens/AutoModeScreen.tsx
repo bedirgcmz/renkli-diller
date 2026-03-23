@@ -26,6 +26,9 @@ type Speed = 0.5 | 1 | 1.5 | 2;
 
 const SPEEDS: Speed[] = [0.5, 1, 1.5, 2];
 
+// Actual TTS rates — 1x label = 0.85 real rate, 0.5x label = 0.4 real rate
+const SPEED_RATE: Record<Speed, number> = { 0.5: 0.4, 1: 0.85, 1.5: 1.3, 2: 1.7 };
+
 const LANG_CODE: Record<SupportedLanguage, string> = {
   tr: "tr-TR",
   en: "en-US",
@@ -100,7 +103,7 @@ export default function AutoModeScreen() {
       const sourceText = stripMarkers(sentence.source_text);
       Speech.speak(sourceText, {
         language: LANG_CODE[uiLanguage],
-        rate: speedRef.current,
+        rate: SPEED_RATE[speedRef.current],
         onDone: () => setPhase("waiting"),
         onStopped: () => {},
         onError: () => setPhase("waiting"),
@@ -129,7 +132,7 @@ export default function AutoModeScreen() {
       const targetText = stripMarkers(sentence.target_text);
       Speech.speak(targetText, {
         language: LANG_CODE[targetLanguage],
-        rate: speedRef.current,
+        rate: SPEED_RATE[speedRef.current],
         onDone: () => setPhase("post"),
         onStopped: () => {},
         onError: () => setPhase("post"),
