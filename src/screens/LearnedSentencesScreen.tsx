@@ -23,7 +23,7 @@ export default function LearnedSentencesScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, forgot, loadProgress } = useProgressStore();
+  const { progressMap, addToLearning, loadProgress } = useProgressStore();
   const { isPremium } = usePremium();
 
   useEffect(() => {
@@ -79,7 +79,15 @@ export default function LearnedSentencesScreen() {
             <LearnedCard
               key={sentence.id}
               sentence={sentence}
-              onForgot={async () => { await forgot(sentence.id); loadProgress(); }}
+              onForgot={async () => {
+                if (sentence.is_preset) {
+                  await addToLearning(sentence.id);
+                } else {
+                  await useSentenceStore.getState().addToLearningList(sentence.id);
+                  loadSentences();
+                }
+                loadProgress();
+              }}
               colors={colors}
               t={t}
             />
