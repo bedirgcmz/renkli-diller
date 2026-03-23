@@ -79,7 +79,7 @@ export default function LearnedSentencesScreen() {
             <LearnedCard
               key={sentence.id}
               sentence={sentence}
-              onForgot={() => forgot(sentence.id)}
+              onForgot={async () => { await forgot(sentence.id); loadProgress(); }}
               colors={colors}
               t={t}
             />
