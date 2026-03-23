@@ -14,8 +14,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@/hooks/useTheme";
@@ -24,15 +22,12 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
-import { MainStackParamList } from "@/types";
-import PDFExportModal from "@/components/PDFExportModal";
 import ActivityChart from "@/components/ActivityChart";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const { user, signOut, uploadAvatar, removeAvatar, updateProfile } = useAuthStore();
+  const { user, uploadAvatar, removeAvatar, updateProfile } = useAuthStore();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(user?.display_name || "");
@@ -42,7 +37,6 @@ export default function ProfileScreen() {
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
-  const [pdfModalVisible, setPdfModalVisible] = useState(false);
   const [avatarKey, setAvatarKey] = useState(0);
   const [avatarLoadError, setAvatarLoadError] = useState(false);
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
@@ -85,17 +79,6 @@ export default function ProfileScreen() {
     setNameSaving(false);
     setEditingName(false);
     if (!res.success) Alert.alert(t("common.error"), res.error);
-  };
-
-  const handleSignOut = () => {
-    Alert.alert(
-      t("profile.sign_out"),
-      t("profile.confirm_signout"),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        { text: t("common.yes"), style: "destructive", onPress: () => signOut() },
-      ],
-    );
   };
 
   const handleAvatarPress = () => setPhotoSheetVisible(true);
@@ -161,74 +144,6 @@ export default function ProfileScreen() {
       Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
     }
   };
-
-  const menuItems: Array<{
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    onPress: () => void;
-    color?: string;
-    badge?: string;
-  }> = [
-    {
-      icon: "grid-outline",
-      label: t("sentences.preset_sentences"),
-      onPress: () => navigation.navigate("CategoryBrowser"),
-    },
-    {
-      icon: "document-text-outline",
-      label: t("profile.export_pdf"),
-      onPress: () => {
-        if (!isPremium) {
-          Alert.alert(t("common.premium_badge"), t("add_sentence.upgrade_to_add_more"));
-          return;
-        }
-        setPdfModalVisible(true);
-      },
-      badge: isPremium ? undefined : t("common.premium_badge"),
-    },
-    {
-      icon: "checkmark-done-outline",
-      label: t("profile.learned_sentences"),
-      onPress: () => navigation.navigate("LearnedSentences"),
-    },
-    {
-      icon: "play-circle-outline",
-      label: t("profile.auto_mode"),
-      onPress: () => navigation.navigate("AutoMode"),
-    },
-    {
-      icon: "mail-outline",
-      label: t("profile.change_email"),
-      onPress: () => navigation.navigate("ChangeEmail"),
-    },
-    {
-      icon: "lock-closed-outline",
-      label: t("profile.change_password"),
-      onPress: () => navigation.navigate("ChangePassword"),
-    },
-    {
-      icon: "settings-outline",
-      label: t("profile.settings"),
-      onPress: () => navigation.navigate("Settings"),
-    },
-    ...(!isPremium
-      ? [
-          {
-            icon: "star-outline" as keyof typeof Ionicons.glyphMap,
-            label: t("premium.title"),
-            onPress: () => navigation.navigate("Paywall"),
-            color: colors.premiumAccent,
-            badge: "✨",
-          },
-        ]
-      : []),
-    {
-      icon: "log-out-outline",
-      label: t("profile.sign_out"),
-      onPress: handleSignOut,
-      color: colors.error,
-    },
-  ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
@@ -426,54 +341,8 @@ export default function ProfileScreen() {
         {/* Activity chart */}
         <ActivityChart progress={progress} />
 
-        {/* Menu */}
-        <View style={[styles.menuCard, { backgroundColor: colors.cardBackground }]}>
-          {menuItems.map((item, idx) => (
-            <View key={idx}>
-              {idx > 0 && (
-                <View style={[styles.menuDivider, { backgroundColor: colors.divider }]} />
-              )}
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={item.onPress}
-                activeOpacity={0.7}
-              >
-                <View style={styles.menuItemLeft}>
-                  <Ionicons
-                    name={item.icon}
-                    size={22}
-                    color={item.color ?? colors.text}
-                  />
-                  <Text
-                    style={[
-                      styles.menuItemLabel,
-                      { color: item.color ?? colors.text },
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badge && (
-                    <View
-                      style={[styles.menuBadge, { backgroundColor: colors.premiumAccent + "22" }]}
-                    >
-                      <Text
-                        style={[styles.menuBadgeText, { color: colors.premiumAccent }]}
-                      >
-                        {item.badge}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-
         <View style={{ height: 24 }} />
       </ScrollView>
-
-      <PDFExportModal visible={pdfModalVisible} onClose={() => setPdfModalVisible(false)} />
 
       {/* Photo action sheet */}
       <Modal
@@ -649,27 +518,6 @@ const styles = StyleSheet.create({
   quizBarFill: { height: 5, borderRadius: 3 },
   quizRowPct: { fontSize: 12, fontWeight: "600", width: 34, textAlign: "right" },
   quizDivider: { height: StyleSheet.hairlineWidth, marginVertical: 2 },
-  menuCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-  },
-  menuItemLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  menuItemLabel: { fontSize: 15, fontWeight: "500" },
-  menuBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 5 },
-  menuBadgeText: { fontSize: 11, fontWeight: "700" },
-  menuDivider: { height: StyleSheet.hairlineWidth, marginLeft: 50 },
   sheetBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
