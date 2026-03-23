@@ -268,7 +268,6 @@ export default function LearnScreen() {
     loadProgress,
     addToLearning,
     markAsLearned: presetMarkLearned,
-    forgot,
   } = useProgressStore();
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
@@ -477,14 +476,11 @@ export default function LearnScreen() {
     }
   };
 
-  const handleForgotCard = async () => {
+  const handleRemoveFromList = async () => {
     if (!currentSentence) return;
-    if (currentSentence.is_preset) {
-      await forgot(currentSentence.id);
-    } else {
-      await useSentenceStore.getState().updateSentence(currentSentence.id, { status: "new" });
-      await loadSentences();
-    }
+    animateAndGo("next", () => {});
+    await useSentenceStore.getState().removeFromLearningList(currentSentence.id);
+    if (!currentSentence.is_preset) await loadSentences();
   };
 
   // ── Listening actions ────────────────────────────────────────────────────────
@@ -701,7 +697,8 @@ export default function LearnScreen() {
                       state={getEffectiveState(currentSentence)}
                       onLearn={handleLearn}
                       onMarkLearned={handleMarkLearned}
-                      onForgot={handleForgotCard}
+                      onForgot={handleRemoveFromList}
+                      onRemoveFromList={handleRemoveFromList}
                       onEdit={() =>
                         navigation.navigate("EditSentence", {
                           sentenceId: currentSentence.id,

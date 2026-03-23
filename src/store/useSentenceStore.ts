@@ -355,9 +355,9 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   markAsUnlearned: async (id) => {
     const { presetSentences } = get();
     if (presetSentences.find((s) => s.id === id)) {
-      await useProgressStore.getState().forgot(id);
+      await useProgressStore.getState().addToLearning(id);
     } else {
-      await get().updateSentence(id, { status: "new" });
+      await get().updateSentence(id, { status: "learning" });
     }
   },
 

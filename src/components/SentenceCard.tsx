@@ -35,6 +35,7 @@ export interface SentenceCardProps {
   onLearn: () => void;
   onMarkLearned: () => void;
   onForgot: () => void;
+  onRemoveFromList?: () => void;
   onEdit?: () => void;
   showTarget?: boolean;
 }
@@ -47,6 +48,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   onLearn,
   onMarkLearned,
   onForgot,
+  onRemoveFromList,
   onEdit,
   showTarget = true,
 }) => {
@@ -209,30 +211,72 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
             </View>
           ) : null}
 
-          {/* ✅ v2: soft-filled ghost pill button */}
-          <View style={styles.actionRow}>
-            <Pressable onPress={actionConfig.handler}>
-              {({ pressed }) => (
-                <View
-                  style={[
-                    styles.actionBtn,
-                    {
-                      backgroundColor: pressed ? btnBgPress : btnBg,
-                      borderColor: btnBorder,
-                      transform: [{ scale: pressed ? 0.96 : 1 }],
-                    },
-                  ]}
-                >
-                  <Ionicons name={actionConfig.icon} size={15} color={colors.textSecondary} />
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.actionBtnText, { color: colors.textSecondary }]}
+          {/* Action buttons */}
+          <View style={[styles.actionRow, state === "learning" && onRemoveFromList ? styles.actionRowSplit : null]}>
+            {state === "learning" && onRemoveFromList ? (
+              <>
+                {/* Listeden Çıkar — ghost */}
+                <Pressable onPress={onRemoveFromList} style={{ flex: 1 }}>
+                  {({ pressed }) => (
+                    <View
+                      style={[
+                        styles.actionBtn,
+                        {
+                          backgroundColor: pressed ? btnBgPress : btnBg,
+                          borderColor: btnBorder,
+                          transform: [{ scale: pressed ? 0.96 : 1 }],
+                        },
+                      ]}
+                    >
+                      <Ionicons name="remove-circle-outline" size={15} color={colors.textTertiary} />
+                      <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textTertiary }]}>
+                        {t("learn.remove_from_list")}
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+                {/* Öğrendim — accent fill */}
+                <Pressable onPress={onMarkLearned} style={{ flex: 1 }}>
+                  {({ pressed }) => (
+                    <View
+                      style={[
+                        styles.actionBtn,
+                        {
+                          backgroundColor: pressed ? colors.primary + "33" : colors.primary + "18",
+                          borderColor: colors.primary + "40",
+                          transform: [{ scale: pressed ? 0.96 : 1 }],
+                        },
+                      ]}
+                    >
+                      <Ionicons name="checkmark-circle-outline" size={15} color={colors.primary} />
+                      <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.primary }]}>
+                        {t("learn.mark_learned")}
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+              </>
+            ) : (
+              <Pressable onPress={actionConfig.handler}>
+                {({ pressed }) => (
+                  <View
+                    style={[
+                      styles.actionBtn,
+                      {
+                        backgroundColor: pressed ? btnBgPress : btnBg,
+                        borderColor: btnBorder,
+                        transform: [{ scale: pressed ? 0.96 : 1 }],
+                      },
+                    ]}
                   >
-                    {actionConfig.label}
-                  </Text>
-                </View>
-              )}
-            </Pressable>
+                    <Ionicons name={actionConfig.icon} size={15} color={colors.textSecondary} />
+                    <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textSecondary }]}>
+                      {actionConfig.label}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            )}
           </View>
 
           {hasMismatch && (
@@ -298,6 +342,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 16,
+  },
+  actionRowSplit: {
+    gap: 8,
   },
   actionBtn: {
     flexDirection: "row",
