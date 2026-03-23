@@ -280,6 +280,8 @@ export default function LearnScreen() {
 
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const cardTranslateX = useRef(new Animated.Value(0)).current;
+  const cardScale = useRef(new Animated.Value(1)).current;
+  const successOverlayOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let mounted = true;
@@ -378,6 +380,35 @@ export default function LearnScreen() {
     [cardOpacity, cardTranslateX],
   );
 
+  // Success animation: scale up + green overlay → fly right → next card
+  const animateSuccess = useCallback(
+    (callback: () => void) => {
+      // Phase 1: scale up + show overlay (120ms)
+      Animated.parallel([
+        Animated.spring(cardScale, { toValue: 1.04, useNativeDriver: true, speed: 30, bounciness: 4 }),
+        Animated.timing(successOverlayOpacity, { toValue: 1, duration: 120, useNativeDriver: true }),
+      ]).start(() => {
+        // Phase 2: fly right + fade out (200ms)
+        Animated.parallel([
+          Animated.timing(cardOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+          Animated.timing(cardTranslateX, { toValue: 80, duration: 200, useNativeDriver: true }),
+          Animated.timing(cardScale, { toValue: 1.06, duration: 200, useNativeDriver: true }),
+        ]).start(() => {
+          // Reset values, run callback, slide in next card from left
+          cardTranslateX.setValue(-40);
+          cardScale.setValue(1);
+          successOverlayOpacity.setValue(0);
+          callback();
+          Animated.parallel([
+            Animated.timing(cardOpacity, { toValue: 1, duration: 180, useNativeDriver: true }),
+            Animated.timing(cardTranslateX, { toValue: 0, duration: 180, useNativeDriver: true }),
+          ]).start();
+        });
+      });
+    },
+    [cardOpacity, cardTranslateX, cardScale, successOverlayOpacity],
+  );
+
   // Learning tab navigation
   const goNext = useCallback(() => {
     if (currentIndex < total - 1) animateAndGo("next", () => setCurrentIndex((i) => i + 1));
@@ -425,7 +456,7 @@ export default function LearnScreen() {
   const handleMarkLearned = async () => {
     if (!currentSentence) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-    animateAndGo("next", () => {});
+    animateSuccess(() => {});
     if (currentSentence.is_preset) {
       await presetMarkLearned(currentSentence.id);
     } else {
@@ -658,7 +689,10 @@ export default function LearnScreen() {
                 <Animated.View
                   style={[
                     styles.cardWrapper,
-                    { opacity: cardOpacity, transform: [{ translateX: cardTranslateX }] },
+                    {
+                      opacity: cardOpacity,
+                      transform: [{ translateX: cardTranslateX }, { scale: cardScale }],
+                    },
                   ]}
                 >
                   {currentSentence && (
@@ -678,6 +712,13 @@ export default function LearnScreen() {
                       }
                     />
                   )}
+                  {/* Success overlay */}
+                  <Animated.View
+                    style={[styles.successOverlay, { opacity: successOverlayOpacity }]}
+                    pointerEvents="none"
+                  >
+                    <Ionicons name="checkmark-circle" size={72} color="#fff" />
+                  </Animated.View>
                 </Animated.View>
               </GestureDetector>
 
@@ -843,6 +884,17 @@ const styles = StyleSheet.create({
   badgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   cardWrapper: { flex: 1, paddingHorizontal: 20, justifyContent: "center" },
+  successOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 20,
+    right: 20,
+    bottom: 0,
+    borderRadius: 20,
+    backgroundColor: "#49C98A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   navRow: {
     flexDirection: "row",
     justifyContent: "space-between",
