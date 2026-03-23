@@ -12,6 +12,7 @@ import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -23,7 +24,7 @@ import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
-import { Sentence, MainStackParamList } from "@/types";
+import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
 
 type TabKey = "learning" | "listening";
 
@@ -245,8 +246,11 @@ const listenStyles = StyleSheet.create({
 export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const route = useRoute<RouteProp<MainStackParamList, "Learn">>();
+  const navigation = useNavigation<CompositeNavigationProp<
+    NativeStackNavigationProp<HomeStackParamList>,
+    NativeStackNavigationProp<MainStackParamList>
+  >>();
+  const route = useRoute<RouteProp<HomeStackParamList, "Learn">>();
   const initialTab: TabKey = route.params?.initialTab === "listening" ? "listening" : "learning";
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const {

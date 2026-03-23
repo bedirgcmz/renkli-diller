@@ -93,11 +93,15 @@ export type RootStackParamList = {
   Main: undefined;
 };
 
-export type MainStackParamList = {
-  Tabs: undefined;
+export type HomeStackParamList = {
+  HomeMain: undefined;
   Learn: { initialTab?: "study" | "listening" } | undefined;
   Quiz: undefined;
   Reading: undefined;
+};
+
+export type MainStackParamList = {
+  Tabs: undefined;
   AddSentence: undefined;
   EditSentence: { sentenceId: string; isPreset: boolean };
   Settings: undefined;

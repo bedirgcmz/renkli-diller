@@ -1,21 +1,18 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
-import { MainStackParamList } from "@/types";
+import { HomeStackParamList, MainStackParamList } from "@/types";
 
-type Nav = NativeStackNavigationProp<MainStackParamList>;
+type Nav = CompositeNavigationProp<
+  NativeStackNavigationProp<HomeStackParamList>,
+  NativeStackNavigationProp<MainStackParamList>
+>;
 
 const { width } = Dimensions.get("window");
 const CARD_GAP = 12;
@@ -80,11 +77,11 @@ export default function HomeScreen() {
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: colors.text }]}>{t("app_name")}</Text>
 
         <View style={styles.grid}>
@@ -99,9 +96,7 @@ export default function HomeScreen() {
                 <View style={[styles.iconCircle, { backgroundColor: card.iconColor + "1A" }]}>
                   <Ionicons name={card.icon} size={28} color={card.iconColor} />
                 </View>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>
-                  {t(card.titleKey)}
-                </Text>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>{t(card.titleKey)}</Text>
                 <Text style={[styles.cardDesc, { color: colors.textTertiary }]}>
                   {t(card.descKey)}
                 </Text>
@@ -138,9 +133,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.28,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 14,
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
     elevation: 8,
   },
   cardInner: {

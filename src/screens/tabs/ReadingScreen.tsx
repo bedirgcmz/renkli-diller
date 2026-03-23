@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -23,7 +24,7 @@ import { useReadingStore } from "@/store/useReadingStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KEYWORD_TEXT_COLORS } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
-import { ReadingTextKeyword, SupportedLanguage, MainStackParamList } from "@/types";
+import { ReadingTextKeyword, SupportedLanguage, HomeStackParamList, MainStackParamList } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -490,7 +491,10 @@ export default function ReadingScreen() {
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const navigation = useNavigation<CompositeNavigationProp<
+    NativeStackNavigationProp<HomeStackParamList>,
+    NativeStackNavigationProp<MainStackParamList>
+  >>();
   const {
     currentText,
     keywords,

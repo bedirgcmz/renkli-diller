@@ -2,9 +2,6 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MainStackParamList } from "@/types";
 import TabNavigator from "./TabNavigator";
-import LearnScreen from "@/screens/tabs/LearnScreen";
-import QuizScreen from "@/screens/tabs/QuizScreen";
-import ReadingScreen from "@/screens/tabs/ReadingScreen";
 import AddSentenceScreen from "@/screens/AddSentenceScreen";
 import EditSentenceScreen from "@/screens/EditSentenceScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
@@ -21,9 +18,6 @@ export default function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Tabs" component={TabNavigator} />
-      <Stack.Screen name="Learn" component={LearnScreen} />
-      <Stack.Screen name="Quiz" component={QuizScreen} />
-      <Stack.Screen name="Reading" component={ReadingScreen} />
       <Stack.Screen
         name="AddSentence"
         component={AddSentenceScreen}

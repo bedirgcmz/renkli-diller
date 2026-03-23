@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
@@ -23,7 +24,7 @@ import { usePremium } from "@/hooks/usePremium";
 import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
-import { MainStackParamList, PillSegment, Sentence } from "@/types";
+import { HomeStackParamList, MainStackParamList, PillSegment, Sentence } from "@/types";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -101,7 +102,10 @@ export default function QuizScreen() {
   const { colors } = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const navigation = useNavigation<CompositeNavigationProp<
+    NativeStackNavigationProp<HomeStackParamList>,
+    NativeStackNavigationProp<MainStackParamList>
+  >>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();

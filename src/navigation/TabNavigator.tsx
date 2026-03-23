@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 // Screens
-import HomeScreen from "@/screens/HomeScreen";
+import HomeStackNavigator from "@/navigation/HomeStackNavigator";
 import SentencesScreen from "@/screens/tabs/SentencesScreen";
 import ProfileScreen from "@/screens/tabs/ProfileScreen";
 import MoreScreen from "@/screens/MoreScreen";
@@ -71,7 +71,7 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStackNavigator}
         options={{ tabBarLabel: t("tabs.home") }}
       />
       <Tab.Screen
