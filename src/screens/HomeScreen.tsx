@@ -95,15 +95,17 @@ export default function HomeScreen() {
               onPress={() => card.onPress(navigation)}
               activeOpacity={0.75}
             >
-              <View style={[styles.iconCircle, { backgroundColor: card.iconColor + "1A" }]}>
-                <Ionicons name={card.icon} size={28} color={card.iconColor} />
+              <View style={styles.cardInner}>
+                <View style={[styles.iconCircle, { backgroundColor: card.iconColor + "1A" }]}>
+                  <Ionicons name={card.icon} size={28} color={card.iconColor} />
+                </View>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>
+                  {t(card.titleKey)}
+                </Text>
+                <Text style={[styles.cardDesc, { color: colors.textTertiary }]}>
+                  {t(card.descKey)}
+                </Text>
               </View>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {t(card.titleKey)}
-              </Text>
-              <Text style={[styles.cardDesc, { color: colors.textTertiary }]}>
-                {t(card.descKey)}
-              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -136,10 +138,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.28,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  cardInner: {
+    alignItems: "center",
   },
   iconCircle: {
     width: 52,
@@ -153,9 +158,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 4,
+    textAlign: "center",
   },
   cardDesc: {
     fontSize: 12,
     lineHeight: 16,
+    textAlign: "center",
   },
 });
