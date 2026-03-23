@@ -25,6 +25,7 @@ import { KeywordText } from "@/components/KeywordText";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
 import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
+import * as Haptics from "expo-haptics";
 
 type TabKey = "learning" | "listening";
 
@@ -423,6 +424,7 @@ export default function LearnScreen() {
 
   const handleMarkLearned = async () => {
     if (!currentSentence) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     animateAndGo("next", () => {});
     if (currentSentence.is_preset) {
       await presetMarkLearned(currentSentence.id);
