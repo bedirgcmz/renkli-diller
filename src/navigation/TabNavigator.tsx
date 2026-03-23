@@ -8,19 +8,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 // Screens
-import LearnScreen from "@/screens/tabs/LearnScreen";
-import QuizScreen from "@/screens/tabs/QuizScreen";
+import HomeScreen from "@/screens/HomeScreen";
 import SentencesScreen from "@/screens/tabs/SentencesScreen";
-import ReadingScreen from "@/screens/tabs/ReadingScreen";
 import ProfileScreen from "@/screens/tabs/ProfileScreen";
+import MoreScreen from "@/screens/MoreScreen";
 
-export type TabParamList = {
-  Learn: undefined;
-  Quiz: undefined;
-  Sentences: undefined;
-  Read: undefined;
-  Profile: undefined;
-};
+import { TabParamList } from "@/types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -56,20 +49,17 @@ export default function TabNavigator() {
           let iconName: keyof typeof Ionicons.glyphMap;
 
           switch (route.name) {
-            case "Learn":
-              iconName = focused ? "book" : "book-outline";
-              break;
-            case "Quiz":
-              iconName = focused ? "school" : "school-outline";
+            case "Home":
+              iconName = focused ? "home" : "home-outline";
               break;
             case "Sentences":
               iconName = focused ? "list" : "list-outline";
               break;
-            case "Read":
-              iconName = focused ? "newspaper" : "newspaper-outline";
-              break;
-            case "Profile":
+            case "Me":
               iconName = focused ? "person" : "person-outline";
+              break;
+            case "More":
+              iconName = focused ? "ellipsis-horizontal-circle" : "ellipsis-horizontal-circle-outline";
               break;
             default:
               iconName = "help-circle-outline";
@@ -80,39 +70,24 @@ export default function TabNavigator() {
       })}
     >
       <Tab.Screen
-        name="Learn"
-        component={LearnScreen}
-        options={{
-          tabBarLabel: t("tabs.learn"),
-        }}
-      />
-      <Tab.Screen
-        name="Quiz"
-        component={QuizScreen}
-        options={{
-          tabBarLabel: t("tabs.quiz"),
-        }}
+        name="Home"
+        component={HomeScreen}
+        options={{ tabBarLabel: t("tabs.home") }}
       />
       <Tab.Screen
         name="Sentences"
         component={SentencesScreen}
-        options={{
-          tabBarLabel: t("tabs.sentences"),
-        }}
+        options={{ tabBarLabel: t("tabs.sentences") }}
       />
       <Tab.Screen
-        name="Read"
-        component={ReadingScreen}
-        options={{
-          tabBarLabel: t("tabs.read"),
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
+        name="Me"
         component={ProfileScreen}
-        options={{
-          tabBarLabel: t("tabs.profile"),
-        }}
+        options={{ tabBarLabel: t("tabs.me") }}
+      />
+      <Tab.Screen
+        name="More"
+        component={MoreScreen}
+        options={{ tabBarLabel: t("tabs.more") }}
       />
     </Tab.Navigator>
   );
