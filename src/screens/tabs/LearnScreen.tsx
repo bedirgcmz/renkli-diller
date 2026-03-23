@@ -805,6 +805,19 @@ function MotivationBar({
   colors: any;
   t: (k: string) => string;
 }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const prevLearned = useRef(learnedCount);
+
+  useEffect(() => {
+    if (learnedCount > prevLearned.current) {
+      Animated.sequence([
+        Animated.spring(scale, { toValue: 1.18, useNativeDriver: true, speed: 40, bounciness: 8 }),
+        Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 4 }),
+      ]).start();
+    }
+    prevLearned.current = learnedCount;
+  }, [learnedCount, scale]);
+
   const message =
     remaining > 0
       ? `${remaining} ${t("learn.sentences_to_learn")} 💪`
@@ -816,7 +829,11 @@ function MotivationBar({
 
   return (
     <View style={[styles.motivationBar, { backgroundColor: colors.backgroundSecondary }]}>
-      <Text style={[styles.motivationText, { color: colors.textTertiary }]}>{message}</Text>
+      <Animated.Text
+        style={[styles.motivationText, { color: colors.textTertiary, transform: [{ scale }] }]}
+      >
+        {message}
+      </Animated.Text>
     </View>
   );
 }
