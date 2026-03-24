@@ -20,9 +20,8 @@ export const ENTITLEMENT_PREMIUM = "premium";
 
 // Offering içindeki package identifier'lar (RevenueCat dashboard'da tanımlanır)
 export const PACKAGE_IDS = {
-  monthly: "$rc_monthly",    // veya custom identifier
+  monthly: "$rc_monthly",
   annual: "$rc_annual",
-  lifetime: "$rc_lifetime",
 } as const;
 
 export type PackageType = keyof typeof PACKAGE_IDS;
