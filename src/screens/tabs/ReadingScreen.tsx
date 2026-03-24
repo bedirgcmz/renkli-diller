@@ -502,6 +502,7 @@ export default function ReadingScreen() {
   const [quizVisible, setQuizVisible] = useState(false);
   const [speaking, setSpeaking] = useState<"source" | "target" | "slow" | null>(null);
   const [completedThisSession, setCompletedThisSession] = useState(false);
+  const [upsellDismissed, setUpsellDismissed] = useState(false);
   const [sourceVisible, setSourceVisible] = useState(false);
 
   const userId = user?.id ?? "";
@@ -567,6 +568,7 @@ export default function ReadingScreen() {
     if (!userId || !currentText) return;
     await markAsCompleted(userId, currentText.id);
     setCompletedThisSession(true);
+    setUpsellDismissed(false);
   };
 
   const handleNextText = () => {
@@ -903,14 +905,35 @@ export default function ReadingScreen() {
                   </TouchableOpacity>
                 </View>
               )
+            ) : upsellDismissed ? (
+              // Free — upsell dismissed, show minimal re-open hint
+              <TouchableOpacity
+                style={styles.upsellReopenRow}
+                onPress={() => setUpsellDismissed(false)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="star-outline" size={13} color={colors.premiumAccent} />
+                <Text style={[styles.upsellReopenText, { color: colors.premiumAccent }]}>
+                  {t("reading.unlock_premium")}
+                </Text>
+              </TouchableOpacity>
             ) : (
               // Free — daily limit upsell
               <View style={[styles.limitBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "50" }]}>
-                <Text style={[styles.limitBannerText, { color: colors.text }]}>
-                  {t("reading.daily_limit_free")}
-                </Text>
+                <View style={styles.limitBannerHeader}>
+                  <Text style={[styles.limitBannerText, { color: colors.text }]}>
+                    {t("reading.daily_limit_free")}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setUpsellDismissed(true)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="close" size={16} color={colors.textTertiary} />
+                  </TouchableOpacity>
+                </View>
                 <TouchableOpacity
-                  style={[styles.paywallBtn, { backgroundColor: colors.premiumAccent }]}
+                  style={[styles.upsellFullBtn, { backgroundColor: colors.premiumAccent }]}
                   onPress={() => navigation.navigate("Paywall")}
                   activeOpacity={0.85}
                 >
@@ -1051,8 +1074,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 28,
+    paddingTop: 10,
+    paddingBottom: 22,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   actionRow: {
@@ -1070,24 +1093,42 @@ const styles = StyleSheet.create({
   },
   completeBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
   completedState: {
-    gap: 10,
+    gap: 8,
   },
   successRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 4,
+    paddingVertical: 2,
     gap: 8,
   },
   successText: { fontSize: 15, fontWeight: "700" },
   limitBanner: {
     borderWidth: 1,
     borderRadius: 12,
-    padding: 12,
+    padding: 10,
+    gap: 6,
+  },
+  limitBannerHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 8,
   },
-  limitBannerText: { fontSize: 13, lineHeight: 18 },
+  limitBannerText: { fontSize: 13, lineHeight: 18, flex: 1 },
   limitBannerCount: { fontSize: 12, fontWeight: "700" },
+  upsellFullBtn: {
+    paddingVertical: 11,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  upsellReopenRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingVertical: 6,
+  },
+  upsellReopenText: { fontSize: 12, fontWeight: "600" },
   todayCountText: { fontSize: 12, flex: 1 },
   nextBtn: {
     flexDirection: "row",
