@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { GradientView } from "@/components/GradientView";
+import { countTodayLearned } from "@/utils/progressHelpers";
 
 export function HeroHeader() {
   const { t } = useTranslation();
@@ -18,12 +19,7 @@ export function HeroHeader() {
     loadProgress();
   }, [loadProgress]);
 
-  const todayLearned = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    return progress.filter(
-      (p) => p.state === "learned" && p.learned_at?.startsWith(today),
-    ).length;
-  }, [progress]);
+  const todayLearned = useMemo(() => countTodayLearned(progress), [progress]);
 
   const hour = new Date().getHours();
   const greetingKey =

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { Sentence, SentenceStatus, Category, SupportedLanguage } from "@/types";
+import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
 
@@ -196,9 +197,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           target_text: row.target_text || "",
           keywords: toKeywordsArray(row.keywords),
           category_id: row.category_id,
-          category_name: cat
-            ? (cat[`name_${uiLanguage}` as keyof Category] as string)
-            : "",
+          category_name: cat ? getCategoryName(cat, uiLanguage) : "",
           status: (row.state || "new") as SentenceStatus,
           is_preset: false,
           source_lang: row.source_lang ?? uiLanguage,
@@ -255,9 +254,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         target_text,
         keywords,
         category_id,
-        category_name: cat
-          ? (cat[`name_${uiLanguage}` as keyof Category] as string)
-          : "",
+        category_name: cat ? getCategoryName(cat, uiLanguage) : "",
         status: "learning",
         is_preset: false,
         source_lang: source_lang as Sentence["source_lang"],
@@ -303,9 +300,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return {
           ...s,
           ...updates,
-          category_name: cat
-            ? (cat[`name_${uiLanguage}` as keyof Category] as string)
-            : s.category_name,
+          category_name: cat ? getCategoryName(cat, uiLanguage) : s.category_name,
         };
       });
 

@@ -23,6 +23,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import ActivityChart from "@/components/ActivityChart";
+import { countTodayLearned } from "@/utils/progressHelpers";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -49,10 +50,7 @@ export default function ProfileScreen() {
   const totalStudied = Object.keys(progressMap).length;
   const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
   const learningCount = Object.values(progressMap).filter((s) => s === "learning").length;
-  const today = new Date().toISOString().split("T")[0];
-  const todayLearned = progress.filter(
-    (p) => p.state === "learned" && p.learned_at?.startsWith(today),
-  ).length;
+  const todayLearned = countTodayLearned(progress);
   const dailyGoalProgress = Math.min(todayLearned / dailyGoal, 1);
 
   const initials = (user?.display_name || user?.email || "?")
