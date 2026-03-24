@@ -149,7 +149,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       set({ ...DEFAULT_SETTINGS, loading: false, initialized: true });
       await AsyncStorage.setItem("user_settings", JSON.stringify(DEFAULT_SETTINGS));
     } catch (error) {
-      console.error("Error loading settings:", error);
+      if (__DEV__) console.error("Error loading settings:", error);
       set({ ...DEFAULT_SETTINGS, loading: false, initialized: true });
     }
   },
@@ -183,11 +183,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         }, { onConflict: "user_id" });
 
         if (error) {
-          console.error("Error saving settings to Supabase:", error);
+          if (__DEV__) console.error("Error saving settings to Supabase:", error);
         }
       }
     } catch (error) {
-      console.error("Error saving settings:", error);
+      if (__DEV__) console.error("Error saving settings:", error);
     }
   },
 

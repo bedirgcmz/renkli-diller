@@ -72,6 +72,12 @@ export async function getOfferings(): Promise<PurchasesOffering | null> {
   return offerings.current;
 }
 
+// RevenueCat errors are plain objects with optional typed fields.
+function asRCError(e: unknown): { userCancelled?: boolean; message?: string } {
+  if (typeof e === "object" && e !== null) return e as { userCancelled?: boolean; message?: string };
+  return {};
+}
+
 export async function purchasePackage(
   pkg: PurchasesPackage
 ): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string; userCancelled?: boolean }> {
@@ -80,11 +86,12 @@ export async function purchasePackage(
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     const premium = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
     return { success: premium, customerInfo };
-  } catch (error: any) {
-    if (error.userCancelled) {
+  } catch (e: unknown) {
+    const err = asRCError(e);
+    if (err.userCancelled) {
       return { success: false, userCancelled: true };
     }
-    return { success: false, error: error.message ?? "Purchase failed" };
+    return { success: false, error: err.message ?? "Purchase failed" };
   }
 }
 
@@ -98,7 +105,8 @@ export async function restorePurchases(): Promise<{
     const customerInfo = await Purchases.restorePurchases();
     const isPremium = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
     return { success: true, isPremium };
-  } catch (error: any) {
-    return { success: false, isPremium: false, error: error.message ?? "Restore failed" };
+  } catch (e: unknown) {
+    const err = asRCError(e);
+    return { success: false, isPremium: false, error: err.message ?? "Restore failed" };
   }
 }

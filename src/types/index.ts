@@ -116,6 +116,7 @@ export type MainStackParamList = {
 export type AuthStackParamList = {
   Auth: undefined;
   ResetPassword: undefined;
+  LanguageSelection: undefined;
 };
 
 export type TabParamList = {

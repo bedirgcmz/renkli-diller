@@ -68,6 +68,9 @@ export const MIN_DELAY_MS = 2000;
 export const DELAY_PER_CHAR_MS = 100;
 export const POST_READ_DELAY_MS = 2000;
 
+export const QUIZ_CORRECT_COLOR = "#2ECC71";
+export const QUIZ_WRONG_COLOR = "#E53E3E";
+
 export const LANG_CODE: Record<SupportedLanguage, string> = {
   tr: "tr-TR",
   en: "en-US",

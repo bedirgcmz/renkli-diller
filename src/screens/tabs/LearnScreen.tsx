@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  type DimensionValue,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
@@ -16,6 +17,7 @@ import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
+import type { ThemeColors } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -24,6 +26,7 @@ import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
+import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
 import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
 import * as Haptics from "expo-haptics";
 
@@ -68,7 +71,7 @@ function ListenCard({
   onSelectOption: (opt: ListenOption) => void;
   onReplay: () => void;
   onReplaySlow: () => void;
-  colors: any;
+  colors: ThemeColors;
   t: (k: string) => string;
 }) {
   return (
@@ -147,13 +150,13 @@ function ListenCard({
 
           if (selected !== null) {
             if (opt.isCorrect) {
-              bg = "#2ECC7122";
-              borderColor = "#2ECC71";
-              textColor = "#2ECC71";
+              bg = QUIZ_CORRECT_COLOR + "22";
+              borderColor = QUIZ_CORRECT_COLOR;
+              textColor = QUIZ_CORRECT_COLOR;
             } else if (opt.text === selected && !opt.isCorrect) {
-              bg = "#E53E3E22";
-              borderColor = "#E53E3E";
-              textColor = "#E53E3E";
+              bg = QUIZ_WRONG_COLOR + "22";
+              borderColor = QUIZ_WRONG_COLOR;
+              textColor = QUIZ_WRONG_COLOR;
             }
           }
 
@@ -167,10 +170,10 @@ function ListenCard({
             >
               <Text style={[listenStyles.optionText, { color: textColor }]}>{opt.text}</Text>
               {selected !== null && opt.isCorrect && (
-                <Ionicons name="checkmark-circle" size={18} color="#2ECC71" />
+                <Ionicons name="checkmark-circle" size={18} color={QUIZ_CORRECT_COLOR} />
               )}
               {selected !== null && opt.text === selected && !opt.isCorrect && (
-                <Ionicons name="close-circle" size={18} color="#E53E3E" />
+                <Ionicons name="close-circle" size={18} color={QUIZ_WRONG_COLOR} />
               )}
             </TouchableOpacity>
           );
@@ -700,7 +703,7 @@ export default function LearnScreen() {
                 colors={["#4DA3FF", "#49C98A"]}
                 style={[
                   styles.progressFill,
-                  { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as any },
+                  { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as DimensionValue },
                 ]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -829,7 +832,7 @@ export default function LearnScreen() {
 
 // ─── Alt bileşenler ────────────────────────────────────────────────────────────
 
-function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: string) => string }) {
+function EmptyState({ tab, colors, t }: { tab: TabKey; colors: ThemeColors; t: (k: string) => string }) {
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>{tab === "listening" ? "🎧" : "📚"}</Text>
@@ -849,7 +852,7 @@ function MotivationBar({
 }: {
   remaining: number;
   learnedCount: number;
-  colors: any;
+  colors: ThemeColors;
   t: (k: string) => string;
 }) {
   const scale = useRef(new Animated.Value(1)).current;

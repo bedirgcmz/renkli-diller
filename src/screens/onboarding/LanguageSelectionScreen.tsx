@@ -4,16 +4,16 @@ import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { AuthStackParamList } from "@/types";
+import type { AuthStackParamList, SupportedLanguage } from "@/types";
 
 export default function LanguageSelectionScreen() {
   const { t } = useTranslation();
   const setUILanguage = useSettingsStore((s) => s.setUILanguage);
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, "Auth">>();
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
 
   const selectLanguage = async (lang: string) => {
-    await setUILanguage(lang as any);
-    navigation.navigate("SignIn" as any);
+    await setUILanguage(lang as SupportedLanguage);
+    navigation.navigate("Auth");
   };
 
   return (

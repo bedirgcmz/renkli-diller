@@ -73,7 +73,7 @@ export default function PaywallScreen() {
       const defaultPkg = annual ?? monthly ?? lifetime;
       if (defaultPkg) setSelectedPkg(defaultPkg);
     } catch (e) {
-      console.error("Offerings load error:", e);
+      if (__DEV__) console.error("Offerings load error:", e);
     } finally {
       setLoading(false);
     }

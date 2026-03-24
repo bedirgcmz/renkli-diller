@@ -130,7 +130,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         { onConflict: "user_id,sentence_id" }
       );
     } catch {
-      console.error("addToLearning failed");
+      if (__DEV__) console.error("addToLearning failed");
     }
   },
 
@@ -160,7 +160,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       // Refresh progress array + stats (streak, today's goal) after persistence
       await get().loadProgress();
     } catch {
-      console.error("markAsLearned failed");
+      if (__DEV__) console.error("markAsLearned failed");
     }
   },
 
@@ -183,7 +183,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .eq("user_id", user.id)
         .eq("sentence_id", sentenceId);
     } catch {
-      console.error("forgot failed");
+      if (__DEV__) console.error("forgot failed");
     }
   },
 
@@ -324,7 +324,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         },
       });
     } catch (error) {
-      console.error("Error loading stats:", error);
+      if (__DEV__) console.error("Error loading stats:", error);
     }
   },
 
@@ -343,7 +343,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       await get().loadStats();
     } catch (error) {
-      console.error("Error recording study session:", error);
+      if (__DEV__) console.error("Error recording study session:", error);
     }
   },
 
@@ -368,7 +368,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       await get().loadStats();
     } catch (error) {
-      console.error("Error recording quiz result:", error);
+      if (__DEV__) console.error("Error recording quiz result:", error);
     }
   },
 
@@ -388,7 +388,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       await get().loadProgress();
     } catch (error) {
-      console.error("Error updating sentence progress:", error);
+      if (__DEV__) console.error("Error updating sentence progress:", error);
     }
   },
 

@@ -4,24 +4,26 @@ import { Sentence, SentenceStatus, Category, SupportedLanguage } from "@/types";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
 
-function toKeywordsArray(raw: any): string[] {
+type DbRow = Record<string, unknown>;
+
+function toKeywordsArray(raw: unknown): string[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw as string[];
   if (typeof raw === "string") return raw.split(",").map((s) => s.trim()).filter(Boolean);
   return [];
 }
 
-function getLangText(row: any, lang: SupportedLanguage): string {
-  return row[`text_${lang}`] || row.text_en || row.text_tr || "";
+function getLangText(row: DbRow, lang: SupportedLanguage): string {
+  return (row[`text_${lang}`] as string) || (row.text_en as string) || (row.text_tr as string) || "";
 }
 
-function getLangKeywords(row: any, lang: SupportedLanguage): string[] {
-  return toKeywordsArray(row[`keywords_${lang}`] || null);
+function getLangKeywords(row: DbRow, lang: SupportedLanguage): string[] {
+  return toKeywordsArray(row[`keywords_${lang}`] ?? null);
 }
 
-function getCatName(cat: any, lang: SupportedLanguage): string {
+function getCatName(cat: DbRow | null, lang: SupportedLanguage): string {
   if (!cat) return "";
-  return cat[`name_${lang}`] || cat.name_en || "";
+  return (cat[`name_${lang}`] as string) || (cat.name_en as string) || "";
 }
 
 interface SentenceFilters {
@@ -115,7 +117,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           .from("categories")
           .select("id")
           .eq("is_free", true);
-        const freeCatIds = freeCats?.map((c: any) => c.id) ?? [];
+        const freeCatIds = freeCats?.map((c: DbRow) => c.id) ?? [];
         if (freeCatIds.length > 0) {
           query = query.in("category_id", freeCatIds);
         } else {
@@ -130,7 +132,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return;
       }
 
-      const mapped: Sentence[] = (data || []).map((row: any) => ({
+      const mapped: Sentence[] = (data || []).map((row: DbRow) => ({
         id: String(row.id),
         source_text: getLangText(row, uiLanguage),
         target_text: getLangText(row, targetLanguage),
@@ -185,7 +187,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return;
       }
 
-      const mapped: Sentence[] = (data || []).map((row: any) => {
+      const mapped: Sentence[] = (data || []).map((row: DbRow) => {
         const cat = categories.find((c) => c.id === row.category_id);
         return {
           id: String(row.id),
@@ -275,7 +277,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   updateSentence: async (id, updates) => {
     set({ loading: true, error: null });
     try {
-      const dbUpdates: Record<string, any> = {};
+      const dbUpdates: Record<string, unknown> = {};
       if (updates.source_text !== undefined) dbUpdates.source_text = updates.source_text;
       if (updates.target_text !== undefined) dbUpdates.target_text = updates.target_text;
       if (updates.keywords !== undefined) dbUpdates.keywords = updates.keywords;

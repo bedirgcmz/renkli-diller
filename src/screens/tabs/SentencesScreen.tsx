@@ -19,6 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -52,7 +53,7 @@ interface SentenceItemProps {
   onForgot: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  colors: any;
+  colors: ThemeColors;
   t: (k: string, opts?: Record<string, string>) => string;
 }
 

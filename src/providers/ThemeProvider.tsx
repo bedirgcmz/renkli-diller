@@ -4,7 +4,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 
 type ThemeMode = "light" | "dark";
 
-interface ThemeColors {
+export interface ThemeColors {
   // Background colors
   background: string;
   backgroundGradient: [string, string];

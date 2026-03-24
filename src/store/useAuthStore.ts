@@ -161,7 +161,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       set({ loading: false });
-      console.error("Sign out error:", error);
+      if (__DEV__) console.error("Sign out error:", error);
     }
   },
 
@@ -246,7 +246,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       return { success: true, url: publicUrl };
     } catch (error: any) {
-      console.error("[uploadAvatar] exception:", error);
+      if (__DEV__) console.error("[uploadAvatar] exception:", error);
       return { success: false, error: error.message ?? "Upload failed" };
     }
   },
@@ -388,7 +388,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({ initialized: true });
     } catch (error) {
-      console.error("Auth initialization error:", error);
+      if (__DEV__) console.error("Auth initialization error:", error);
       set({ initialized: true });
     }
   },
