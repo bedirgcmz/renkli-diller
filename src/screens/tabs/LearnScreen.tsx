@@ -298,6 +298,8 @@ export default function LearnScreen() {
 
   useEffect(() => {
     let mounted = true;
+    // Reset so dependent effects (e.g. listening tab) re-fire after reload.
+    setInitialized(false);
     const init = async () => {
       try {
         await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
@@ -358,7 +360,7 @@ export default function LearnScreen() {
       clearTimeout(timer);
       stopSpeaking();
     };
-  }, [listenIdx, activeTab, initialized]);
+  }, [listenIdx, activeTab, initialized, targetLanguage]);
 
   const handleTabChange = (tab: TabKey) => {
     stopSpeaking();

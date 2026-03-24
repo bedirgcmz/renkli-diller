@@ -259,7 +259,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const learnedDays = [
         ...new Set([
           ...(learnedRows || []).map((r) => r.learned_at!.split("T")[0]),
-          ...(quizResults || []).map((r) => r.answered_at.split("T")[0]),
+          ...(quizResults || []).filter((r) => r.answered_at != null).map((r) => r.answered_at.split("T")[0]),
           ...(studySessionRows || []).map((r) => r.created_at.split("T")[0]),
         ]),
       ].sort().reverse();

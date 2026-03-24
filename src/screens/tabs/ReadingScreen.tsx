@@ -22,21 +22,12 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useReadingStore } from "@/store/useReadingStore";
 import { usePremium } from "@/hooks/usePremium";
-import { KEYWORD_TEXT_COLORS } from "@/utils/constants";
+import { KEYWORD_TEXT_COLORS, LANG_CODE } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
 import { ReadingTextKeyword, SupportedLanguage, HomeStackParamList, MainStackParamList } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const LANG_CODE: Record<SupportedLanguage, string> = {
-  tr: "tr-TR",
-  en: "en-US",
-  sv: "sv-SE",
-  de: "de-DE",
-  es: "es-ES",
-  fr: "fr-FR",
-  pt: "pt-BR",
-};
 
 const DIFFICULTY_COLORS: Record<number, string> = {
   1: "#49C98A",

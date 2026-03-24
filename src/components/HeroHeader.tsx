@@ -16,7 +16,7 @@ export function HeroHeader() {
 
   useEffect(() => {
     loadProgress();
-  }, []);
+  }, [loadProgress]);
 
   const todayLearned = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];

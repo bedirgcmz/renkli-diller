@@ -78,6 +78,8 @@ export async function cancelDailyReminder(): Promise<void> {
 }
 
 export function parseReminderTime(timeStr: string): { hour: number; minute: number } {
-  const [h, m] = timeStr.split(":").map(Number);
-  return { hour: h ?? 19, minute: m ?? 0 };
+  const parts = timeStr.split(":");
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  return { hour: Number.isNaN(h) ? 19 : h, minute: Number.isNaN(m) ? 0 : m };
 }

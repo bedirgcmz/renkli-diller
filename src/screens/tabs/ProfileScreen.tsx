@@ -44,7 +44,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     loadSentences();
     loadProgress();
-  }, []);
+  }, [loadSentences, loadProgress]);
 
   const totalStudied = Object.keys(progressMap).length;
   const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;

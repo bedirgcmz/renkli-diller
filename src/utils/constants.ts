@@ -68,6 +68,16 @@ export const MIN_DELAY_MS = 2000;
 export const DELAY_PER_CHAR_MS = 100;
 export const POST_READ_DELAY_MS = 2000;
 
+export const LANG_CODE: Record<SupportedLanguage, string> = {
+  tr: "tr-TR",
+  en: "en-US",
+  sv: "sv-SE",
+  de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+  pt: "pt-BR",
+};
+
 export const APP_NAMES: Record<SupportedLanguage, string> = {
   tr: 'Parlio',
   en: 'Parlio',

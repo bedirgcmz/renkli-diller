@@ -38,6 +38,10 @@ interface AuthState {
   clear: () => void;
 }
 
+// Module-level subscription handle — prevents duplicate listeners across
+// multiple `initialize` calls (e.g. hot-reload or fast-refresh cycles).
+let authSubscription: { unsubscribe: () => void } | null = null;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
@@ -340,8 +344,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
 
+      // Clean up any previous listener before attaching a new one.
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+        authSubscription = null;
+      }
+
       // Listen for auth changes
-      supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === "SIGNED_IN" && session?.user) {
           // Fetch user profile
           const { data: profile } = await supabase
@@ -374,6 +384,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
         }
       });
+      authSubscription = subscription;
 
       set({ initialized: true });
     } catch (error) {
@@ -382,11 +393,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  clear: () =>
+  clear: () => {
+    if (authSubscription) {
+      authSubscription.unsubscribe();
+      authSubscription = null;
+    }
     set({
       user: null,
       session: null,
       loading: false,
       initialized: false,
-    }),
+    });
+  },
 }));
