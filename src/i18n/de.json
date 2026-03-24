@@ -350,7 +350,9 @@
     "quiz_next": "Weiter",
     "quiz_premium_only": "Premium-Funktion",
     "share": "Teilen",
-    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!"
+    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!",
+    "show_translation": "Übersetzung anzeigen",
+    "hide_translation": "Übersetzung ausblenden"
   },
   "home": {
     "card_learn_title": "Lernen",

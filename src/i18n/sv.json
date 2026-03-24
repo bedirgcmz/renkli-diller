@@ -350,7 +350,9 @@
     "quiz_next": "Nästa",
     "quiz_premium_only": "Premiumfunktion",
     "share": "Dela",
-    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!"
+    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!",
+    "show_translation": "Visa översättning",
+    "hide_translation": "Dölj översättning"
   },
   "home": {
     "card_learn_title": "Studera",

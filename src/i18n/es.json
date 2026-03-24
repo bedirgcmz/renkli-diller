@@ -350,7 +350,9 @@
     "quiz_next": "Siguiente",
     "quiz_premium_only": "Función premium",
     "share": "Compartir",
-    "share_text": "¡Estudié el texto \"{title}\" hoy — aprende idiomas con Parlio!"
+    "share_text": "¡Estudié el texto \"{title}\" hoy — aprende idiomas con Parlio!",
+    "show_translation": "Mostrar traducción",
+    "hide_translation": "Ocultar traducción"
   },
   "home": {
     "card_learn_title": "Estudiar",

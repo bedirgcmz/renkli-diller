@@ -26,6 +26,7 @@ import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/util
 import { KeywordText } from "@/components/KeywordText";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
 import { HomeStackParamList, MainStackParamList, PillSegment, Sentence } from "@/types";
+import { speak, stopSpeaking } from "@/services/tts";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -109,7 +110,7 @@ export default function QuizScreen() {
   >>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
-  const { uiLanguage, targetLanguage } = useSettingsStore();
+  const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
   const { isPremium } = usePremium();
 
   const [mode, setMode] = useState<QuizMode>("multiple_choice");
@@ -128,6 +129,7 @@ export default function QuizScreen() {
   const [isRetryPhase, setIsRetryPhase] = useState(false);
   const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
   const [refreshing, setRefreshing] = useState(false);
+  const [quizMuted, setQuizMuted] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -175,6 +177,20 @@ export default function QuizScreen() {
     const timer = setTimeout(() => kwInputRefs.current[0]?.focus(), 150);
     return () => clearTimeout(timer);
   }, [currentIdx, mode, questions]);
+
+  // Auto-speak MC question when it loads
+  useEffect(() => {
+    const q = questions[currentIdx];
+    if (mode !== "multiple_choice" || !q || q.type !== "multiple_choice") return;
+    if (!ttsEnabled || quizMuted) return;
+    const timer = setTimeout(() => {
+      speak(stripMarkers(q.sentence.target_text), targetLanguage);
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      stopSpeaking();
+    };
+  }, [currentIdx, mode, questions, ttsEnabled, quizMuted]);
 
   const allSentences: Sentence[] = [
     ...sentences,
@@ -516,9 +532,24 @@ export default function QuizScreen() {
           <>
             {/* ── Question card ─────────────────────────────────── */}
             <View style={[styles.questionCard, { backgroundColor: colors.cardBackground }]}>
-              <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
-                {currentIdx + 1}/{questions.length}
-              </Text>
+              <View style={styles.questionCardHeader}>
+                <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
+                  {currentIdx + 1}/{questions.length}
+                </Text>
+                {mcQ && (
+                  <TouchableOpacity
+                    onPress={() => setQuizMuted((m) => !m)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name={quizMuted ? "volume-mute-outline" : "volume-high-outline"}
+                      size={20}
+                      color={quizMuted ? colors.textTertiary : colors.primary}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
 
               {/* FB: direction badge */}
               {fbQ && (
@@ -891,7 +922,13 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
-  questionNum: { fontSize: 12, marginBottom: 10 },
+  questionCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  questionNum: { fontSize: 12 },
   questionPrompt: { marginBottom: 12 },
   directionBadge: {
     flexDirection: "row",

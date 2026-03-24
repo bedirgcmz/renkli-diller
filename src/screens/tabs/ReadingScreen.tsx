@@ -502,6 +502,7 @@ export default function ReadingScreen() {
   const [quizVisible, setQuizVisible] = useState(false);
   const [speaking, setSpeaking] = useState<"source" | "target" | "slow" | null>(null);
   const [markedThisSession, setMarkedThisSession] = useState(false);
+  const [sourceVisible, setSourceVisible] = useState(false);
 
   const userId = user?.id ?? "";
 
@@ -785,21 +786,7 @@ export default function ReadingScreen() {
         {/* Title */}
         <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
 
-        {/* Source body */}
-        <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
-          <Text style={[styles.langTag, { color: colors.textTertiary }]}>
-            {uiLanguage.toUpperCase()}
-          </Text>
-          <ReadingBody
-            body={sourceBody}
-            keywords={keywords}
-            isDark={isDark}
-            baseColor={colors.text}
-            fontSize={16}
-          />
-        </View>
-
-        {/* Target body */}
+        {/* Target body — shown first */}
         <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
           <Text style={[styles.langTag, { color: colors.textTertiary }]}>
             {targetLanguage.toUpperCase()}
@@ -808,9 +795,41 @@ export default function ReadingScreen() {
             body={targetBody}
             keywords={keywords}
             isDark={isDark}
-            baseColor={colors.textSecondary}
-            fontSize={15}
+            baseColor={colors.text}
+            fontSize={16}
           />
+        </View>
+
+        {/* Source body — hidden by default */}
+        <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+          <TouchableOpacity
+            style={styles.langTagRow}
+            onPress={() => setSourceVisible((v) => !v)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.langTag, { color: colors.textTertiary, marginBottom: 0 }]}>
+              {uiLanguage.toUpperCase()}
+            </Text>
+            <Ionicons
+              name={sourceVisible ? "eye-outline" : "eye-off-outline"}
+              size={14}
+              color={colors.textTertiary}
+            />
+            <Text style={[styles.langTagHint, { color: colors.textTertiary }]}>
+              {sourceVisible ? t("reading.hide_translation") : t("reading.show_translation")}
+            </Text>
+          </TouchableOpacity>
+          {sourceVisible && (
+            <View style={{ marginTop: 10 }}>
+              <ReadingBody
+                body={sourceBody}
+                keywords={keywords}
+                isDark={isDark}
+                baseColor={colors.textSecondary}
+                fontSize={15}
+              />
+            </View>
+          )}
         </View>
 
         <View style={{ height: 120 }} />
@@ -969,6 +988,17 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.8,
     marginBottom: 10,
+  },
+  langTagRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginBottom: 2,
+  },
+  langTagHint: {
+    fontSize: 10,
+    fontWeight: "500",
+    letterSpacing: 0.2,
   },
 
   footer: {

@@ -350,7 +350,9 @@
     "quiz_next": "Sonraki",
     "quiz_premium_only": "Premium özellik",
     "share": "Paylaş",
-    "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!"
+    "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!",
+    "show_translation": "Çeviriyi göster",
+    "hide_translation": "Çeviriyi gizle"
   },
   "home": {
     "card_learn_title": "Çalış",

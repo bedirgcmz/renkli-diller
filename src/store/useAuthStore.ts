@@ -312,9 +312,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const session = JSON.parse(storedSession);
         const {
           data: { user },
+          error: sessionError,
         } = await supabase.auth.setSession(session);
 
-        if (user) {
+        if (sessionError) {
+          // Refresh token expired or invalid — clear stale session so we don't
+          // retry it on every subsequent app launch.
+          await AsyncStorage.removeItem("supabase_session");
+        } else if (user) {
           // Fetch user profile
           const { data: profile } = await supabase
             .from("profiles")
