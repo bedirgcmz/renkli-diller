@@ -492,8 +492,8 @@ export default function ReadingScreen() {
     loading,
     fetchNextText,
     fetchProgress,
-    markAsRead,
-    markAsLearned,
+    markAsCompleted,
+    getTodayCount,
     getLearnedCount,
     getReadingStreak,
   } = useReadingStore();
@@ -501,7 +501,7 @@ export default function ReadingScreen() {
   const [kwModalVisible, setKwModalVisible] = useState(false);
   const [quizVisible, setQuizVisible] = useState(false);
   const [speaking, setSpeaking] = useState<"source" | "target" | "slow" | null>(null);
-  const [markedThisSession, setMarkedThisSession] = useState(false);
+  const [completedThisSession, setCompletedThisSession] = useState(false);
   const [sourceVisible, setSourceVisible] = useState(false);
 
   const userId = user?.id ?? "";
@@ -563,20 +563,15 @@ export default function ReadingScreen() {
     await Share.share({ message });
   }, [currentText, uiLanguage, t]);
 
-  const handleMarkLearned = async () => {
+  const handleComplete = async () => {
     if (!userId || !currentText) return;
-    await markAsLearned(userId, currentText.id);
-    setMarkedThisSession(true);
-    // Load next after brief delay so UI shows the success state
-    setTimeout(() => {
-      setMarkedThisSession(false);
-      fetchNextText(userId);
-    }, 1200);
+    await markAsCompleted(userId, currentText.id);
+    setCompletedThisSession(true);
   };
 
-  const handleMarkRead = async () => {
-    if (!userId || !currentText) return;
-    await markAsRead(userId, currentText.id);
+  const handleNextText = () => {
+    setCompletedThisSession(false);
+    setSourceVisible(false);
     fetchNextText(userId);
   };
 
@@ -601,7 +596,14 @@ export default function ReadingScreen() {
 
   const streak = getReadingStreak();
   const learnedCount = getLearnedCount();
+  const todayCount = getTodayCount();
   const isPaywalled = !!(currentText?.is_premium && !isPremium);
+
+  const FREE_DAILY_LIMIT = 1;
+  const PREMIUM_DAILY_LIMIT = 3;
+  const dailyLimitReached = isPremium
+    ? todayCount >= PREMIUM_DAILY_LIMIT
+    : todayCount >= FREE_DAILY_LIMIT;
 
   const difficulty = currentText?.difficulty ?? 1;
   const diffColor = DIFFICULTY_COLORS[difficulty];
@@ -845,6 +847,7 @@ export default function ReadingScreen() {
           },
         ]}
       >
+        {/* Paywall: premium-only text */}
         {isPaywalled ? (
           <View style={styles.actionRow}>
             <View style={[styles.paywallBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "40" }]}>
@@ -861,31 +864,72 @@ export default function ReadingScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        ) : markedThisSession ? (
-          <View style={styles.successRow}>
-            <Ionicons name="checkmark-circle" size={22} color="#49C98A" />
-            <Text style={[styles.successText, { color: "#49C98A" }]}>{t("reading.mark_learned")} ✓</Text>
-          </View>
-        ) : (
-          <View style={styles.actionRow}>
-            <TouchableOpacity
-              style={[styles.readBtn, { borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
-              onPress={handleMarkRead}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.readBtnText, { color: colors.textSecondary }]}>
-                {t("reading.mark_read")}
+
+        ) : completedThisSession || dailyLimitReached ? (
+          // ── Post-completion / limit-reached state ──
+          <View style={styles.completedState}>
+            {/* Success row */}
+            <View style={styles.successRow}>
+              <Ionicons name="checkmark-circle" size={22} color="#49C98A" />
+              <Text style={[styles.successText, { color: "#49C98A" }]}>
+                {t("reading.completed_feedback")}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.learnedBtn, { backgroundColor: colors.primary }]}
-              onPress={handleMarkLearned}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-              <Text style={styles.learnedBtnText}>{t("reading.mark_learned")}</Text>
-            </TouchableOpacity>
+            </View>
+
+            {isPremium ? (
+              dailyLimitReached ? (
+                // Premium — daily cap hit
+                <View style={[styles.limitBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+                  <Text style={[styles.limitBannerText, { color: colors.textSecondary }]}>
+                    {t("reading.daily_limit_premium")}
+                  </Text>
+                  <Text style={[styles.limitBannerCount, { color: colors.primary }]}>
+                    {t("reading.texts_today", { count: todayCount })}
+                  </Text>
+                </View>
+              ) : (
+                // Premium — can still read more
+                <View style={styles.actionRow}>
+                  <Text style={[styles.todayCountText, { color: colors.textTertiary }]}>
+                    {t("reading.texts_today", { count: todayCount })}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.nextBtn, { backgroundColor: colors.primary }]}
+                    onPress={handleNextText}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.nextBtnText}>{t("reading.next_text_btn")}</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )
+            ) : (
+              // Free — daily limit upsell
+              <View style={[styles.limitBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "50" }]}>
+                <Text style={[styles.limitBannerText, { color: colors.text }]}>
+                  {t("reading.daily_limit_free")}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.paywallBtn, { backgroundColor: colors.premiumAccent }]}
+                  onPress={() => navigation.navigate("Paywall")}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.paywallBtnText}>{t("reading.unlock_premium")}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
+
+        ) : (
+          // ── Default: Tamamladım button ──
+          <TouchableOpacity
+            style={[styles.completeBtn, { backgroundColor: colors.primary }]}
+            onPress={handleComplete}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+            <Text style={styles.completeBtnText}>{t("reading.complete_btn")}</Text>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -1013,35 +1057,47 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
-  readBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  readBtnText: { fontSize: 14, fontWeight: "600" },
-  learnedBtn: {
-    flex: 2,
+  completeBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 13,
+    paddingVertical: 14,
     borderRadius: 14,
-    gap: 7,
+    gap: 8,
   },
-  learnedBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  completeBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  completedState: {
+    gap: 10,
+  },
   successRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 13,
+    paddingVertical: 4,
     gap: 8,
   },
   successText: { fontSize: 15, fontWeight: "700" },
+  limitBanner: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    gap: 8,
+  },
+  limitBannerText: { fontSize: 13, lineHeight: 18 },
+  limitBannerCount: { fontSize: 12, fontWeight: "700" },
+  todayCountText: { fontSize: 12, flex: 1 },
+  nextBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 12,
+    gap: 6,
+  },
+  nextBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" },
 
   statsStrip: {
     flexDirection: "row",

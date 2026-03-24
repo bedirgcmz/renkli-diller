@@ -352,7 +352,13 @@
     "share": "Paylaş",
     "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!",
     "show_translation": "Çeviriyi göster",
-    "hide_translation": "Çeviriyi gizle"
+    "hide_translation": "Çeviriyi gizle",
+    "complete_btn": "Tamamladım",
+    "completed_feedback": "Harika! Metin tamamlandı.",
+    "next_text_btn": "Sonraki Metin",
+    "daily_limit_free": "Bugünkü metni tamamladın. Günde daha fazla metin okumak için Premium ol.",
+    "daily_limit_premium": "Bugün 3 metin tamamladın. Yarın devam et!",
+    "texts_today": "Bugün {{count}}/3 metin"
   },
   "home": {
     "card_learn_title": "Çalış",

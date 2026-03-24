@@ -352,7 +352,13 @@
     "share": "Partager",
     "share_text": "J'ai étudié le texte \"{title}\" aujourd'hui — apprenez les langues avec Parlio !",
     "show_translation": "Afficher la traduction",
-    "hide_translation": "Masquer la traduction"
+    "hide_translation": "Masquer la traduction",
+    "complete_btn": "Terminé",
+    "completed_feedback": "Bravo ! Texte complété.",
+    "next_text_btn": "Texte suivant",
+    "daily_limit_free": "Tu as complété le texte du jour. Passe en Premium pour lire plus de textes par jour.",
+    "daily_limit_premium": "Tu as lu 3 textes aujourd'hui. Reviens demain !",
+    "texts_today": "{{count}}/3 textes aujourd'hui"
   },
   "home": {
     "card_learn_title": "Étudier",

@@ -352,7 +352,13 @@
     "share": "Share",
     "share_text": "I studied the text \"{title}\" today — learn languages with Parlio!",
     "show_translation": "Show translation",
-    "hide_translation": "Hide translation"
+    "hide_translation": "Hide translation",
+    "complete_btn": "Done",
+    "completed_feedback": "Great job! Text completed.",
+    "next_text_btn": "Next Text",
+    "daily_limit_free": "You've completed today's text. Go Premium to read more texts per day.",
+    "daily_limit_premium": "You've read 3 texts today. Come back tomorrow!",
+    "texts_today": "{{count}}/3 texts today"
   },
   "home": {
     "card_learn_title": "Study",

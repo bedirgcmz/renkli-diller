@@ -352,7 +352,13 @@
     "share": "Teilen",
     "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!",
     "show_translation": "Übersetzung anzeigen",
-    "hide_translation": "Übersetzung ausblenden"
+    "hide_translation": "Übersetzung ausblenden",
+    "complete_btn": "Fertig",
+    "completed_feedback": "Super! Text abgeschlossen.",
+    "next_text_btn": "Nächster Text",
+    "daily_limit_free": "Du hast den heutigen Text abgeschlossen. Werde Premium, um täglich mehr Texte zu lesen.",
+    "daily_limit_premium": "Du hast heute 3 Texte gelesen. Komm morgen wieder!",
+    "texts_today": "Heute {{count}}/3 Texte"
   },
   "home": {
     "card_learn_title": "Lernen",

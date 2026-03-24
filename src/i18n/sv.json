@@ -352,7 +352,13 @@
     "share": "Dela",
     "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!",
     "show_translation": "Visa översättning",
-    "hide_translation": "Dölj översättning"
+    "hide_translation": "Dölj översättning",
+    "complete_btn": "Klar",
+    "completed_feedback": "Bra jobbat! Texten är klar.",
+    "next_text_btn": "Nästa text",
+    "daily_limit_free": "Du har slutfört dagens text. Bli Premium för att läsa fler texter per dag.",
+    "daily_limit_premium": "Du har läst 3 texter idag. Kom tillbaka imorgon!",
+    "texts_today": "{{count}}/3 texter idag"
   },
   "home": {
     "card_learn_title": "Studera",

@@ -231,7 +231,7 @@ export interface UserReadingProgress {
   id: string;
   user_id: string;
   reading_text_id: string;
-  status: "read" | "learned";
+  status: "read" | "learned" | "completed";
   completed_at: string;
 }
 
