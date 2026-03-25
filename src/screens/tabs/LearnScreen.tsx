@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, useIsFocused, RouteProp } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -267,6 +267,7 @@ const listenStyles = StyleSheet.create({
 export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const isFocused = useIsFocused();
   const navigation =
     useNavigation<
       CompositeNavigationProp<
@@ -351,6 +352,7 @@ export default function LearnScreen() {
 
   // ── Auto-TTS + option generation when listening card changes ─────────────────
   useEffect(() => {
+    if (!initialized || !isFocused) return;
     if (activeTab !== "listening") return;
     const sentence = learningList[listenIdx];
     if (!sentence) return;
@@ -371,7 +373,7 @@ export default function LearnScreen() {
       clearTimeout(timer);
       stopSpeaking();
     };
-  }, [listenIdx, activeTab, initialized, targetLanguage]);
+  }, [listenIdx, activeTab, initialized, isFocused, targetLanguage]);
 
   const handleTabChange = (tab: TabKey) => {
     stopSpeaking();

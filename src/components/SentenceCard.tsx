@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { stripMarkers } from "@/utils/keywords";
-import { usePremium } from "@/hooks/usePremium";
+
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -55,7 +55,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
-  const { isPremium } = usePremium();
+
   const [speaking, setSpeaking] = useState(false);
 
   const hasMismatch =
@@ -72,28 +72,13 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
       return;
     }
     setSpeaking(true);
-    const speakTarget = () => {
-      Speech.speak(stripMarkers(sentence.target_text), {
-        language: LANG_CODE[targetLanguage],
-        rate: 0.85,
-        onDone: () => setSpeaking(false),
-        onStopped: () => setSpeaking(false),
-        onError: () => setSpeaking(false),
-      });
-    };
-    if (isPremium) {
-      Speech.speak(stripMarkers(sentence.source_text), {
-        language: LANG_CODE[uiLanguage],
-        rate: 0.85,
-        onDone: () => {
-          setTimeout(speakTarget, 1000);
-        },
-        onStopped: () => setSpeaking(false),
-        onError: () => setSpeaking(false),
-      });
-    } else {
-      speakTarget();
-    }
+    Speech.speak(stripMarkers(sentence.target_text), {
+      language: LANG_CODE[targetLanguage],
+      rate: 0.85,
+      onDone: () => setSpeaking(false),
+      onStopped: () => setSpeaking(false),
+      onError: () => setSpeaking(false),
+    });
   };
 
   const actionConfig = {

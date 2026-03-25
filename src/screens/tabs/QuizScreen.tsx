@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
@@ -113,6 +113,7 @@ export default function QuizScreen() {
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
   const { isPremium } = usePremium();
+  const isFocused = useIsFocused();
 
   const [mode, setMode] = useState<QuizMode>("multiple_choice");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -160,6 +161,7 @@ export default function QuizScreen() {
   }, []);
 
   useEffect(() => {
+    setInitialized(false);
     Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
       setInitialized(true),
     );
@@ -181,6 +183,7 @@ export default function QuizScreen() {
 
   // Auto-speak MC question when it loads
   useEffect(() => {
+    if (!initialized || !isFocused) return;
     const q = questions[currentIdx];
     if (mode !== "multiple_choice" || !q || q.type !== "multiple_choice") return;
     if (!ttsEnabled || quizMuted) return;
@@ -191,7 +194,7 @@ export default function QuizScreen() {
       clearTimeout(timer);
       stopSpeaking();
     };
-  }, [currentIdx, mode, questions, ttsEnabled, quizMuted]);
+  }, [currentIdx, mode, questions, ttsEnabled, quizMuted, initialized, isFocused]);
 
   const allSentences: Sentence[] = [
     ...sentences,
@@ -223,7 +226,7 @@ export default function QuizScreen() {
 
   useEffect(() => {
     if (learningSentences.length > 0) startSession();
-  }, [mode, sentences.length]);
+  }, [mode, sentences.length, presetSentences.length, initialized]);
 
   const currentQ = questions[currentIdx];
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
