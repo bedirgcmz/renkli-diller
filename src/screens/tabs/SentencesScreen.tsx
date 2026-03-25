@@ -24,6 +24,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -52,8 +53,6 @@ interface SentenceItemProps {
   onForgot: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  isFavorite: boolean;
-  onToggleFavorite: () => void;
   colors: ThemeColors;
   t: (k: string, opts?: Record<string, string>) => string;
 }
@@ -68,8 +67,6 @@ function SentenceItem({
   onForgot,
   onEdit,
   onDelete,
-  isFavorite,
-  onToggleFavorite,
   colors,
   t,
 }: SentenceItemProps) {
@@ -111,17 +108,7 @@ function SentenceItem({
               <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
             </Pressable>
           )}
-          <Pressable
-            onPress={onToggleFavorite}
-            hitSlop={HIT}
-            style={({ pressed }) => [pressed && { opacity: 0.6 }]}
-          >
-            <Ionicons
-              name={isFavorite ? "heart" : "heart-outline"}
-              size={18}
-              color={isFavorite ? "#E85D5D" : colors.textSecondary}
-            />
-          </Pressable>
+          <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
           <Pressable
             onPress={onEdit}
             hitSlop={HIT}
@@ -561,7 +548,6 @@ export default function SentencesScreen() {
     sentences,
     presetSentences,
     categories,
-    favoriteIds,
     loadSentences,
     loadPresetSentences,
     loadCategories,
@@ -570,7 +556,6 @@ export default function SentencesScreen() {
     markAsUnlearned,
     addToLearningList,
     deleteSentence,
-    toggleFavorite,
   } = useSentenceStore();
   const { progressMap, loadProgress } = useProgressStore();
 
@@ -791,8 +776,6 @@ export default function SentencesScreen() {
               })
             }
             onDelete={() => handleDelete(item)}
-            isFavorite={favoriteIds.includes(item.id)}
-            onToggleFavorite={() => toggleFavorite(item.id, item.is_preset)}
             uiLanguage={uiLanguage}
             targetLanguage={targetLanguage}
             colors={colors}

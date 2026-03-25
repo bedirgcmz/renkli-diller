@@ -8,6 +8,7 @@ import { stripMarkers } from "@/utils/keywords";
 import { usePremium } from "@/hooks/usePremium";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Sentence, SupportedLanguage } from "@/types";
 
 // State-aware top accent colors (subtle, not a bar)
@@ -178,6 +179,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                 />
               </View>
               {/* ✅ v2: softer icon opacity */}
+              <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset ?? false} size={19} />
               <Pressable
                 onPress={handleAudio}
                 style={({ pressed }) => [

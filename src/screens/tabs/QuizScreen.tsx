@@ -24,6 +24,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
 import { HomeStackParamList, MainStackParamList, PillSegment, Sentence } from "@/types";
 import { speak, stopSpeaking } from "@/services/tts";
@@ -536,19 +537,26 @@ export default function QuizScreen() {
                 <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
                   {currentIdx + 1}/{questions.length}
                 </Text>
-                {mcQ && (
-                  <TouchableOpacity
-                    onPress={() => setQuizMuted((m) => !m)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons
-                      name={quizMuted ? "volume-mute-outline" : "volume-high-outline"}
-                      size={20}
-                      color={quizMuted ? colors.textTertiary : colors.primary}
-                    />
-                  </TouchableOpacity>
-                )}
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <FavoriteButton
+                    sentenceId={currentQ.sentence.id}
+                    isPreset={currentQ.sentence.is_preset ?? false}
+                    size={20}
+                  />
+                  {mcQ && (
+                    <TouchableOpacity
+                      onPress={() => setQuizMuted((m) => !m)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={quizMuted ? "volume-mute-outline" : "volume-high-outline"}
+                        size={20}
+                        color={quizMuted ? colors.textTertiary : colors.primary}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
 
               {/* FB: direction badge */}

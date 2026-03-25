@@ -18,6 +18,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Category, MainStackParamList } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
 
@@ -119,6 +120,7 @@ export default function CategoryBrowserScreen() {
                         <Text style={styles.addBtnText}>{t("learn.add_to_list")}</Text>
                       </TouchableOpacity>
                     )}
+                    <FavoriteButton sentenceId={item.id} isPreset={true} size={18} />
                   </View>
                 </View>
               );
@@ -279,7 +281,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  cardFooter: { marginTop: 6 },
+  cardFooter: { marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   statusBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: 10,
