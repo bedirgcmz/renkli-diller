@@ -16,9 +16,16 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initRevenueCat } from "@/services/revenueCat";
 import { supabase } from "@/lib/supabase";
 
+// Achievements
+import { AchievementToast } from "@/components/AchievementToast";
+import { useAchievementStore } from "@/store/useAchievementStore";
+
 export default function App() {
+  const loadAchievements = useAchievementStore((s) => s.loadAchievements);
+
   useEffect(() => {
     initRevenueCat().catch(() => {});
+    loadAchievements();
   }, []);
 
   // Handle OAuth deep link callbacks (e.g. Google sign-in redirect)
@@ -59,6 +66,7 @@ export default function App() {
           <I18nProvider>
             <ThemeProvider>
               <AppNavigator />
+              <AchievementToast />
               <StatusBar style="auto" />
             </ThemeProvider>
           </I18nProvider>
