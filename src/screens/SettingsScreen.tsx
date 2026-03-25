@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -7,8 +7,6 @@ import {
   StyleSheet,
   Switch,
   Alert,
-  Modal,
-  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,10 +14,12 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/providers/ThemeProvider";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useI18n } from "@/providers/I18nProvider";
 import { MainStackParamList, SupportedLanguage } from "@/types";
+import { TimePicker, LangPicker } from "@/components/SettingsPicker";
 import {
   requestNotificationPermissions,
   scheduleDailyReminder,
@@ -27,19 +27,9 @@ import {
   parseReminderTime,
 } from "@/services/notifications";
 
-const LANGUAGE_OPTIONS: Array<{ value: SupportedLanguage; label: string; flag: string }> = [
-  { value: "tr", label: "Türkçe", flag: "🇹🇷" },
-  { value: "en", label: "English", flag: "🇬🇧" },
-  { value: "sv", label: "Svenska", flag: "🇸🇪" },
-  { value: "de", label: "Deutsch", flag: "🇩🇪" },
-  { value: "es", label: "Español", flag: "🇪🇸" },
-  { value: "fr", label: "Français", flag: "🇫🇷" },
-  { value: "pt", label: "Português", flag: "🇧🇷" },
-];
-
 const DAILY_GOAL_OPTIONS = [5, 10, 20, 30];
 
-function SectionTitle({ label, colors }: { label: string; colors: any }) {
+function SectionTitle({ label, colors }: { label: string; colors: ThemeColors }) {
   return (
     <Text style={[sStyles.sectionTitle, { color: colors.textSecondary }]}>{label}</Text>
   );
@@ -54,7 +44,7 @@ function SettingRow({
   icon: string;
   label: string;
   children: React.ReactNode;
-  colors: any;
+  colors: ThemeColors;
 }) {
   return (
     <View style={[sStyles.row, { borderBottomColor: colors.divider }]}>
@@ -64,111 +54,6 @@ function SettingRow({
       </View>
       <View style={sStyles.rowRight}>{children}</View>
     </View>
-  );
-}
-
-const TIME_OPTIONS = [
-  "07:00","08:00","09:00","10:00","12:00","14:00",
-  "16:00","17:00","18:00","19:00","20:00","21:00","22:00",
-];
-
-function TimePicker({
-  value,
-  onChange,
-  colors,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  colors: any;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <TouchableOpacity
-        style={[sStyles.pickerBtn, { borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
-        onPress={() => setOpen(true)}
-        activeOpacity={0.8}
-      >
-        <Text style={[sStyles.pickerBtnText, { color: colors.text }]}>{value}</Text>
-        <Ionicons name="chevron-down" size={14} color={colors.textSecondary} />
-      </TouchableOpacity>
-
-      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={sStyles.modalBackdrop} onPress={() => setOpen(false)}>
-          <Pressable style={[sStyles.modalSheet, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
-            {TIME_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt}
-                style={[
-                  sStyles.pickerOption,
-                  opt === value && { backgroundColor: colors.primary + "15" },
-                ]}
-                onPress={() => { onChange(opt); setOpen(false); }}
-                activeOpacity={0.7}
-              >
-                <Text style={[sStyles.pickerOptionText, { color: opt === value ? colors.primary : colors.text }]}>
-                  {opt}
-                </Text>
-                {opt === value && <Ionicons name="checkmark" size={16} color={colors.primary} />}
-              </TouchableOpacity>
-            ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </>
-  );
-}
-
-function LangPicker({
-  value,
-  onChange,
-  colors,
-}: {
-  value: SupportedLanguage;
-  onChange: (v: SupportedLanguage) => void;
-  colors: any;
-}) {
-  const [open, setOpen] = useState(false);
-  const selected = LANGUAGE_OPTIONS.find((o) => o.value === value);
-
-  return (
-    <>
-      <TouchableOpacity
-        style={[sStyles.pickerBtn, { borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
-        onPress={() => setOpen(true)}
-        activeOpacity={0.8}
-      >
-        <Text style={[sStyles.pickerBtnText, { color: colors.text }]}>
-          {selected?.flag} {selected?.label}
-        </Text>
-        <Ionicons name="chevron-down" size={14} color={colors.textSecondary} />
-      </TouchableOpacity>
-
-      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={sStyles.modalBackdrop} onPress={() => setOpen(false)}>
-          <Pressable style={[sStyles.modalSheet, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
-            {LANGUAGE_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[
-                  sStyles.pickerOption,
-                  opt.value === value && { backgroundColor: colors.primary + "15" },
-                ]}
-                onPress={() => { onChange(opt.value); setOpen(false); }}
-                activeOpacity={0.7}
-              >
-                <Text style={[sStyles.pickerOptionText, { color: opt.value === value ? colors.primary : colors.text }]}>
-                  {opt.flag} {opt.label}
-                </Text>
-                {opt.value === value && (
-                  <Ionicons name="checkmark" size={16} color={colors.primary} />
-                )}
-              </TouchableOpacity>
-            ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </>
   );
 }
 
@@ -475,41 +360,6 @@ const sStyles = StyleSheet.create({
   rowLabel: { fontSize: 15 },
   rowRight: { flexShrink: 0 },
   rowValue: { fontSize: 13, maxWidth: 160 },
-  pickerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  pickerBtnText: { fontSize: 13 },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-  modalSheet: {
-    width: "100%",
-    borderRadius: 14,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 12,
-  },
-  pickerOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  pickerOptionText: { fontSize: 14 },
   goalChips: { flexDirection: "row", gap: 6 },
   goalChip: {
     width: 36,

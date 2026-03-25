@@ -7,7 +7,6 @@ import {
   FlatList,
   StyleSheet,
   Alert,
-  ScrollView,
   RefreshControl,
   Pressable,
   Modal,
@@ -19,11 +18,13 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -52,7 +53,7 @@ interface SentenceItemProps {
   onForgot: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  colors: any;
+  colors: ThemeColors;
   t: (k: string, opts?: Record<string, string>) => string;
 }
 
@@ -107,6 +108,7 @@ function SentenceItem({
               <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
             </Pressable>
           )}
+          <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
           <Pressable
             onPress={onEdit}
             hitSlop={HIT}
@@ -465,11 +467,7 @@ function FilterModal({
         <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
           {t("sentences.filter_category") || "Kategori"}
         </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={filterStyles.chipsRow}
-        >
+        <View style={filterStyles.chipsWrap}>
           <TouchableOpacity
             style={[filterStyles.chip, chipActive(categoryFilter === "all")]}
             onPress={() => setCategoryFilter("all")}
@@ -495,7 +493,7 @@ function FilterModal({
               </Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -553,6 +551,7 @@ export default function SentencesScreen() {
     loadSentences,
     loadPresetSentences,
     loadCategories,
+    loadFavorites,
     markAsLearned,
     markAsUnlearned,
     addToLearningList,
@@ -579,11 +578,12 @@ export default function SentencesScreen() {
     loadPresetSentences(undefined, isPremium);
     loadSentences();
     loadProgress();
+    loadFavorites();
   }, [isPremium, targetLanguage, uiLanguage]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadPresetSentences(undefined, isPremium), loadSentences(), loadProgress()]);
+    await Promise.all([loadPresetSentences(undefined, isPremium), loadSentences(), loadProgress(), loadFavorites()]);
     setRefreshing(false);
   };
 

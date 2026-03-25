@@ -11,7 +11,7 @@ import {
   Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -22,21 +22,16 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useReadingStore } from "@/store/useReadingStore";
 import { usePremium } from "@/hooks/usePremium";
-import { KEYWORD_TEXT_COLORS } from "@/utils/constants";
+import { KEYWORD_TEXT_COLORS, LANG_CODE } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
-import { ReadingTextKeyword, SupportedLanguage, HomeStackParamList, MainStackParamList } from "@/types";
+import {
+  ReadingTextKeyword,
+  SupportedLanguage,
+  HomeStackParamList,
+  MainStackParamList,
+} from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
-const LANG_CODE: Record<SupportedLanguage, string> = {
-  tr: "tr-TR",
-  en: "en-US",
-  sv: "sv-SE",
-  de: "de-DE",
-  es: "es-ES",
-  fr: "fr-FR",
-  pt: "pt-BR",
-};
 
 const DIFFICULTY_COLORS: Record<number, string> = {
   1: "#49C98A",
@@ -54,7 +49,7 @@ function parseBody(body: string): Segment[] {
   return parseKeywords(body).map((seg) =>
     seg.isPill
       ? { isKeyword: true as const, text: seg.text, positionIndex: seg.pillIndex ?? 0 }
-      : { isKeyword: false as const, text: seg.text }
+      : { isKeyword: false as const, text: seg.text },
   );
 }
 
@@ -136,7 +131,10 @@ function KeywordPreviewModal({
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
       <Pressable style={kStyles.backdrop} onPress={onClose}>
-        <Pressable style={[kStyles.sheet, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
+        <Pressable
+          style={[kStyles.sheet, { backgroundColor: colors.cardBackground }]}
+          onPress={() => {}}
+        >
           {/* Header */}
           <View style={[kStyles.sheetHeader, { borderBottomColor: colors.divider }]}>
             <Text style={[kStyles.sheetTitle, { color: colors.text }]}>
@@ -234,7 +232,9 @@ function buildQuizQuestions(
 ) {
   // Build array of {question (source word), answer (target word), options}
   const all = keywords.filter(
-    (kw) => getField<string>(kw, `keyword_${uiLanguage}`) && getField<string>(kw, `keyword_${targetLanguage}`),
+    (kw) =>
+      getField<string>(kw, `keyword_${uiLanguage}`) &&
+      getField<string>(kw, `keyword_${targetLanguage}`),
   );
   if (all.length < 2) return [];
 
@@ -334,7 +334,9 @@ function VocabQuizModal({
                 {t("reading.quiz_well_done")}
               </Text>
               <Text style={[qStyles.resultScore, { color: colors.primary }]}>
-                {t("reading.quiz_result").replace("{score}", String(score)).replace("{total}", String(questions.length))}
+                {t("reading.quiz_result")
+                  .replace("{score}", String(score))
+                  .replace("{total}", String(questions.length))}
               </Text>
               <TouchableOpacity
                 style={[qStyles.closeBtn, { backgroundColor: colors.primary }]}
@@ -353,7 +355,12 @@ function VocabQuizModal({
               </Text>
 
               {/* Question word */}
-              <View style={[qStyles.questionBox, { backgroundColor: qColor + "15", borderColor: qColor + "30" }]}>
+              <View
+                style={[
+                  qStyles.questionBox,
+                  { backgroundColor: qColor + "15", borderColor: qColor + "30" },
+                ]}
+              >
                 <Text style={[qStyles.questionWord, { color: qColor }]}>{q.question}</Text>
                 <Text style={[qStyles.questionHint, { color: colors.textTertiary }]}>
                   {uiLanguage.toUpperCase()} → {targetLanguage.toUpperCase()}
@@ -369,8 +376,15 @@ function VocabQuizModal({
                   let border = colors.border;
                   let textColor = colors.text;
                   if (selected) {
-                    if (isCorrect) { bg = "#49C98A20"; border = "#49C98A"; textColor = "#49C98A"; }
-                    else if (isSelected) { bg = "#FF6B6B20"; border = "#FF6B6B"; textColor = "#FF6B6B"; }
+                    if (isCorrect) {
+                      bg = "#49C98A20";
+                      border = "#49C98A";
+                      textColor = "#49C98A";
+                    } else if (isSelected) {
+                      bg = "#FF6B6B20";
+                      border = "#FF6B6B";
+                      textColor = "#FF6B6B";
+                    }
                   }
                   return (
                     <TouchableOpacity
@@ -400,7 +414,9 @@ function VocabQuizModal({
                   activeOpacity={0.85}
                 >
                   <Text style={qStyles.nextBtnText}>
-                    {currentQ < questions.length - 1 ? t("reading.quiz_next") : t("reading.quiz_finish")}
+                    {currentQ < questions.length - 1
+                      ? t("reading.quiz_next")
+                      : t("reading.quiz_finish")}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -491,26 +507,31 @@ export default function ReadingScreen() {
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
-  const navigation = useNavigation<CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList>,
-    NativeStackNavigationProp<MainStackParamList>
-  >>();
+  const navigation =
+    useNavigation<
+      CompositeNavigationProp<
+        NativeStackNavigationProp<HomeStackParamList>,
+        NativeStackNavigationProp<MainStackParamList>
+      >
+    >();
   const {
     currentText,
     keywords,
     loading,
     fetchNextText,
     fetchProgress,
-    markAsRead,
-    markAsLearned,
+    markAsCompleted,
+    getTodayCount,
     getLearnedCount,
     getReadingStreak,
   } = useReadingStore();
 
   const [kwModalVisible, setKwModalVisible] = useState(false);
   const [quizVisible, setQuizVisible] = useState(false);
-  const [speaking, setSpeaking] = useState<"source" | "target" | null>(null);
-  const [markedThisSession, setMarkedThisSession] = useState(false);
+  const [speaking, setSpeaking] = useState<"source" | "target" | "slow" | null>(null);
+  const [completedThisSession, setCompletedThisSession] = useState(false);
+  const [upsellDismissed, setUpsellDismissed] = useState(false);
+  const [sourceVisible, setSourceVisible] = useState(false);
 
   const userId = user?.id ?? "";
 
@@ -534,6 +555,7 @@ export default function ReadingScreen() {
       setSpeaking(type);
       Speech.speak(stripMarkers(raw), {
         language: LANG_CODE[lang],
+        rate: 0.85,
         onDone: () => setSpeaking(null),
         onStopped: () => setSpeaking(null),
         onError: () => setSpeaking(null),
@@ -542,6 +564,24 @@ export default function ReadingScreen() {
     [speaking, currentText],
   );
 
+  const speakTextSlow = useCallback(async () => {
+    if (speaking) {
+      await Speech.stop();
+      setSpeaking(null);
+      return;
+    }
+    const raw = getField<string>(currentText, `body_${targetLanguage}`);
+    if (!raw) return;
+    setSpeaking("slow");
+    Speech.speak(stripMarkers(raw), {
+      language: LANG_CODE[targetLanguage],
+      rate: 0.4,
+      onDone: () => setSpeaking(null),
+      onStopped: () => setSpeaking(null),
+      onError: () => setSpeaking(null),
+    });
+  }, [speaking, currentText, targetLanguage]);
+
   const handleShare = useCallback(async () => {
     if (!currentText) return;
     const textTitle = getField<string>(currentText, `title_${uiLanguage}`) ?? "";
@@ -549,20 +589,16 @@ export default function ReadingScreen() {
     await Share.share({ message });
   }, [currentText, uiLanguage, t]);
 
-  const handleMarkLearned = async () => {
+  const handleComplete = async () => {
     if (!userId || !currentText) return;
-    await markAsLearned(userId, currentText.id);
-    setMarkedThisSession(true);
-    // Load next after brief delay so UI shows the success state
-    setTimeout(() => {
-      setMarkedThisSession(false);
-      fetchNextText(userId);
-    }, 1200);
+    await markAsCompleted(userId, currentText.id);
+    setCompletedThisSession(true);
+    setUpsellDismissed(false);
   };
 
-  const handleMarkRead = async () => {
-    if (!userId || !currentText) return;
-    await markAsRead(userId, currentText.id);
+  const handleNextText = () => {
+    setCompletedThisSession(false);
+    setSourceVisible(false);
     fetchNextText(userId);
   };
 
@@ -573,11 +609,9 @@ export default function ReadingScreen() {
     getField<string>(currentText, "title_en") ??
     "";
 
-  const sourceBody =
-    getField<string>(currentText, `body_${uiLanguage}`) ?? "";
+  const sourceBody = getField<string>(currentText, `body_${uiLanguage}`) ?? "";
 
-  const targetBody =
-    getField<string>(currentText, `body_${targetLanguage}`) ?? "";
+  const targetBody = getField<string>(currentText, `body_${targetLanguage}`) ?? "";
 
   const CATEGORY_LABELS: Record<string, string> = {
     daily_life: t("reading.category_daily_life"),
@@ -587,7 +621,14 @@ export default function ReadingScreen() {
 
   const streak = getReadingStreak();
   const learnedCount = getLearnedCount();
+  const todayCount = getTodayCount();
   const isPaywalled = !!(currentText?.is_premium && !isPremium);
+
+  const FREE_DAILY_LIMIT = 1;
+  const PREMIUM_DAILY_LIMIT = 3;
+  const dailyLimitReached = isPremium
+    ? todayCount >= PREMIUM_DAILY_LIMIT
+    : todayCount >= FREE_DAILY_LIMIT;
 
   const difficulty = currentText?.difficulty ?? 1;
   const diffColor = DIFFICULTY_COLORS[difficulty];
@@ -606,7 +647,10 @@ export default function ReadingScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -616,10 +660,15 @@ export default function ReadingScreen() {
 
   if (!currentText) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         <View style={styles.centered}>
           <Text style={styles.emptyIcon}>🎉</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>{t("reading.no_more_texts")}</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            {t("reading.no_more_texts")}
+          </Text>
           <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
             {t("reading.no_more_subtitle")}
           </Text>
@@ -629,7 +678,10 @@ export default function ReadingScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
       {/* ── Header ─────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("reading.title")}</Text>
@@ -642,7 +694,6 @@ export default function ReadingScreen() {
           >
             <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
-
           {/* Keyword preview */}
           {keywords.length > 0 && (
             <TouchableOpacity
@@ -653,45 +704,6 @@ export default function ReadingScreen() {
               <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
-          {/* Source TTS (premium only) */}
-          {isPremium && (
-            <TouchableOpacity
-              style={[
-                styles.iconBtn,
-                {
-                  backgroundColor:
-                    speaking === "source" ? colors.primary + "20" : colors.backgroundSecondary,
-                },
-              ]}
-              onPress={() => speakText(uiLanguage, "source")}
-              activeOpacity={0.75}
-            >
-              <Ionicons
-                name={speaking === "source" ? "stop-circle" : "volume-medium-outline"}
-                size={20}
-                color={speaking === "source" ? colors.primary : colors.textSecondary}
-              />
-            </TouchableOpacity>
-          )}
-          {/* Target TTS */}
-          <TouchableOpacity
-            style={[
-              styles.iconBtn,
-              {
-                backgroundColor:
-                  speaking === "target" ? colors.primary + "20" : colors.backgroundSecondary,
-              },
-            ]}
-            onPress={() => speakText(targetLanguage, "target")}
-            activeOpacity={0.75}
-          >
-            <Ionicons
-              name={speaking === "target" ? "stop-circle" : "volume-high-outline"}
-              size={20}
-              color={speaking === "target" ? colors.primary : colors.textSecondary}
-            />
-          </TouchableOpacity>
-
           {/* Vocab quiz (premium) */}
           {isPremium && keywords.length >= 2 && (
             <TouchableOpacity
@@ -728,10 +740,7 @@ export default function ReadingScreen() {
       )}
 
       {/* ── Body ───────────────────────────────────────────────────── */}
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Meta row */}
         <View style={styles.metaRow}>
           <View style={[styles.categoryChip, { backgroundColor: colors.backgroundSecondary }]}>
@@ -753,13 +762,53 @@ export default function ReadingScreen() {
         {/* Title */}
         <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
 
-        {/* Source body */}
-        <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
-          <Text style={[styles.langTag, { color: colors.textTertiary }]}>
-            {uiLanguage.toUpperCase()}
-          </Text>
+        {/* Target body — shown first */}
+        <View
+          style={[
+            styles.langSection,
+            { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" },
+          ]}
+        >
+          {/* Header: lang code left, TTS buttons right */}
+          <View style={styles.langSectionHeader}>
+            <Text style={[styles.langTag, { color: colors.textTertiary, marginBottom: 0 }]}>
+              {targetLanguage.toUpperCase()}
+            </Text>
+            <View style={{ flexDirection: "row", gap: 4 }}>
+              <TouchableOpacity
+                style={[
+                  styles.ttsIconBtn,
+                  {
+                    backgroundColor: speaking === "target" ? colors.primary + "18" : "transparent",
+                  },
+                ]}
+                onPress={() => speakText(targetLanguage, "target")}
+                activeOpacity={0.75}
+              >
+                <Ionicons
+                  name={speaking === "target" ? "stop-circle" : "volume-high-outline"}
+                  size={17}
+                  color={speaking === "target" ? colors.primary : colors.textTertiary}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.ttsIconBtn,
+                  { backgroundColor: speaking === "slow" ? colors.primary + "18" : "transparent" },
+                ]}
+                onPress={speakTextSlow}
+                activeOpacity={0.75}
+              >
+                {speaking === "slow" ? (
+                  <Ionicons name="stop-circle" size={17} color={colors.primary} />
+                ) : (
+                  <MaterialIcons name="slow-motion-video" size={17} color={colors.textTertiary} />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
           <ReadingBody
-            body={sourceBody}
+            body={targetBody}
             keywords={keywords}
             isDark={isDark}
             baseColor={colors.text}
@@ -767,18 +816,62 @@ export default function ReadingScreen() {
           />
         </View>
 
-        {/* Target body */}
-        <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
-          <Text style={[styles.langTag, { color: colors.textTertiary }]}>
-            {targetLanguage.toUpperCase()}
-          </Text>
-          <ReadingBody
-            body={targetBody}
-            keywords={keywords}
-            isDark={isDark}
-            baseColor={colors.textSecondary}
-            fontSize={15}
-          />
+        {/* Source body — hidden by default */}
+        <View
+          style={[
+            styles.langSection,
+            { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" },
+          ]}
+        >
+          {/* Header: lang code + eye toggle left, source TTS right (premium) */}
+          <View style={styles.langSectionHeader}>
+            <TouchableOpacity
+              style={styles.langTagRow}
+              onPress={() => setSourceVisible((v) => !v)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.langTag, { color: colors.textTertiary, marginBottom: 0 }]}>
+                {uiLanguage.toUpperCase()}
+              </Text>
+              <Ionicons
+                name={sourceVisible ? "eye-outline" : "eye-off-outline"}
+                size={14}
+                color={colors.textTertiary}
+              />
+              <Text style={[styles.langTagHint, { color: colors.textTertiary }]}>
+                {sourceVisible ? t("reading.hide_translation") : t("reading.show_translation")}
+              </Text>
+            </TouchableOpacity>
+            {isPremium && (
+              <TouchableOpacity
+                style={[
+                  styles.ttsIconBtn,
+                  {
+                    backgroundColor: speaking === "source" ? colors.primary + "18" : "transparent",
+                  },
+                ]}
+                onPress={() => speakText(uiLanguage, "source")}
+                activeOpacity={0.75}
+              >
+                <Ionicons
+                  name={speaking === "source" ? "stop-circle" : "volume-medium-outline"}
+                  size={17}
+                  color={speaking === "source" ? colors.primary : colors.textTertiary}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+          {sourceVisible && (
+            <View style={{ marginTop: 10 }}>
+              <ReadingBody
+                body={sourceBody}
+                keywords={keywords}
+                isDark={isDark}
+                baseColor={colors.textSecondary}
+                fontSize={15}
+              />
+            </View>
+          )}
         </View>
 
         <View style={{ height: 120 }} />
@@ -794,9 +887,18 @@ export default function ReadingScreen() {
           },
         ]}
       >
+        {/* Paywall: premium-only text */}
         {isPaywalled ? (
           <View style={styles.actionRow}>
-            <View style={[styles.paywallBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "40" }]}>
+            <View
+              style={[
+                styles.paywallBanner,
+                {
+                  backgroundColor: colors.backgroundSecondary,
+                  borderColor: colors.premiumAccent + "40",
+                },
+              ]}
+            >
               <Ionicons name="lock-closed-outline" size={16} color={colors.premiumAccent} />
               <Text style={[styles.paywallText, { color: colors.text }]}>
                 {t("reading.premium_required")}
@@ -810,31 +912,104 @@ export default function ReadingScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        ) : markedThisSession ? (
-          <View style={styles.successRow}>
-            <Ionicons name="checkmark-circle" size={22} color="#49C98A" />
-            <Text style={[styles.successText, { color: "#49C98A" }]}>{t("reading.mark_learned")} ✓</Text>
+        ) : completedThisSession || dailyLimitReached ? (
+          // ── Post-completion / limit-reached state ──
+          <View style={styles.completedState}>
+            {/* Success row */}
+            <View style={styles.successRow}>
+              <Ionicons name="checkmark-circle" size={22} color="#49C98A" />
+              <Text style={[styles.successText, { color: "#49C98A" }]}>
+                {t("reading.completed_feedback")}
+              </Text>
+            </View>
+
+            {isPremium ? (
+              dailyLimitReached ? (
+                // Premium — daily cap hit
+                <View
+                  style={[
+                    styles.limitBanner,
+                    { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+                  ]}
+                >
+                  <Text style={[styles.limitBannerText, { color: colors.textSecondary }]}>
+                    {t("reading.daily_limit_premium")}
+                  </Text>
+                  <Text style={[styles.limitBannerCount, { color: colors.primary }]}>
+                    {t("reading.texts_today", { count: todayCount })}
+                  </Text>
+                </View>
+              ) : (
+                // Premium — can still read more
+                <View style={styles.actionRow}>
+                  <Text style={[styles.todayCountText, { color: colors.textTertiary }]}>
+                    {t("reading.texts_today", { count: todayCount })}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.nextBtn, { backgroundColor: colors.primary }]}
+                    onPress={handleNextText}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.nextBtnText}>{t("reading.next_text_btn")}</Text>
+                    <Ionicons name="arrow-forward" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )
+            ) : upsellDismissed ? (
+              // Free — upsell dismissed, show minimal re-open hint
+              <TouchableOpacity
+                style={styles.upsellReopenRow}
+                onPress={() => setUpsellDismissed(false)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="star-outline" size={13} color={colors.premiumAccent} />
+                <Text style={[styles.upsellReopenText, { color: colors.premiumAccent }]}>
+                  {t("reading.unlock_premium")}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              // Free — daily limit upsell
+              <View
+                style={[
+                  styles.limitBanner,
+                  {
+                    backgroundColor: colors.backgroundSecondary,
+                    borderColor: colors.premiumAccent + "50",
+                  },
+                ]}
+              >
+                <View style={styles.limitBannerHeader}>
+                  <Text style={[styles.limitBannerText, { color: colors.text }]}>
+                    {t("reading.daily_limit_free")}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setUpsellDismissed(true)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="close" size={16} color={colors.textTertiary} />
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  style={[styles.upsellFullBtn, { backgroundColor: colors.premiumAccent }]}
+                  onPress={() => navigation.navigate("Paywall")}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.paywallBtnText}>{t("reading.unlock_premium")}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         ) : (
-          <View style={styles.actionRow}>
-            <TouchableOpacity
-              style={[styles.readBtn, { borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
-              onPress={handleMarkRead}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.readBtnText, { color: colors.textSecondary }]}>
-                {t("reading.mark_read")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.learnedBtn, { backgroundColor: colors.primary }]}
-              onPress={handleMarkLearned}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-              <Text style={styles.learnedBtnText}>{t("reading.mark_learned")}</Text>
-            </TouchableOpacity>
-          </View>
+          // ── Default: Tamamladım button ──
+          <TouchableOpacity
+            style={[styles.completeBtn, { backgroundColor: colors.primary }]}
+            onPress={handleComplete}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+            <Text style={styles.completeBtnText}>{t("reading.complete_btn")}</Text>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -880,10 +1055,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 0,
   },
-  headerTitle: { fontSize: 22, fontWeight: "700" },
-  headerActions: { flexDirection: "row", gap: 8 },
+  headerTitle: { fontSize: 22, fontWeight: "700", flexShrink: 1 },
+  headerActions: { flexDirection: "row", gap: 6 },
   iconBtn: {
     width: 36,
     height: 36,
@@ -894,11 +1069,27 @@ const styles = StyleSheet.create({
 
   scroll: { paddingHorizontal: 20 },
 
+  langSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  ttsIconBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 14,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    paddingTop: 6,
     flexWrap: "wrap",
   },
   categoryChip: {
@@ -923,7 +1114,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     lineHeight: 28,
-    marginBottom: 20,
+    marginBottom: 10,
   },
 
   langSection: {
@@ -938,6 +1129,17 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 10,
   },
+  langTagRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginBottom: 2,
+  },
+  langTagHint: {
+    fontSize: 10,
+    fontWeight: "500",
+    letterSpacing: 0.2,
+  },
 
   footer: {
     position: "absolute",
@@ -945,41 +1147,71 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 28,
+    paddingTop: 10,
+    paddingBottom: 22,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   actionRow: {
     flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
-  readBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  readBtnText: { fontSize: 14, fontWeight: "600" },
-  learnedBtn: {
-    flex: 2,
+  completeBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 13,
+    paddingVertical: 14,
     borderRadius: 14,
-    gap: 7,
+    gap: 8,
   },
-  learnedBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+  completeBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  completedState: {
+    gap: 8,
+  },
   successRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 13,
+    paddingVertical: 2,
     gap: 8,
   },
   successText: { fontSize: 15, fontWeight: "700" },
+  limitBanner: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+    gap: 6,
+  },
+  limitBannerHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  limitBannerText: { fontSize: 13, lineHeight: 18, flex: 1 },
+  limitBannerCount: { fontSize: 12, fontWeight: "700" },
+  upsellFullBtn: {
+    paddingVertical: 11,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  upsellReopenRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingVertical: 6,
+  },
+  upsellReopenText: { fontSize: 12, fontWeight: "600" },
+  todayCountText: { fontSize: 12, flex: 1 },
+  nextBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 12,
+    gap: 6,
+  },
+  nextBtnText: { color: "#fff", fontSize: 14, fontWeight: "700" },
 
   statsStrip: {
     flexDirection: "row",

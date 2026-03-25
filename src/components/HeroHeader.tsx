@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, type DimensionValue } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { GradientView } from "@/components/GradientView";
+import { countTodayLearned } from "@/utils/progressHelpers";
 
 export function HeroHeader() {
   const { t } = useTranslation();
@@ -16,14 +17,9 @@ export function HeroHeader() {
 
   useEffect(() => {
     loadProgress();
-  }, []);
+  }, [loadProgress]);
 
-  const todayLearned = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    return progress.filter(
-      (p) => p.state === "learned" && p.learned_at?.startsWith(today),
-    ).length;
-  }, [progress]);
+  const todayLearned = useMemo(() => countTodayLearned(progress), [progress]);
 
   const hour = new Date().getHours();
   const greetingKey =
@@ -118,7 +114,7 @@ export function HeroHeader() {
           <View style={[styles.progressTrack, { backgroundColor: progressBg }]}>
             <GradientView
               colors={["#4DA3FF", "#49C98A"]}
-              style={[styles.progressFill, { width: progressPct as any }]}
+              style={[styles.progressFill, { width: progressPct as DimensionValue }]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             />

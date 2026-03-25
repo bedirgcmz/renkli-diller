@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import type { PurchasesPackage, PurchasesOffering } from "react-native-purchases";
+import type { PurchasesPackage } from "react-native-purchases";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -33,7 +33,6 @@ export default function PaywallScreen() {
   const navigation = useNavigation();
   const { refresh } = usePremium();
 
-  const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [packages, setPackages] = useState<PackageOption[]>([]);
   const [selectedPkg, setSelectedPkg] = useState<PurchasesPackage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,28 +51,21 @@ export default function PaywallScreen() {
         setLoading(false);
         return;
       }
-      setOffering(current);
-
       const opts: PackageOption[] = [];
 
       // Paketleri belirli sırayla göster
       const monthly = current.monthly;
       const annual = current.annual;
-      // Ömürlük için availablePackages içinde ara
-      const lifetime = current.availablePackages.find(
-        (p) => p.packageType === "LIFETIME" || p.identifier.includes("lifetime")
-      );
 
       if (monthly) opts.push({ pkg: monthly, label: t("premium.pkg_monthly") });
       if (annual) opts.push({ pkg: annual, label: t("premium.pkg_annual"), badge: t("premium.badge_popular") });
-      if (lifetime) opts.push({ pkg: lifetime, label: t("premium.pkg_lifetime"), badge: t("premium.badge_best_value") });
 
       setPackages(opts);
       // Varsayılan seçim: yıllık
-      const defaultPkg = annual ?? monthly ?? lifetime;
+      const defaultPkg = annual ?? monthly;
       if (defaultPkg) setSelectedPkg(defaultPkg);
     } catch (e) {
-      console.error("Offerings load error:", e);
+      if (__DEV__) console.error("Offerings load error:", e);
     } finally {
       setLoading(false);
     }

@@ -1,27 +1,30 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { Sentence, SentenceStatus, Category, SupportedLanguage } from "@/types";
+import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
 
-function toKeywordsArray(raw: any): string[] {
+type DbRow = Record<string, unknown>;
+
+function toKeywordsArray(raw: unknown): string[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw as string[];
   if (typeof raw === "string") return raw.split(",").map((s) => s.trim()).filter(Boolean);
   return [];
 }
 
-function getLangText(row: any, lang: SupportedLanguage): string {
-  return row[`text_${lang}`] || row.text_en || row.text_tr || "";
+function getLangText(row: DbRow, lang: SupportedLanguage): string {
+  return (row[`text_${lang}`] as string) || (row.text_en as string) || (row.text_tr as string) || "";
 }
 
-function getLangKeywords(row: any, lang: SupportedLanguage): string[] {
-  return toKeywordsArray(row[`keywords_${lang}`] || null);
+function getLangKeywords(row: DbRow, lang: SupportedLanguage): string[] {
+  return toKeywordsArray(row[`keywords_${lang}`] ?? null);
 }
 
-function getCatName(cat: any, lang: SupportedLanguage): string {
+function getCatName(cat: DbRow | null, lang: SupportedLanguage): string {
   if (!cat) return "";
-  return cat[`name_${lang}`] || cat.name_en || "";
+  return (cat[`name_${lang}`] as string) || (cat.name_en as string) || "";
 }
 
 interface SentenceFilters {
@@ -34,12 +37,15 @@ interface SentenceState {
   sentences: Sentence[];
   presetSentences: Sentence[];
   categories: Category[];
+  favoriteIds: string[];
   loading: boolean;
   error: string | null;
 
   loadSentences: (filters?: SentenceFilters) => Promise<void>;
   loadPresetSentences: (categoryId?: number, isPremium?: boolean) => Promise<void>;
   loadCategories: () => Promise<void>;
+  loadFavorites: () => Promise<void>;
+  toggleFavorite: (id: string, isPreset: boolean) => Promise<void>;
   addSentence: (data: {
     source_text: string;
     target_text: string;
@@ -73,8 +79,51 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   sentences: [],
   presetSentences: [],
   categories: [],
+  favoriteIds: [],
   loading: false,
   error: null,
+
+  loadFavorites: async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      set({ favoriteIds: [] });
+      return;
+    }
+    const { data } = await supabase
+      .from("sentence_favorites")
+      .select("sentence_id")
+      .eq("user_id", user.id);
+    if (data) {
+      set({ favoriteIds: data.map((r: Record<string, unknown>) => r.sentence_id as string) });
+    }
+  },
+
+  toggleFavorite: async (id: string, isPreset: boolean) => {
+    const { favoriteIds } = get();
+    const isFav = favoriteIds.includes(id);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (isFav) {
+      await supabase
+        .from("sentence_favorites")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("sentence_id", id);
+      set({ favoriteIds: favoriteIds.filter((fid) => fid !== id) });
+    } else {
+      await supabase.from("sentence_favorites").insert({
+        user_id: user.id,
+        sentence_id: id,
+        is_preset: isPreset,
+      });
+      set({ favoriteIds: [...favoriteIds, id] });
+    }
+  },
 
   loadCategories: async () => {
     const { data } = await supabase
@@ -90,9 +139,21 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { uiLanguage, targetLanguage } = useSettingsStore.getState();
+
+      // Only fetch columns needed for the active language pair + fallback columns
+      const sentenceCols = [...new Set([
+        "id", "category_id", "sort_order",
+        `text_${uiLanguage}`,
+        `text_${targetLanguage}`,
+        "text_en",   // getLangText fallback
+        "text_tr",   // getLangText fallback
+        `keywords_${targetLanguage}`,
+      ])].join(", ");
+      const catCols = [...new Set([`name_${uiLanguage}`, "name_en"])].join(", ");
+
       let query = supabase
         .from("sentences")
-        .select("*, categories(name_tr, name_en, name_sv, name_de, name_es, name_fr, name_pt)")
+        .select(`${sentenceCols}, categories(${catCols})`)
         .order("sort_order");
 
       if (categoryId) {
@@ -103,7 +164,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           .from("categories")
           .select("id")
           .eq("is_free", true);
-        const freeCatIds = freeCats?.map((c: any) => c.id) ?? [];
+        const freeCatIds = freeCats?.map((c: DbRow) => c.id) ?? [];
         if (freeCatIds.length > 0) {
           query = query.in("category_id", freeCatIds);
         } else {
@@ -118,7 +179,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return;
       }
 
-      const mapped: Sentence[] = (data || []).map((row: any) => ({
+      const mapped: Sentence[] = (data || []).map((row: DbRow) => ({
         id: String(row.id),
         source_text: getLangText(row, uiLanguage),
         target_text: getLangText(row, targetLanguage),
@@ -173,7 +234,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return;
       }
 
-      const mapped: Sentence[] = (data || []).map((row: any) => {
+      const mapped: Sentence[] = (data || []).map((row: DbRow) => {
         const cat = categories.find((c) => c.id === row.category_id);
         return {
           id: String(row.id),
@@ -182,9 +243,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           target_text: row.target_text || "",
           keywords: toKeywordsArray(row.keywords),
           category_id: row.category_id,
-          category_name: cat
-            ? (cat[`name_${uiLanguage}` as keyof Category] as string)
-            : "",
+          category_name: cat ? getCategoryName(cat, uiLanguage) : "",
           status: (row.state || "new") as SentenceStatus,
           is_preset: false,
           source_lang: row.source_lang ?? uiLanguage,
@@ -241,9 +300,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         target_text,
         keywords,
         category_id,
-        category_name: cat
-          ? (cat[`name_${uiLanguage}` as keyof Category] as string)
-          : "",
+        category_name: cat ? getCategoryName(cat, uiLanguage) : "",
         status: "learning",
         is_preset: false,
         source_lang: source_lang as Sentence["source_lang"],
@@ -263,7 +320,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   updateSentence: async (id, updates) => {
     set({ loading: true, error: null });
     try {
-      const dbUpdates: Record<string, any> = {};
+      const dbUpdates: Record<string, unknown> = {};
       if (updates.source_text !== undefined) dbUpdates.source_text = updates.source_text;
       if (updates.target_text !== undefined) dbUpdates.target_text = updates.target_text;
       if (updates.keywords !== undefined) dbUpdates.keywords = updates.keywords;
@@ -289,9 +346,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return {
           ...s,
           ...updates,
-          category_name: cat
-            ? (cat[`name_${uiLanguage}` as keyof Category] as string)
-            : s.category_name,
+          category_name: cat ? getCategoryName(cat, uiLanguage) : s.category_name,
         };
       });
 
@@ -375,6 +430,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       sentences: [],
       presetSentences: [],
       categories: [],
+      favoriteIds: [],
       loading: false,
       error: null,
     }),

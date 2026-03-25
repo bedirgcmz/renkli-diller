@@ -18,7 +18,9 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Category, MainStackParamList } from "@/types";
+import { getCategoryName } from "@/utils/categoryHelpers";
 
 export default function CategoryBrowserScreen() {
   const { t } = useTranslation();
@@ -36,8 +38,7 @@ export default function CategoryBrowserScreen() {
     loadCategories().finally(() => setInitialized(true));
   }, []);
 
-  const getCategoryName = (cat: Category): string =>
-    (cat[`name_${uiLanguage}` as keyof Category] as string) || cat.name_en;
+  const getLocalCategoryName = (cat: Category): string => getCategoryName(cat, uiLanguage);
 
   const handleCategoryPress = (cat: Category) => {
     if (!cat.is_free && !isPremium) {
@@ -61,7 +62,7 @@ export default function CategoryBrowserScreen() {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
-            {getCategoryName(selectedCategory)}
+            {getLocalCategoryName(selectedCategory)}
           </Text>
           <View style={{ width: 24 }} />
         </View>
@@ -119,6 +120,7 @@ export default function CategoryBrowserScreen() {
                         <Text style={styles.addBtnText}>{t("learn.add_to_list")}</Text>
                       </TouchableOpacity>
                     )}
+                    <FavoriteButton sentenceId={item.id} isPreset={true} size={18} />
                   </View>
                 </View>
               );
@@ -192,7 +194,7 @@ export default function CategoryBrowserScreen() {
                   style={[styles.categoryName, { color: colors.text }]}
                   numberOfLines={2}
                 >
-                  {getCategoryName(item)}
+                  {getLocalCategoryName(item)}
                 </Text>
                 {isLocked ? (
                   <View style={[styles.lockBadge, { backgroundColor: colors.premiumAccent + "18" }]}>
@@ -279,7 +281,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  cardFooter: { marginTop: 6 },
+  cardFooter: { marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   statusBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: 10,

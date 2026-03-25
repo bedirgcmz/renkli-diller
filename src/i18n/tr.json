@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Farklı dil çiftiyle eklendi",
     "lang_mismatch_body": "Bu cümleyi {{sourceLang}} → {{targetLang}} dil çifti için eklediniz. Şu anki ayarlarınız ({{currentSource}} → {{currentTarget}}) ile eşleşmiyor. Düzenleyerek güncelleyebilirsiniz.",
     "lang_mismatch_edit": "Düzenle",
-    "lang_mismatch_strip": "Dil ayarları değişti  ·  Düzenle"
+    "lang_mismatch_strip": "Dil ayarları değişti  ·  Düzenle",
+    "remove_favorite": "Favoriden Çıkar"
+  },
+  "favorites": {
+    "title": "Favoriler",
+    "empty": "Henüz favori cümle yok.\nCümlelerde kalp ikonuna basarak buraya ekleyebilirsiniz.",
+    "count": "favori cümle"
   },
   "add_sentence": {
     "title": "Yeni Cümle Ekle",
@@ -112,7 +118,7 @@
     "keywords": "Hedef Kelimeler",
     "keyword_hint": "Renklendirmek için işaretçi kullanın: *kırmızı* #yeşil# %sarı%",
     "keyword_guide_instruction": "Vurgulamak istediğin kelime veya kelime grubunu **çift yıldız** içine al:",
-    "keyword_guide_shown_as": "renkli badge olarak gösterilir",
+    "keyword_guide_shown_as": "renkli metin olarak gösterilir",
     "select_category": "Kategori Seçin",
     "save": "Kaydet",
     "cancel": "İptal",
@@ -158,6 +164,7 @@
     "confirm_signout": "Çıkış yapmak istediğinize emin misiniz?",
     "learning": "Öğreniyor",
     "learned_sentences": "Öğrenilen Cümleler",
+    "favorite_sentences": "Favori Cümleler",
     "activity": "Aktivite",
     "week": "Hafta",
     "month": "Ay",
@@ -350,7 +357,15 @@
     "quiz_next": "Sonraki",
     "quiz_premium_only": "Premium özellik",
     "share": "Paylaş",
-    "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!"
+    "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!",
+    "show_translation": "Çeviriyi göster",
+    "hide_translation": "Çeviriyi gizle",
+    "complete_btn": "Tamamladım",
+    "completed_feedback": "Harika! Metin tamamlandı.",
+    "next_text_btn": "Sonraki Metin",
+    "daily_limit_free": "Bugünkü metni tamamladın. Günde daha fazla metin okumak için Premium ol.",
+    "daily_limit_premium": "Bugün 3 metin tamamladın. Yarın devam et!",
+    "texts_today": "Bugün {{count}}/3 metin"
   },
   "home": {
     "card_learn_title": "Çalış",

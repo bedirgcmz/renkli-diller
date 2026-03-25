@@ -18,7 +18,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function App() {
   useEffect(() => {
-    initRevenueCat().catch(console.error);
+    initRevenueCat().catch(() => {});
   }, []);
 
   // Handle OAuth deep link callbacks (e.g. Google sign-in redirect)

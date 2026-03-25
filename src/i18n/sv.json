@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Lades till med ett annat språkpar",
     "lang_mismatch_body": "Du lade till den här meningen för {{sourceLang}} → {{targetLang}}. Det matchar inte dina nuvarande inställningar ({{currentSource}} → {{currentTarget}}). Du kan redigera den för att uppdatera.",
     "lang_mismatch_edit": "Redigera",
-    "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera"
+    "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera",
+    "remove_favorite": "Ta bort från favoriter"
+  },
+  "favorites": {
+    "title": "Favoriter",
+    "empty": "Inga favoritmeningar ännu.\nTryck på hjärtat på en mening för att spara den här.",
+    "count": "favoritmeningar"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",
@@ -112,7 +118,7 @@
     "keywords": "Målord",
     "keyword_hint": "Använd markörer för färgning: *röd* #grön# %gul%",
     "keyword_guide_instruction": "Omge det ord eller fras du vill markera med **dubbla asterisker**:",
-    "keyword_guide_shown_as": "visas som ett färgglatt märke",
+    "keyword_guide_shown_as": "visas som färgad text",
     "select_category": "Välj kategori",
     "save": "Spara",
     "cancel": "Avbryt",
@@ -158,6 +164,7 @@
     "confirm_signout": "Är du säker på att du vill logga ut?",
     "learning": "Lärande",
     "learned_sentences": "Inlärda Meningar",
+    "favorite_sentences": "Favoritmeningar",
     "activity": "Aktivitet",
     "week": "Vecka",
     "month": "Månad",
@@ -350,7 +357,15 @@
     "quiz_next": "Nästa",
     "quiz_premium_only": "Premiumfunktion",
     "share": "Dela",
-    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!"
+    "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!",
+    "show_translation": "Visa översättning",
+    "hide_translation": "Dölj översättning",
+    "complete_btn": "Klar",
+    "completed_feedback": "Bra jobbat! Texten är klar.",
+    "next_text_btn": "Nästa text",
+    "daily_limit_free": "Du har slutfört dagens text. Bli Premium för att läsa fler texter per dag.",
+    "daily_limit_premium": "Du har läst 3 texter idag. Kom tillbaka imorgon!",
+    "texts_today": "{{count}}/3 texter idag"
   },
   "home": {
     "card_learn_title": "Studera",

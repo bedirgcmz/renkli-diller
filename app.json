@@ -23,7 +23,10 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +48,11 @@
           "cameraPermission": "Parlio, profil fotoğrafı çekmek için kameraya erişim istiyor."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "383aa96b-ac6f-4878-9cdc-56c3e6829483"
+      }
+    }
   }
 }

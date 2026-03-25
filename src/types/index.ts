@@ -26,6 +26,7 @@ export interface Sentence {
   category_name?: string;
   status: SentenceStatus;
   is_preset: boolean;
+  is_favorite?: boolean;
   source_lang?: SupportedLanguage;
   target_lang?: SupportedLanguage;
   created_at?: string;
@@ -111,11 +112,13 @@ export type MainStackParamList = {
   ChangeEmail: undefined;
   ChangePassword: undefined;
   LearnedSentences: undefined;
+  FavoriteSentences: undefined;
 };
 
 export type AuthStackParamList = {
   Auth: undefined;
   ResetPassword: undefined;
+  LanguageSelection: undefined;
 };
 
 export type TabParamList = {
@@ -230,7 +233,7 @@ export interface UserReadingProgress {
   id: string;
   user_id: string;
   reading_text_id: string;
-  status: "read" | "learned";
+  status: "read" | "learned" | "completed";
   completed_at: string;
 }
 

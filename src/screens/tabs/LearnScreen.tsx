@@ -6,24 +6,28 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  type DimensionValue,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, useIsFocused, RouteProp } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@/providers/ThemeProvider";
+import type { ThemeColors } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
+import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
 import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
 import * as Haptics from "expo-haptics";
 
@@ -68,66 +72,67 @@ function ListenCard({
   onSelectOption: (opt: ListenOption) => void;
   onReplay: () => void;
   onReplaySlow: () => void;
-  colors: any;
+  colors: ThemeColors;
   t: (k: string) => string;
 }) {
   return (
     <View style={[listenStyles.card, { backgroundColor: colors.cardBackground }]}>
-      {/* ── Target sentence area ── */}
-      <View style={listenStyles.targetRow}>
-        <View style={listenStyles.targetContent}>
-          {showTarget ? (
-            <KeywordText
-              text={sentence.target_text}
-              baseColor={colors.text}
-              fontSize={18}
-              lineHeight={27}
-              fontWeight="600"
-              colorSeed={String(sentence.id)}
-            />
-          ) : (
-            <View
-              style={[
-                listenStyles.hiddenBox,
-                { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
-              ]}
-            >
-              <Ionicons name="headset-outline" size={18} color={colors.primary} />
-              <Text style={[listenStyles.hiddenText, { color: colors.textSecondary }]}>
-                {t("learn.tap_to_reveal")}
-              </Text>
-            </View>
-          )}
+      {/* ── Icon row: eye toggle + replay + favorite — horizontal, left-aligned ── */}
+      <View style={listenStyles.iconRow}>
+        <TouchableOpacity
+          style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
+          onPress={onToggleTarget}
+          activeOpacity={0.75}
+        >
+          <Ionicons
+            name={showTarget ? "eye-outline" : "eye-off-outline"}
+            size={18}
+            color={colors.textSecondary}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "18" }]}
+          onPress={onReplay}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "10" }]}
+          onPress={onReplaySlow}
+          activeOpacity={0.75}
+        >
+          <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
+        </TouchableOpacity>
+        <View style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}>
+          <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset ?? false} size={18} />
         </View>
+      </View>
 
-        {/* Action icons: eye toggle + replay */}
-        <View style={listenStyles.iconCol}>
-          <TouchableOpacity
-            style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
-            onPress={onToggleTarget}
-            activeOpacity={0.75}
+      {/* ── Target sentence area ── */}
+      <View style={listenStyles.targetContent}>
+        {showTarget ? (
+          <KeywordText
+            text={sentence.target_text}
+            baseColor={colors.text}
+            fontSize={18}
+            lineHeight={27}
+            fontWeight="600"
+            colorSeed={String(sentence.id)}
+          />
+        ) : (
+          <View
+            style={[
+              listenStyles.hiddenBox,
+              { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+            ]}
           >
-            <Ionicons
-              name={showTarget ? "eye-outline" : "eye-off-outline"}
-              size={18}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "18" }]}
-            onPress={onReplay}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "10" }]}
-            onPress={onReplaySlow}
-            activeOpacity={0.75}
-          >
-            <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
+            <Ionicons name="headset-outline" size={18} color={colors.primary} />
+            <Text style={[listenStyles.hiddenText, { color: colors.textSecondary }]}>
+              {t("learn.tap_to_reveal")}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Divider */}
@@ -147,13 +152,13 @@ function ListenCard({
 
           if (selected !== null) {
             if (opt.isCorrect) {
-              bg = "#2ECC7122";
-              borderColor = "#2ECC71";
-              textColor = "#2ECC71";
+              bg = QUIZ_CORRECT_COLOR + "22";
+              borderColor = QUIZ_CORRECT_COLOR;
+              textColor = QUIZ_CORRECT_COLOR;
             } else if (opt.text === selected && !opt.isCorrect) {
-              bg = "#E53E3E22";
-              borderColor = "#E53E3E";
-              textColor = "#E53E3E";
+              bg = QUIZ_WRONG_COLOR + "22";
+              borderColor = QUIZ_WRONG_COLOR;
+              textColor = QUIZ_WRONG_COLOR;
             }
           }
 
@@ -167,10 +172,10 @@ function ListenCard({
             >
               <Text style={[listenStyles.optionText, { color: textColor }]}>{opt.text}</Text>
               {selected !== null && opt.isCorrect && (
-                <Ionicons name="checkmark-circle" size={18} color="#2ECC71" />
+                <Ionicons name="checkmark-circle" size={18} color={QUIZ_CORRECT_COLOR} />
               )}
               {selected !== null && opt.text === selected && !opt.isCorrect && (
-                <Ionicons name="close-circle" size={18} color="#E53E3E" />
+                <Ionicons name="close-circle" size={18} color={QUIZ_WRONG_COLOR} />
               )}
             </TouchableOpacity>
           );
@@ -196,8 +201,14 @@ const listenStyles = StyleSheet.create({
     gap: 10,
     marginBottom: 16,
   },
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+  },
   targetContent: {
-    flex: 1,
+    marginBottom: 16,
   },
   hiddenBox: {
     flexDirection: "row",
@@ -256,6 +267,7 @@ const listenStyles = StyleSheet.create({
 export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const isFocused = useIsFocused();
   const navigation =
     useNavigation<
       CompositeNavigationProp<
@@ -298,6 +310,8 @@ export default function LearnScreen() {
 
   useEffect(() => {
     let mounted = true;
+    // Reset so dependent effects (e.g. listening tab) re-fire after reload.
+    setInitialized(false);
     const init = async () => {
       try {
         await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
@@ -338,6 +352,7 @@ export default function LearnScreen() {
 
   // ── Auto-TTS + option generation when listening card changes ─────────────────
   useEffect(() => {
+    if (!initialized || !isFocused) return;
     if (activeTab !== "listening") return;
     const sentence = learningList[listenIdx];
     if (!sentence) return;
@@ -358,7 +373,7 @@ export default function LearnScreen() {
       clearTimeout(timer);
       stopSpeaking();
     };
-  }, [listenIdx, activeTab, initialized]);
+  }, [listenIdx, activeTab, initialized, isFocused, targetLanguage]);
 
   const handleTabChange = (tab: TabKey) => {
     stopSpeaking();
@@ -698,7 +713,7 @@ export default function LearnScreen() {
                 colors={["#4DA3FF", "#49C98A"]}
                 style={[
                   styles.progressFill,
-                  { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as any },
+                  { width: `${Math.round(((currentIndex + 1) / total) * 100)}%` as DimensionValue },
                 ]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -827,7 +842,7 @@ export default function LearnScreen() {
 
 // ─── Alt bileşenler ────────────────────────────────────────────────────────────
 
-function EmptyState({ tab, colors, t }: { tab: TabKey; colors: any; t: (k: string) => string }) {
+function EmptyState({ tab, colors, t }: { tab: TabKey; colors: ThemeColors; t: (k: string) => string }) {
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>{tab === "listening" ? "🎧" : "📚"}</Text>
@@ -847,7 +862,7 @@ function MotivationBar({
 }: {
   remaining: number;
   learnedCount: number;
-  colors: any;
+  colors: ThemeColors;
   t: (k: string) => string;
 }) {
   const scale = useRef(new Animated.Value(1)).current;

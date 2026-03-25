@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Adicionada com outro par de idiomas",
     "lang_mismatch_body": "Você adicionou esta frase para {{sourceLang}} → {{targetLang}}. Não corresponde às suas configurações atuais ({{currentSource}} → {{currentTarget}}). Você pode editá-la para atualizar.",
     "lang_mismatch_edit": "Editar",
-    "lang_mismatch_strip": "Configurações de idioma alteradas  ·  Editar"
+    "lang_mismatch_strip": "Configurações de idioma alteradas  ·  Editar",
+    "remove_favorite": "Remover dos favoritos"
+  },
+  "favorites": {
+    "title": "Favoritos",
+    "empty": "Nenhuma frase favorita ainda.\nToque no coração de qualquer frase para salvá-la aqui.",
+    "count": "frases favoritas"
   },
   "add_sentence": {
     "title": "Nova frase",
@@ -112,7 +118,7 @@
     "keywords": "Palavras-chave",
     "keyword_hint": "Use marcadores para colorir: *vermelho* #verde# %amarelo%",
     "keyword_guide_instruction": "Envolva a palavra ou frase com **asteriscos duplos**:",
-    "keyword_guide_shown_as": "exibido como um badge colorido",
+    "keyword_guide_shown_as": "exibido como texto colorido",
     "select_category": "Selecionar categoria",
     "save": "Salvar",
     "cancel": "Cancelar",
@@ -158,6 +164,7 @@
     "confirm_signout": "Tem certeza que deseja sair?",
     "learning": "Aprendendo",
     "learned_sentences": "Frases Aprendidas",
+    "favorite_sentences": "Frases Favoritas",
     "activity": "Atividade",
     "week": "Semana",
     "month": "Mês",
@@ -350,7 +357,15 @@
     "quiz_next": "Próximo",
     "quiz_premium_only": "Recurso premium",
     "share": "Compartilhar",
-    "share_text": "Estudei o texto \"{title}\" hoje — aprenda idiomas com Parlio!"
+    "share_text": "Estudei o texto \"{title}\" hoje — aprenda idiomas com Parlio!",
+    "show_translation": "Mostrar tradução",
+    "hide_translation": "Ocultar tradução",
+    "complete_btn": "Concluído",
+    "completed_feedback": "Ótimo! Texto concluído.",
+    "next_text_btn": "Próximo texto",
+    "daily_limit_free": "Você concluiu o texto de hoje. Torne-se Premium para ler mais textos por dia.",
+    "daily_limit_premium": "Você leu 3 textos hoje. Volte amanhã!",
+    "texts_today": "{{count}}/3 textos hoje"
   },
   "home": {
     "card_learn_title": "Estudar",

@@ -5,9 +5,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { stripMarkers } from "@/utils/keywords";
-import { usePremium } from "@/hooks/usePremium";
+
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Sentence, SupportedLanguage } from "@/types";
 
 // State-aware top accent colors (subtle, not a bar)
@@ -54,7 +55,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
-  const { isPremium } = usePremium();
+
   const [speaking, setSpeaking] = useState(false);
 
   const hasMismatch =
@@ -71,26 +72,13 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
       return;
     }
     setSpeaking(true);
-    const speakTarget = () => {
-      Speech.speak(stripMarkers(sentence.target_text), {
-        language: LANG_CODE[targetLanguage],
-        onDone: () => setSpeaking(false),
-        onStopped: () => setSpeaking(false),
-        onError: () => setSpeaking(false),
-      });
-    };
-    if (isPremium) {
-      Speech.speak(stripMarkers(sentence.source_text), {
-        language: LANG_CODE[uiLanguage],
-        onDone: () => {
-          setTimeout(speakTarget, 1000);
-        },
-        onStopped: () => setSpeaking(false),
-        onError: () => setSpeaking(false),
-      });
-    } else {
-      speakTarget();
-    }
+    Speech.speak(stripMarkers(sentence.target_text), {
+      language: LANG_CODE[targetLanguage],
+      rate: 0.85,
+      onDone: () => setSpeaking(false),
+      onStopped: () => setSpeaking(false),
+      onError: () => setSpeaking(false),
+    });
   };
 
   const actionConfig = {
@@ -148,6 +136,15 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           start={{ x: 0.2, y: 0 }}
           end={{ x: 0.8, y: 1 }}
         />
+
+        {/* Favorite button — absolute top-right */}
+        <View style={{ position: "absolute", top: 4, right: 4, zIndex: 1 }}>
+          <FavoriteButton
+            sentenceId={sentence.id}
+            isPreset={sentence.is_preset ?? false}
+            size={20}
+          />
+        </View>
 
         {/* ✅ v2: 1px subtle accent line (not 3px bar) — state awareness without gimmick */}
         <View />
@@ -212,7 +209,12 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           ) : null}
 
           {/* Action buttons */}
-          <View style={[styles.actionRow, state === "learning" && onRemoveFromList ? styles.actionRowSplit : null]}>
+          <View
+            style={[
+              styles.actionRow,
+              state === "learning" && onRemoveFromList ? styles.actionRowSplit : null,
+            ]}
+          >
             {state === "learning" && onRemoveFromList ? (
               <>
                 {/* Listeden Çıkar — ghost */}
@@ -228,8 +230,15 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                         },
                       ]}
                     >
-                      <Ionicons name="remove-circle-outline" size={15} color={colors.textTertiary} />
-                      <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textTertiary }]}>
+                      <Ionicons
+                        name="remove-circle-outline"
+                        size={15}
+                        color={colors.textTertiary}
+                      />
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.actionBtnText, { color: colors.textTertiary }]}
+                      >
                         {t("learn.remove_from_list")}
                       </Text>
                     </View>
@@ -249,7 +258,10 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                       ]}
                     >
                       <Ionicons name="checkmark-circle-outline" size={15} color={colors.primary} />
-                      <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.primary }]}>
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.actionBtnText, { color: colors.primary }]}
+                      >
                         {t("learn.mark_learned")}
                       </Text>
                     </View>
@@ -270,7 +282,10 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                     ]}
                   >
                     <Ionicons name={actionConfig.icon} size={15} color={colors.textSecondary} />
-                    <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textSecondary }]}>
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.actionBtnText, { color: colors.textSecondary }]}
+                    >
                       {actionConfig.label}
                     </Text>
                   </View>

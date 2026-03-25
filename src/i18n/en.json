@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Added in a different language pair",
     "lang_mismatch_body": "You added this sentence for {{sourceLang}} → {{targetLang}}. It doesn't match your current settings ({{currentSource}} → {{currentTarget}}). You can edit it to update it.",
     "lang_mismatch_edit": "Edit",
-    "lang_mismatch_strip": "Language settings changed  ·  Edit"
+    "lang_mismatch_strip": "Language settings changed  ·  Edit",
+    "remove_favorite": "Remove Favorite"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorite sentences yet.\nTap the heart icon on any sentence to save it here.",
+    "count": "favorite sentences"
   },
   "add_sentence": {
     "title": "Add New Sentence",
@@ -112,7 +118,7 @@
     "keywords": "Target Words",
     "keyword_hint": "Use markers for coloring: *red* #green# %yellow%",
     "keyword_guide_instruction": "Wrap the word or phrase you want to highlight in **double asterisks**:",
-    "keyword_guide_shown_as": "shown as a colorful badge",
+    "keyword_guide_shown_as": "shown as colored text",
     "select_category": "Select Category",
     "save": "Save",
     "cancel": "Cancel",
@@ -158,6 +164,7 @@
     "confirm_signout": "Are you sure you want to sign out?",
     "learning": "Learning",
     "learned_sentences": "Learned Sentences",
+    "favorite_sentences": "Favorite Sentences",
     "activity": "Activity",
     "week": "Week",
     "month": "Month",
@@ -350,7 +357,15 @@
     "quiz_next": "Next",
     "quiz_premium_only": "Premium feature",
     "share": "Share",
-    "share_text": "I studied the text \"{title}\" today — learn languages with Parlio!"
+    "share_text": "I studied the text \"{title}\" today — learn languages with Parlio!",
+    "show_translation": "Show translation",
+    "hide_translation": "Hide translation",
+    "complete_btn": "Done",
+    "completed_feedback": "Great job! Text completed.",
+    "next_text_btn": "Next Text",
+    "daily_limit_free": "You've completed today's text. Go Premium to read more texts per day.",
+    "daily_limit_premium": "You've read 3 texts today. Come back tomorrow!",
+    "texts_today": "{{count}}/3 texts today"
   },
   "home": {
     "card_learn_title": "Study",

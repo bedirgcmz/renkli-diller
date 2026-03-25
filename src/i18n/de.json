@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Mit einem anderen Sprachpaar hinzugefügt",
     "lang_mismatch_body": "Du hast diesen Satz für {{sourceLang}} → {{targetLang}} hinzugefügt. Das stimmt nicht mit deinen aktuellen Einstellungen ({{currentSource}} → {{currentTarget}}) überein. Du kannst ihn bearbeiten, um ihn zu aktualisieren.",
     "lang_mismatch_edit": "Bearbeiten",
-    "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten"
+    "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten",
+    "remove_favorite": "Aus Favoriten entfernen"
+  },
+  "favorites": {
+    "title": "Favoriten",
+    "empty": "Noch keine Favoriten.\nTippe auf das Herz-Symbol bei einem Satz.",
+    "count": "Favoriten"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",
@@ -112,7 +118,7 @@
     "keywords": "Zielwörter",
     "keyword_hint": "Markierungen für Farbcodierung verwenden: *rot* #grün# %gelb%",
     "keyword_guide_instruction": "Umschließe das Wort oder die Phrase mit **doppelten Sternchen**:",
-    "keyword_guide_shown_as": "wird als buntes Badge angezeigt",
+    "keyword_guide_shown_as": "wird als farbiger Text angezeigt",
     "select_category": "Kategorie auswählen",
     "save": "Speichern",
     "cancel": "Abbrechen",
@@ -158,6 +164,7 @@
     "confirm_signout": "Sind Sie sicher, dass Sie sich abmelden möchten?",
     "learning": "Lernt gerade",
     "learned_sentences": "Gelernte Sätze",
+    "favorite_sentences": "Favoritensätze",
     "activity": "Aktivität",
     "week": "Woche",
     "month": "Monat",
@@ -350,7 +357,15 @@
     "quiz_next": "Weiter",
     "quiz_premium_only": "Premium-Funktion",
     "share": "Teilen",
-    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!"
+    "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!",
+    "show_translation": "Übersetzung anzeigen",
+    "hide_translation": "Übersetzung ausblenden",
+    "complete_btn": "Fertig",
+    "completed_feedback": "Super! Text abgeschlossen.",
+    "next_text_btn": "Nächster Text",
+    "daily_limit_free": "Du hast den heutigen Text abgeschlossen. Werde Premium, um täglich mehr Texte zu lesen.",
+    "daily_limit_premium": "Du hast heute 3 Texte gelesen. Komm morgen wieder!",
+    "texts_today": "Heute {{count}}/3 Texte"
   },
   "home": {
     "card_learn_title": "Lernen",

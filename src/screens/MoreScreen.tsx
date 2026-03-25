@@ -62,6 +62,11 @@ export default function MoreScreen() {
           onPress: () => navigation.navigate("LearnedSentences"),
         },
         {
+          icon: "heart-outline",
+          label: t("profile.favorite_sentences"),
+          onPress: () => navigation.navigate("FavoriteSentences"),
+        },
+        {
           icon: "document-text-outline",
           label: t("profile.export_pdf"),
           onPress: () => {

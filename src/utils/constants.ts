@@ -60,13 +60,25 @@ export const KEYWORD_TEXT_COLORS = {
 export const FREE_USER_SENTENCE_LIMIT = 30;
 export const FREE_QUIZ_DAILY_LIMIT = 5;
 export const FREE_AUTO_MODE_LIMIT = 10;
-export const PREMIUM_PRICE_MONTHLY = '$2.99';
-export const PREMIUM_PRICE_ANNUAL = '$16.99';
-export const PREMIUM_PRICE_LIFETIME = '$24.99';
+export const PREMIUM_PRICE_MONTHLY = '€3.99';
+export const PREMIUM_PRICE_ANNUAL = '€19.99';
 
 export const MIN_DELAY_MS = 2000;
 export const DELAY_PER_CHAR_MS = 100;
 export const POST_READ_DELAY_MS = 2000;
+
+export const QUIZ_CORRECT_COLOR = "#2ECC71";
+export const QUIZ_WRONG_COLOR = "#E53E3E";
+
+export const LANG_CODE: Record<SupportedLanguage, string> = {
+  tr: "tr-TR",
+  en: "en-US",
+  sv: "sv-SE",
+  de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+  pt: "pt-BR",
+};
 
 export const APP_NAMES: Record<SupportedLanguage, string> = {
   tr: 'Parlio',

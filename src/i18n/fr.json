@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Ajoutée avec une autre paire de langues",
     "lang_mismatch_body": "Vous avez ajouté cette phrase pour {{sourceLang}} → {{targetLang}}. Cela ne correspond pas à vos paramètres actuels ({{currentSource}} → {{currentTarget}}). Vous pouvez la modifier pour la mettre à jour.",
     "lang_mismatch_edit": "Modifier",
-    "lang_mismatch_strip": "Paramètres de langue modifiés  ·  Modifier"
+    "lang_mismatch_strip": "Paramètres de langue modifiés  ·  Modifier",
+    "remove_favorite": "Retirer des favoris"
+  },
+  "favorites": {
+    "title": "Favoris",
+    "empty": "Aucune phrase favorite pour l'instant.\nAppuyez sur le cœur d'une phrase pour la sauvegarder.",
+    "count": "phrases favorites"
   },
   "add_sentence": {
     "title": "Nouvelle phrase",
@@ -112,7 +118,7 @@
     "keywords": "Mots clés",
     "keyword_hint": "Utilisez des marqueurs pour coloriser : *rouge* #vert# %jaune%",
     "keyword_guide_instruction": "Entourez le mot ou la phrase avec des **doubles astérisques** :",
-    "keyword_guide_shown_as": "affiché comme un badge coloré",
+    "keyword_guide_shown_as": "affiché comme du texte coloré",
     "select_category": "Choisir une catégorie",
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -158,6 +164,7 @@
     "confirm_signout": "Êtes-vous sûr de vouloir vous déconnecter ?",
     "learning": "En cours",
     "learned_sentences": "Phrases Apprises",
+    "favorite_sentences": "Phrases Favorites",
     "activity": "Activité",
     "week": "Semaine",
     "month": "Mois",
@@ -350,7 +357,15 @@
     "quiz_next": "Suivant",
     "quiz_premium_only": "Fonction premium",
     "share": "Partager",
-    "share_text": "J'ai étudié le texte \"{title}\" aujourd'hui — apprenez les langues avec Parlio !"
+    "share_text": "J'ai étudié le texte \"{title}\" aujourd'hui — apprenez les langues avec Parlio !",
+    "show_translation": "Afficher la traduction",
+    "hide_translation": "Masquer la traduction",
+    "complete_btn": "Terminé",
+    "completed_feedback": "Bravo ! Texte complété.",
+    "next_text_btn": "Texte suivant",
+    "daily_limit_free": "Tu as complété le texte du jour. Passe en Premium pour lire plus de textes par jour.",
+    "daily_limit_premium": "Tu as lu 3 textes aujourd'hui. Reviens demain !",
+    "texts_today": "{{count}}/3 textes aujourd'hui"
   },
   "home": {
     "card_learn_title": "Étudier",

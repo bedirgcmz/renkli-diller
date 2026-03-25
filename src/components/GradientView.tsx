@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
 
-let LinearGradient: any = null;
+type LinearGradientType = typeof import('expo-linear-gradient').LinearGradient;
+let LinearGradient: LinearGradientType | null = null;
 try {
-  LinearGradient = require('expo-linear-gradient').LinearGradient;
+  LinearGradient = require('expo-linear-gradient').LinearGradient as LinearGradientType;
 } catch {}
 
 interface Props {

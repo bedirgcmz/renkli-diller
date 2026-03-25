@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
@@ -24,8 +24,10 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
 import { HomeStackParamList, MainStackParamList, PillSegment, Sentence } from "@/types";
+import { speak, stopSpeaking } from "@/services/tts";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -109,8 +111,9 @@ export default function QuizScreen() {
   >>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
-  const { uiLanguage, targetLanguage } = useSettingsStore();
+  const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
   const { isPremium } = usePremium();
+  const isFocused = useIsFocused();
 
   const [mode, setMode] = useState<QuizMode>("multiple_choice");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -128,6 +131,7 @@ export default function QuizScreen() {
   const [isRetryPhase, setIsRetryPhase] = useState(false);
   const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
   const [refreshing, setRefreshing] = useState(false);
+  const [quizMuted, setQuizMuted] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -157,6 +161,7 @@ export default function QuizScreen() {
   }, []);
 
   useEffect(() => {
+    setInitialized(false);
     Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
       setInitialized(true),
     );
@@ -175,6 +180,21 @@ export default function QuizScreen() {
     const timer = setTimeout(() => kwInputRefs.current[0]?.focus(), 150);
     return () => clearTimeout(timer);
   }, [currentIdx, mode, questions]);
+
+  // Auto-speak MC question when it loads
+  useEffect(() => {
+    if (!initialized || !isFocused) return;
+    const q = questions[currentIdx];
+    if (mode !== "multiple_choice" || !q || q.type !== "multiple_choice") return;
+    if (!ttsEnabled || quizMuted) return;
+    const timer = setTimeout(() => {
+      speak(stripMarkers(q.sentence.target_text), targetLanguage);
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      stopSpeaking();
+    };
+  }, [currentIdx, mode, questions, ttsEnabled, quizMuted, initialized, isFocused]);
 
   const allSentences: Sentence[] = [
     ...sentences,
@@ -206,7 +226,7 @@ export default function QuizScreen() {
 
   useEffect(() => {
     if (learningSentences.length > 0) startSession();
-  }, [mode, sentences.length]);
+  }, [mode, sentences.length, presetSentences.length, initialized]);
 
   const currentQ = questions[currentIdx];
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
@@ -516,9 +536,31 @@ export default function QuizScreen() {
           <>
             {/* ── Question card ─────────────────────────────────── */}
             <View style={[styles.questionCard, { backgroundColor: colors.cardBackground }]}>
-              <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
-                {currentIdx + 1}/{questions.length}
-              </Text>
+              <View style={styles.questionCardHeader}>
+                <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
+                  {currentIdx + 1}/{questions.length}
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <FavoriteButton
+                    sentenceId={currentQ.sentence.id}
+                    isPreset={currentQ.sentence.is_preset ?? false}
+                    size={20}
+                  />
+                  {mcQ && (
+                    <TouchableOpacity
+                      onPress={() => setQuizMuted((m) => !m)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={quizMuted ? "volume-mute-outline" : "volume-high-outline"}
+                        size={20}
+                        color={quizMuted ? colors.textTertiary : colors.primary}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
 
               {/* FB: direction badge */}
               {fbQ && (
@@ -891,7 +933,13 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
-  questionNum: { fontSize: 12, marginBottom: 10 },
+  questionCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  questionNum: { fontSize: 12 },
   questionPrompt: { marginBottom: 12 },
   directionBadge: {
     flexDirection: "row",
@@ -954,7 +1002,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingTop: 2,
     lineHeight: 30,
-    color: "transparent",
+    opacity: 0,
   },
   kwInput: {
     position: "absolute",

@@ -48,6 +48,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
     setSpeaking(true);
     Speech.speak(plainText, {
       language: LANGUAGE_CODES[language],
+      rate: 0.85,
       onDone: () => setSpeaking(false),
       onStopped: () => setSpeaking(false),
       onError: () => setSpeaking(false),

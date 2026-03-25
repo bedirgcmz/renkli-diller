@@ -11,6 +11,7 @@ import AutoModeScreen from "@/screens/AutoModeScreen";
 import ChangeEmailScreen from "@/screens/ChangeEmailScreen";
 import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
 import LearnedSentencesScreen from "@/screens/LearnedSentencesScreen";
+import FavoriteSentencesScreen from "@/screens/FavoriteSentencesScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -61,6 +62,11 @@ export default function MainNavigator() {
       <Stack.Screen
         name="LearnedSentences"
         component={LearnedSentencesScreen}
+        options={{ presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="FavoriteSentences"
+        component={FavoriteSentencesScreen}
         options={{ presentation: "modal" }}
       />
     </Stack.Navigator>

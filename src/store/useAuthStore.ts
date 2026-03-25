@@ -38,6 +38,10 @@ interface AuthState {
   clear: () => void;
 }
 
+// Module-level subscription handle — prevents duplicate listeners across
+// multiple `initialize` calls (e.g. hot-reload or fast-refresh cycles).
+let authSubscription: { unsubscribe: () => void } | null = null;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
@@ -157,7 +161,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       set({ loading: false });
-      console.error("Sign out error:", error);
+      if (__DEV__) console.error("Sign out error:", error);
     }
   },
 
@@ -242,7 +246,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       return { success: true, url: publicUrl };
     } catch (error: any) {
-      console.error("[uploadAvatar] exception:", error);
+      if (__DEV__) console.error("[uploadAvatar] exception:", error);
       return { success: false, error: error.message ?? "Upload failed" };
     }
   },
@@ -308,9 +312,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const session = JSON.parse(storedSession);
         const {
           data: { user },
+          error: sessionError,
         } = await supabase.auth.setSession(session);
 
-        if (user) {
+        if (sessionError) {
+          // Refresh token expired or invalid — clear stale session so we don't
+          // retry it on every subsequent app launch.
+          await AsyncStorage.removeItem("supabase_session");
+        } else if (user) {
           // Fetch user profile
           const { data: profile } = await supabase
             .from("profiles")
@@ -340,8 +349,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
 
+      // Clean up any previous listener before attaching a new one.
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+        authSubscription = null;
+      }
+
       // Listen for auth changes
-      supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === "SIGNED_IN" && session?.user) {
           // Fetch user profile
           const { data: profile } = await supabase
@@ -374,19 +389,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
         }
       });
+      authSubscription = subscription;
 
       set({ initialized: true });
     } catch (error) {
-      console.error("Auth initialization error:", error);
+      if (__DEV__) console.error("Auth initialization error:", error);
       set({ initialized: true });
     }
   },
 
-  clear: () =>
+  clear: () => {
+    if (authSubscription) {
+      authSubscription.unsubscribe();
+      authSubscription = null;
+    }
     set({
       user: null,
       session: null,
       loading: false,
       initialized: false,
-    }),
+    });
+  },
 }));

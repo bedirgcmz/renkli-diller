@@ -23,6 +23,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import ActivityChart from "@/components/ActivityChart";
+import { countTodayLearned } from "@/utils/progressHelpers";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -44,15 +45,12 @@ export default function ProfileScreen() {
   useEffect(() => {
     loadSentences();
     loadProgress();
-  }, []);
+  }, [loadSentences, loadProgress]);
 
   const totalStudied = Object.keys(progressMap).length;
   const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
   const learningCount = Object.values(progressMap).filter((s) => s === "learning").length;
-  const today = new Date().toISOString().split("T")[0];
-  const todayLearned = progress.filter(
-    (p) => p.state === "learned" && p.learned_at?.startsWith(today),
-  ).length;
+  const todayLearned = countTodayLearned(progress);
   const dailyGoalProgress = Math.min(todayLearned / dailyGoal, 1);
 
   const initials = (user?.display_name || user?.email || "?")
@@ -94,7 +92,8 @@ export default function ProfileScreen() {
       quality: 0.7,
       base64: true,
     });
-    if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
+    if (!result.canceled)
+      await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
   };
 
   const pickFromGallery = async () => {
@@ -108,7 +107,8 @@ export default function ProfileScreen() {
       quality: 0.7,
       base64: true,
     });
-    if (!result.canceled) await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
+    if (!result.canceled)
+      await doUpload(result.assets[0].uri, result.assets[0].base64 ?? undefined);
   };
 
   const handleRemovePhoto = () => {
@@ -146,11 +146,11 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Text style={[styles.screenTitle, { color: colors.text }]}>{t("profile.title")}</Text>
 
@@ -163,7 +163,9 @@ export default function ProfileScreen() {
           >
             {user?.avatar_url && !avatarLoadError ? (
               <Image
-                source={{ uri: avatarKey > 0 ? `${user.avatar_url}?v=${avatarKey}` : user.avatar_url }}
+                source={{
+                  uri: avatarKey > 0 ? `${user.avatar_url}?v=${avatarKey}` : user.avatar_url,
+                }}
                 style={styles.avatarImage}
                 onError={() => setAvatarLoadError(true)}
               />
@@ -185,7 +187,10 @@ export default function ProfileScreen() {
               {editingName ? (
                 <TextInput
                   ref={nameInputRef}
-                  style={[styles.nameInput, { color: colors.text, borderBottomColor: colors.primary }]}
+                  style={[
+                    styles.nameInput,
+                    { color: colors.text, borderBottomColor: colors.primary },
+                  ]}
                   value={nameValue}
                   onChangeText={setNameValue}
                   onSubmitEditing={saveName}
@@ -198,7 +203,12 @@ export default function ProfileScreen() {
                   {user?.display_name || user?.email?.split("@")[0] || "—"}
                 </Text>
               )}
-              <TouchableOpacity onPress={editingName ? saveName : startEditName} hitSlop={10} disabled={nameSaving} style={styles.nameEditBtn}>
+              <TouchableOpacity
+                onPress={editingName ? saveName : startEditName}
+                hitSlop={10}
+                disabled={nameSaving}
+                style={styles.nameEditBtn}
+              >
                 {nameSaving ? (
                   <ActivityIndicator size="small" color={colors.primary} />
                 ) : (
@@ -209,17 +219,18 @@ export default function ProfileScreen() {
                   />
                 )}
               </TouchableOpacity>
-              {isPremium && !editingName && (
-                <View style={[styles.premiumBadge, { backgroundColor: colors.premiumAccent + "22" }]}>
-                  <Text style={[styles.premiumBadgeText, { color: colors.premiumAccent }]}>
-                    ✨ {t("common.premium_badge")}
-                  </Text>
-                </View>
-              )}
             </View>
             <Text style={[styles.userEmail, { color: colors.textSecondary }]} numberOfLines={1}>
               {user?.email}
             </Text>
+            {isPremium && !editingName && (
+              <View style={[styles.premiumBadge, { backgroundColor: colors.premiumAccent + "18" }]}>
+                <Ionicons name="star" size={11} color={colors.premiumAccent} />
+                <Text style={[styles.premiumBadgeText, { color: colors.premiumAccent }]}>
+                  {t("common.premium_badge")}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -227,9 +238,7 @@ export default function ProfileScreen() {
         <View style={styles.streakRow}>
           <View style={[styles.streakCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.streakIcon}>🔥</Text>
-            <Text style={[styles.streakNumber, { color: colors.text }]}>
-              {stats.currentStreak}
-            </Text>
+            <Text style={[styles.streakNumber, { color: colors.text }]}>{stats.currentStreak}</Text>
             <Text style={[styles.streakLabel, { color: colors.textSecondary }]}>
               {t("profile.streak")}
             </Text>
@@ -300,11 +309,19 @@ export default function ProfileScreen() {
               const pct = Math.round((s.correct / s.total) * 100);
               return (
                 <View key={mode} style={styles.quizRow}>
-                  <Text style={[styles.quizRowLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+                  <Text
+                    style={[styles.quizRowLabel, { color: colors.textSecondary }]}
+                    numberOfLines={1}
+                  >
                     {t(`quiz.${mode}`)}
                   </Text>
                   <View style={[styles.quizBar, { backgroundColor: colors.border }]}>
-                    <View style={[styles.quizBarFill, { backgroundColor: colors.primary, width: `${pct}%` }]} />
+                    <View
+                      style={[
+                        styles.quizBarFill,
+                        { backgroundColor: colors.primary, width: `${pct}%` },
+                      ]}
+                    />
                   </View>
                   <Text style={[styles.quizRowPct, { color: colors.text }]}>{pct}%</Text>
                 </View>
@@ -325,11 +342,19 @@ export default function ProfileScreen() {
                 const label = t(`categories.${cat}`, { defaultValue: cat });
                 return (
                   <View key={cat} style={styles.quizRow}>
-                    <Text style={[styles.quizRowLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+                    <Text
+                      style={[styles.quizRowLabel, { color: colors.textSecondary }]}
+                      numberOfLines={1}
+                    >
                       {label}
                     </Text>
                     <View style={[styles.quizBar, { backgroundColor: colors.border }]}>
-                      <View style={[styles.quizBarFill, { backgroundColor: colors.success, width: `${pct}%` }]} />
+                      <View
+                        style={[
+                          styles.quizBarFill,
+                          { backgroundColor: colors.success, width: `${pct}%` },
+                        ]}
+                      />
                     </View>
                     <Text style={[styles.quizRowPct, { color: colors.text }]}>{pct}%</Text>
                   </View>
@@ -358,25 +383,33 @@ export default function ProfileScreen() {
             </Text>
             <TouchableOpacity style={styles.sheetItem} onPress={pickFromCamera}>
               <Ionicons name="camera-outline" size={22} color={colors.text} />
-              <Text style={[styles.sheetItemText, { color: colors.text }]}>{t("profile.photo_camera")}</Text>
+              <Text style={[styles.sheetItemText, { color: colors.text }]}>
+                {t("profile.photo_camera")}
+              </Text>
             </TouchableOpacity>
             <View style={[styles.sheetDivider, { backgroundColor: colors.divider }]} />
             <TouchableOpacity style={styles.sheetItem} onPress={pickFromGallery}>
               <Ionicons name="image-outline" size={22} color={colors.text} />
-              <Text style={[styles.sheetItemText, { color: colors.text }]}>{t("profile.photo_gallery")}</Text>
+              <Text style={[styles.sheetItemText, { color: colors.text }]}>
+                {t("profile.photo_gallery")}
+              </Text>
             </TouchableOpacity>
             {!!user?.avatar_url && (
               <>
                 <View style={[styles.sheetDivider, { backgroundColor: colors.divider }]} />
                 <TouchableOpacity style={styles.sheetItem} onPress={handleRemovePhoto}>
                   <Ionicons name="trash-outline" size={22} color={colors.error} />
-                  <Text style={[styles.sheetItemText, { color: colors.error }]}>{t("profile.photo_remove")}</Text>
+                  <Text style={[styles.sheetItemText, { color: colors.error }]}>
+                    {t("profile.photo_remove")}
+                  </Text>
                 </TouchableOpacity>
               </>
             )}
             <View style={[styles.sheetDivider, { backgroundColor: colors.divider }]} />
             <TouchableOpacity style={styles.sheetItem} onPress={() => setPhotoSheetVisible(false)}>
-              <Text style={[styles.sheetItemText, { color: colors.textSecondary }]}>{t("common.cancel")}</Text>
+              <Text style={[styles.sheetItemText, { color: colors.textSecondary }]}>
+                {t("common.cancel")}
+              </Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>
@@ -440,9 +473,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   userInfo: { flex: 1 },
-  nameRow: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+  nameRow: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
   userName: { fontSize: 17, fontWeight: "600", flex: 1 },
-  premiumBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  premiumBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginTop: 6,
+  },
   premiumBadgeText: { fontSize: 11, fontWeight: "700" },
   userEmail: { fontSize: 13 },
   streakRow: { flexDirection: "row", gap: 12, marginBottom: 14 },

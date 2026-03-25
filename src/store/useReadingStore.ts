@@ -11,8 +11,8 @@ interface ReadingState {
 
   fetchNextText: (userId: string) => Promise<void>;
   fetchProgress: (userId: string) => Promise<void>;
-  markAsRead: (userId: string, textId: string) => Promise<void>;
-  markAsLearned: (userId: string, textId: string) => Promise<void>;
+  markAsCompleted: (userId: string, textId: string) => Promise<void>;
+  getTodayCount: () => number;
   getLearnedCount: () => number;
   getReadingStreak: () => number;
 }
@@ -35,24 +35,22 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   fetchNextText: async (userId) => {
     set({ loading: true, error: null });
     try {
-      // Get learned text IDs for this user
+      // Exclude ALL previously completed texts regardless of status
       const { data: prog } = await supabase
         .from("user_reading_progress")
         .select("reading_text_id")
-        .eq("user_id", userId)
-        .eq("status", "learned");
+        .eq("user_id", userId);
 
-      const learnedIds = prog?.map((p: any) => p.reading_text_id) ?? [];
+      const doneIds = prog?.map((p: any) => p.reading_text_id) ?? [];
 
-      // Fetch next unlearned text ordered by order_index
       let query = supabase
         .from("reading_texts")
         .select("*")
         .order("order_index")
         .limit(1);
 
-      if (learnedIds.length > 0) {
-        query = query.not("id", "in", `(${learnedIds.join(",")})`);
+      if (doneIds.length > 0) {
+        query = query.not("id", "in", `(${doneIds.join(",")})`);
       }
 
       const { data: textData, error } = await query.single();
@@ -61,7 +59,6 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
         return;
       }
 
-      // Fetch keywords for this text ordered by position
       const { data: kwData } = await supabase
         .from("reading_text_keywords")
         .select("*")
@@ -78,53 +75,57 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
     }
   },
 
-  markAsRead: async (userId, textId) => {
+  markAsCompleted: async (userId, textId) => {
+    const now = new Date().toISOString();
     await supabase.from("user_reading_progress").upsert(
-      { user_id: userId, reading_text_id: textId, status: "read" },
+      { user_id: userId, reading_text_id: textId, status: "completed", completed_at: now },
       { onConflict: "user_id,reading_text_id" }
     );
-    await get().fetchProgress(userId);
+    set((state) => {
+      const exists = state.progress.some((p) => p.reading_text_id === textId);
+      return {
+        progress: exists
+          ? state.progress.map((p) =>
+              p.reading_text_id === textId
+                ? { ...p, status: "completed" as const, completed_at: now }
+                : p
+            )
+          : [
+              ...state.progress,
+              {
+                id: "",
+                user_id: userId,
+                reading_text_id: textId,
+                status: "completed" as const,
+                completed_at: now,
+              },
+            ],
+      };
+    });
   },
 
-  markAsLearned: async (userId, textId) => {
-    await supabase.from("user_reading_progress").upsert(
-      { user_id: userId, reading_text_id: textId, status: "learned" },
-      { onConflict: "user_id,reading_text_id" }
-    );
-    set((state) => ({
-      progress: state.progress.some((p) => p.reading_text_id === textId)
-        ? state.progress.map((p) =>
-            p.reading_text_id === textId ? { ...p, status: "learned" } : p
-          )
-        : [
-            ...state.progress,
-            {
-              id: "",
-              user_id: userId,
-              reading_text_id: textId,
-              status: "learned",
-              completed_at: new Date().toISOString(),
-            },
-          ],
-    }));
+  getTodayCount: () => {
+    const today = new Date().toISOString().split("T")[0];
+    return get().progress.filter(
+      (p) => p.completed_at && p.completed_at.split("T")[0] === today
+    ).length;
   },
 
   getLearnedCount: () => {
-    return get().progress.filter((p) => p.status === "learned").length;
+    return get().progress.length;
   },
 
   getReadingStreak: () => {
     const prog = get().progress;
     if (prog.length === 0) return 0;
-    // Unique dates with at least one completed reading, descending
+
     const days = [
-      ...new Set(prog.map((p) => p.completed_at.split("T")[0])),
-    ].sort().reverse();
+      ...new Set(prog.map((p) => p.completed_at?.split("T")[0]).filter(Boolean)),
+    ].sort().reverse() as string[];
 
     const today = new Date().toISOString().split("T")[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
-    // Streak must start from today or yesterday
     if (days[0] !== today && days[0] !== yesterday) return 0;
 
     let streak = 0;
