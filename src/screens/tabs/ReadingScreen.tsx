@@ -24,10 +24,14 @@ import { useReadingStore } from "@/store/useReadingStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KEYWORD_TEXT_COLORS, LANG_CODE } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
-import { ReadingTextKeyword, SupportedLanguage, HomeStackParamList, MainStackParamList } from "@/types";
+import {
+  ReadingTextKeyword,
+  SupportedLanguage,
+  HomeStackParamList,
+  MainStackParamList,
+} from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
 
 const DIFFICULTY_COLORS: Record<number, string> = {
   1: "#49C98A",
@@ -45,7 +49,7 @@ function parseBody(body: string): Segment[] {
   return parseKeywords(body).map((seg) =>
     seg.isPill
       ? { isKeyword: true as const, text: seg.text, positionIndex: seg.pillIndex ?? 0 }
-      : { isKeyword: false as const, text: seg.text }
+      : { isKeyword: false as const, text: seg.text },
   );
 }
 
@@ -127,7 +131,10 @@ function KeywordPreviewModal({
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
       <Pressable style={kStyles.backdrop} onPress={onClose}>
-        <Pressable style={[kStyles.sheet, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
+        <Pressable
+          style={[kStyles.sheet, { backgroundColor: colors.cardBackground }]}
+          onPress={() => {}}
+        >
           {/* Header */}
           <View style={[kStyles.sheetHeader, { borderBottomColor: colors.divider }]}>
             <Text style={[kStyles.sheetTitle, { color: colors.text }]}>
@@ -225,7 +232,9 @@ function buildQuizQuestions(
 ) {
   // Build array of {question (source word), answer (target word), options}
   const all = keywords.filter(
-    (kw) => getField<string>(kw, `keyword_${uiLanguage}`) && getField<string>(kw, `keyword_${targetLanguage}`),
+    (kw) =>
+      getField<string>(kw, `keyword_${uiLanguage}`) &&
+      getField<string>(kw, `keyword_${targetLanguage}`),
   );
   if (all.length < 2) return [];
 
@@ -325,7 +334,9 @@ function VocabQuizModal({
                 {t("reading.quiz_well_done")}
               </Text>
               <Text style={[qStyles.resultScore, { color: colors.primary }]}>
-                {t("reading.quiz_result").replace("{score}", String(score)).replace("{total}", String(questions.length))}
+                {t("reading.quiz_result")
+                  .replace("{score}", String(score))
+                  .replace("{total}", String(questions.length))}
               </Text>
               <TouchableOpacity
                 style={[qStyles.closeBtn, { backgroundColor: colors.primary }]}
@@ -344,7 +355,12 @@ function VocabQuizModal({
               </Text>
 
               {/* Question word */}
-              <View style={[qStyles.questionBox, { backgroundColor: qColor + "15", borderColor: qColor + "30" }]}>
+              <View
+                style={[
+                  qStyles.questionBox,
+                  { backgroundColor: qColor + "15", borderColor: qColor + "30" },
+                ]}
+              >
                 <Text style={[qStyles.questionWord, { color: qColor }]}>{q.question}</Text>
                 <Text style={[qStyles.questionHint, { color: colors.textTertiary }]}>
                   {uiLanguage.toUpperCase()} → {targetLanguage.toUpperCase()}
@@ -360,8 +376,15 @@ function VocabQuizModal({
                   let border = colors.border;
                   let textColor = colors.text;
                   if (selected) {
-                    if (isCorrect) { bg = "#49C98A20"; border = "#49C98A"; textColor = "#49C98A"; }
-                    else if (isSelected) { bg = "#FF6B6B20"; border = "#FF6B6B"; textColor = "#FF6B6B"; }
+                    if (isCorrect) {
+                      bg = "#49C98A20";
+                      border = "#49C98A";
+                      textColor = "#49C98A";
+                    } else if (isSelected) {
+                      bg = "#FF6B6B20";
+                      border = "#FF6B6B";
+                      textColor = "#FF6B6B";
+                    }
                   }
                   return (
                     <TouchableOpacity
@@ -391,7 +414,9 @@ function VocabQuizModal({
                   activeOpacity={0.85}
                 >
                   <Text style={qStyles.nextBtnText}>
-                    {currentQ < questions.length - 1 ? t("reading.quiz_next") : t("reading.quiz_finish")}
+                    {currentQ < questions.length - 1
+                      ? t("reading.quiz_next")
+                      : t("reading.quiz_finish")}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -482,10 +507,13 @@ export default function ReadingScreen() {
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { isPremium } = usePremium();
-  const navigation = useNavigation<CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList>,
-    NativeStackNavigationProp<MainStackParamList>
-  >>();
+  const navigation =
+    useNavigation<
+      CompositeNavigationProp<
+        NativeStackNavigationProp<HomeStackParamList>,
+        NativeStackNavigationProp<MainStackParamList>
+      >
+    >();
   const {
     currentText,
     keywords,
@@ -536,26 +564,23 @@ export default function ReadingScreen() {
     [speaking, currentText],
   );
 
-  const speakTextSlow = useCallback(
-    async () => {
-      if (speaking) {
-        await Speech.stop();
-        setSpeaking(null);
-        return;
-      }
-      const raw = getField<string>(currentText, `body_${targetLanguage}`);
-      if (!raw) return;
-      setSpeaking("slow");
-      Speech.speak(stripMarkers(raw), {
-        language: LANG_CODE[targetLanguage],
-        rate: 0.4,
-        onDone: () => setSpeaking(null),
-        onStopped: () => setSpeaking(null),
-        onError: () => setSpeaking(null),
-      });
-    },
-    [speaking, currentText, targetLanguage],
-  );
+  const speakTextSlow = useCallback(async () => {
+    if (speaking) {
+      await Speech.stop();
+      setSpeaking(null);
+      return;
+    }
+    const raw = getField<string>(currentText, `body_${targetLanguage}`);
+    if (!raw) return;
+    setSpeaking("slow");
+    Speech.speak(stripMarkers(raw), {
+      language: LANG_CODE[targetLanguage],
+      rate: 0.4,
+      onDone: () => setSpeaking(null),
+      onStopped: () => setSpeaking(null),
+      onError: () => setSpeaking(null),
+    });
+  }, [speaking, currentText, targetLanguage]);
 
   const handleShare = useCallback(async () => {
     if (!currentText) return;
@@ -584,11 +609,9 @@ export default function ReadingScreen() {
     getField<string>(currentText, "title_en") ??
     "";
 
-  const sourceBody =
-    getField<string>(currentText, `body_${uiLanguage}`) ?? "";
+  const sourceBody = getField<string>(currentText, `body_${uiLanguage}`) ?? "";
 
-  const targetBody =
-    getField<string>(currentText, `body_${targetLanguage}`) ?? "";
+  const targetBody = getField<string>(currentText, `body_${targetLanguage}`) ?? "";
 
   const CATEGORY_LABELS: Record<string, string> = {
     daily_life: t("reading.category_daily_life"),
@@ -624,7 +647,10 @@ export default function ReadingScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -634,10 +660,15 @@ export default function ReadingScreen() {
 
   if (!currentText) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         <View style={styles.centered}>
           <Text style={styles.emptyIcon}>🎉</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>{t("reading.no_more_texts")}</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            {t("reading.no_more_texts")}
+          </Text>
           <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
             {t("reading.no_more_subtitle")}
           </Text>
@@ -647,7 +678,10 @@ export default function ReadingScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
       {/* ── Header ─────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("reading.title")}</Text>
@@ -660,7 +694,6 @@ export default function ReadingScreen() {
           >
             <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
-
           {/* Keyword preview */}
           {keywords.length > 0 && (
             <TouchableOpacity
@@ -671,64 +704,6 @@ export default function ReadingScreen() {
               <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
-          {/* Source TTS (premium only) */}
-          {isPremium && (
-            <TouchableOpacity
-              style={[
-                styles.iconBtn,
-                {
-                  backgroundColor:
-                    speaking === "source" ? colors.primary + "20" : colors.backgroundSecondary,
-                },
-              ]}
-              onPress={() => speakText(uiLanguage, "source")}
-              activeOpacity={0.75}
-            >
-              <Ionicons
-                name={speaking === "source" ? "stop-circle" : "volume-medium-outline"}
-                size={20}
-                color={speaking === "source" ? colors.primary : colors.textSecondary}
-              />
-            </TouchableOpacity>
-          )}
-          {/* Target TTS */}
-          <TouchableOpacity
-            style={[
-              styles.iconBtn,
-              {
-                backgroundColor:
-                  speaking === "target" ? colors.primary + "20" : colors.backgroundSecondary,
-              },
-            ]}
-            onPress={() => speakText(targetLanguage, "target")}
-            activeOpacity={0.75}
-          >
-            <Ionicons
-              name={speaking === "target" ? "stop-circle" : "volume-high-outline"}
-              size={20}
-              color={speaking === "target" ? colors.primary : colors.textSecondary}
-            />
-          </TouchableOpacity>
-
-          {/* Slow TTS */}
-          <TouchableOpacity
-            style={[
-              styles.iconBtn,
-              {
-                backgroundColor:
-                  speaking === "slow" ? colors.primary + "20" : colors.backgroundSecondary,
-              },
-            ]}
-            onPress={speakTextSlow}
-            activeOpacity={0.75}
-          >
-            {speaking === "slow" ? (
-              <Ionicons name="stop-circle" size={20} color={colors.primary} />
-            ) : (
-              <MaterialIcons name="slow-motion-video" size={20} color={colors.textSecondary} />
-            )}
-          </TouchableOpacity>
-
           {/* Vocab quiz (premium) */}
           {isPremium && keywords.length >= 2 && (
             <TouchableOpacity
@@ -765,10 +740,7 @@ export default function ReadingScreen() {
       )}
 
       {/* ── Body ───────────────────────────────────────────────────── */}
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Meta row */}
         <View style={styles.metaRow}>
           <View style={[styles.categoryChip, { backgroundColor: colors.backgroundSecondary }]}>
@@ -791,10 +763,50 @@ export default function ReadingScreen() {
         <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
 
         {/* Target body — shown first */}
-        <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
-          <Text style={[styles.langTag, { color: colors.textTertiary }]}>
-            {targetLanguage.toUpperCase()}
-          </Text>
+        <View
+          style={[
+            styles.langSection,
+            { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" },
+          ]}
+        >
+          {/* Header: lang code left, TTS buttons right */}
+          <View style={styles.langSectionHeader}>
+            <Text style={[styles.langTag, { color: colors.textTertiary, marginBottom: 0 }]}>
+              {targetLanguage.toUpperCase()}
+            </Text>
+            <View style={{ flexDirection: "row", gap: 4 }}>
+              <TouchableOpacity
+                style={[
+                  styles.ttsIconBtn,
+                  {
+                    backgroundColor: speaking === "target" ? colors.primary + "18" : "transparent",
+                  },
+                ]}
+                onPress={() => speakText(targetLanguage, "target")}
+                activeOpacity={0.75}
+              >
+                <Ionicons
+                  name={speaking === "target" ? "stop-circle" : "volume-high-outline"}
+                  size={17}
+                  color={speaking === "target" ? colors.primary : colors.textTertiary}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.ttsIconBtn,
+                  { backgroundColor: speaking === "slow" ? colors.primary + "18" : "transparent" },
+                ]}
+                onPress={speakTextSlow}
+                activeOpacity={0.75}
+              >
+                {speaking === "slow" ? (
+                  <Ionicons name="stop-circle" size={17} color={colors.primary} />
+                ) : (
+                  <MaterialIcons name="slow-motion-video" size={17} color={colors.textTertiary} />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
           <ReadingBody
             body={targetBody}
             keywords={keywords}
@@ -805,24 +817,50 @@ export default function ReadingScreen() {
         </View>
 
         {/* Source body — hidden by default */}
-        <View style={[styles.langSection, { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
-          <TouchableOpacity
-            style={styles.langTagRow}
-            onPress={() => setSourceVisible((v) => !v)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.langTag, { color: colors.textTertiary, marginBottom: 0 }]}>
-              {uiLanguage.toUpperCase()}
-            </Text>
-            <Ionicons
-              name={sourceVisible ? "eye-outline" : "eye-off-outline"}
-              size={14}
-              color={colors.textTertiary}
-            />
-            <Text style={[styles.langTagHint, { color: colors.textTertiary }]}>
-              {sourceVisible ? t("reading.hide_translation") : t("reading.show_translation")}
-            </Text>
-          </TouchableOpacity>
+        <View
+          style={[
+            styles.langSection,
+            { borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" },
+          ]}
+        >
+          {/* Header: lang code + eye toggle left, source TTS right (premium) */}
+          <View style={styles.langSectionHeader}>
+            <TouchableOpacity
+              style={styles.langTagRow}
+              onPress={() => setSourceVisible((v) => !v)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.langTag, { color: colors.textTertiary, marginBottom: 0 }]}>
+                {uiLanguage.toUpperCase()}
+              </Text>
+              <Ionicons
+                name={sourceVisible ? "eye-outline" : "eye-off-outline"}
+                size={14}
+                color={colors.textTertiary}
+              />
+              <Text style={[styles.langTagHint, { color: colors.textTertiary }]}>
+                {sourceVisible ? t("reading.hide_translation") : t("reading.show_translation")}
+              </Text>
+            </TouchableOpacity>
+            {isPremium && (
+              <TouchableOpacity
+                style={[
+                  styles.ttsIconBtn,
+                  {
+                    backgroundColor: speaking === "source" ? colors.primary + "18" : "transparent",
+                  },
+                ]}
+                onPress={() => speakText(uiLanguage, "source")}
+                activeOpacity={0.75}
+              >
+                <Ionicons
+                  name={speaking === "source" ? "stop-circle" : "volume-medium-outline"}
+                  size={17}
+                  color={speaking === "source" ? colors.primary : colors.textTertiary}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
           {sourceVisible && (
             <View style={{ marginTop: 10 }}>
               <ReadingBody
@@ -852,7 +890,15 @@ export default function ReadingScreen() {
         {/* Paywall: premium-only text */}
         {isPaywalled ? (
           <View style={styles.actionRow}>
-            <View style={[styles.paywallBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "40" }]}>
+            <View
+              style={[
+                styles.paywallBanner,
+                {
+                  backgroundColor: colors.backgroundSecondary,
+                  borderColor: colors.premiumAccent + "40",
+                },
+              ]}
+            >
               <Ionicons name="lock-closed-outline" size={16} color={colors.premiumAccent} />
               <Text style={[styles.paywallText, { color: colors.text }]}>
                 {t("reading.premium_required")}
@@ -866,7 +912,6 @@ export default function ReadingScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
         ) : completedThisSession || dailyLimitReached ? (
           // ── Post-completion / limit-reached state ──
           <View style={styles.completedState}>
@@ -881,7 +926,12 @@ export default function ReadingScreen() {
             {isPremium ? (
               dailyLimitReached ? (
                 // Premium — daily cap hit
-                <View style={[styles.limitBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+                <View
+                  style={[
+                    styles.limitBanner,
+                    { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+                  ]}
+                >
                   <Text style={[styles.limitBannerText, { color: colors.textSecondary }]}>
                     {t("reading.daily_limit_premium")}
                   </Text>
@@ -919,7 +969,15 @@ export default function ReadingScreen() {
               </TouchableOpacity>
             ) : (
               // Free — daily limit upsell
-              <View style={[styles.limitBanner, { backgroundColor: colors.backgroundSecondary, borderColor: colors.premiumAccent + "50" }]}>
+              <View
+                style={[
+                  styles.limitBanner,
+                  {
+                    backgroundColor: colors.backgroundSecondary,
+                    borderColor: colors.premiumAccent + "50",
+                  },
+                ]}
+              >
                 <View style={styles.limitBannerHeader}>
                   <Text style={[styles.limitBannerText, { color: colors.text }]}>
                     {t("reading.daily_limit_free")}
@@ -942,7 +1000,6 @@ export default function ReadingScreen() {
               </View>
             )}
           </View>
-
         ) : (
           // ── Default: Tamamladım button ──
           <TouchableOpacity
@@ -998,7 +1055,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 0,
   },
   headerTitle: { fontSize: 22, fontWeight: "700", flexShrink: 1 },
   headerActions: { flexDirection: "row", gap: 6 },
@@ -1012,11 +1069,27 @@ const styles = StyleSheet.create({
 
   scroll: { paddingHorizontal: 20 },
 
+  langSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  ttsIconBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 14,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    paddingTop: 6,
     flexWrap: "wrap",
   },
   categoryChip: {
@@ -1041,7 +1114,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     lineHeight: 28,
-    marginBottom: 20,
+    marginBottom: 10,
   },
 
   langSection: {

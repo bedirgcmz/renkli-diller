@@ -152,6 +152,15 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           end={{ x: 0.8, y: 1 }}
         />
 
+        {/* Favorite button — absolute top-right */}
+        <View style={{ position: "absolute", top: 4, right: 4, zIndex: 1 }}>
+          <FavoriteButton
+            sentenceId={sentence.id}
+            isPreset={sentence.is_preset ?? false}
+            size={20}
+          />
+        </View>
+
         {/* ✅ v2: 1px subtle accent line (not 3px bar) — state awareness without gimmick */}
         <View />
 
@@ -179,7 +188,6 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                 />
               </View>
               {/* ✅ v2: softer icon opacity */}
-              <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset ?? false} size={19} />
               <Pressable
                 onPress={handleAudio}
                 style={({ pressed }) => [
@@ -216,7 +224,12 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           ) : null}
 
           {/* Action buttons */}
-          <View style={[styles.actionRow, state === "learning" && onRemoveFromList ? styles.actionRowSplit : null]}>
+          <View
+            style={[
+              styles.actionRow,
+              state === "learning" && onRemoveFromList ? styles.actionRowSplit : null,
+            ]}
+          >
             {state === "learning" && onRemoveFromList ? (
               <>
                 {/* Listeden Çıkar — ghost */}
@@ -232,8 +245,15 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                         },
                       ]}
                     >
-                      <Ionicons name="remove-circle-outline" size={15} color={colors.textTertiary} />
-                      <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textTertiary }]}>
+                      <Ionicons
+                        name="remove-circle-outline"
+                        size={15}
+                        color={colors.textTertiary}
+                      />
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.actionBtnText, { color: colors.textTertiary }]}
+                      >
                         {t("learn.remove_from_list")}
                       </Text>
                     </View>
@@ -253,7 +273,10 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                       ]}
                     >
                       <Ionicons name="checkmark-circle-outline" size={15} color={colors.primary} />
-                      <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.primary }]}>
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.actionBtnText, { color: colors.primary }]}
+                      >
                         {t("learn.mark_learned")}
                       </Text>
                     </View>
@@ -274,7 +297,10 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
                     ]}
                   >
                     <Ionicons name={actionConfig.icon} size={15} color={colors.textSecondary} />
-                    <Text numberOfLines={1} style={[styles.actionBtnText, { color: colors.textSecondary }]}>
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.actionBtnText, { color: colors.textSecondary }]}
+                    >
                       {actionConfig.label}
                     </Text>
                   </View>

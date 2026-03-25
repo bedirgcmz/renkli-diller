@@ -24,6 +24,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
@@ -76,61 +77,62 @@ function ListenCard({
 }) {
   return (
     <View style={[listenStyles.card, { backgroundColor: colors.cardBackground }]}>
-      {/* ── Target sentence area ── */}
-      <View style={listenStyles.targetRow}>
-        <View style={listenStyles.targetContent}>
-          {showTarget ? (
-            <KeywordText
-              text={sentence.target_text}
-              baseColor={colors.text}
-              fontSize={18}
-              lineHeight={27}
-              fontWeight="600"
-              colorSeed={String(sentence.id)}
-            />
-          ) : (
-            <View
-              style={[
-                listenStyles.hiddenBox,
-                { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
-              ]}
-            >
-              <Ionicons name="headset-outline" size={18} color={colors.primary} />
-              <Text style={[listenStyles.hiddenText, { color: colors.textSecondary }]}>
-                {t("learn.tap_to_reveal")}
-              </Text>
-            </View>
-          )}
+      {/* ── Icon row: eye toggle + replay + favorite — horizontal, left-aligned ── */}
+      <View style={listenStyles.iconRow}>
+        <TouchableOpacity
+          style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
+          onPress={onToggleTarget}
+          activeOpacity={0.75}
+        >
+          <Ionicons
+            name={showTarget ? "eye-outline" : "eye-off-outline"}
+            size={18}
+            color={colors.textSecondary}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "18" }]}
+          onPress={onReplay}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "10" }]}
+          onPress={onReplaySlow}
+          activeOpacity={0.75}
+        >
+          <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
+        </TouchableOpacity>
+        <View style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}>
+          <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset ?? false} size={18} />
         </View>
+      </View>
 
-        {/* Action icons: eye toggle + replay */}
-        <View style={listenStyles.iconCol}>
-          <TouchableOpacity
-            style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
-            onPress={onToggleTarget}
-            activeOpacity={0.75}
+      {/* ── Target sentence area ── */}
+      <View style={listenStyles.targetContent}>
+        {showTarget ? (
+          <KeywordText
+            text={sentence.target_text}
+            baseColor={colors.text}
+            fontSize={18}
+            lineHeight={27}
+            fontWeight="600"
+            colorSeed={String(sentence.id)}
+          />
+        ) : (
+          <View
+            style={[
+              listenStyles.hiddenBox,
+              { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+            ]}
           >
-            <Ionicons
-              name={showTarget ? "eye-outline" : "eye-off-outline"}
-              size={18}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "18" }]}
-            onPress={onReplay}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[listenStyles.iconBtn, { backgroundColor: colors.primary + "10" }]}
-            onPress={onReplaySlow}
-            activeOpacity={0.75}
-          >
-            <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
+            <Ionicons name="headset-outline" size={18} color={colors.primary} />
+            <Text style={[listenStyles.hiddenText, { color: colors.textSecondary }]}>
+              {t("learn.tap_to_reveal")}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Divider */}
@@ -199,8 +201,14 @@ const listenStyles = StyleSheet.create({
     gap: 10,
     marginBottom: 16,
   },
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+  },
   targetContent: {
-    flex: 1,
+    marginBottom: 16,
   },
   hiddenBox: {
     flexDirection: "row",
