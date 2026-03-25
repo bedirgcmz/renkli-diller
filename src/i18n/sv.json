@@ -387,5 +387,56 @@
     "daily_goal": "Dagligt mål",
     "goal_hint": "Slutför ditt mål för idag",
     "goal_done": "Mål nått idag 🎉"
+  },
+  "achievements": {
+    "title": "Prestationer",
+    "menu_item": "Mina Prestationer 🏆",
+    "badge": "{{unlocked}} / {{total}} prestationer",
+    "new_achievement": "Ny Prestation!",
+    "unlocked_on": "Upplåst {{date}}",
+    "first_learned": {
+      "title": "Första Steget",
+      "description": "Du lärde dig din första mening"
+    },
+    "learned_10": {
+      "title": "Läsare",
+      "description": "Du lärde dig 10 meningar"
+    },
+    "learned_50": {
+      "title": "Uthållig",
+      "description": "Du lärde dig 50 meningar"
+    },
+    "learned_100": {
+      "title": "Mästare",
+      "description": "Du lärde dig 100 meningar"
+    },
+    "streak_7": {
+      "title": "På Eld",
+      "description": "7 dagars inlärningsserie"
+    },
+    "streak_30": {
+      "title": "Järndisciplin",
+      "description": "30 dagars inlärningsserie"
+    },
+    "first_quiz": {
+      "title": "Första Provet",
+      "description": "Du svarade på din första quizfråga"
+    },
+    "quiz_100": {
+      "title": "Frågejakare",
+      "description": "Du svarade på 100 quizfrågor totalt"
+    },
+    "quiz_500": {
+      "title": "Quizgeni",
+      "description": "Du svarade på 500 quizfrågor totalt"
+    },
+    "perfect_quiz": {
+      "title": "Felfri",
+      "description": "100% noggrannhet i en quizsession"
+    },
+    "first_automode": {
+      "title": "Aktiv Lyssnare",
+      "description": "Du slutförde din första automatlägesession"
+    }
   }
 }

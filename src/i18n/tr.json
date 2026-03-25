@@ -387,5 +387,56 @@
     "daily_goal": "Günlük hedef",
     "goal_hint": "Bugünkü hedefini tamamla",
     "goal_done": "Bugünkü hedefine ulaştın 🎉"
+  },
+  "achievements": {
+    "title": "Başarılar",
+    "menu_item": "Başarılarım 🏆",
+    "badge": "{{unlocked}} / {{total}} başarı",
+    "new_achievement": "Yeni Başarı!",
+    "unlocked_on": "{{date}} tarihinde açıldı",
+    "first_learned": {
+      "title": "İlk Adım",
+      "description": "İlk cümleyi öğrendin"
+    },
+    "learned_10": {
+      "title": "Okuyucu",
+      "description": "10 cümle öğrendin"
+    },
+    "learned_50": {
+      "title": "Azimli",
+      "description": "50 cümle öğrendin"
+    },
+    "learned_100": {
+      "title": "Usta",
+      "description": "100 cümle öğrendin"
+    },
+    "streak_7": {
+      "title": "Ateş Hattı",
+      "description": "7 günlük kesintisiz seri"
+    },
+    "streak_30": {
+      "title": "Demir Disiplin",
+      "description": "30 günlük kesintisiz seri"
+    },
+    "first_quiz": {
+      "title": "İlk Sınav",
+      "description": "İlk quiz sorusunu yanıtladın"
+    },
+    "quiz_100": {
+      "title": "Soru Avcısı",
+      "description": "Toplam 100 quiz sorusu yanıtladın"
+    },
+    "quiz_500": {
+      "title": "Quiz Dehası",
+      "description": "Toplam 500 quiz sorusu yanıtladın"
+    },
+    "perfect_quiz": {
+      "title": "Kusursuz",
+      "description": "Bir quiz oturumunda %100 doğruluk"
+    },
+    "first_automode": {
+      "title": "Dinleyici",
+      "description": "İlk otomatik mod oturumunu tamamladın"
+    }
   }
 }

@@ -387,5 +387,56 @@
     "daily_goal": "Daily goal",
     "goal_hint": "Complete your goal for today",
     "goal_done": "Goal reached today 🎉"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "menu_item": "My Achievements 🏆",
+    "badge": "{{unlocked}} / {{total}} achievements",
+    "new_achievement": "New Achievement!",
+    "unlocked_on": "Unlocked on {{date}}",
+    "first_learned": {
+      "title": "First Step",
+      "description": "You learned your first sentence"
+    },
+    "learned_10": {
+      "title": "Reader",
+      "description": "You learned 10 sentences"
+    },
+    "learned_50": {
+      "title": "Persistent",
+      "description": "You learned 50 sentences"
+    },
+    "learned_100": {
+      "title": "Master",
+      "description": "You learned 100 sentences"
+    },
+    "streak_7": {
+      "title": "On Fire",
+      "description": "7-day learning streak"
+    },
+    "streak_30": {
+      "title": "Iron Discipline",
+      "description": "30-day learning streak"
+    },
+    "first_quiz": {
+      "title": "First Test",
+      "description": "You answered your first quiz question"
+    },
+    "quiz_100": {
+      "title": "Question Hunter",
+      "description": "You answered 100 quiz questions in total"
+    },
+    "quiz_500": {
+      "title": "Quiz Genius",
+      "description": "You answered 500 quiz questions in total"
+    },
+    "perfect_quiz": {
+      "title": "Flawless",
+      "description": "100% accuracy in a quiz session"
+    },
+    "first_automode": {
+      "title": "Active Listener",
+      "description": "You completed your first auto mode session"
+    }
   }
 }

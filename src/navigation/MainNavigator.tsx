@@ -12,6 +12,7 @@ import ChangeEmailScreen from "@/screens/ChangeEmailScreen";
 import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
 import LearnedSentencesScreen from "@/screens/LearnedSentencesScreen";
 import FavoriteSentencesScreen from "@/screens/FavoriteSentencesScreen";
+import AchievementsScreen from "@/screens/AchievementsScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -67,6 +68,11 @@ export default function MainNavigator() {
       <Stack.Screen
         name="FavoriteSentences"
         component={FavoriteSentencesScreen}
+        options={{ presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="Achievements"
+        component={AchievementsScreen}
         options={{ presentation: "modal" }}
       />
     </Stack.Navigator>

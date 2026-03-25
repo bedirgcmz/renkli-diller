@@ -387,5 +387,56 @@
     "daily_goal": "Meta diaria",
     "goal_hint": "Completa tu meta de hoy",
     "goal_done": "Meta alcanzada hoy 🎉"
+  },
+  "achievements": {
+    "title": "Logros",
+    "menu_item": "Mis Logros 🏆",
+    "badge": "{{unlocked}} / {{total}} logros",
+    "new_achievement": "¡Nuevo Logro!",
+    "unlocked_on": "Desbloqueado el {{date}}",
+    "first_learned": {
+      "title": "Primer Paso",
+      "description": "Aprendiste tu primera oración"
+    },
+    "learned_10": {
+      "title": "Lector",
+      "description": "Aprendiste 10 oraciones"
+    },
+    "learned_50": {
+      "title": "Persistente",
+      "description": "Aprendiste 50 oraciones"
+    },
+    "learned_100": {
+      "title": "Maestro",
+      "description": "Aprendiste 100 oraciones"
+    },
+    "streak_7": {
+      "title": "En Llamas",
+      "description": "Racha de aprendizaje de 7 días"
+    },
+    "streak_30": {
+      "title": "Disciplina de Hierro",
+      "description": "Racha de aprendizaje de 30 días"
+    },
+    "first_quiz": {
+      "title": "Primera Prueba",
+      "description": "Respondiste tu primera pregunta de quiz"
+    },
+    "quiz_100": {
+      "title": "Cazador de Preguntas",
+      "description": "Respondiste 100 preguntas de quiz en total"
+    },
+    "quiz_500": {
+      "title": "Genio del Quiz",
+      "description": "Respondiste 500 preguntas de quiz en total"
+    },
+    "perfect_quiz": {
+      "title": "Perfecto",
+      "description": "100% de precisión en una sesión de quiz"
+    },
+    "first_automode": {
+      "title": "Oyente Activo",
+      "description": "Completaste tu primera sesión de modo automático"
+    }
   }
 }

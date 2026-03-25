@@ -67,6 +67,11 @@ export default function MoreScreen() {
           onPress: () => navigation.navigate("FavoriteSentences"),
         },
         {
+          icon: "trophy-outline",
+          label: t("achievements.menu_item"),
+          onPress: () => navigation.navigate("Achievements"),
+        },
+        {
           icon: "document-text-outline",
           label: t("profile.export_pdf"),
           onPress: () => {

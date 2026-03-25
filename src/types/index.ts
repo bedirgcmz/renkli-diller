@@ -113,6 +113,7 @@ export type MainStackParamList = {
   ChangePassword: undefined;
   LearnedSentences: undefined;
   FavoriteSentences: undefined;
+  Achievements: undefined;
 };
 
 export type AuthStackParamList = {
