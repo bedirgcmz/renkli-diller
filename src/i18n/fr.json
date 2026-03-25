@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Ajoutée avec une autre paire de langues",
     "lang_mismatch_body": "Vous avez ajouté cette phrase pour {{sourceLang}} → {{targetLang}}. Cela ne correspond pas à vos paramètres actuels ({{currentSource}} → {{currentTarget}}). Vous pouvez la modifier pour la mettre à jour.",
     "lang_mismatch_edit": "Modifier",
-    "lang_mismatch_strip": "Paramètres de langue modifiés  ·  Modifier"
+    "lang_mismatch_strip": "Paramètres de langue modifiés  ·  Modifier",
+    "remove_favorite": "Retirer des favoris"
+  },
+  "favorites": {
+    "title": "Favoris",
+    "empty": "Aucune phrase favorite pour l'instant.\nAppuyez sur le cœur d'une phrase pour la sauvegarder.",
+    "count": "phrases favorites"
   },
   "add_sentence": {
     "title": "Nouvelle phrase",
@@ -158,6 +164,7 @@
     "confirm_signout": "Êtes-vous sûr de vouloir vous déconnecter ?",
     "learning": "En cours",
     "learned_sentences": "Phrases Apprises",
+    "favorite_sentences": "Phrases Favorites",
     "activity": "Activité",
     "week": "Semaine",
     "month": "Mois",

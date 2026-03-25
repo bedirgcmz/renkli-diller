@@ -26,6 +26,7 @@ export interface Sentence {
   category_name?: string;
   status: SentenceStatus;
   is_preset: boolean;
+  is_favorite?: boolean;
   source_lang?: SupportedLanguage;
   target_lang?: SupportedLanguage;
   created_at?: string;
@@ -111,6 +112,7 @@ export type MainStackParamList = {
   ChangeEmail: undefined;
   ChangePassword: undefined;
   LearnedSentences: undefined;
+  FavoriteSentences: undefined;
 };
 
 export type AuthStackParamList = {

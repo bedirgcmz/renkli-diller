@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Mit einem anderen Sprachpaar hinzugefügt",
     "lang_mismatch_body": "Du hast diesen Satz für {{sourceLang}} → {{targetLang}} hinzugefügt. Das stimmt nicht mit deinen aktuellen Einstellungen ({{currentSource}} → {{currentTarget}}) überein. Du kannst ihn bearbeiten, um ihn zu aktualisieren.",
     "lang_mismatch_edit": "Bearbeiten",
-    "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten"
+    "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten",
+    "remove_favorite": "Aus Favoriten entfernen"
+  },
+  "favorites": {
+    "title": "Favoriten",
+    "empty": "Noch keine Favoriten.\nTippe auf das Herz-Symbol bei einem Satz.",
+    "count": "Favoriten"
   },
   "add_sentence": {
     "title": "Neuen Satz hinzufügen",
@@ -158,6 +164,7 @@
     "confirm_signout": "Sind Sie sicher, dass Sie sich abmelden möchten?",
     "learning": "Lernt gerade",
     "learned_sentences": "Gelernte Sätze",
+    "favorite_sentences": "Favoritensätze",
     "activity": "Aktivität",
     "week": "Woche",
     "month": "Monat",

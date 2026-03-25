@@ -37,12 +37,15 @@ interface SentenceState {
   sentences: Sentence[];
   presetSentences: Sentence[];
   categories: Category[];
+  favoriteIds: string[];
   loading: boolean;
   error: string | null;
 
   loadSentences: (filters?: SentenceFilters) => Promise<void>;
   loadPresetSentences: (categoryId?: number, isPremium?: boolean) => Promise<void>;
   loadCategories: () => Promise<void>;
+  loadFavorites: () => Promise<void>;
+  toggleFavorite: (id: string, isPreset: boolean) => Promise<void>;
   addSentence: (data: {
     source_text: string;
     target_text: string;
@@ -76,8 +79,51 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   sentences: [],
   presetSentences: [],
   categories: [],
+  favoriteIds: [],
   loading: false,
   error: null,
+
+  loadFavorites: async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      set({ favoriteIds: [] });
+      return;
+    }
+    const { data } = await supabase
+      .from("sentence_favorites")
+      .select("sentence_id")
+      .eq("user_id", user.id);
+    if (data) {
+      set({ favoriteIds: data.map((r: Record<string, unknown>) => r.sentence_id as string) });
+    }
+  },
+
+  toggleFavorite: async (id: string, isPreset: boolean) => {
+    const { favoriteIds } = get();
+    const isFav = favoriteIds.includes(id);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (isFav) {
+      await supabase
+        .from("sentence_favorites")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("sentence_id", id);
+      set({ favoriteIds: favoriteIds.filter((fid) => fid !== id) });
+    } else {
+      await supabase.from("sentence_favorites").insert({
+        user_id: user.id,
+        sentence_id: id,
+        is_preset: isPreset,
+      });
+      set({ favoriteIds: [...favoriteIds, id] });
+    }
+  },
 
   loadCategories: async () => {
     const { data } = await supabase
@@ -384,6 +430,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       sentences: [],
       presetSentences: [],
       categories: [],
+      favoriteIds: [],
       loading: false,
       error: null,
     }),

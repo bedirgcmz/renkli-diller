@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Lades till med ett annat språkpar",
     "lang_mismatch_body": "Du lade till den här meningen för {{sourceLang}} → {{targetLang}}. Det matchar inte dina nuvarande inställningar ({{currentSource}} → {{currentTarget}}). Du kan redigera den för att uppdatera.",
     "lang_mismatch_edit": "Redigera",
-    "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera"
+    "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera",
+    "remove_favorite": "Ta bort från favoriter"
+  },
+  "favorites": {
+    "title": "Favoriter",
+    "empty": "Inga favoritmeningar ännu.\nTryck på hjärtat på en mening för att spara den här.",
+    "count": "favoritmeningar"
   },
   "add_sentence": {
     "title": "Lägg till ny mening",
@@ -158,6 +164,7 @@
     "confirm_signout": "Är du säker på att du vill logga ut?",
     "learning": "Lärande",
     "learned_sentences": "Inlärda Meningar",
+    "favorite_sentences": "Favoritmeningar",
     "activity": "Aktivitet",
     "week": "Vecka",
     "month": "Månad",

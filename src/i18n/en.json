@@ -103,7 +103,13 @@
     "lang_mismatch_title": "Added in a different language pair",
     "lang_mismatch_body": "You added this sentence for {{sourceLang}} → {{targetLang}}. It doesn't match your current settings ({{currentSource}} → {{currentTarget}}). You can edit it to update it.",
     "lang_mismatch_edit": "Edit",
-    "lang_mismatch_strip": "Language settings changed  ·  Edit"
+    "lang_mismatch_strip": "Language settings changed  ·  Edit",
+    "remove_favorite": "Remove Favorite"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorite sentences yet.\nTap the heart icon on any sentence to save it here.",
+    "count": "favorite sentences"
   },
   "add_sentence": {
     "title": "Add New Sentence",
@@ -158,6 +164,7 @@
     "confirm_signout": "Are you sure you want to sign out?",
     "learning": "Learning",
     "learned_sentences": "Learned Sentences",
+    "favorite_sentences": "Favorite Sentences",
     "activity": "Activity",
     "week": "Week",
     "month": "Month",

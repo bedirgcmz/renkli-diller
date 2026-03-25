@@ -15,11 +15,13 @@ export function usePremium() {
     setLoading(true);
     try {
       const active = await isPremiumActive();
-      setIsPremium(active);
+      // Supabase'deki manuel değer veya RevenueCat — ikisi de yeterli
+      const effective = active || (user?.is_premium ?? false);
+      setIsPremium(effective);
 
-      // Supabase profili ile senkron tut
-      if (user && active !== user.is_premium) {
-        await updateProfile({ is_premium: active });
+      // Supabase'e sadece RevenueCat premium onayladığında yaz (false ile ezme)
+      if (user && active && !user.is_premium) {
+        await updateProfile({ is_premium: true });
       }
     } catch {
       // RevenueCat erişilemezse mevcut store değerini kullan

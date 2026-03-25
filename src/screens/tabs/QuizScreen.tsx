@@ -991,7 +991,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingTop: 2,
     lineHeight: 30,
-    color: "transparent",
+    opacity: 0,
   },
   kwInput: {
     position: "absolute",

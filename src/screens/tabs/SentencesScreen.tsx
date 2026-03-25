@@ -7,7 +7,6 @@ import {
   FlatList,
   StyleSheet,
   Alert,
-  ScrollView,
   RefreshControl,
   Pressable,
   Modal,
@@ -53,6 +52,8 @@ interface SentenceItemProps {
   onForgot: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
   colors: ThemeColors;
   t: (k: string, opts?: Record<string, string>) => string;
 }
@@ -67,6 +68,8 @@ function SentenceItem({
   onForgot,
   onEdit,
   onDelete,
+  isFavorite,
+  onToggleFavorite,
   colors,
   t,
 }: SentenceItemProps) {
@@ -108,6 +111,17 @@ function SentenceItem({
               <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
             </Pressable>
           )}
+          <Pressable
+            onPress={onToggleFavorite}
+            hitSlop={HIT}
+            style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+          >
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={18}
+              color={isFavorite ? "#E85D5D" : colors.textSecondary}
+            />
+          </Pressable>
           <Pressable
             onPress={onEdit}
             hitSlop={HIT}
@@ -466,11 +480,7 @@ function FilterModal({
         <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
           {t("sentences.filter_category") || "Kategori"}
         </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={filterStyles.chipsRow}
-        >
+        <View style={filterStyles.chipsWrap}>
           <TouchableOpacity
             style={[filterStyles.chip, chipActive(categoryFilter === "all")]}
             onPress={() => setCategoryFilter("all")}
@@ -496,7 +506,7 @@ function FilterModal({
               </Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -551,13 +561,16 @@ export default function SentencesScreen() {
     sentences,
     presetSentences,
     categories,
+    favoriteIds,
     loadSentences,
     loadPresetSentences,
     loadCategories,
+    loadFavorites,
     markAsLearned,
     markAsUnlearned,
     addToLearningList,
     deleteSentence,
+    toggleFavorite,
   } = useSentenceStore();
   const { progressMap, loadProgress } = useProgressStore();
 
@@ -580,11 +593,12 @@ export default function SentencesScreen() {
     loadPresetSentences(undefined, isPremium);
     loadSentences();
     loadProgress();
+    loadFavorites();
   }, [isPremium, targetLanguage, uiLanguage]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadPresetSentences(undefined, isPremium), loadSentences(), loadProgress()]);
+    await Promise.all([loadPresetSentences(undefined, isPremium), loadSentences(), loadProgress(), loadFavorites()]);
     setRefreshing(false);
   };
 
@@ -777,6 +791,8 @@ export default function SentencesScreen() {
               })
             }
             onDelete={() => handleDelete(item)}
+            isFavorite={favoriteIds.includes(item.id)}
+            onToggleFavorite={() => toggleFavorite(item.id, item.is_preset)}
             uiLanguage={uiLanguage}
             targetLanguage={targetLanguage}
             colors={colors}
