@@ -118,7 +118,7 @@
     "keywords": "Hedef Kelimeler",
     "keyword_hint": "Renklendirmek için işaretçi kullanın: *kırmızı* #yeşil# %sarı%",
     "keyword_guide_instruction": "Vurgulamak istediğin kelime veya kelime grubunu **çift yıldız** içine al:",
-    "keyword_guide_shown_as": "renkli badge olarak gösterilir",
+    "keyword_guide_shown_as": "renkli metin olarak gösterilir",
     "select_category": "Kategori Seçin",
     "save": "Kaydet",
     "cancel": "İptal",

@@ -118,7 +118,7 @@
     "keywords": "Palavras-chave",
     "keyword_hint": "Use marcadores para colorir: *vermelho* #verde# %amarelo%",
     "keyword_guide_instruction": "Envolva a palavra ou frase com **asteriscos duplos**:",
-    "keyword_guide_shown_as": "exibido como um badge colorido",
+    "keyword_guide_shown_as": "exibido como texto colorido",
     "select_category": "Selecionar categoria",
     "save": "Salvar",
     "cancel": "Cancelar",

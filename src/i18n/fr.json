@@ -118,7 +118,7 @@
     "keywords": "Mots clés",
     "keyword_hint": "Utilisez des marqueurs pour coloriser : *rouge* #vert# %jaune%",
     "keyword_guide_instruction": "Entourez le mot ou la phrase avec des **doubles astérisques** :",
-    "keyword_guide_shown_as": "affiché comme un badge coloré",
+    "keyword_guide_shown_as": "affiché comme du texte coloré",
     "select_category": "Choisir une catégorie",
     "save": "Enregistrer",
     "cancel": "Annuler",

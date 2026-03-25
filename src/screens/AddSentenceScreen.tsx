@@ -141,9 +141,7 @@ export default function AddSentenceScreen() {
               </View>
               <View style={[styles.guideRow, { marginTop: 4 }]}>
                 <Text style={[styles.guideArrow, { color: colors.textSecondary }]}>→</Text>
-                <View style={[styles.guideSample, { backgroundColor: "#54A0FF" }]}>
-                  <Text style={[styles.guideSampleText, { color: "#fff" }]}>get used to</Text>
-                </View>
+                <Text style={[styles.guideSampleText, { color: "#54A0FF" }]}>get used to</Text>
                 <Text style={[{ color: colors.textSecondary, fontSize: 13, marginLeft: 6 }]}>
                   {t("add_sentence.keyword_guide_shown_as")}
                 </Text>
@@ -312,7 +310,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   guideRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  guideMarker: { fontSize: 13, fontFamily: "monospace", width: 100 },
+  guideMarker: { fontSize: 13, fontFamily: "monospace", flex: 1 },
   guideArrow: { fontSize: 13 },
   guideSample: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
   guideSampleText: { fontSize: 12, fontWeight: "600" },

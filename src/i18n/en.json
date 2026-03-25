@@ -118,7 +118,7 @@
     "keywords": "Target Words",
     "keyword_hint": "Use markers for coloring: *red* #green# %yellow%",
     "keyword_guide_instruction": "Wrap the word or phrase you want to highlight in **double asterisks**:",
-    "keyword_guide_shown_as": "shown as a colorful badge",
+    "keyword_guide_shown_as": "shown as colored text",
     "select_category": "Select Category",
     "save": "Save",
     "cancel": "Cancel",
