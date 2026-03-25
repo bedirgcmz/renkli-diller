@@ -47,10 +47,16 @@ export default function ProfileScreen() {
     loadProgress();
   }, [loadSentences, loadProgress]);
 
-  const totalStudied = Object.keys(progressMap).length;
-  const learnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
-  const learningCount = Object.values(progressMap).filter((s) => s === "learning").length;
-  const todayLearned = countTodayLearned(progress);
+  const presetLearnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
+  const presetLearningCount = Object.values(progressMap).filter((s) => s === "learning").length;
+  const userLearnedCount = sentences.filter((s) => s.status === "learned").length;
+  const userLearningCount = sentences.filter((s) => s.status === "learning").length;
+  const totalStudied =
+    Object.keys(progressMap).length +
+    sentences.filter((s) => s.status !== "new").length;
+  const learnedCount = presetLearnedCount + userLearnedCount;
+  const learningCount = presetLearningCount + userLearningCount;
+  const todayLearned = countTodayLearned(progress) + stats.todayLearnedUserSentences;
   const dailyGoalProgress = Math.min(todayLearned / dailyGoal, 1);
 
   const initials = (user?.display_name || user?.email || "?")
@@ -364,7 +370,7 @@ export default function ProfileScreen() {
         )}
 
         {/* Activity chart */}
-        <ActivityChart progress={progress} />
+        <ActivityChart progress={progress} userLearnedDates={stats.userLearnedDates} />
 
         <View style={{ height: 24 }} />
       </ScrollView>

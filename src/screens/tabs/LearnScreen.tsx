@@ -288,12 +288,12 @@ export default function LearnScreen() {
     progressMap,
     loadProgress,
     addToLearning,
-    markAsLearned: presetMarkLearned,
   } = useProgressStore();
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // ── Listening state ──────────────────────────────────────────────────────────
   const [listenIdx, setListenIdx] = useState(0);
@@ -516,22 +516,22 @@ export default function LearnScreen() {
   };
 
   const handleMarkLearned = async () => {
-    if (!currentSentence) return;
+    if (!currentSentence || isProcessing) return;
+    setIsProcessing(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     animateSuccess(() => {});
-    if (currentSentence.is_preset) {
-      await presetMarkLearned(currentSentence.id);
-    } else {
-      await useSentenceStore.getState().updateSentence(currentSentence.id, { status: "learned" });
-      await loadSentences();
-    }
+    await useSentenceStore.getState().markAsLearned(currentSentence.id);
+    if (!currentSentence.is_preset) await loadSentences();
+    setIsProcessing(false);
   };
 
   const handleRemoveFromList = async () => {
-    if (!currentSentence) return;
+    if (!currentSentence || isProcessing) return;
+    setIsProcessing(true);
     animateRemove(() => {});
     await useSentenceStore.getState().removeFromLearningList(currentSentence.id);
     if (!currentSentence.is_preset) await loadSentences();
+    setIsProcessing(false);
   };
 
   // ── Listening actions ────────────────────────────────────────────────────────

@@ -38,8 +38,7 @@ export interface UserProgress {
   id: string;
   user_id: string;
   sentence_id: string;
-  correct: boolean;
-  state?: "learning" | "learned";
+  state: "learning" | "learned";
   learned_at?: string | null;
   created_at: string;
 }
@@ -56,7 +55,8 @@ export interface StudySession {
 export interface QuizResult {
   id: string;
   user_id: string;
-  sentence_id: string;
+  sentence_id: string | null;
+  user_sentence_id?: number | null;
   is_correct: boolean;
   quiz_type: "multiple_choice" | "fill_blank";
   answered_at: string;

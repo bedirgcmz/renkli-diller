@@ -407,6 +407,18 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     } else {
       await get().updateSentence(id, { status: "learned" });
 
+      // Write learned_at so this event counts toward streak (same as preset sentences)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("user_sentences")
+          .update({ learned_at: new Date().toISOString() })
+          .eq("id", id)
+          .eq("user_id", user.id);
+      }
+
       // Calculate total learned across user sentences + preset sentences
       const userLearnedCount = get().sentences.filter((s) => s.status === "learned").length;
       const presetLearnedCount = Object.values(useProgressStore.getState().progressMap).filter(

@@ -19,7 +19,10 @@ export function HeroHeader() {
     loadProgress();
   }, [loadProgress]);
 
-  const todayLearned = useMemo(() => countTodayLearned(progress), [progress]);
+  const todayLearned = useMemo(
+    () => countTodayLearned(progress) + stats.todayLearnedUserSentences,
+    [progress, stats.todayLearnedUserSentences]
+  );
 
   const hour = new Date().getHours();
   const greetingKey =

@@ -14,6 +14,7 @@ interface Bar {
 
 interface Props {
   progress: UserProgress[];
+  userLearnedDates?: string[];
 }
 
 const LOCALE_MAP: Record<string, string> = {
@@ -28,7 +29,7 @@ const LOCALE_MAP: Record<string, string> = {
 
 const BAR_MAX_HEIGHT = 72;
 
-export default function ActivityChart({ progress }: Props) {
+export default function ActivityChart({ progress, userLearnedDates }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { uiLanguage } = useSettingsStore();
@@ -62,13 +63,19 @@ export default function ActivityChart({ progress }: Props) {
         }
       }
     }
+    for (const dateStr of userLearnedDates ?? []) {
+      const day = dateStr.split("T")[0];
+      if (dayKeys.includes(day)) {
+        counts[day] = (counts[day] ?? 0) + 1;
+      }
+    }
 
     const bars: Bar[] = dayKeys.map((date) => ({ date, count: counts[date] ?? 0 }));
     const maxCount = Math.max(...bars.map((b) => b.count), 1);
     const totalInPeriod = bars.reduce((s, b) => s + b.count, 0);
 
     return { bars, maxCount, totalInPeriod };
-  }, [progress, period]);
+  }, [progress, userLearnedDates, period]);
 
   // Label shown below each bar
   const getLabel = (date: string, idx: number): string => {

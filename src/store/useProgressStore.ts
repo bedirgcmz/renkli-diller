@@ -21,6 +21,8 @@ interface ProgressStats {
   lastStudyDate: string | null;
   quizByMode: { multiple_choice: ModeStats; fill_blank: ModeStats };
   quizByCategory: Record<string, ModeStats>;
+  todayLearnedUserSentences: number;
+  userLearnedDates: string[];
 }
 
 interface ProgressState {
@@ -39,7 +41,6 @@ interface ProgressState {
   // Legacy quiz tracking
   recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
   recordQuizResult: (result: Omit<QuizResult, "id" | "answered_at">) => Promise<void>;
-  updateSentenceProgress: (sentenceId: string, correct: boolean) => Promise<void>;
   getTodayProgress: () => UserProgress[];
   getWeekProgress: () => UserProgress[];
   getMonthProgress: () => UserProgress[];
@@ -61,6 +62,8 @@ const DEFAULT_STATS: ProgressStats = {
   lastStudyDate: null,
   quizByMode: { multiple_choice: { correct: 0, total: 0 }, fill_blank: { correct: 0, total: 0 } },
   quizByCategory: {},
+  todayLearnedUserSentences: 0,
+  userLearnedDates: [],
 };
 
 export const useProgressStore = create<ProgressState>((set, get) => ({
@@ -226,13 +229,20 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const { data: quizWithCategory } = await supabase
         .from("quiz_results")
-        .select("is_correct, quiz_type, sentences(category)")
+        .select("is_correct, quiz_type, sentences(categories(name_en))")
         .eq("user_id", user.id);
 
       const { data: studySessionRows } = await supabase
         .from("study_sessions")
         .select("created_at")
         .eq("user_id", user.id);
+
+      const { data: userLearnedRows } = await supabase
+        .from("user_sentences")
+        .select("learned_at")
+        .eq("user_id", user.id)
+        .eq("state", "learned")
+        .not("learned_at", "is", null);
 
       const totalSentencesStudied = allProgressRows?.length || 0;
       const totalSentencesLearned =
@@ -257,7 +267,8 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const quizByCategory: ProgressStats["quizByCategory"] = {};
       for (const q of quizWithCategory || []) {
-        const cat = (q.sentences as { category?: string } | null)?.category ?? "other";
+        const sentenceData = q.sentences as { categories?: { name_en?: string } | null } | null;
+        const cat = sentenceData?.categories?.name_en ?? "other";
         if (!quizByCategory[cat]) quizByCategory[cat] = { correct: 0, total: 0 };
         quizByCategory[cat].total++;
         if (q.is_correct) quizByCategory[cat].correct++;
@@ -267,6 +278,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const learnedDays = [
         ...new Set([
           ...(learnedRows || []).map((r) => r.learned_at!.split("T")[0]),
+          ...(userLearnedRows || []).map((r) => (r.learned_at as string).split("T")[0]),
           ...(quizResults || []).filter((r) => r.answered_at != null).map((r) => r.answered_at.split("T")[0]),
           ...(studySessionRows || []).map((r) => r.created_at.split("T")[0]),
         ]),
@@ -314,6 +326,11 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       const lastStudyDate = learnedDays.length > 0 ? learnedDays[0] : null;
 
+      const todayLearnedUserSentences = (userLearnedRows || []).filter((r) =>
+        (r.learned_at as string).startsWith(today)
+      ).length;
+      const userLearnedDates = (userLearnedRows || []).map((r) => r.learned_at as string);
+
       set({
         stats: {
           totalSentencesStudied,
@@ -329,6 +346,8 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           lastStudyDate,
           quizByMode,
           quizByCategory,
+          todayLearnedUserSentences,
+          userLearnedDates,
         },
       });
     } catch (error) {
@@ -376,7 +395,8 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .from("quiz_results")
         .insert({
           user_id: user.id,
-          sentence_id: result.sentence_id,
+          sentence_id: result.user_sentence_id ? null : result.sentence_id,
+          user_sentence_id: result.user_sentence_id ?? null,
           is_correct: result.is_correct,
           quiz_type: result.quiz_type,
           answered_at: new Date().toISOString(),
@@ -394,26 +414,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       });
     } catch (error) {
       if (__DEV__) console.error("Error recording quiz result:", error);
-    }
-  },
-
-  updateSentenceProgress: async (sentenceId, correct) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      await supabase.from("user_progress").insert({
-        user_id: user.id,
-        sentence_id: sentenceId,
-        correct,
-        created_at: new Date().toISOString(),
-      });
-
-      await get().loadProgress();
-    } catch (error) {
-      if (__DEV__) console.error("Error updating sentence progress:", error);
     }
   },
 

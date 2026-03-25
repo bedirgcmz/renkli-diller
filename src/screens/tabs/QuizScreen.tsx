@@ -258,7 +258,8 @@ export default function QuizScreen() {
       setDailyCount((c) => c + 1);
       recordQuizResult({
         user_id: "",
-        sentence_id: currentQ.sentence.id,
+        sentence_id: currentQ.sentence.is_preset ? currentQ.sentence.id : null,
+        user_sentence_id: currentQ.sentence.is_preset ? null : Number(currentQ.sentence.id),
         is_correct: correct,
         quiz_type: currentQ.type,
       });

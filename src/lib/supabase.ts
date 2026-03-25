@@ -84,24 +84,27 @@ export type Database = {
       };
       user_progress: {
         Row: {
-          id: string;
+          id: number;
           user_id: string;
-          sentence_id: string;
-          correct: boolean;
+          sentence_id: number;
+          state: "learning" | "learned";
+          learned_at: string | null;
           created_at: string;
         };
         Insert: {
-          id?: string;
+          id?: number;
           user_id: string;
-          sentence_id: string;
-          correct: boolean;
+          sentence_id: number;
+          state?: "learning" | "learned";
+          learned_at?: string | null;
           created_at?: string;
         };
         Update: {
-          id?: string;
+          id?: number;
           user_id?: string;
-          sentence_id?: string;
-          correct?: boolean;
+          sentence_id?: number;
+          state?: "learning" | "learned";
+          learned_at?: string | null;
           created_at?: string;
         };
       };
