@@ -268,7 +268,10 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const quizByCategory: ProgressStats["quizByCategory"] = {};
       for (const q of quizWithCategory || []) {
         const sentenceData = q.sentences as { categories?: { name_en?: string } | null } | null;
-        const cat = sentenceData?.categories?.name_en ?? "other";
+        const rawCat = sentenceData?.categories?.name_en;
+        const cat = rawCat
+          ? rawCat.toLowerCase().replace(/\s+/g, "_")
+          : "other";
         if (!quizByCategory[cat]) quizByCategory[cat] = { correct: 0, total: 0 };
         quizByCategory[cat].total++;
         if (q.is_correct) quizByCategory[cat].correct++;
