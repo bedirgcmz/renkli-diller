@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { UserProgress, QuizResult, StudySession } from "@/types";
+import { useAchievementStore } from "./useAchievementStore";
 
 // TODO: daily_stats tablosuna yazma — şu an streak user_progress.learned_at'tan hesaplanıyor.
 // daily_stats tablosu şu an kullanılmıyor; gerekirse her öğrenme/quiz sonrası güncellenebilir.
@@ -159,6 +160,13 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       // Refresh progress array + stats (streak, today's goal) after persistence
       await get().loadProgress();
+
+      const { stats } = get();
+      await useAchievementStore.getState().checkProgressAchievements({
+        totalSentencesLearned: stats.totalSentencesLearned,
+        currentStreak: stats.currentStreak,
+        totalQuizQuestions: stats.totalQuizQuestions,
+      });
     } catch {
       if (__DEV__) console.error("markAsLearned failed");
     }
@@ -342,6 +350,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .single();
 
       await get().loadStats();
+
+      // first_automode achievement
+      await useAchievementStore.getState().unlockAchievement("first_automode");
+
+      const { stats } = get();
+      await useAchievementStore.getState().checkProgressAchievements({
+        totalSentencesLearned: stats.totalSentencesLearned,
+        currentStreak: stats.currentStreak,
+        totalQuizQuestions: stats.totalQuizQuestions,
+      });
     } catch (error) {
       if (__DEV__) console.error("Error recording study session:", error);
     }
@@ -367,6 +385,13 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .single();
 
       await get().loadStats();
+
+      const { stats } = get();
+      await useAchievementStore.getState().checkProgressAchievements({
+        totalSentencesLearned: stats.totalSentencesLearned,
+        currentStreak: stats.currentStreak,
+        totalQuizQuestions: stats.totalQuizQuestions,
+      });
     } catch (error) {
       if (__DEV__) console.error("Error recording quiz result:", error);
     }

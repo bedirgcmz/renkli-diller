@@ -28,6 +28,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
 import { HomeStackParamList, MainStackParamList, PillSegment, Sentence } from "@/types";
 import { speak, stopSpeaking } from "@/services/tts";
+import { useAchievementStore } from "@/store/useAchievementStore";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -133,6 +134,13 @@ export default function QuizScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [quizMuted, setQuizMuted] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // perfect_quiz: 100% accuracy in a main session (no wrong answers → no retry phase)
+  useEffect(() => {
+    if (sessionComplete && !isRetryPhase && score.total > 0 && score.correct === score.total) {
+      useAchievementStore.getState().unlockAchievement("perfect_quiz");
+    }
+  }, [sessionComplete]);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {

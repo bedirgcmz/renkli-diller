@@ -4,6 +4,7 @@ import { Sentence, SentenceStatus, Category, SupportedLanguage } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
+import { useAchievementStore } from "./useAchievementStore";
 
 type DbRow = Record<string, unknown>;
 
@@ -401,9 +402,23 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   markAsLearned: async (id) => {
     const isPreset = get().presetSentences.some((s) => s.id === id);
     if (isPreset) {
+      // Achievement check is triggered inside useProgressStore.markAsLearned
       await useProgressStore.getState().markAsLearned(id);
     } else {
       await get().updateSentence(id, { status: "learned" });
+
+      // Calculate total learned across user sentences + preset sentences
+      const userLearnedCount = get().sentences.filter((s) => s.status === "learned").length;
+      const presetLearnedCount = Object.values(useProgressStore.getState().progressMap).filter(
+        (s) => s === "learned"
+      ).length;
+      const { currentStreak, totalQuizQuestions } = useProgressStore.getState().stats;
+
+      await useAchievementStore.getState().checkProgressAchievements({
+        totalSentencesLearned: userLearnedCount + presetLearnedCount,
+        currentStreak,
+        totalQuizQuestions,
+      });
     }
   },
 
