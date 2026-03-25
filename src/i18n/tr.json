@@ -394,6 +394,7 @@
     "badge": "{{unlocked}} / {{total}} başarı",
     "new_achievement": "Yeni Başarı!",
     "unlocked_on": "{{date}} tarihinde açıldı",
+    "requires_premium": "Premium",
     "first_learned": {
       "title": "İlk Adım",
       "description": "İlk cümleyi öğrendin"

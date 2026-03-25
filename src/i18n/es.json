@@ -394,6 +394,7 @@
     "badge": "{{unlocked}} / {{total}} logros",
     "new_achievement": "¡Nuevo Logro!",
     "unlocked_on": "Desbloqueado el {{date}}",
+    "requires_premium": "Premium",
     "first_learned": {
       "title": "Primer Paso",
       "description": "Aprendiste tu primera oración"

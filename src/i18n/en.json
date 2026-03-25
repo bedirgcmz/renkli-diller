@@ -394,6 +394,7 @@
     "badge": "{{unlocked}} / {{total}} achievements",
     "new_achievement": "New Achievement!",
     "unlocked_on": "Unlocked on {{date}}",
+    "requires_premium": "Premium",
     "first_learned": {
       "title": "First Step",
       "description": "You learned your first sentence"

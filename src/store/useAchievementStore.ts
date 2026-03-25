@@ -1,13 +1,6 @@
 import { create } from "zustand";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "@/lib/supabase";
 import { ACHIEVEMENTS } from "@/utils/achievements";
-
-const STORAGE_KEY = "achievement_data";
-
-interface AchievementData {
-  unlockedIds: string[];
-  unlockedDates: Record<string, string>;
-}
 
 interface AchievementState {
   unlockedIds: string[];
@@ -32,13 +25,25 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
 
   loadAchievements: async () => {
     try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data: AchievementData = JSON.parse(stored);
-        set({ unlockedIds: data.unlockedIds ?? [], unlockedDates: data.unlockedDates ?? {} });
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("user_settings")
+        .select("achievement_unlocked_ids, achievement_unlocked_dates")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data) {
+        set({
+          unlockedIds: data.achievement_unlocked_ids ?? [],
+          unlockedDates: (data.achievement_unlocked_dates as Record<string, string>) ?? {},
+        });
       }
     } catch {
-      // ignore
+      if (__DEV__) console.error("loadAchievements failed");
     }
   },
 
@@ -50,12 +55,25 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
     const newIds = [...unlockedIds, id];
     const newDates = { ...unlockedDates, [id]: now };
 
+    // Optimistic update + show toast
     set({ unlockedIds: newIds, unlockedDates: newDates, pendingToast: id });
 
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ unlockedIds: newIds, unlockedDates: newDates }));
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase
+        .from("user_settings")
+        .update({
+          achievement_unlocked_ids: newIds,
+          achievement_unlocked_dates: newDates,
+          updated_at: now,
+        })
+        .eq("user_id", user.id);
     } catch {
-      // ignore
+      if (__DEV__) console.error("unlockAchievement save failed");
     }
   },
 

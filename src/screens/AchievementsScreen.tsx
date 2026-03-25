@@ -72,9 +72,16 @@ export default function AchievementsScreen() {
                 </Text>
               </View>
               <View style={styles.info}>
-                <Text style={[styles.title, { color: colors.text }]}>
-                  {unlocked ? t(achievement.title_key) : "???"}
-                </Text>
+                <View style={styles.titleRow}>
+                  <Text style={[styles.title, { color: colors.text }]}>
+                    {unlocked ? t(achievement.title_key) : "???"}
+                  </Text>
+                  {achievement.requiresPremium && !unlocked && (
+                    <View style={[styles.premiumBadge, { backgroundColor: "#FFD700" + "25" }]}>
+                      <Text style={styles.premiumBadgeText}>👑 {t("achievements.requires_premium")}</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
                   {t(achievement.description_key)}
                 </Text>
@@ -143,7 +150,10 @@ const styles = StyleSheet.create({
   icon: { fontSize: 24 },
   iconLocked: { opacity: 0.5 },
   info: { flex: 1 },
-  title: { fontSize: 15, fontWeight: "700", marginBottom: 2 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 },
+  title: { fontSize: 15, fontWeight: "700" },
+  premiumBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  premiumBadgeText: { fontSize: 10, fontWeight: "600", color: "#B8860B" },
   description: { fontSize: 12, lineHeight: 17 },
   date: { fontSize: 11, marginTop: 4 },
 });

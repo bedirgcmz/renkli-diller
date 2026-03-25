@@ -394,6 +394,7 @@
     "badge": "{{unlocked}} / {{total}} succès",
     "new_achievement": "Nouveau Succès !",
     "unlocked_on": "Débloqué le {{date}}",
+    "requires_premium": "Premium",
     "first_learned": {
       "title": "Premier Pas",
       "description": "Tu as appris ta première phrase"

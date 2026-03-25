@@ -5,6 +5,7 @@ export interface Achievement {
   description_key: string;
   conditionType: "learned_count" | "streak" | "quiz_total" | "perfect_quiz" | "automode";
   conditionValue?: number;
+  requiresPremium?: boolean;
 }
 
 export const ACHIEVEMENTS: Achievement[] = [

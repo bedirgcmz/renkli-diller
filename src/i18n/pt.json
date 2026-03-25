@@ -394,6 +394,7 @@
     "badge": "{{unlocked}} / {{total}} conquistas",
     "new_achievement": "Nova Conquista!",
     "unlocked_on": "Desbloqueado em {{date}}",
+    "requires_premium": "Premium",
     "first_learned": {
       "title": "Primeiro Passo",
       "description": "Você aprendeu sua primeira frase"

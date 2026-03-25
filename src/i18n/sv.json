@@ -394,6 +394,7 @@
     "badge": "{{unlocked}} / {{total}} prestationer",
     "new_achievement": "Ny Prestation!",
     "unlocked_on": "Upplåst {{date}}",
+    "requires_premium": "Premium",
     "first_learned": {
       "title": "Första Steget",
       "description": "Du lärde dig din första mening"

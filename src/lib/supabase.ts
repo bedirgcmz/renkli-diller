@@ -174,6 +174,8 @@ export type Database = {
           show_translations: boolean;
           tts_enabled: boolean;
           tts_voice: string;
+          achievement_unlocked_ids: string[];
+          achievement_unlocked_dates: Record<string, string>;
           created_at: string;
           updated_at: string;
         };
@@ -190,6 +192,8 @@ export type Database = {
           show_translations?: boolean;
           tts_enabled?: boolean;
           tts_voice?: string;
+          achievement_unlocked_ids?: string[];
+          achievement_unlocked_dates?: Record<string, string>;
           created_at?: string;
           updated_at?: string;
         };
@@ -206,6 +210,8 @@ export type Database = {
           show_translations?: boolean;
           tts_enabled?: boolean;
           tts_voice?: string;
+          achievement_unlocked_ids?: string[];
+          achievement_unlocked_dates?: Record<string, string>;
           created_at?: string;
           updated_at?: string;
         };
