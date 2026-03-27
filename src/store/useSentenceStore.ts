@@ -54,6 +54,7 @@ interface SentenceState {
     category_id?: number;
     source_lang?: string;
     target_lang?: string;
+    is_ai_generated?: boolean;
   }) => Promise<{ success: boolean; error?: string }>;
   updateSentence: (
     id: string,
@@ -247,6 +248,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           category_name: cat ? getCategoryName(cat, uiLanguage) : "",
           status: (row.state || "new") as SentenceStatus,
           is_preset: false,
+          is_ai_generated: (row.is_ai_generated as boolean) ?? false,
           source_lang: row.source_lang ?? uiLanguage,
           target_lang: row.target_lang ?? targetLanguage,
           created_at: row.created_at,
@@ -260,7 +262,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     }
   },
 
-  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang }) => {
+  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang, is_ai_generated }) => {
     set({ loading: true, error: null });
     try {
       const {
@@ -282,6 +284,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           state: "learning",
           source_lang: source_lang ?? null,
           target_lang: target_lang ?? null,
+          is_ai_generated: is_ai_generated ?? false,
         })
         .select()
         .single();

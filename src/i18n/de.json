@@ -439,5 +439,38 @@
       "title": "Zuhörer",
       "description": "Du hast deine erste Auto-Modus-Sitzung abgeschlossen"
     }
+  },
+  "ai_translator": {
+    "title": "KI-Übersetzer",
+    "subtitle": "Natürliche, idiomatische Übersetzung",
+    "card_title": "KI-Übersetzer",
+    "card_desc": "Intelligente Satzübersetzung",
+    "placeholder": "Gib einen Satz ein... **Wörter** mit Sternchen markieren",
+    "translate_btn": "Übersetzen",
+    "retranslate_btn": "Erneut übersetzen",
+    "copy_btn": "Kopieren",
+    "add_to_list": "Zu meinen Sätzen hinzufügen",
+    "trial_days_left": "{{count}} Tag(e) Testzeit übrig",
+    "trial_expired_title": "Testzeit abgelaufen",
+    "trial_expired_body": "Upgrade auf Premium, um den KI-Übersetzer weiter zu nutzen",
+    "go_premium": "Premium werden",
+    "recent_title": "Letzte Übersetzungen",
+    "save_modal_title": "Satz speichern",
+    "category_label": "Kategorie",
+    "new_category_label": "Neue Kategorie",
+    "new_category_placeholder": "Neuer Kategoriename...",
+    "keywords_label": "Schlüsselwörter",
+    "keywords_hint": "Optional · max. 3",
+    "keyword_placeholder": "Schlüsselwort {{n}}",
+    "save_btn": "Speichern",
+    "save_success": "Satz gespeichert!",
+    "save_error": "Satz konnte nicht gespeichert werden.",
+    "translate_error": "Übersetzung fehlgeschlagen. Bitte erneut versuchen.",
+    "char_limit": "{{count}}/200",
+    "loading": "Wird übersetzt...",
+    "no_category": "Keine Kategorie",
+    "source_label": "Quelle",
+    "result_label": "Übersetzung",
+    "tap_to_restore": "Zum Wiederherstellen tippen"
   }
 }

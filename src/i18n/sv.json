@@ -439,5 +439,38 @@
       "title": "Aktiv Lyssnare",
       "description": "Du slutförde din första automatlägesession"
     }
+  },
+  "ai_translator": {
+    "title": "AI-Översättare",
+    "subtitle": "Naturlig, idiomatisk översättning",
+    "card_title": "AI-Översättare",
+    "card_desc": "Smart meningsöversättning",
+    "placeholder": "Skriv en mening... markera **ord** med stjärnor",
+    "translate_btn": "Översätt",
+    "retranslate_btn": "Översätt igen",
+    "copy_btn": "Kopiera",
+    "add_to_list": "Lägg till mina meningar",
+    "trial_days_left": "{{count}} dag(ar) kvar av testperioden",
+    "trial_expired_title": "Testperioden har gått ut",
+    "trial_expired_body": "Uppgradera till Premium för att fortsätta använda AI-Översättaren",
+    "go_premium": "Bli Premium",
+    "recent_title": "Senaste översättningar",
+    "save_modal_title": "Spara mening",
+    "category_label": "Kategori",
+    "new_category_label": "Ny kategori",
+    "new_category_placeholder": "Nytt kategorinamn...",
+    "keywords_label": "Nyckelord",
+    "keywords_hint": "Valfritt · max 3",
+    "keyword_placeholder": "nyckelord {{n}}",
+    "save_btn": "Spara",
+    "save_success": "Meningen sparad!",
+    "save_error": "Det gick inte att spara meningen.",
+    "translate_error": "Översättning misslyckades. Försök igen.",
+    "char_limit": "{{count}}/200",
+    "loading": "Översätter...",
+    "no_category": "Ingen kategori",
+    "source_label": "Källa",
+    "result_label": "Översättning",
+    "tap_to_restore": "Tryck för att återställa"
   }
 }

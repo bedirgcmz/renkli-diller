@@ -27,6 +27,7 @@ export interface Sentence {
   status: SentenceStatus;
   is_preset: boolean;
   is_favorite?: boolean;
+  is_ai_generated?: boolean;
   source_lang?: SupportedLanguage;
   target_lang?: SupportedLanguage;
   created_at?: string;
@@ -114,6 +115,7 @@ export type MainStackParamList = {
   LearnedSentences: undefined;
   FavoriteSentences: undefined;
   Achievements: undefined;
+  AITranslator: undefined;
 };
 
 export type AuthStackParamList = {

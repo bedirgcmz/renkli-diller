@@ -439,5 +439,38 @@
       "title": "Ouvinte Ativo",
       "description": "Você completou sua primeira sessão em modo automático"
     }
+  },
+  "ai_translator": {
+    "title": "Tradutor IA",
+    "subtitle": "Tradução natural e idiomática",
+    "card_title": "Tradutor IA",
+    "card_desc": "Tradução inteligente de frases",
+    "placeholder": "Digite uma frase... destaque **palavras** com asteriscos",
+    "translate_btn": "Traduzir",
+    "retranslate_btn": "Traduzir novamente",
+    "copy_btn": "Copiar",
+    "add_to_list": "Adicionar às minhas frases",
+    "trial_days_left": "{{count}} dia(s) de teste restante(s)",
+    "trial_expired_title": "Período de teste encerrado",
+    "trial_expired_body": "Atualize para Premium para continuar usando o Tradutor IA",
+    "go_premium": "Ir para Premium",
+    "recent_title": "Traduções recentes",
+    "save_modal_title": "Salvar frase",
+    "category_label": "Categoria",
+    "new_category_label": "Nova categoria",
+    "new_category_placeholder": "Nome da nova categoria...",
+    "keywords_label": "Palavras-chave",
+    "keywords_hint": "Opcional · máx. 3",
+    "keyword_placeholder": "palavra-chave {{n}}",
+    "save_btn": "Salvar",
+    "save_success": "Frase salva!",
+    "save_error": "Falha ao salvar a frase.",
+    "translate_error": "Tradução falhou. Tente novamente.",
+    "char_limit": "{{count}}/200",
+    "loading": "Traduzindo...",
+    "no_category": "Sem categoria",
+    "source_label": "Fonte",
+    "result_label": "Tradução",
+    "tap_to_restore": "Toque para restaurar"
   }
 }

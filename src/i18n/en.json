@@ -439,5 +439,38 @@
       "title": "Active Listener",
       "description": "You completed your first auto mode session"
     }
+  },
+  "ai_translator": {
+    "title": "AI Translator",
+    "subtitle": "Natural, idiomatic translation",
+    "card_title": "AI Translator",
+    "card_desc": "Smart sentence translation",
+    "placeholder": "Type a sentence... wrap **keywords** in stars",
+    "translate_btn": "Translate",
+    "retranslate_btn": "Translate Again",
+    "copy_btn": "Copy",
+    "add_to_list": "Add to My Sentences",
+    "trial_days_left": "{{count}} day(s) left in trial",
+    "trial_expired_title": "Trial Period Ended",
+    "trial_expired_body": "Upgrade to Premium to continue using AI Translator",
+    "go_premium": "Go Premium",
+    "recent_title": "Recent Translations",
+    "save_modal_title": "Save Sentence",
+    "category_label": "Category",
+    "new_category_label": "New Category",
+    "new_category_placeholder": "New category name...",
+    "keywords_label": "Keywords",
+    "keywords_hint": "Optional · max 3",
+    "keyword_placeholder": "keyword {{n}}",
+    "save_btn": "Save",
+    "save_success": "Sentence saved!",
+    "save_error": "Failed to save sentence.",
+    "translate_error": "Translation failed. Please try again.",
+    "char_limit": "{{count}}/200",
+    "loading": "Translating...",
+    "no_category": "No category",
+    "source_label": "Source",
+    "result_label": "Translation",
+    "tap_to_restore": "Tap to restore"
   }
 }

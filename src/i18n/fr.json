@@ -439,5 +439,38 @@
       "title": "Auditeur Actif",
       "description": "Tu as complété ta première session en mode automatique"
     }
+  },
+  "ai_translator": {
+    "title": "Traducteur IA",
+    "subtitle": "Traduction naturelle et idiomatique",
+    "card_title": "Traducteur IA",
+    "card_desc": "Traduction intelligente de phrases",
+    "placeholder": "Tapez une phrase... mettez **les mots** entre astérisques",
+    "translate_btn": "Traduire",
+    "retranslate_btn": "Retraduire",
+    "copy_btn": "Copier",
+    "add_to_list": "Ajouter à mes phrases",
+    "trial_days_left": "{{count}} jour(s) d'essai restant(s)",
+    "trial_expired_title": "Période d'essai terminée",
+    "trial_expired_body": "Passez à Premium pour continuer à utiliser le Traducteur IA",
+    "go_premium": "Passer à Premium",
+    "recent_title": "Traductions récentes",
+    "save_modal_title": "Enregistrer la phrase",
+    "category_label": "Catégorie",
+    "new_category_label": "Nouvelle catégorie",
+    "new_category_placeholder": "Nom de nouvelle catégorie...",
+    "keywords_label": "Mots-clés",
+    "keywords_hint": "Facultatif · max. 3",
+    "keyword_placeholder": "mot-clé {{n}}",
+    "save_btn": "Enregistrer",
+    "save_success": "Phrase enregistrée !",
+    "save_error": "Échec de l'enregistrement.",
+    "translate_error": "Traduction échouée. Veuillez réessayer.",
+    "char_limit": "{{count}}/200",
+    "loading": "Traduction en cours...",
+    "no_category": "Sans catégorie",
+    "source_label": "Source",
+    "result_label": "Traduction",
+    "tap_to_restore": "Appuyer pour restaurer"
   }
 }

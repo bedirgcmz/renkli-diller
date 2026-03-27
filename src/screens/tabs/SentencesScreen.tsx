@@ -99,6 +99,11 @@ function SentenceItem({
       <View style={[itemStyles.statusBar, { backgroundColor: barColor }]} />
       <View style={itemStyles.body}>
         <View style={itemStyles.iconRow}>
+          {sentence.is_ai_generated && (
+            <View style={[itemStyles.aiBadge, { backgroundColor: colors.primary + "18" }]}>
+              <Ionicons name="sparkles" size={11} color={colors.primary} />
+            </View>
+          )}
           {hasMismatch && (
             <Pressable
               onPress={handleMismatchPress}
@@ -327,6 +332,13 @@ const itemStyles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
+  },
+  aiBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionBtnText: {
     fontSize: 13,
@@ -650,22 +662,31 @@ export default function SentencesScreen() {
       {/* ── Başlık ───────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("sentences.title")}</Text>
-        <TouchableOpacity
-          onPress={() => setFilterVisible(true)}
-          style={styles.filterBtn}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name="options-outline"
-            size={24}
-            color={activeFilterCount > 0 ? colors.primary : colors.textSecondary}
-          />
-          {activeFilterCount > 0 && (
-            <View style={[styles.filterBadge, { backgroundColor: colors.primary }]}>
-              <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("AITranslator")}
+            style={[styles.filterBtn, { backgroundColor: colors.primary + "15", borderRadius: 10 }]}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="sparkles" size={20} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setFilterVisible(true)}
+            style={styles.filterBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="options-outline"
+              size={24}
+              color={activeFilterCount > 0 ? colors.primary : colors.textSecondary}
+            />
+            {activeFilterCount > 0 && (
+              <View style={[styles.filterBadge, { backgroundColor: colors.primary }]}>
+                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* ── Arama ────────────────────────────────────────────────────── */}

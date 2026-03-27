@@ -439,5 +439,38 @@
       "title": "Dinleyici",
       "description": "İlk otomatik mod oturumunu tamamladın"
     }
+  },
+  "ai_translator": {
+    "title": "AI Çevirmen",
+    "subtitle": "Doğal, deyimsel çeviri",
+    "card_title": "AI Çevirmen",
+    "card_desc": "Akıllı cümle çevirisi",
+    "placeholder": "Bir cümle yaz... **kelimeleri** yıldızla işaretle",
+    "translate_btn": "Çevir",
+    "retranslate_btn": "Yeniden Çevir",
+    "copy_btn": "Kopyala",
+    "add_to_list": "Cümlelerime Ekle",
+    "trial_days_left": "{{count}} gün deneme hakkın kaldı",
+    "trial_expired_title": "Deneme Süren Doldu",
+    "trial_expired_body": "AI Çevirmen'i kullanmaya devam etmek için Premium'a geçin",
+    "go_premium": "Premium'a Geç",
+    "recent_title": "Son Çeviriler",
+    "save_modal_title": "Cümleyi Kaydet",
+    "category_label": "Kategori",
+    "new_category_label": "Yeni Kategori",
+    "new_category_placeholder": "Yeni kategori adı...",
+    "keywords_label": "Anahtar Kelimeler",
+    "keywords_hint": "Opsiyonel · maks 3",
+    "keyword_placeholder": "anahtar kelime {{n}}",
+    "save_btn": "Kaydet",
+    "save_success": "Cümle kaydedildi!",
+    "save_error": "Cümle kaydedilemedi.",
+    "translate_error": "Çeviri başarısız. Tekrar deneyin.",
+    "char_limit": "{{count}}/200",
+    "loading": "Çevriliyor...",
+    "no_category": "Kategorisiz",
+    "source_label": "Kaynak",
+    "result_label": "Çeviri",
+    "tap_to_restore": "Geri yüklemek için dokun"
   }
 }

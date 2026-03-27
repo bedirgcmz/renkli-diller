@@ -638,6 +638,26 @@ export default function LearnScreen() {
           )}
         </View>
 
+        {/* AI Translator card */}
+        <TouchableOpacity
+          style={[aiCardStyles.card, { backgroundColor: colors.cardBackground, borderColor: colors.primary + "30" }]}
+          onPress={() => navigation.navigate("AITranslator")}
+          activeOpacity={0.8}
+        >
+          <View style={[aiCardStyles.iconWrap, { backgroundColor: colors.primary + "18" }]}>
+            <Ionicons name="sparkles" size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[aiCardStyles.cardTitle, { color: colors.text }]}>
+              {t("ai_translator.card_title")}
+            </Text>
+            <Text style={[aiCardStyles.cardDesc, { color: colors.textSecondary }]}>
+              {t("ai_translator.card_desc")}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+        </TouchableOpacity>
+
         {/* Segment control */}
         <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
           {/* Learning tab */}
@@ -897,6 +917,42 @@ function MotivationBar({
     </View>
   );
 }
+
+// ─── AI card styles ────────────────────────────────────────────────────────────
+
+const aiCardStyles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 14,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  cardDesc: {
+    fontSize: 12,
+    marginTop: 1,
+  },
+});
 
 // ─── Stiller ───────────────────────────────────────────────────────────────────
 
