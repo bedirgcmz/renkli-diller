@@ -13,7 +13,7 @@ export async function translateWithAI(
   sourceLang: string,
   targetLang: string
 ): Promise<TranslateResult> {
-  const { data, error } = await supabase.functions.invoke("ai-translate", {
+  const { data, error } = await supabase.functions.invoke("smooth-handler", {
     body: { sourceText, sourceLang, targetLang },
   });
 
