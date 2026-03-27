@@ -7,8 +7,8 @@ import Purchases, {
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 
-// Expo Go'da (appOwnership === "expo") RevenueCat native store yoktur
-const isExpoGo = Constants.appOwnership === "expo";
+// Expo Go'da RevenueCat native store yoktur
+const isExpoGo = Constants.executionEnvironment === "storeClient";
 
 const API_KEYS = {
   ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY ?? "",
@@ -45,16 +45,19 @@ export async function initRevenueCat(userId?: string): Promise<void> {
 
 export async function logInUser(userId: string): Promise<void> {
   if (isExpoGo) return;
+  if (!(await Purchases.isConfigured())) return;
   await Purchases.logIn(userId);
 }
 
 export async function logOutUser(): Promise<void> {
   if (isExpoGo) return;
+  if (!(await Purchases.isConfigured())) return;
   await Purchases.logOut();
 }
 
 export async function getCustomerInfo(): Promise<CustomerInfo | null> {
   if (isExpoGo) return null;
+  if (!(await Purchases.isConfigured())) return null;
   return Purchases.getCustomerInfo();
 }
 
@@ -67,6 +70,7 @@ export async function isPremiumActive(): Promise<boolean> {
 
 export async function getOfferings(): Promise<PurchasesOffering | null> {
   if (isExpoGo) return null;
+  if (!(await Purchases.isConfigured())) return null;
   const offerings = await Purchases.getOfferings();
   return offerings.current;
 }
@@ -81,6 +85,7 @@ export async function purchasePackage(
   pkg: PurchasesPackage
 ): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string; userCancelled?: boolean }> {
   if (isExpoGo) return { success: false, error: "Not available in Expo Go" };
+  if (!(await Purchases.isConfigured())) return { success: false, error: "RevenueCat not configured" };
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     const premium = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
@@ -100,6 +105,7 @@ export async function restorePurchases(): Promise<{
   error?: string;
 }> {
   if (isExpoGo) return { success: false, isPremium: false, error: "Not available in Expo Go" };
+  if (!(await Purchases.isConfigured())) return { success: false, isPremium: false, error: "RevenueCat not configured" };
   try {
     const customerInfo = await Purchases.restorePurchases();
     const isPremium = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
