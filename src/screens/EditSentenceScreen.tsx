@@ -20,7 +20,9 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { KeywordText } from "@/components/KeywordText";
-import { MainStackParamList } from "@/types";
+import { TAG_OPTIONS } from "@/utils/constants";
+import { MainStackParamList, SentenceTag } from "@/types";
+import { useProgressStore } from "@/store/useProgressStore";
 
 
 export default function EditSentenceScreen() {
@@ -30,6 +32,7 @@ export default function EditSentenceScreen() {
   const route = useRoute<RouteProp<MainStackParamList, "EditSentence">>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { sentences, presetSentences, categories, updateSentence, loadCategories } = useSentenceStore();
+  const { tagMap, updatePresetTag } = useProgressStore();
 
   const { sentenceId, isPreset } = route.params;
   const pool = isPreset ? presetSentences : sentences;
@@ -46,6 +49,11 @@ export default function EditSentenceScreen() {
     sentence?.category_id,
   );
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<SentenceTag | null>(
+    sentence?.is_preset
+      ? (tagMap[sentence.id] ?? null)
+      : (sentence?.tag ?? null)
+  );
 
   useEffect(() => {
     if (categories.length === 0) loadCategories();
@@ -74,11 +82,18 @@ export default function EditSentenceScreen() {
     }
 
     setSaving(true);
+    if (sentence.is_preset) {
+      await updatePresetTag(sentence.id, selectedTag);
+      setSaving(false);
+      navigation.goBack();
+      return;
+    }
     const result = await updateSentence(sentence.id, {
       source_text: sourceText.trim(),
       target_text: targetText.trim(),
       keywords: keywords.filter((k) => k.trim() !== ""),
       category_id: categoryId,
+      tag: selectedTag,
     });
     setSaving(false);
 
@@ -276,21 +291,44 @@ export default function EditSentenceScreen() {
             )}
           </View>
 
-          {isUserSentence && (
-            <TouchableOpacity
-              style={[
-                styles.saveBtn,
-                { backgroundColor: saving ? colors.primaryLight : colors.primary },
-              ]}
-              onPress={handleSave}
-              disabled={saving}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.saveBtnText}>
-                {saving ? t("common.loading") : t("common.save")}
-              </Text>
-            </TouchableOpacity>
-          )}
+          {/* Tag */}
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: colors.text }]}>
+              {t("tags.label")} ({t("common.optional")})
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tagRow}>
+              {TAG_OPTIONS.map((opt) => {
+                const active = selectedTag === opt.value;
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={[styles.tagChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
+                    onPress={() => setSelectedTag(active ? null : opt.value)}
+                    activeOpacity={0.75}
+                  >
+                    <Ionicons name={opt.icon as any} size={14} color={active ? colors.primary : colors.textSecondary} />
+                    <Text style={[styles.tagChipText, { color: active ? colors.primary : colors.textSecondary }]}>
+                      {t(opt.i18nKey)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.saveBtn,
+              { backgroundColor: saving ? colors.primaryLight : colors.primary },
+            ]}
+            onPress={handleSave}
+            disabled={saving}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.saveBtnText}>
+              {saving ? t("common.loading") : t("common.save")}
+            </Text>
+          </TouchableOpacity>
 
           <View style={{ height: 20 }} />
         </ScrollView>
@@ -374,4 +412,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  tagRow: { flexDirection: "row", gap: 8, paddingVertical: 2 },
+  tagChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  tagChipText: { fontSize: 13, fontWeight: "500" },
 });
