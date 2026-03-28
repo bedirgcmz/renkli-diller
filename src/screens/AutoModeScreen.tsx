@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,8 +19,9 @@ import {
   DELAY_PER_CHAR_MS,
   POST_READ_DELAY_MS,
   LANG_CODE,
+  TAG_OPTIONS,
 } from "@/utils/constants";
-import { MainStackParamList } from "@/types";
+import { MainStackParamList, SentenceTag } from "@/types";
 
 type Phase = "idle" | "source" | "waiting" | "target" | "post" | "done";
 type Speed = 0.5 | 1 | 1.5 | 2;
@@ -37,7 +38,7 @@ export default function AutoModeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage, autoModeSpeed } = useSettingsStore();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, loadProgress, recordStudySession } = useProgressStore();
+  const { progressMap, tagMap, loadProgress, recordStudySession } = useProgressStore();
   const { isPremium } = usePremium();
 
   const [speed, setSpeed] = useState<Speed>((autoModeSpeed as Speed) ?? 1);
@@ -47,6 +48,7 @@ export default function AutoModeScreen() {
   const [showTarget, setShowTarget] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [activeTagFilter, setActiveTagFilter] = useState<SentenceTag | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef<Speed>(speed);
@@ -56,6 +58,15 @@ export default function AutoModeScreen() {
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
+
+  // Reset session when tag filter changes
+  useEffect(() => {
+    try { Speech.stop(); } catch {}
+    setIsPlaying(false);
+    setPhase("idle");
+    setCurrentIndex(0);
+    setShowTarget(false);
+  }, [activeTagFilter]);
 
   useEffect(() => {
     Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
@@ -68,7 +79,14 @@ export default function AutoModeScreen() {
     ...sentences.filter((s) => s.status === "learning"),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
-  const sessionSentences = isPremium ? allLearning : allLearning.slice(0, FREE_AUTO_MODE_LIMIT);
+
+  const filteredLearning = activeTagFilter === null
+    ? allLearning
+    : allLearning.filter((s) =>
+        s.is_preset ? tagMap[s.id] === activeTagFilter : s.tag === activeTagFilter
+      );
+
+  const sessionSentences = isPremium ? filteredLearning : filteredLearning.slice(0, FREE_AUTO_MODE_LIMIT);
 
   const sentence = sessionSentences[currentIndex];
   const total = sessionSentences.length;
@@ -250,6 +268,35 @@ export default function AutoModeScreen() {
         </Text>
         <Text style={[styles.phaseLabel, { color: colors.primary }]}>{phaseLabel}</Text>
       </View>
+
+      {/* Tag filter */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow} style={styles.filterBar}>
+        <TouchableOpacity
+          style={[styles.filterChip, { borderColor: activeTagFilter === null ? colors.primary : colors.border, backgroundColor: activeTagFilter === null ? colors.primary + "18" : colors.backgroundSecondary }]}
+          onPress={() => setActiveTagFilter(null)}
+          activeOpacity={0.75}
+        >
+          <Text style={[styles.filterChipText, { color: activeTagFilter === null ? colors.primary : colors.textSecondary }]}>
+            {t("tags.filter_all")}
+          </Text>
+        </TouchableOpacity>
+        {TAG_OPTIONS.map((opt) => {
+          const active = activeTagFilter === opt.value;
+          return (
+            <TouchableOpacity
+              key={opt.value}
+              style={[styles.filterChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
+              onPress={() => setActiveTagFilter(active ? null : opt.value)}
+              activeOpacity={0.75}
+            >
+              <Ionicons name={opt.icon as any} size={12} color={active ? colors.primary : colors.textSecondary} />
+              <Text style={[styles.filterChipText, { color: active ? colors.primary : colors.textSecondary }]}>
+                {t(opt.i18nKey)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
 
       {/* Info note */}
       <View style={[styles.infoBox, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
@@ -591,4 +638,16 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   limitBannerBtnText: { color: "#fff", fontSize: 11, fontWeight: "700" },
+  filterBar: { marginBottom: 8 },
+  filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 2 },
+  filterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  filterChipText: { fontSize: 12, fontWeight: "500" },
 });
