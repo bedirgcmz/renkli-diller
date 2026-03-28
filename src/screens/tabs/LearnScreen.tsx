@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  ScrollView,
   StyleSheet,
   ActivityIndicator,
   Animated,
@@ -27,8 +28,8 @@ import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
-import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
-import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
+import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, TAG_OPTIONS } from "@/utils/constants";
+import { Sentence, SentenceTag, HomeStackParamList, MainStackParamList } from "@/types";
 import * as Haptics from "expo-haptics";
 
 type TabKey = "learning" | "listening";
@@ -286,6 +287,7 @@ export default function LearnScreen() {
   } = useSentenceStore();
   const {
     progressMap,
+    tagMap,
     loadProgress,
     addToLearning,
   } = useProgressStore();
@@ -294,6 +296,7 @@ export default function LearnScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [activeTagFilter, setActiveTagFilter] = useState<SentenceTag | null>(null);
 
   // ── Listening state ──────────────────────────────────────────────────────────
   const [listenIdx, setListenIdx] = useState(0);
@@ -337,9 +340,23 @@ export default function LearnScreen() {
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 
-  const total = learningList.length;
-  const listenTotal = learningList.length;
-  const currentSentence = learningList[currentIndex] ?? null;
+  const filteredLearningList: Sentence[] = activeTagFilter === null
+    ? learningList
+    : learningList.filter((s) =>
+        s.is_preset
+          ? tagMap[s.id] === activeTagFilter
+          : s.tag === activeTagFilter
+      );
+
+  const total = filteredLearningList.length;
+  const listenTotal = filteredLearningList.length;
+  const currentSentence = filteredLearningList[currentIndex] ?? null;
+
+  // Reset card index when filter changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setListenIdx(0);
+  }, [activeTagFilter]);
 
   // index guard
   useEffect(() => {
@@ -354,7 +371,7 @@ export default function LearnScreen() {
   useEffect(() => {
     if (!initialized || !isFocused) return;
     if (activeTab !== "listening") return;
-    const sentence = learningList[listenIdx];
+    const sentence = filteredLearningList[listenIdx];
     if (!sentence) return;
 
     setShowTarget(false);
@@ -543,12 +560,12 @@ export default function LearnScreen() {
   };
 
   const handleReplay = () => {
-    const s = learningList[listenIdx];
+    const s = filteredLearningList[listenIdx];
     if (s) speak(stripMarkers(s.target_text), targetLanguage);
   };
 
   const handleReplaySlow = () => {
-    const s = learningList[listenIdx];
+    const s = filteredLearningList[listenIdx];
     if (s) speak(stripMarkers(s.target_text), targetLanguage, 0.5);
   };
 
@@ -725,6 +742,42 @@ export default function LearnScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Tag filter bar */}
+        {learningList.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+            style={styles.filterBar}
+          >
+            <TouchableOpacity
+              style={[styles.filterChip, { borderColor: activeTagFilter === null ? colors.primary : colors.border, backgroundColor: activeTagFilter === null ? colors.primary + "18" : colors.backgroundSecondary }]}
+              onPress={() => setActiveTagFilter(null)}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.filterChipText, { color: activeTagFilter === null ? colors.primary : colors.textSecondary }]}>
+                {t("tags.filter_all")}
+              </Text>
+            </TouchableOpacity>
+            {TAG_OPTIONS.map((opt) => {
+              const active = activeTagFilter === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.filterChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
+                  onPress={() => setActiveTagFilter(active ? null : opt.value)}
+                  activeOpacity={0.75}
+                >
+                  <Ionicons name={opt.icon as any} size={12} color={active ? colors.primary : colors.textSecondary} />
+                  <Text style={[styles.filterChipText, { color: active ? colors.primary : colors.textSecondary }]}>
+                    {t(opt.i18nKey)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
+
         {/* Progress bar — only on learning tab */}
         {activeTab === "learning" && initialized && total > 0 && (
           <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
@@ -833,7 +886,7 @@ export default function LearnScreen() {
                   renderToHardwareTextureAndroid
                 >
                   <ListenCard
-                    sentence={learningList[listenIdx]}
+                    sentence={filteredLearningList[listenIdx]}
                     showTarget={showTarget}
                     onToggleTarget={() => setShowTarget((v) => !v)}
                     options={listenOptions}
@@ -1104,4 +1157,16 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   autoModeShortcutText: { fontSize: 13 },
+  filterBar: { marginBottom: 10 },
+  filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 2 },
+  filterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  filterChipText: { fontSize: 12, fontWeight: "500" },
 });
