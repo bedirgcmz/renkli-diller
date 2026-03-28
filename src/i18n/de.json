@@ -471,6 +471,26 @@
     "no_category": "Keine Kategorie",
     "source_label": "Quelle",
     "result_label": "Übersetzung",
-    "tap_to_restore": "Zum Wiederherstellen tippen"
+    "tap_to_restore": "Zum Wiederherstellen tippen",
+    "tips_title": "Übersetzungstipps",
+    "tips_body": "• Sterne vor dem Satzzeichen schließen: **Wort**? schreiben, nicht **Wort?**\n• Sterne markieren das zu lernende Wort — halte es fokussiert\n• Natürliche Sätze liefern die besten Ergebnisse"
+  },
+  "tags": {
+    "label": "Tag",
+    "none": "Kein Tag",
+    "filter_all": "Alle",
+    "this_week": "Diese Woche",
+    "this_month": "Diesen Monat",
+    "work": "Arbeit",
+    "school": "Schule",
+    "home": "Zuhause",
+    "travel": "Reise",
+    "shopping": "Einkaufen",
+    "social": "Sozial",
+    "health": "Gesundheit",
+    "food": "Essen",
+    "easy": "Leicht",
+    "hard": "Schwer",
+    "important": "Wichtig"
   }
 }

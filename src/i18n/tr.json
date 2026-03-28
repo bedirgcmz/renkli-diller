@@ -471,6 +471,26 @@
     "no_category": "Kategorisiz",
     "source_label": "Kaynak",
     "result_label": "Çeviri",
-    "tap_to_restore": "Geri yüklemek için dokun"
+    "tap_to_restore": "Geri yüklemek için dokun",
+    "tips_title": "Çeviri İpuçları",
+    "tips_body": "• Yıldızı noktalama işaretinden önce kapat: **kimsin**? yaz, **kimsin?** değil\n• Yıldızlar öğrenmek istediğin kelimeyi işaretler — odaklı tut\n• En iyi sonuç için doğal cümleler yaz"
+  },
+  "tags": {
+    "label": "Etiket",
+    "none": "Etiket yok",
+    "filter_all": "Tümü",
+    "this_week": "Bu Hafta",
+    "this_month": "Bu Ay",
+    "work": "İş",
+    "school": "Okul",
+    "home": "Ev",
+    "travel": "Seyahat",
+    "shopping": "Alışveriş",
+    "social": "Sosyal",
+    "health": "Sağlık",
+    "food": "Yemek",
+    "easy": "Kolay",
+    "hard": "Zor",
+    "important": "Önemli"
   }
 }

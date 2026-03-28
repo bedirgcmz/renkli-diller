@@ -471,6 +471,26 @@
     "no_category": "No category",
     "source_label": "Source",
     "result_label": "Translation",
-    "tap_to_restore": "Tap to restore"
+    "tap_to_restore": "Tap to restore",
+    "tips_title": "Translation Tips",
+    "tips_body": "• Close the stars before punctuation: write **word**? not **word?**\n• Stars highlight the word or phrase to learn — keep it focused\n• Write natural sentences for the best results"
+  },
+  "tags": {
+    "label": "Tag",
+    "none": "No tag",
+    "filter_all": "All",
+    "this_week": "This Week",
+    "this_month": "This Month",
+    "work": "Work",
+    "school": "School",
+    "home": "Home",
+    "travel": "Travel",
+    "shopping": "Shopping",
+    "social": "Social",
+    "health": "Health",
+    "food": "Food",
+    "easy": "Easy",
+    "hard": "Hard",
+    "important": "Important"
   }
 }
