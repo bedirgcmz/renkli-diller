@@ -16,6 +16,21 @@ export type SentenceCategory =
   | "health"
   | "social_modern";
 
+export type SentenceTag =
+  | "this_week"
+  | "this_month"
+  | "work"
+  | "school"
+  | "home"
+  | "travel"
+  | "shopping"
+  | "social"
+  | "health"
+  | "food"
+  | "easy"
+  | "hard"
+  | "important";
+
 export interface Sentence {
   id: string;
   user_id?: string;
@@ -28,6 +43,7 @@ export interface Sentence {
   is_preset: boolean;
   is_favorite?: boolean;
   is_ai_generated?: boolean;
+  tag?: SentenceTag | null;
   source_lang?: SupportedLanguage;
   target_lang?: SupportedLanguage;
   created_at?: string;
