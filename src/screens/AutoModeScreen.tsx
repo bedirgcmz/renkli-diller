@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,9 +19,9 @@ import {
   DELAY_PER_CHAR_MS,
   POST_READ_DELAY_MS,
   LANG_CODE,
-  TAG_OPTIONS,
 } from "@/utils/constants";
 import { MainStackParamList, SentenceTag } from "@/types";
+import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 
 type Phase = "idle" | "source" | "waiting" | "target" | "post" | "done";
 type Speed = 0.5 | 1 | 1.5 | 2;
@@ -48,7 +48,8 @@ export default function AutoModeScreen() {
   const [showTarget, setShowTarget] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [activeTagFilter, setActiveTagFilter] = useState<SentenceTag | null>(null);
+  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef<Speed>(speed);
@@ -66,7 +67,7 @@ export default function AutoModeScreen() {
     setPhase("idle");
     setCurrentIndex(0);
     setShowTarget(false);
-  }, [activeTagFilter]);
+  }, [activeTagFilters]);
 
   useEffect(() => {
     Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
@@ -80,11 +81,12 @@ export default function AutoModeScreen() {
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 
-  const filteredLearning = activeTagFilter === null
+  const filteredLearning = activeTagFilters.length === 0
     ? allLearning
-    : allLearning.filter((s) =>
-        s.is_preset ? tagMap[s.id] === activeTagFilter : s.tag === activeTagFilter
-      );
+    : allLearning.filter((s) => {
+        const tag = s.is_preset ? tagMap[s.id] : s.tag;
+        return tag != null && activeTagFilters.includes(tag);
+      });
 
   const sessionSentences = isPremium ? filteredLearning : filteredLearning.slice(0, FREE_AUTO_MODE_LIMIT);
 
@@ -238,7 +240,10 @@ export default function AutoModeScreen() {
     >
       {/* Header */}
       <View style={styles.topBar}>
-        <View style={{ width: 26 }} />
+        <FilterButton
+          activeCount={activeTagFilters.length}
+          onPress={() => setFilterModalVisible(true)}
+        />
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
         <TouchableOpacity
           onPress={() => {
@@ -250,6 +255,12 @@ export default function AutoModeScreen() {
           <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
+      <TagFilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        selectedTags={activeTagFilters}
+        onApply={setActiveTagFilters}
+      />
 
       {/* Progress bar */}
       <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
@@ -269,34 +280,6 @@ export default function AutoModeScreen() {
         <Text style={[styles.phaseLabel, { color: colors.primary }]}>{phaseLabel}</Text>
       </View>
 
-      {/* Tag filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow} style={styles.filterBar}>
-        <TouchableOpacity
-          style={[styles.filterChip, { borderColor: activeTagFilter === null ? colors.primary : colors.border, backgroundColor: activeTagFilter === null ? colors.primary + "18" : colors.backgroundSecondary }]}
-          onPress={() => setActiveTagFilter(null)}
-          activeOpacity={0.75}
-        >
-          <Text style={[styles.filterChipText, { color: activeTagFilter === null ? colors.primary : colors.textSecondary }]}>
-            {t("tags.filter_all")}
-          </Text>
-        </TouchableOpacity>
-        {TAG_OPTIONS.map((opt) => {
-          const active = activeTagFilter === opt.value;
-          return (
-            <TouchableOpacity
-              key={opt.value}
-              style={[styles.filterChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
-              onPress={() => setActiveTagFilter(active ? null : opt.value)}
-              activeOpacity={0.75}
-            >
-              <Ionicons name={opt.icon as any} size={12} color={active ? colors.primary : colors.textSecondary} />
-              <Text style={[styles.filterChipText, { color: active ? colors.primary : colors.textSecondary }]}>
-                {t(opt.i18nKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
 
       {/* Info note */}
       <View style={[styles.infoBox, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
@@ -638,16 +621,4 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   limitBannerBtnText: { color: "#fff", fontSize: 11, fontWeight: "700" },
-  filterBar: { height: 32, marginBottom: 8, flexShrink: 0 },
-  filterRow: { flexDirection: "row", gap: 6, paddingHorizontal: 16, alignItems: "center" },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  filterChipText: { fontSize: 11, fontWeight: "500" },
 });

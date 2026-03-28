@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
   ActivityIndicator,
   Animated,
@@ -28,8 +27,9 @@ import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
-import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, TAG_OPTIONS } from "@/utils/constants";
+import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
 import { Sentence, SentenceTag, HomeStackParamList, MainStackParamList } from "@/types";
+import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import * as Haptics from "expo-haptics";
 
 type TabKey = "learning" | "listening";
@@ -296,7 +296,8 @@ export default function LearnScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTagFilter, setActiveTagFilter] = useState<SentenceTag | null>(null);
+  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   // ── Listening state ──────────────────────────────────────────────────────────
   const [listenIdx, setListenIdx] = useState(0);
@@ -340,13 +341,12 @@ export default function LearnScreen() {
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 
-  const filteredLearningList: Sentence[] = activeTagFilter === null
+  const filteredLearningList: Sentence[] = activeTagFilters.length === 0
     ? learningList
-    : learningList.filter((s) =>
-        s.is_preset
-          ? tagMap[s.id] === activeTagFilter
-          : s.tag === activeTagFilter
-      );
+    : learningList.filter((s) => {
+        const tag = s.is_preset ? tagMap[s.id] : s.tag;
+        return tag != null && activeTagFilters.includes(tag);
+      });
 
   const total = filteredLearningList.length;
   const listenTotal = filteredLearningList.length;
@@ -356,7 +356,7 @@ export default function LearnScreen() {
   useEffect(() => {
     setCurrentIndex(0);
     setListenIdx(0);
-  }, [activeTagFilter]);
+  }, [activeTagFilters]);
 
   // index guard
   useEffect(() => {
@@ -639,21 +639,35 @@ export default function LearnScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t("learn.title")}</Text>
-          {activeTab === "learning" && total > 0 && (
-            <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
-              <Text style={[styles.counterText, { color: colors.primary }]}>
-                {currentIndex + 1}/{total}
-              </Text>
-            </View>
-          )}
-          {activeTab === "listening" && listenTotal > 0 && (
-            <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
-              <Text style={[styles.counterText, { color: colors.primary }]}>
-                {listenIdx + 1}/{listenTotal}
-              </Text>
-            </View>
-          )}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {activeTab === "learning" && total > 0 && (
+              <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
+                <Text style={[styles.counterText, { color: colors.primary }]}>
+                  {currentIndex + 1}/{total}
+                </Text>
+              </View>
+            )}
+            {activeTab === "listening" && listenTotal > 0 && (
+              <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
+                <Text style={[styles.counterText, { color: colors.primary }]}>
+                  {listenIdx + 1}/{listenTotal}
+                </Text>
+              </View>
+            )}
+            {learningList.length > 0 && (
+              <FilterButton
+                activeCount={activeTagFilters.length}
+                onPress={() => setFilterModalVisible(true)}
+              />
+            )}
+          </View>
         </View>
+        <TagFilterModal
+          visible={filterModalVisible}
+          onClose={() => setFilterModalVisible(false)}
+          selectedTags={activeTagFilters}
+          onApply={setActiveTagFilters}
+        />
 
         {/* AI Translator card */}
         <TouchableOpacity
@@ -742,41 +756,6 @@ export default function LearnScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Tag filter bar */}
-        {learningList.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterRow}
-            style={styles.filterBar}
-          >
-            <TouchableOpacity
-              style={[styles.filterChip, { borderColor: activeTagFilter === null ? colors.primary : colors.border, backgroundColor: activeTagFilter === null ? colors.primary + "18" : colors.backgroundSecondary }]}
-              onPress={() => setActiveTagFilter(null)}
-              activeOpacity={0.75}
-            >
-              <Text style={[styles.filterChipText, { color: activeTagFilter === null ? colors.primary : colors.textSecondary }]}>
-                {t("tags.filter_all")}
-              </Text>
-            </TouchableOpacity>
-            {TAG_OPTIONS.map((opt) => {
-              const active = activeTagFilter === opt.value;
-              return (
-                <TouchableOpacity
-                  key={opt.value}
-                  style={[styles.filterChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
-                  onPress={() => setActiveTagFilter(active ? null : opt.value)}
-                  activeOpacity={0.75}
-                >
-                  <Ionicons name={opt.icon as any} size={12} color={active ? colors.primary : colors.textSecondary} />
-                  <Text style={[styles.filterChipText, { color: active ? colors.primary : colors.textSecondary }]}>
-                    {t(opt.i18nKey)}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        )}
 
         {/* Progress bar — only on learning tab */}
         {activeTab === "learning" && initialized && total > 0 && (
@@ -1157,16 +1136,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   autoModeShortcutText: { fontSize: 13 },
-  filterBar: { height: 32, marginBottom: 10, flexShrink: 0 },
-  filterRow: { flexDirection: "row", gap: 6, paddingHorizontal: 16, alignItems: "center" },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  filterChipText: { fontSize: 11, fontWeight: "500" },
 });

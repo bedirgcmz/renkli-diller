@@ -96,6 +96,21 @@ export const TAG_OPTIONS: { value: SentenceTag; i18nKey: string; icon: string }[
   { value: "important",  i18nKey: "tags.important",  icon: "star-outline" },
 ];
 
+export const TAG_GROUPS: { labelKey: string; tags: SentenceTag[] }[] = [
+  {
+    labelKey: "tags.group_time",
+    tags: ["this_week", "this_month"],
+  },
+  {
+    labelKey: "tags.group_topic",
+    tags: ["work", "school", "home", "travel", "shopping", "social", "health", "food"],
+  },
+  {
+    labelKey: "tags.group_difficulty",
+    tags: ["easy", "hard", "important"],
+  },
+];
+
 export const APP_NAMES: Record<SupportedLanguage, string> = {
   tr: 'Parlio',
   en: 'Parlio',

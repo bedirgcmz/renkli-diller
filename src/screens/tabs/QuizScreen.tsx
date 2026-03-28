@@ -25,8 +25,9 @@ import { usePremium } from "@/hooks/usePremium";
 import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { FREE_QUIZ_DAILY_LIMIT, TAG_OPTIONS } from "@/utils/constants";
+import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
 import { HomeStackParamList, MainStackParamList, PillSegment, Sentence, SentenceTag } from "@/types";
+import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import { speak, stopSpeaking } from "@/services/tts";
 import { useAchievementStore } from "@/store/useAchievementStore";
 
@@ -133,7 +134,8 @@ export default function QuizScreen() {
   const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
   const [refreshing, setRefreshing] = useState(false);
   const [quizMuted, setQuizMuted] = useState(false);
-  const [activeTagFilter, setActiveTagFilter] = useState<SentenceTag | null>(null);
+  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // perfect_quiz: 100% accuracy in a main session (no wrong answers → no retry phase)
@@ -214,11 +216,12 @@ export default function QuizScreen() {
     (s) => s.status === "learning" || progressMap[s.id] === "learning",
   );
 
-  const filteredLearningSentences = activeTagFilter === null
+  const filteredLearningSentences = activeTagFilters.length === 0
     ? learningSentences
-    : learningSentences.filter((s) =>
-        s.is_preset ? tagMap[s.id] === activeTagFilter : s.tag === activeTagFilter
-      );
+    : learningSentences.filter((s) => {
+        const tag = s.is_preset ? tagMap[s.id] : s.tag;
+        return tag != null && activeTagFilters.includes(tag);
+      });
 
   const sessionSize = isPremium ? 20 : FREE_QUIZ_DAILY_LIMIT;
   const dailyLimitReached = !isPremium && dailyCount >= FREE_QUIZ_DAILY_LIMIT;
@@ -241,7 +244,7 @@ export default function QuizScreen() {
 
   useEffect(() => {
     if (filteredLearningSentences.length > 0) startSession();
-  }, [mode, sentences.length, presetSentences.length, initialized, activeTagFilter]);
+  }, [mode, sentences.length, presetSentences.length, initialized, activeTagFilters]);
 
   const currentQ = questions[currentIdx];
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
@@ -371,12 +374,24 @@ export default function QuizScreen() {
     <>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
-        <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
-          <Text style={[styles.scoreText, { color: colors.primary }]}>
-            ✓ {score.correct}/{score.total}
-          </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
+            <Text style={[styles.scoreText, { color: colors.primary }]}>
+              ✓ {score.correct}/{score.total}
+            </Text>
+          </View>
+          <FilterButton
+            activeCount={activeTagFilters.length}
+            onPress={() => setFilterModalVisible(true)}
+          />
         </View>
       </View>
+      <TagFilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        selectedTags={activeTagFilters}
+        onApply={setActiveTagFilters}
+      />
 
       <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
         {(["multiple_choice", "fill_blank"] as QuizMode[]).map((m) => (
@@ -400,34 +415,6 @@ export default function QuizScreen() {
           </TouchableOpacity>
         ))}
       </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow} style={styles.filterBar}>
-        <TouchableOpacity
-          style={[styles.filterChip, { borderColor: activeTagFilter === null ? colors.primary : colors.border, backgroundColor: activeTagFilter === null ? colors.primary + "18" : colors.backgroundSecondary }]}
-          onPress={() => setActiveTagFilter(null)}
-          activeOpacity={0.75}
-        >
-          <Text style={[styles.filterChipText, { color: activeTagFilter === null ? colors.primary : colors.textSecondary }]}>
-            {t("tags.filter_all")}
-          </Text>
-        </TouchableOpacity>
-        {TAG_OPTIONS.map((opt) => {
-          const active = activeTagFilter === opt.value;
-          return (
-            <TouchableOpacity
-              key={opt.value}
-              style={[styles.filterChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
-              onPress={() => setActiveTagFilter(active ? null : opt.value)}
-              activeOpacity={0.75}
-            >
-              <Ionicons name={opt.icon as any} size={12} color={active ? colors.primary : colors.textSecondary} />
-              <Text style={[styles.filterChipText, { color: active ? colors.primary : colors.textSecondary }]}>
-                {t(opt.i18nKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
     </>
   );
 
@@ -1178,16 +1165,4 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   emptyBtnText: { color: "#fff", fontSize: 14, fontWeight: "600" },
-  filterBar: { height: 32, marginBottom: 10, flexShrink: 0 },
-  filterRow: { flexDirection: "row", gap: 6, paddingHorizontal: 16, alignItems: "center" },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  filterChipText: { fontSize: 11, fontWeight: "500" },
 });
