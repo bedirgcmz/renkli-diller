@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
-import { UserProgress, QuizResult, StudySession } from "@/types";
+import { UserProgress, QuizResult, StudySession, SentenceTag } from "@/types";
 import { useAchievementStore } from "./useAchievementStore";
 
 // TODO: daily_stats tablosuna yazma — şu an streak user_progress.learned_at'tan hesaplanıyor.
@@ -28,6 +28,7 @@ interface ProgressStats {
 interface ProgressState {
   progress: UserProgress[];
   progressMap: Record<string, "learning" | "learned">;
+  tagMap: Record<string, SentenceTag | null>;
   stats: ProgressStats;
   loading: boolean;
   error: string | null;
@@ -38,6 +39,7 @@ interface ProgressState {
   addToLearning: (sentenceId: string) => Promise<void>;
   markAsLearned: (sentenceId: string) => Promise<void>;
   forgot: (sentenceId: string) => Promise<void>;
+  updatePresetTag: (sentenceId: string, tag: SentenceTag | null) => Promise<void>;
   // Legacy quiz tracking
   recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
   recordQuizResult: (result: Omit<QuizResult, "id" | "answered_at">) => Promise<void>;
@@ -69,6 +71,7 @@ const DEFAULT_STATS: ProgressStats = {
 export const useProgressStore = create<ProgressState>((set, get) => ({
   progress: [],
   progressMap: {},
+  tagMap: {},
   stats: DEFAULT_STATS,
   loading: false,
   error: null,
@@ -96,15 +99,19 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         return;
       }
 
-      // Build progressMap from rows that have a state field
+      // Build progressMap and tagMap from rows
       const progressMap: Record<string, "learning" | "learned"> = {};
+      const tagMap: Record<string, SentenceTag | null> = {};
       for (const row of data || []) {
         if (row.state === "learning" || row.state === "learned") {
           progressMap[String(row.sentence_id)] = row.state;
         }
+        if (row.tag) {
+          tagMap[String(row.sentence_id)] = row.tag as SentenceTag;
+        }
       }
 
-      set({ progress: data || [], progressMap, loading: false });
+      set({ progress: data || [], progressMap, tagMap, loading: false });
       await get().loadStats();
     } catch {
       set({ error: "Failed to load progress", loading: false });
@@ -172,6 +179,23 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       });
     } catch {
       if (__DEV__) console.error("markAsLearned failed");
+    }
+  },
+
+  updatePresetTag: async (sentenceId: string, tag: SentenceTag | null) => {
+    set((state) => ({
+      tagMap: { ...state.tagMap, [sentenceId]: tag },
+    }));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("user_progress")
+        .update({ tag: tag ?? null })
+        .eq("user_id", user.id)
+        .eq("sentence_id", sentenceId);
+    } catch {
+      if (__DEV__) console.error("updatePresetTag failed");
     }
   },
 
@@ -446,6 +470,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     set({
       progress: [],
       progressMap: {},
+      tagMap: {},
       stats: DEFAULT_STATS,
       loading: false,
       error: null,
