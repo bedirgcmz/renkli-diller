@@ -17,8 +17,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { stripMarkers } from "@/utils/keywords";
 import { HomeStackParamList, MainStackParamList, Sentence } from "@/types";
+import { buildWordChips, WordChip } from "@/utils/buildSentence";
 
 type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<HomeStackParamList>,
@@ -200,6 +200,11 @@ export default function BuildSentenceScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
 
+  // Word chip state — rebuilt whenever sentence changes
+  const [wordBank, setWordBank] = useState<WordChip[]>([]);
+  const [dropZone, setDropZone] = useState<WordChip[]>([]);
+  const [correctOrder, setCorrectOrder] = useState<string[]>([]);
+
   // Shuffle once at session start; ref so it doesn't re-shuffle on re-render
   const shuffledRef = useRef<Sentence[]>([]);
 
@@ -228,6 +233,19 @@ export default function BuildSentenceScreen() {
   const total = learningSentences.length;
   const currentSentence = learningSentences[currentIndex] ?? null;
   const sentenceIcon = SENTENCE_ICONS[currentIndex % SENTENCE_ICONS.length];
+
+  // Rebuild word chips whenever the current sentence changes
+  useEffect(() => {
+    if (!currentSentence) return;
+    const { chips, correctOrder: order } = buildWordChips(
+      currentSentence,
+      learningSentences,
+      3,
+    );
+    setWordBank(chips);
+    setDropZone([]);
+    setCorrectOrder(order);
+  }, [currentSentence?.id]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (!initialized) {
@@ -292,11 +310,28 @@ export default function BuildSentenceScreen() {
           colors={colors}
         />
 
-        {/* Drop zone & word bank — implemented in next tasks */}
+        {/* Drop zone placeholder */}
         <View style={[styles.dropZonePlaceholder, { borderColor: colors.border }]}>
           <Text style={{ color: colors.textTertiary, fontSize: 13 }}>
             {t("build_sentence.drop_hint")}
           </Text>
+        </View>
+
+        {/* Word bank — static chip display (interaction added next task) */}
+        <View style={styles.wordBankContainer}>
+          <View style={styles.chipRow}>
+            {wordBank.map((chip) => (
+              <View
+                key={chip.id}
+                style={[
+                  styles.chip,
+                  { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                ]}
+              >
+                <Text style={[styles.chipText, { color: colors.text }]}>{chip.display}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -318,5 +353,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
+  },
+  wordBankContainer: {
+    marginHorizontal: 16,
+    marginTop: 20,
+  },
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  chipText: {
+    fontSize: 15,
+    fontWeight: "500",
   },
 });
