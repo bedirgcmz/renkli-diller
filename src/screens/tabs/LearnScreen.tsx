@@ -332,12 +332,12 @@ export default function LearnScreen() {
   }, [targetLanguage, uiLanguage]);
 
   const learningList: Sentence[] = [
-    ...userSentences.filter((s) => s.status === "learning"),
+    ...userSentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 
   const learnedList: Sentence[] = [
-    ...userSentences.filter((s) => s.status === "learned"),
+    ...userSentences.filter((s) => s.status === "learned" && (s.target_lang ?? targetLanguage) === targetLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 

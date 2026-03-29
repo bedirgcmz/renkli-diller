@@ -209,7 +209,7 @@ export default function QuizScreen() {
   }, [currentIdx, mode, questions, ttsEnabled, quizMuted, initialized, isFocused]);
 
   const allSentences: Sentence[] = [
-    ...sentences,
+    ...sentences.filter((s) => (s.target_lang ?? targetLanguage) === targetLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
   ];
 

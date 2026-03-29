@@ -70,14 +70,19 @@ export default function AutoModeScreen() {
   }, [activeTagFilters]);
 
   useEffect(() => {
+    setInitialized(false);
+    try { Speech.stop(); } catch {}
+    setIsPlaying(false);
+    setPhase("idle");
+    setCurrentIndex(0);
     Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
       setInitialized(true),
     );
-  }, []);
+  }, [targetLanguage, uiLanguage]);
 
   // Tüm öğreniliyor cümleler: user sentences + preset sentences (progressMap)
   const allLearning = [
-    ...sentences.filter((s) => s.status === "learning"),
+    ...sentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 

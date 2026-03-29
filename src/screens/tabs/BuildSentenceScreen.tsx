@@ -265,8 +265,9 @@ export default function BuildSentenceScreen() {
     if (!initialized) return;
     const { sentences: s, presetSentences: ps } = useSentenceStore.getState();
     const { progressMap: pm } = useProgressStore.getState();
+    const { targetLanguage: tl } = useSettingsStore.getState();
     const learning = [
-      ...s.filter((sent) => sent.status === "learning"),
+      ...s.filter((sent) => sent.status === "learning" && (sent.target_lang ?? tl) === tl),
       ...ps.filter((sent) => pm[sent.id] === "learning"),
     ];
     setLearningSentences([...learning].sort(() => Math.random() - 0.5));
@@ -368,8 +369,9 @@ export default function BuildSentenceScreen() {
   const handleRestart = useCallback(() => {
     const { sentences: s, presetSentences: ps } = useSentenceStore.getState();
     const { progressMap: pm } = useProgressStore.getState();
+    const { targetLanguage: tl } = useSettingsStore.getState();
     const learning = [
-      ...s.filter((sent) => sent.status === "learning"),
+      ...s.filter((sent) => sent.status === "learning" && (sent.target_lang ?? tl) === tl),
       ...ps.filter((sent) => pm[sent.id] === "learning"),
     ];
     setLearningSentences([...learning].sort(() => Math.random() - 0.5));
