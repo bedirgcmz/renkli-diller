@@ -55,7 +55,7 @@ export default function HomeScreen() {
       onPress: (nav) => nav.navigate("Quiz"),
     },
     {
-      icon: "text-outline",
+      icon: "extension-puzzle-outline",
       iconColor: "#10B981",
       titleKey: "home.card_build_title",
       descKey: "home.card_build_desc",
