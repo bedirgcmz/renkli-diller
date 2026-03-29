@@ -517,6 +517,14 @@
     "empty_title": "Öğrenme listesi boş",
     "empty_desc": "Cümleleri öğrenme listene ekle, sonra buraya gelip sırala.",
     "source_label": "Şunu çevir:",
-    "drop_hint": "Kelimelere dokunarak cümle kur"
+    "drop_hint": "Kelimelere dokunarak cümle kur",
+    "validate": "Doğrula",
+    "continue": "Devam",
+    "correct_feedback": "Harika! Doğru cevap 🎉",
+    "wrong_feedback": "Yanlış",
+    "correct_answer_label": "Doğru cevap:",
+    "session_complete": "Oturum tamamlandı!",
+    "session_score": "{{correct}} / {{total}} doğru",
+    "restart": "Yeniden Başla"
   }
 }

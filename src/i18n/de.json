@@ -517,6 +517,14 @@
     "empty_title": "Lernliste ist leer",
     "empty_desc": "Füge Sätze zur Lernliste hinzu und komm dann zurück.",
     "source_label": "Übersetze das:",
-    "drop_hint": "Tippe auf Wörter, um den Satz zu bauen"
+    "drop_hint": "Tippe auf Wörter, um den Satz zu bauen",
+    "validate": "Prüfen",
+    "continue": "Weiter",
+    "correct_feedback": "Super! Richtige Antwort 🎉",
+    "wrong_feedback": "Falsch",
+    "correct_answer_label": "Richtige Antwort:",
+    "session_complete": "Sitzung abgeschlossen!",
+    "session_score": "{{correct}} / {{total}} richtig",
+    "restart": "Neu starten"
   }
 }

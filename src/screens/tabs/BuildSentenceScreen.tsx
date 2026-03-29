@@ -27,6 +27,8 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { HomeStackParamList, MainStackParamList, Sentence } from "@/types";
 import { buildWordChips, WordChip } from "@/utils/buildSentence";
+import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
+import * as Haptics from "expo-haptics";
 
 type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<HomeStackParamList>,
@@ -213,6 +215,12 @@ export default function BuildSentenceScreen() {
   const [dropZone, setDropZone] = useState<WordChip[]>([]);
   const [correctOrder, setCorrectOrder] = useState<string[]>([]);
 
+  // Validate / feedback state
+  type Phase = "arranging" | "correct" | "wrong";
+  const [phase, setPhase] = useState<Phase>("arranging");
+  const [score, setScore] = useState({ correct: 0, total: 0 });
+  const [sessionComplete, setSessionComplete] = useState(false);
+
   // Shuffle once at session start; ref so it doesn't re-shuffle on re-render
   const shuffledRef = useRef<Sentence[]>([]);
 
@@ -256,16 +264,59 @@ export default function BuildSentenceScreen() {
   }, [currentSentence?.id]);
 
   const handleBankChipPress = useCallback((chip: WordChip) => {
+    if (phase !== "arranging") return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setWordBank((prev) => prev.filter((c) => c.id !== chip.id));
     setDropZone((prev) => [...prev, chip]);
-  }, []);
+  }, [phase]);
 
   const handleDropChipPress = useCallback((chip: WordChip) => {
+    if (phase !== "arranging") return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setDropZone((prev) => prev.filter((c) => c.id !== chip.id));
     setWordBank((prev) => [...prev, chip]);
-  }, []);
+  }, [phase]);
+
+  const handleValidate = useCallback(() => {
+    const placed = dropZone.map((c) => c.normalized);
+    const isCorrect =
+      placed.length === correctOrder.length &&
+      placed.every((w, i) => w === correctOrder[i]);
+
+    if (isCorrect) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+
+    setPhase(isCorrect ? "correct" : "wrong");
+    setScore((s) => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }));
+  }, [dropZone, correctOrder]);
+
+  const handleGoNext = useCallback(() => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= total) {
+      setSessionComplete(true);
+      return;
+    }
+    setPhase("arranging");
+    setCurrentIndex(nextIndex);
+  }, [currentIndex, total]);
+
+  const handleRestart = useCallback(() => {
+    const all: Sentence[] = [
+      ...sentences,
+      ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
+    ];
+    const learning = all.filter(
+      (s) => s.status === "learning" || progressMap[s.id] === "learning",
+    );
+    shuffledRef.current = [...learning].sort(() => Math.random() - 0.5);
+    setCurrentIndex(0);
+    setPhase("arranging");
+    setScore({ correct: 0, total: 0 });
+    setSessionComplete(false);
+  }, [sentences, presetSentences, progressMap]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (!initialized) {
@@ -305,7 +356,53 @@ export default function BuildSentenceScreen() {
     );
   }
 
+  // ── Session complete ──────────────────────────────────────────────────────
+  if (sessionComplete) {
+    const accuracy = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+        <Header
+          title={t("build_sentence.title")}
+          current={total - 1}
+          total={total}
+          onBack={() => navigation.goBack()}
+          colors={colors}
+        />
+        <View style={styles.center}>
+          <Text style={styles.completeEmoji}>🏆</Text>
+          <Text style={[styles.completeTitle, { color: colors.text }]}>
+            {t("build_sentence.session_complete")}
+          </Text>
+          <Text style={[styles.completeScore, { color: colors.textSecondary }]}>
+            {t("build_sentence.session_score", { correct: score.correct, total: score.total })}
+          </Text>
+          <Text style={[styles.completeAccuracy, { color: colors.primary }]}>
+            {accuracy}%
+          </Text>
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+            onPress={handleRestart}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryBtnText}>{t("build_sentence.restart")}</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // ── Main ─────────────────────────────────────────────────────────────────
+  const dropZoneBorderColor =
+    phase === "correct"
+      ? QUIZ_CORRECT_COLOR
+      : phase === "wrong"
+        ? QUIZ_WRONG_COLOR
+        : dropZone.length > 0
+          ? colors.primary
+          : colors.border;
+
+  const canValidate = dropZone.length === correctOrder.length && phase === "arranging";
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       <Header
@@ -336,7 +433,8 @@ export default function BuildSentenceScreen() {
             styles.dropZone,
             {
               backgroundColor: colors.surface ?? colors.backgroundSecondary,
-              borderColor: dropZone.length > 0 ? colors.primary : colors.border,
+              borderColor: dropZoneBorderColor,
+              borderStyle: phase === "arranging" && dropZone.length === 0 ? "dashed" : "solid",
             },
           ]}
         >
@@ -346,23 +444,81 @@ export default function BuildSentenceScreen() {
             </Text>
           ) : (
             <View style={styles.chipRow}>
-              {dropZone.map((chip) => (
-                <TouchableOpacity
-                  key={chip.id}
-                  onPress={() => handleDropChipPress(chip)}
-                  activeOpacity={0.7}
-                  style={[
-                    styles.chip,
-                    styles.chipPlaced,
-                    { backgroundColor: colors.primary + "18", borderColor: colors.primary },
-                  ]}
-                >
-                  <Text style={[styles.chipText, { color: colors.primary }]}>{chip.display}</Text>
-                </TouchableOpacity>
-              ))}
+              {dropZone.map((chip) => {
+                const chipBg =
+                  phase === "correct"
+                    ? QUIZ_CORRECT_COLOR + "22"
+                    : phase === "wrong"
+                      ? QUIZ_WRONG_COLOR + "22"
+                      : colors.primary + "18";
+                const chipBorder =
+                  phase === "correct"
+                    ? QUIZ_CORRECT_COLOR
+                    : phase === "wrong"
+                      ? QUIZ_WRONG_COLOR
+                      : colors.primary;
+                const chipTextColor =
+                  phase === "correct"
+                    ? QUIZ_CORRECT_COLOR
+                    : phase === "wrong"
+                      ? QUIZ_WRONG_COLOR
+                      : colors.primary;
+                return (
+                  <TouchableOpacity
+                    key={chip.id}
+                    onPress={() => handleDropChipPress(chip)}
+                    activeOpacity={phase === "arranging" ? 0.7 : 1}
+                    disabled={phase !== "arranging"}
+                    style={[styles.chip, styles.chipPlaced, { backgroundColor: chipBg, borderColor: chipBorder }]}
+                  >
+                    <Text style={[styles.chipText, { color: chipTextColor }]}>{chip.display}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>
+
+        {/* ── Feedback bar ── */}
+        {phase !== "arranging" && (
+          <View
+            style={[
+              styles.feedbackBar,
+              {
+                backgroundColor:
+                  phase === "correct" ? QUIZ_CORRECT_COLOR + "18" : QUIZ_WRONG_COLOR + "18",
+                borderColor:
+                  phase === "correct" ? QUIZ_CORRECT_COLOR : QUIZ_WRONG_COLOR,
+              },
+            ]}
+          >
+            <Ionicons
+              name={phase === "correct" ? "checkmark-circle" : "close-circle"}
+              size={20}
+              color={phase === "correct" ? QUIZ_CORRECT_COLOR : QUIZ_WRONG_COLOR}
+            />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  styles.feedbackText,
+                  { color: phase === "correct" ? QUIZ_CORRECT_COLOR : QUIZ_WRONG_COLOR },
+                ]}
+              >
+                {phase === "correct"
+                  ? t("build_sentence.correct_feedback")
+                  : t("build_sentence.wrong_feedback")}
+              </Text>
+              {phase === "wrong" && (
+                <Text style={[styles.correctAnswerLabel, { color: colors.textSecondary }]}>
+                  {t("build_sentence.correct_answer_label")}{" "}
+                  <Text style={{ fontWeight: "600", color: colors.text }}>
+                    {correctOrder.join(" ")}
+                  </Text>
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* ── Divider ── */}
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -375,9 +531,11 @@ export default function BuildSentenceScreen() {
                 key={chip.id}
                 onPress={() => handleBankChipPress(chip)}
                 activeOpacity={0.7}
+                disabled={phase !== "arranging"}
                 style={[
                   styles.chip,
                   { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                  phase !== "arranging" && styles.chipDisabled,
                 ]}
               >
                 <Text style={[styles.chipText, { color: colors.text }]}>{chip.display}</Text>
@@ -386,6 +544,39 @@ export default function BuildSentenceScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* ── Bottom action button ── */}
+      <View style={[styles.bottomBar, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
+        {phase === "arranging" ? (
+          <TouchableOpacity
+            style={[
+              styles.primaryBtn,
+              { backgroundColor: canValidate ? colors.primary : colors.border },
+            ]}
+            onPress={handleValidate}
+            disabled={!canValidate}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.primaryBtnText, !canValidate && { color: colors.textTertiary }]}>
+              {t("build_sentence.validate")}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.primaryBtn,
+              {
+                backgroundColor:
+                  phase === "correct" ? QUIZ_CORRECT_COLOR : QUIZ_WRONG_COLOR,
+              },
+            ]}
+            onPress={handleGoNext}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryBtnText}>{t("build_sentence.continue")}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -432,8 +623,51 @@ const styles = StyleSheet.create({
   chipPlaced: {
     borderStyle: "solid",
   },
+  chipDisabled: {
+    opacity: 0.4,
+  },
   chipText: {
     fontSize: 15,
     fontWeight: "500",
   },
+  feedbackBar: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  feedbackText: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  correctAnswerLabel: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  bottomBar: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  primaryBtn: {
+    height: 52,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryBtnText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  completeEmoji: { fontSize: 56, marginBottom: 8 },
+  completeTitle: { fontSize: 22, fontWeight: "800", marginBottom: 6 },
+  completeScore: { fontSize: 16, marginBottom: 4 },
+  completeAccuracy: { fontSize: 42, fontWeight: "800", marginBottom: 24 },
 });

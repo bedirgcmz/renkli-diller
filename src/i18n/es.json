@@ -517,6 +517,14 @@
     "empty_title": "Lista de aprendizaje vacía",
     "empty_desc": "Agrega oraciones a tu lista de aprendizaje y regresa aquí.",
     "source_label": "Traduce esto:",
-    "drop_hint": "Toca palabras para construir la oración"
+    "drop_hint": "Toca palabras para construir la oración",
+    "validate": "Comprobar",
+    "continue": "Continuar",
+    "correct_feedback": "¡Genial! Respuesta correcta 🎉",
+    "wrong_feedback": "Incorrecto",
+    "correct_answer_label": "Respuesta correcta:",
+    "session_complete": "¡Sesión completada!",
+    "session_score": "{{correct}} / {{total}} correctas",
+    "restart": "Reiniciar"
   }
 }

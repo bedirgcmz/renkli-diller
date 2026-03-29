@@ -517,6 +517,14 @@
     "empty_title": "Liste d'apprentissage vide",
     "empty_desc": "Ajoute des phrases à ta liste d'apprentissage et reviens ici.",
     "source_label": "Traduis ceci :",
-    "drop_hint": "Appuie sur les mots pour construire la phrase"
+    "drop_hint": "Appuie sur les mots pour construire la phrase",
+    "validate": "Vérifier",
+    "continue": "Continuer",
+    "correct_feedback": "Super ! Bonne réponse 🎉",
+    "wrong_feedback": "Incorrect",
+    "correct_answer_label": "Bonne réponse :",
+    "session_complete": "Session terminée !",
+    "session_score": "{{correct}} / {{total}} correctes",
+    "restart": "Recommencer"
   }
 }

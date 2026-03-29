@@ -517,6 +517,14 @@
     "empty_title": "Learning list is empty",
     "empty_desc": "Add sentences to your learning list, then come back to practice here.",
     "source_label": "Translate this:",
-    "drop_hint": "Tap words to build the sentence"
+    "drop_hint": "Tap words to build the sentence",
+    "validate": "Check",
+    "continue": "Continue",
+    "correct_feedback": "Great! Correct answer 🎉",
+    "wrong_feedback": "Incorrect",
+    "correct_answer_label": "Correct answer:",
+    "session_complete": "Session complete!",
+    "session_score": "{{correct}} / {{total}} correct",
+    "restart": "Restart"
   }
 }

@@ -517,6 +517,14 @@
     "empty_title": "Inlärningslistan är tom",
     "empty_desc": "Lägg till meningar i din inlärningslista och kom tillbaka.",
     "source_label": "Översätt detta:",
-    "drop_hint": "Tryck på ord för att bygga meningen"
+    "drop_hint": "Tryck på ord för att bygga meningen",
+    "validate": "Kontrollera",
+    "continue": "Fortsätt",
+    "correct_feedback": "Bra! Rätt svar 🎉",
+    "wrong_feedback": "Fel",
+    "correct_answer_label": "Rätt svar:",
+    "session_complete": "Sessionen klar!",
+    "session_score": "{{correct}} / {{total}} rätt",
+    "restart": "Börja om"
   }
 }
