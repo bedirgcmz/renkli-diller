@@ -25,6 +25,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { QuickTagButton } from "@/components/QuickTagButton";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -113,6 +114,11 @@ function SentenceItem({
               <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
             </Pressable>
           )}
+          <QuickTagButton
+            sentenceId={sentence.id}
+            isPreset={sentence.is_preset ?? false}
+            status={sentence.effectiveStatus}
+          />
           <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
           <Pressable
             onPress={onEdit}

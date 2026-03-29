@@ -87,6 +87,29 @@ export default function HomeScreen() {
 
         <HeroHeader />
 
+        {/* AI Translator Banner */}
+        <TouchableOpacity
+          style={[styles.aiBanner, { backgroundColor: colors.cardBackground }]}
+          onPress={() => navigation.navigate("AITranslator")}
+          activeOpacity={0.75}
+        >
+          <View style={styles.aiBannerIcon}>
+            <Ionicons name="sparkles" size={22} color="#7C5CF6" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.aiBannerTitle, { color: colors.text }]}>
+              {t("ai_translator.card_title")}
+            </Text>
+            <Text style={[styles.aiBannerDesc, { color: colors.textTertiary }]}>
+              {t("ai_translator.card_desc")}
+            </Text>
+          </View>
+          <View style={styles.aiBannerBadge}>
+            <Text style={styles.aiBannerBadgeText}>AI</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+        </TouchableOpacity>
+
         <View style={styles.grid}>
           {cards.map((card, index) => (
             <TouchableOpacity
@@ -160,5 +183,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     textAlign: "center",
+  },
+  aiBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  aiBannerIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#7C5CF622",
+  },
+  aiBannerTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  aiBannerDesc: {
+    fontSize: 12,
+  },
+  aiBannerBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: "#7C5CF620",
+  },
+  aiBannerBadgeText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#7C5CF6",
   },
 });

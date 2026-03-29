@@ -340,7 +340,8 @@ export default function AITranslateScreen() {
         };
         return [newItem, ...prev].slice(0, 5);
       });
-    } catch {
+    } catch (err) {
+      console.error("[AI Translate] error:", err);
       Alert.alert(t("common.error"), t("ai_translator.translate_error"));
     } finally {
       setLoading(false);
@@ -441,7 +442,13 @@ export default function AITranslateScreen() {
           </View>
         </View>
 
-        <View style={{ width: 36 }} />
+        <TouchableOpacity
+          style={styles.infoBtn}
+          onPress={() => Alert.alert(t("ai_translator.tips_title"), t("ai_translator.tips_body"))}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons name="information-circle-outline" size={22} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       <KeyboardAvoidingView
@@ -670,6 +677,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backBtn: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  infoBtn: {
     width: 36,
     height: 36,
     alignItems: "center",

@@ -18,6 +18,8 @@ interface TagFilterModalProps {
   onClose: () => void;
   selectedTags: SentenceTag[];
   onApply: (tags: SentenceTag[]) => void;
+  /** Returns how many sentences match the given draft selection */
+  getMatchCount?: (draft: SentenceTag[]) => number;
 }
 
 export function TagFilterModal({
@@ -25,6 +27,7 @@ export function TagFilterModal({
   onClose,
   selectedTags,
   onApply,
+  getMatchCount,
 }: TagFilterModalProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -146,7 +149,10 @@ export function TagFilterModal({
             <Text style={styles.applyBtnText}>
               {draft.length === 0
                 ? t("tags.filter_show_all")
-                : t("tags.filter_show_results", { count: draft.length })}
+                : t("tags.filter_show_results", {
+                    tagCount: draft.length,
+                    sentenceCount: getMatchCount ? getMatchCount(draft) : draft.length,
+                  })}
             </Text>
           </TouchableOpacity>
         </View>

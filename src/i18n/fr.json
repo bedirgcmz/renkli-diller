@@ -229,6 +229,7 @@
     "subtitle": "Déverrouillez toutes les fonctionnalités",
     "price": "14.99",
     "lifetime": "Paiement unique",
+    "feature_ai": "Traducteur IA (illimité)",
     "feature_sentences": "300 phrases prédéfinies",
     "feature_unlimited_add": "Phrases illimitées",
     "feature_tts": "Audio dans deux langues",
@@ -365,7 +366,14 @@
     "next_text_btn": "Texte suivant",
     "daily_limit_free": "Tu as complété le texte du jour. Passe en Premium pour lire plus de textes par jour.",
     "daily_limit_premium": "Tu as lu 3 textes aujourd'hui. Reviens demain !",
-    "texts_today": "{{count}}/3 textes aujourd'hui"
+    "texts_today": "{{count}}/3 textes aujourd'hui",
+    "history_btn": "Historique",
+    "history_title": "Textes Complétés",
+    "history_empty": "Aucun texte complété pour l'instant.",
+    "history_premium_title": "Fonctionnalité Premium",
+    "history_premium": "Passe en Premium pour accéder à ton historique de lecture et réapprendre des textes.",
+    "relearn_btn": "Réapprendre",
+    "relearn_feedback": "Ce texte réapparaîtra dans le futur."
   },
   "home": {
     "card_learn_title": "Étudier",
@@ -484,7 +492,7 @@
     "group_difficulty": "Difficulté",
     "filter_title": "Filtrer",
     "filter_clear": "Tout effacer",
-    "filter_show_results": "Afficher {{count}} phrases",
+    "filter_show_results": "Afficher {{sentenceCount}} phrases dans {{tagCount}} étiquette(s)",
     "filter_show_all": "Afficher toutes les phrases",
     "this_week": "Cette semaine",
     "this_month": "Ce mois-ci",
@@ -498,6 +506,8 @@
     "food": "Nourriture",
     "easy": "Facile",
     "hard": "Difficile",
-    "important": "Important"
+    "important": "Important",
+    "tag_sentence": "Étiqueter",
+    "tag_remove": "Supprimer l'étiquette"
   }
 }

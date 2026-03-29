@@ -667,6 +667,14 @@ export default function LearnScreen() {
           onClose={() => setFilterModalVisible(false)}
           selectedTags={activeTagFilters}
           onApply={setActiveTagFilters}
+          getMatchCount={(draft) =>
+            draft.length === 0
+              ? learningList.length
+              : learningList.filter((s) => {
+                  const tag = s.is_preset ? tagMap[s.id] : s.tag;
+                  return tag != null && draft.includes(tag);
+                }).length
+          }
         />
 
         {/* AI Translator card */}
@@ -706,9 +714,9 @@ export default function LearnScreen() {
               >
                 <Ionicons name="book-outline" size={14} color="#fff" />
                 <Text style={[styles.segmentLabel, { color: "#fff" }]}>{t("learn.tab_study")}</Text>
-                {learningList.length > 0 && (
+                {filteredLearningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
-                    <Text style={styles.badgeText}>{learningList.length}</Text>
+                    <Text style={styles.badgeText}>{filteredLearningList.length}</Text>
                   </View>
                 )}
               </GradientView>
@@ -718,9 +726,9 @@ export default function LearnScreen() {
                 <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
                   {t("learn.tab_study")}
                 </Text>
-                {learningList.length > 0 && (
+                {filteredLearningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "#4DA3FF" }]}>
-                    <Text style={styles.badgeText}>{learningList.length}</Text>
+                    <Text style={styles.badgeText}>{filteredLearningList.length}</Text>
                   </View>
                 )}
               </View>

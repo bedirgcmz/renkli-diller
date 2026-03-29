@@ -229,6 +229,7 @@
     "subtitle": "Alle Funktionen freischalten",
     "price": "14.99",
     "lifetime": "Einmalzahlung",
+    "feature_ai": "KI-Übersetzer (unbegrenzt)",
     "feature_sentences": "300 voreingestellte Sätze",
     "feature_unlimited_add": "Unbegrenztes Hinzufügen von Sätzen",
     "feature_tts": "Zweisprachige TTS",
@@ -365,7 +366,14 @@
     "next_text_btn": "Nächster Text",
     "daily_limit_free": "Du hast den heutigen Text abgeschlossen. Werde Premium, um täglich mehr Texte zu lesen.",
     "daily_limit_premium": "Du hast heute 3 Texte gelesen. Komm morgen wieder!",
-    "texts_today": "Heute {{count}}/3 Texte"
+    "texts_today": "Heute {{count}}/3 Texte",
+    "history_btn": "Verlauf",
+    "history_title": "Abgeschlossene Texte",
+    "history_empty": "Noch keine abgeschlossenen Texte.",
+    "history_premium_title": "Premium-Funktion",
+    "history_premium": "Werde Premium, um deinen Leseverlauf zu sehen und Texte erneut zu lernen.",
+    "relearn_btn": "Erneut lernen",
+    "relearn_feedback": "Dieser Text wird dir in Zukunft wieder angezeigt."
   },
   "home": {
     "card_learn_title": "Lernen",
@@ -484,7 +492,7 @@
     "group_difficulty": "Schwierigkeit",
     "filter_title": "Filtern",
     "filter_clear": "Alle löschen",
-    "filter_show_results": "{{count}} Sätze anzeigen",
+    "filter_show_results": "{{sentenceCount}} Sätze in {{tagCount}} Tag(s) anzeigen",
     "filter_show_all": "Alle Sätze anzeigen",
     "this_week": "Diese Woche",
     "this_month": "Diesen Monat",
@@ -498,6 +506,8 @@
     "food": "Essen",
     "easy": "Leicht",
     "hard": "Schwer",
-    "important": "Wichtig"
+    "important": "Wichtig",
+    "tag_sentence": "Satz markieren",
+    "tag_remove": "Markierung entfernen"
   }
 }

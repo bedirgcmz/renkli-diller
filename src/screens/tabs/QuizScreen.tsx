@@ -391,6 +391,14 @@ export default function QuizScreen() {
         onClose={() => setFilterModalVisible(false)}
         selectedTags={activeTagFilters}
         onApply={setActiveTagFilters}
+        getMatchCount={(draft) =>
+          draft.length === 0
+            ? learningSentences.length
+            : learningSentences.filter((s) => {
+                const tag = s.is_preset ? tagMap[s.id] : s.tag;
+                return tag != null && draft.includes(tag);
+              }).length
+        }
       />
 
       <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>

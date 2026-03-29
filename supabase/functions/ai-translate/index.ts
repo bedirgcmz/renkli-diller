@@ -32,8 +32,9 @@ Rules:
 1. Translate naturally using simple, everyday spoken language. Never translate word-for-word.
 2. Use common daily expressions (A2-B1 level). Avoid advanced, literary, or rare phrases.
 3. Keep grammar simple and vocabulary familiar to learners.
-4. If the source sentence contains text wrapped in double asterisks (**word**), you MUST wrap the equivalent translated expression in ** markers too. Preserve the exact same number of marked segments. Do not remove, merge, or add ** markers.
-5. Return ONLY the translated sentence. No explanations, no alternatives, no extra text.`;
+4. If the source sentence contains text wrapped in double asterisks (**word**), you MUST wrap the equivalent translated expression in ** markers too. Preserve the exact same number of marked segments. Do not remove, merge, or add ** markers. Even if two source markers translate to the same word in the target language, each must have its own ** marker (e.g. **the more** you work, **the more** you learn).
+5. Always close every ** marker you open. Never leave an unclosed **.
+6. Return ONLY the translated sentence. No explanations, no alternatives, no extra text.`;
 
 function countMarkers(text: string): number {
   return (text.match(/\*\*[^*]+\*\*/g) ?? []).length;
@@ -57,7 +58,7 @@ async function callGemini(
     ],
     generationConfig: {
       temperature: 0.15,
-      maxOutputTokens: 100,
+      maxOutputTokens: 256,
       topP: 0.9,
     },
   };

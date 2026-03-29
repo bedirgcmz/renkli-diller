@@ -252,8 +252,14 @@ export interface UserReadingProgress {
   id: string;
   user_id: string;
   reading_text_id: string;
-  status: "read" | "learned" | "completed";
-  completed_at: string;
+  status: "read" | "learned" | "completed" | "assigned";
+  completed_at: string | null;
+  shown_at: string | null;
+}
+
+export interface CompletedReadingEntry {
+  progress: UserReadingProgress;
+  text: ReadingText;
 }
 
 // Legacy types (for backward compatibility)

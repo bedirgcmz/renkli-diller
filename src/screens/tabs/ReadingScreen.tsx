@@ -499,6 +499,284 @@ const qStyles = StyleSheet.create({
   closeBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
 });
 
+// ── HistorySheet ──────────────────────────────────────────────────────────────
+
+function HistorySheet({
+  visible,
+  onClose,
+  isPremium,
+  userId,
+  fetchCompletedTexts,
+  markAsUncompleted,
+  uiLanguage,
+  targetLanguage,
+  colors,
+  t,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  isPremium: boolean;
+  userId: string;
+  fetchCompletedTexts: (userId: string) => Promise<import("@/types").CompletedReadingEntry[]>;
+  markAsUncompleted: (userId: string, textId: string) => Promise<void>;
+  uiLanguage: SupportedLanguage;
+  targetLanguage: SupportedLanguage;
+  colors: any;
+  t: any;
+}) {
+  const [entries, setEntries] = useState<import("@/types").CompletedReadingEntry[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [detailEntry, setDetailEntry] = useState<import("@/types").CompletedReadingEntry | null>(null);
+
+  useEffect(() => {
+    if (!visible || !isPremium || !userId) return;
+    setLoadingHistory(true);
+    fetchCompletedTexts(userId)
+      .then(setEntries)
+      .finally(() => setLoadingHistory(false));
+  }, [visible]);
+
+  const handleRelearn = async (entry: import("@/types").CompletedReadingEntry) => {
+    await markAsUncompleted(userId, entry.text.id);
+    setEntries((prev) => prev.filter((e) => e.text.id !== entry.text.id));
+    setDetailEntry(null);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <Pressable style={hStyles.backdrop} onPress={onClose}>
+        <Pressable
+          style={[hStyles.sheet, { backgroundColor: colors.cardBackground ?? colors.surface }]}
+          onPress={() => {}}
+        >
+          {/* Header */}
+          <View style={[hStyles.header, { borderBottomColor: colors.divider }]}>
+            <Text style={[hStyles.title, { color: colors.text }]}>{t("reading.history_title")}</Text>
+            <Pressable onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </Pressable>
+          </View>
+
+          {/* Content */}
+          {!isPremium ? (
+            <View style={hStyles.premiumGate}>
+              <Ionicons name="lock-closed-outline" size={32} color={colors.premiumAccent} />
+              <Text style={[hStyles.premiumTitle, { color: colors.text }]}>{t("reading.history_premium_title")}</Text>
+              <Text style={[hStyles.premiumBody, { color: colors.textSecondary }]}>{t("reading.history_premium")}</Text>
+            </View>
+          ) : loadingHistory ? (
+            <View style={hStyles.centered}>
+              <ActivityIndicator color={colors.primary} />
+            </View>
+          ) : entries.length === 0 ? (
+            <View style={hStyles.centered}>
+              <Text style={[hStyles.emptyText, { color: colors.textSecondary }]}>{t("reading.history_empty")}</Text>
+            </View>
+          ) : (
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {entries.map((entry) => {
+                const title =
+                  getField<string>(entry.text, `title_${uiLanguage}`) ??
+                  getField<string>(entry.text, "title_en") ?? "";
+                const rawBody = getField<string>(entry.text, `body_${targetLanguage}`) ?? "";
+                const preview = stripMarkers(rawBody).slice(0, 200);
+                return (
+                  <TouchableOpacity
+                    key={entry.text.id}
+                    style={[hStyles.item, { borderBottomColor: colors.divider }]}
+                    onPress={() => setDetailEntry(entry)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[hStyles.itemTitle, { color: colors.text }]} numberOfLines={1}>{title}</Text>
+                    <Text style={[hStyles.itemPreview, { color: colors.textSecondary }]} numberOfLines={2}>
+                      {preview}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
+        </Pressable>
+      </Pressable>
+
+      {/* Text detail modal */}
+      {detailEntry && (
+        <TextDetailModal
+          entry={detailEntry}
+          onClose={() => setDetailEntry(null)}
+          onRelearn={handleRelearn}
+          targetLanguage={targetLanguage}
+          uiLanguage={uiLanguage}
+          colors={colors}
+          t={t}
+        />
+      )}
+    </Modal>
+  );
+}
+
+function TextDetailModal({
+  entry,
+  onClose,
+  onRelearn,
+  targetLanguage,
+  uiLanguage,
+  colors,
+  t,
+}: {
+  entry: import("@/types").CompletedReadingEntry;
+  onClose: () => void;
+  onRelearn: (entry: import("@/types").CompletedReadingEntry) => Promise<void>;
+  targetLanguage: SupportedLanguage;
+  uiLanguage: SupportedLanguage;
+  colors: any;
+  t: any;
+}) {
+  const [releraning, setReleraning] = useState(false);
+  const [feedback, setFeedback] = useState(false);
+
+  const title =
+    getField<string>(entry.text, `title_${uiLanguage}`) ??
+    getField<string>(entry.text, "title_en") ?? "";
+  const rawBody = getField<string>(entry.text, `body_${targetLanguage}`) ?? "";
+
+  const handleRelearn = async () => {
+    setReleraning(true);
+    await onRelearn(entry);
+    setFeedback(true);
+    setReleraning(false);
+  };
+
+  return (
+    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
+      <Pressable style={hStyles.backdrop} onPress={onClose}>
+        <Pressable
+          style={[hStyles.detailSheet, { backgroundColor: colors.cardBackground ?? colors.surface }]}
+          onPress={() => {}}
+        >
+          <View style={[hStyles.header, { borderBottomColor: colors.divider }]}>
+            <Text style={[hStyles.title, { color: colors.text }]} numberOfLines={2}>{title}</Text>
+            <Pressable onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </Pressable>
+          </View>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+            <Text style={[hStyles.detailBody, { color: colors.text }]}>
+              {stripMarkers(rawBody)}
+            </Text>
+          </ScrollView>
+          <View style={[hStyles.detailFooter, { borderTopColor: colors.divider }]}>
+            {feedback ? (
+              <View style={hStyles.feedbackRow}>
+                <Ionicons name="checkmark-circle" size={18} color="#49C98A" />
+                <Text style={[hStyles.feedbackText, { color: colors.textSecondary }]}>
+                  {t("reading.relearn_feedback")}
+                </Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[hStyles.relearnBtn, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "40" }]}
+                onPress={handleRelearn}
+                disabled={releraning}
+                activeOpacity={0.75}
+              >
+                {releraning ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <>
+                    <Ionicons name="refresh-outline" size={16} color={colors.primary} />
+                    <Text style={[hStyles.relearnBtnText, { color: colors.primary }]}>{t("reading.relearn_btn")}</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const hStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "75%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  detailSheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "85%",
+    flex: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  title: { fontSize: 17, fontWeight: "700", flex: 1, marginRight: 12 },
+  centered: { padding: 40, alignItems: "center" },
+  emptyText: { fontSize: 14, textAlign: "center" },
+  premiumGate: {
+    padding: 32,
+    alignItems: "center",
+    gap: 12,
+  },
+  premiumTitle: { fontSize: 16, fontWeight: "700", textAlign: "center" },
+  premiumBody: { fontSize: 14, textAlign: "center", lineHeight: 20 },
+  item: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 4,
+  },
+  itemTitle: { fontSize: 15, fontWeight: "600" },
+  itemPreview: { fontSize: 13, lineHeight: 18 },
+  detailBody: { fontSize: 16, lineHeight: 26 },
+  detailFooter: {
+    padding: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  relearnBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 8,
+  },
+  relearnBtnText: { fontSize: 15, fontWeight: "600" },
+  feedbackRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+  },
+  feedbackText: { fontSize: 14, lineHeight: 20, flex: 1 },
+});
+
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function ReadingScreen() {
@@ -518,9 +796,12 @@ export default function ReadingScreen() {
     currentText,
     keywords,
     loading,
+    progress,
     fetchNextText,
     fetchProgress,
     markAsCompleted,
+    markAsUncompleted,
+    fetchCompletedTexts,
     getTodayCount,
     getLearnedCount,
     getReadingStreak,
@@ -529,16 +810,21 @@ export default function ReadingScreen() {
   const [kwModalVisible, setKwModalVisible] = useState(false);
   const [quizVisible, setQuizVisible] = useState(false);
   const [speaking, setSpeaking] = useState<"source" | "target" | "slow" | null>(null);
-  const [completedThisSession, setCompletedThisSession] = useState(false);
   const [upsellDismissed, setUpsellDismissed] = useState(false);
   const [sourceVisible, setSourceVisible] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
+
+  // Derive completion state from store (persists across navigation)
+  const isCompleted =
+    !!currentText &&
+    progress.some((p) => p.reading_text_id === currentText.id && p.status === "completed");
 
   const userId = user?.id ?? "";
 
   useEffect(() => {
     if (!userId) return;
     fetchProgress(userId);
-    fetchNextText(userId);
+    fetchNextText(userId, false, isPremium);
   }, [userId]);
 
   // Strip ** markers for TTS
@@ -592,14 +878,12 @@ export default function ReadingScreen() {
   const handleComplete = async () => {
     if (!userId || !currentText) return;
     await markAsCompleted(userId, currentText.id);
-    setCompletedThisSession(true);
     setUpsellDismissed(false);
   };
 
   const handleNextText = () => {
-    setCompletedThisSession(false);
     setSourceVisible(false);
-    fetchNextText(userId);
+    fetchNextText(userId, true, isPremium); // forceNew: skip today's completed text, pick next
   };
 
   // ── Derived values ────────────────────────────────────────────────────────
@@ -912,7 +1196,7 @@ export default function ReadingScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        ) : completedThisSession || dailyLimitReached ? (
+        ) : isCompleted || dailyLimitReached ? (
           // ── Post-completion / limit-reached state ──
           <View style={styles.completedState}>
             {/* Success row */}
@@ -1001,14 +1285,36 @@ export default function ReadingScreen() {
             )}
           </View>
         ) : (
-          // ── Default: Tamamladım button ──
+          // ── Default: Tamamladım + Geçmişim row ──
+          <View style={styles.defaultActionRow}>
+            <TouchableOpacity
+              style={[styles.completeBtn, { backgroundColor: colors.primary, flex: 1 }]}
+              onPress={handleComplete}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+              <Text style={styles.completeBtnText}>{t("reading.complete_btn")}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.historyBtn, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}
+              onPress={() => setHistoryVisible(true)}
+              activeOpacity={0.75}
+            >
+              <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
+              <Text style={[styles.historyBtnText, { color: colors.textSecondary }]}>{t("reading.history_btn")}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Geçmişim link — completed/limit state'de de görünür */}
+        {(isCompleted || dailyLimitReached) && !isPaywalled && (
           <TouchableOpacity
-            style={[styles.completeBtn, { backgroundColor: colors.primary }]}
-            onPress={handleComplete}
-            activeOpacity={0.85}
+            style={styles.historyLinkRow}
+            onPress={() => setHistoryVisible(true)}
+            activeOpacity={0.7}
           >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-            <Text style={styles.completeBtnText}>{t("reading.complete_btn")}</Text>
+            <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
+            <Text style={[styles.historyLinkText, { color: colors.textTertiary }]}>{t("reading.history_btn")}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -1033,6 +1339,20 @@ export default function ReadingScreen() {
         uiLanguage={uiLanguage}
         targetLanguage={targetLanguage}
         isDark={isDark}
+        colors={colors}
+        t={t}
+      />
+
+      {/* ── History sheet ──────────────────────────────────────────── */}
+      <HistorySheet
+        visible={historyVisible}
+        onClose={() => setHistoryVisible(false)}
+        isPremium={isPremium}
+        userId={userId}
+        fetchCompletedTexts={fetchCompletedTexts}
+        markAsUncompleted={markAsUncompleted}
+        uiLanguage={uiLanguage}
+        targetLanguage={targetLanguage}
         colors={colors}
         t={t}
       />
@@ -1241,4 +1561,28 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   paywallBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+
+  defaultActionRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  historyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 6,
+  },
+  historyBtnText: { fontSize: 13, fontWeight: "600" },
+  historyLinkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingTop: 8,
+  },
+  historyLinkText: { fontSize: 12 },
 });

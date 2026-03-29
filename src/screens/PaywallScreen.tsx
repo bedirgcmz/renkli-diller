@@ -147,7 +147,7 @@ export default function PaywallScreen() {
 
         {/* Özellik listesi */}
         <View style={s.featureList}>
-          {(["feature_unlimited_add", "feature_quiz", "feature_categories", "feature_auto", "feature_tts"] as const).map((key) => (
+          {(["feature_ai", "feature_unlimited_add", "feature_sentences", "feature_quiz", "feature_categories", "feature_auto"] as const).map((key) => (
             <View key={key} style={s.featureRow}>
               <Text style={s.featureCheck}>✓</Text>
               <Text style={s.featureText}>{t(`premium.${key}`)}</Text>

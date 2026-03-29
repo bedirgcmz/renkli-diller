@@ -229,6 +229,7 @@
     "subtitle": "Desbloqueie todos os recursos",
     "price": "14.99",
     "lifetime": "Pagamento único",
+    "feature_ai": "Tradutor IA (ilimitado)",
     "feature_sentences": "300 frases predefinidas",
     "feature_unlimited_add": "Frases ilimitadas",
     "feature_tts": "Áudio em dois idiomas",
@@ -365,7 +366,14 @@
     "next_text_btn": "Próximo texto",
     "daily_limit_free": "Você concluiu o texto de hoje. Torne-se Premium para ler mais textos por dia.",
     "daily_limit_premium": "Você leu 3 textos hoje. Volte amanhã!",
-    "texts_today": "{{count}}/3 textos hoje"
+    "texts_today": "{{count}}/3 textos hoje",
+    "history_btn": "Histórico",
+    "history_title": "Textos Concluídos",
+    "history_empty": "Nenhum texto concluído ainda.",
+    "history_premium_title": "Recurso Premium",
+    "history_premium": "Torne-se Premium para acessar seu histórico de leitura e reaprender textos.",
+    "relearn_btn": "Reaprender",
+    "relearn_feedback": "Este texto aparecerá novamente no futuro."
   },
   "home": {
     "card_learn_title": "Estudar",
@@ -484,7 +492,7 @@
     "group_difficulty": "Dificuldade",
     "filter_title": "Filtrar",
     "filter_clear": "Limpar tudo",
-    "filter_show_results": "Mostrar {{count}} frases",
+    "filter_show_results": "Mostrar {{sentenceCount}} frases em {{tagCount}} etiqueta(s)",
     "filter_show_all": "Mostrar todas as frases",
     "this_week": "Esta semana",
     "this_month": "Este mês",
@@ -498,6 +506,8 @@
     "food": "Comida",
     "easy": "Fácil",
     "hard": "Difícil",
-    "important": "Importante"
+    "important": "Importante",
+    "tag_sentence": "Etiquetar frase",
+    "tag_remove": "Remover etiqueta"
   }
 }

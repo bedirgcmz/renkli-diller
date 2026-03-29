@@ -229,6 +229,7 @@
     "subtitle": "Lås upp alla funktioner",
     "price": "14.99",
     "lifetime": "Engångsbetalning",
+    "feature_ai": "AI-översättare (obegränsat)",
     "feature_sentences": "300 förinställda meningar",
     "feature_unlimited_add": "Obegränsat tillägg av meningar",
     "feature_tts": "Dubbel språk TTS",
@@ -365,7 +366,14 @@
     "next_text_btn": "Nästa text",
     "daily_limit_free": "Du har slutfört dagens text. Bli Premium för att läsa fler texter per dag.",
     "daily_limit_premium": "Du har läst 3 texter idag. Kom tillbaka imorgon!",
-    "texts_today": "{{count}}/3 texter idag"
+    "texts_today": "{{count}}/3 texter idag",
+    "history_btn": "Historik",
+    "history_title": "Avslutade Texter",
+    "history_empty": "Inga avslutade texter ännu.",
+    "history_premium_title": "Premiumfunktion",
+    "history_premium": "Bli Premium för att se din läshistorik och lära om texter.",
+    "relearn_btn": "Lär om",
+    "relearn_feedback": "Den här texten kommer att dyka upp igen i framtiden."
   },
   "home": {
     "card_learn_title": "Studera",
@@ -484,7 +492,7 @@
     "group_difficulty": "Svårighet",
     "filter_title": "Filtrera",
     "filter_clear": "Rensa allt",
-    "filter_show_results": "Visa {{count}} meningar",
+    "filter_show_results": "Visa {{sentenceCount}} meningar i {{tagCount}} tagg(ar)",
     "filter_show_all": "Visa alla meningar",
     "this_week": "Den här veckan",
     "this_month": "Den här månaden",
@@ -498,6 +506,8 @@
     "food": "Mat",
     "easy": "Lätt",
     "hard": "Svårt",
-    "important": "Viktigt"
+    "important": "Viktigt",
+    "tag_sentence": "Tagga mening",
+    "tag_remove": "Ta bort tagg"
   }
 }

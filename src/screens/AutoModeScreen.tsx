@@ -260,6 +260,14 @@ export default function AutoModeScreen() {
         onClose={() => setFilterModalVisible(false)}
         selectedTags={activeTagFilters}
         onApply={setActiveTagFilters}
+        getMatchCount={(draft) =>
+          draft.length === 0
+            ? allLearning.length
+            : allLearning.filter((s) => {
+                const tag = s.is_preset ? tagMap[s.id] : s.tag;
+                return tag != null && draft.includes(tag);
+              }).length
+        }
       />
 
       {/* Progress bar */}
