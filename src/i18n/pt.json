@@ -525,6 +525,8 @@
     "correct_answer_label": "Resposta correta:",
     "session_complete": "Sessão concluída!",
     "session_score": "{{correct}} / {{total}} corretas",
-    "restart": "Reiniciar"
+    "restart": "Reiniciar",
+    "limit_title": "Limite diário atingido",
+    "limit_desc": "Usuários gratuitos podem construir 5 frases por dia. Premium para prática ilimitada."
   }
 }

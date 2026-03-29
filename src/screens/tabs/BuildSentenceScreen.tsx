@@ -27,8 +27,10 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { HomeStackParamList, MainStackParamList, Sentence } from "@/types";
 import { buildWordChips, WordChip } from "@/utils/buildSentence";
-import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
+import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, FREE_BUILD_SENTENCE_DAILY_LIMIT } from "@/utils/constants";
 import * as Haptics from "expo-haptics";
+import { supabase } from "@/lib/supabase";
+import { usePremium } from "@/hooks/usePremium";
 
 type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<HomeStackParamList>,
@@ -204,8 +206,9 @@ export default function BuildSentenceScreen() {
   const isFocused = useIsFocused();
 
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, loadProgress } = useProgressStore();
+  const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { targetLanguage, uiLanguage } = useSettingsStore();
+  const { isPremium } = usePremium();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
@@ -221,6 +224,10 @@ export default function BuildSentenceScreen() {
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [sessionComplete, setSessionComplete] = useState(false);
 
+  // Daily limit
+  const [dailyCount, setDailyCount] = useState(0);
+  const dailyLimitReached = !isPremium && dailyCount >= FREE_BUILD_SENTENCE_DAILY_LIMIT;
+
   // Shuffle once at session start; ref so it doesn't re-shuffle on re-render
   const shuffledRef = useRef<Sentence[]>([]);
 
@@ -230,6 +237,23 @@ export default function BuildSentenceScreen() {
       setInitialized(true)
     );
   }, [targetLanguage, uiLanguage]);
+
+  useEffect(() => {
+    const loadTodayCount = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { count } = await supabase
+        .from("quiz_results")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("quiz_type", "build_sentence")
+        .gte("answered_at", todayStart.toISOString());
+      setDailyCount(count ?? 0);
+    };
+    loadTodayCount();
+  }, []);
 
   // Build & shuffle the learning list once after data loads
   useEffect(() => {
@@ -278,6 +302,8 @@ export default function BuildSentenceScreen() {
   }, [phase]);
 
   const handleValidate = useCallback(() => {
+    if (dailyLimitReached) return;
+
     const placed = dropZone.map((c) => c.normalized);
     const isCorrect =
       placed.length === correctOrder.length &&
@@ -291,7 +317,19 @@ export default function BuildSentenceScreen() {
 
     setPhase(isCorrect ? "correct" : "wrong");
     setScore((s) => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }));
-  }, [dropZone, correctOrder]);
+    setDailyCount((c) => c + 1);
+
+    // Persist to quiz_results for stats & daily limit tracking
+    if (currentSentence) {
+      recordQuizResult({
+        user_id: "",
+        sentence_id: currentSentence.is_preset ? currentSentence.id : null,
+        user_sentence_id: currentSentence.is_preset ? null : Number(currentSentence.id),
+        is_correct: isCorrect,
+        quiz_type: "build_sentence",
+      });
+    }
+  }, [dropZone, correctOrder, dailyLimitReached, currentSentence, recordQuizResult]);
 
   const handleGoNext = useCallback(() => {
     const nextIndex = currentIndex + 1;
@@ -352,6 +390,37 @@ export default function BuildSentenceScreen() {
           desc={t("build_sentence.empty_desc")}
           colors={colors}
         />
+      </SafeAreaView>
+    );
+  }
+
+  // ── Daily limit wall ─────────────────────────────────────────────────────
+  if (dailyLimitReached && phase === "arranging") {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+        <Header
+          title={t("build_sentence.title")}
+          current={currentIndex}
+          total={total}
+          onBack={() => navigation.goBack()}
+          colors={colors}
+        />
+        <View style={styles.center}>
+          <Text style={styles.completeEmoji}>⏳</Text>
+          <Text style={[styles.completeTitle, { color: colors.text }]}>
+            {t("build_sentence.limit_title")}
+          </Text>
+          <Text style={[styles.limitDesc, { color: colors.textSecondary }]}>
+            {t("build_sentence.limit_desc")}
+          </Text>
+          <TouchableOpacity
+            style={[styles.primaryBtn, styles.premiumBtn]}
+            onPress={() => navigation.navigate("Paywall")}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryBtnText}>✨ Premium</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -667,7 +736,19 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   completeEmoji: { fontSize: 56, marginBottom: 8 },
-  completeTitle: { fontSize: 22, fontWeight: "800", marginBottom: 6 },
+  completeTitle: { fontSize: 22, fontWeight: "800", marginBottom: 6, textAlign: "center" },
   completeScore: { fontSize: 16, marginBottom: 4 },
   completeAccuracy: { fontSize: 42, fontWeight: "800", marginBottom: 24 },
+  limitDesc: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+    paddingHorizontal: 32,
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  premiumBtn: {
+    width: 200,
+    backgroundColor: "#7C5CF6",
+  },
 });

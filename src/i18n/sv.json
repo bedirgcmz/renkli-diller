@@ -525,6 +525,8 @@
     "correct_answer_label": "Rätt svar:",
     "session_complete": "Sessionen klar!",
     "session_score": "{{correct}} / {{total}} rätt",
-    "restart": "Börja om"
+    "restart": "Börja om",
+    "limit_title": "Daglig gräns nådd",
+    "limit_desc": "Gratisanvändare kan bygga 5 meningar per dag. Skaffa Premium för obegränsad träning."
   }
 }

@@ -525,6 +525,8 @@
     "correct_answer_label": "Bonne réponse :",
     "session_complete": "Session terminée !",
     "session_score": "{{correct}} / {{total}} correctes",
-    "restart": "Recommencer"
+    "restart": "Recommencer",
+    "limit_title": "Limite journalière atteinte",
+    "limit_desc": "Les utilisateurs gratuits peuvent construire 5 phrases par jour. Premium pour une pratique illimitée."
   }
 }

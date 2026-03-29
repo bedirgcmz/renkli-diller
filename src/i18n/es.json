@@ -525,6 +525,8 @@
     "correct_answer_label": "Respuesta correcta:",
     "session_complete": "¡Sesión completada!",
     "session_score": "{{correct}} / {{total}} correctas",
-    "restart": "Reiniciar"
+    "restart": "Reiniciar",
+    "limit_title": "Límite diario alcanzado",
+    "limit_desc": "Los usuarios gratuitos pueden construir 5 oraciones por día. Premium para práctica ilimitada."
   }
 }

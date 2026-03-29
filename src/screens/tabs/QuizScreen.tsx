@@ -160,6 +160,7 @@ export default function QuizScreen() {
         .from("quiz_results")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
+        .in("quiz_type", ["multiple_choice", "fill_blank"])
         .gte("answered_at", todayStart.toISOString());
 
       setDailyCount(count ?? 0);

@@ -525,6 +525,8 @@
     "correct_answer_label": "Richtige Antwort:",
     "session_complete": "Sitzung abgeschlossen!",
     "session_score": "{{correct}} / {{total}} richtig",
-    "restart": "Neu starten"
+    "restart": "Neu starten",
+    "limit_title": "Tageslimit erreicht",
+    "limit_desc": "Kostenlose Nutzer können 5 Sätze pro Tag bauen. Premium für unbegrenzte Übung."
   }
 }

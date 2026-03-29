@@ -525,6 +525,8 @@
     "correct_answer_label": "Doğru cevap:",
     "session_complete": "Oturum tamamlandı!",
     "session_score": "{{correct}} / {{total}} doğru",
-    "restart": "Yeniden Başla"
+    "restart": "Yeniden Başla",
+    "limit_title": "Günlük limit doldu",
+    "limit_desc": "Ücretsiz kullanıcılar günde 5 cümle kurabilir. Premium ile sınırsız çalış."
   }
 }
