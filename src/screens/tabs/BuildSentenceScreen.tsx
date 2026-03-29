@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,15 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from "react-native";
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -247,6 +255,18 @@ export default function BuildSentenceScreen() {
     setCorrectOrder(order);
   }, [currentSentence?.id]);
 
+  const handleBankChipPress = useCallback((chip: WordChip) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setWordBank((prev) => prev.filter((c) => c.id !== chip.id));
+    setDropZone((prev) => [...prev, chip]);
+  }, []);
+
+  const handleDropChipPress = useCallback((chip: WordChip) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setDropZone((prev) => prev.filter((c) => c.id !== chip.id));
+    setWordBank((prev) => [...prev, chip]);
+  }, []);
+
   // ── Loading ──────────────────────────────────────────────────────────────
   if (!initialized) {
     return (
@@ -310,26 +330,58 @@ export default function BuildSentenceScreen() {
           colors={colors}
         />
 
-        {/* Drop zone placeholder */}
-        <View style={[styles.dropZonePlaceholder, { borderColor: colors.border }]}>
-          <Text style={{ color: colors.textTertiary, fontSize: 13 }}>
-            {t("build_sentence.drop_hint")}
-          </Text>
+        {/* ── Drop zone ── */}
+        <View
+          style={[
+            styles.dropZone,
+            {
+              backgroundColor: colors.surface ?? colors.backgroundSecondary,
+              borderColor: dropZone.length > 0 ? colors.primary : colors.border,
+            },
+          ]}
+        >
+          {dropZone.length === 0 ? (
+            <Text style={[styles.dropHint, { color: colors.textTertiary }]}>
+              {t("build_sentence.drop_hint")}
+            </Text>
+          ) : (
+            <View style={styles.chipRow}>
+              {dropZone.map((chip) => (
+                <TouchableOpacity
+                  key={chip.id}
+                  onPress={() => handleDropChipPress(chip)}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.chip,
+                    styles.chipPlaced,
+                    { backgroundColor: colors.primary + "18", borderColor: colors.primary },
+                  ]}
+                >
+                  <Text style={[styles.chipText, { color: colors.primary }]}>{chip.display}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
-        {/* Word bank — static chip display (interaction added next task) */}
+        {/* ── Divider ── */}
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        {/* ── Word bank ── */}
         <View style={styles.wordBankContainer}>
           <View style={styles.chipRow}>
             {wordBank.map((chip) => (
-              <View
+              <TouchableOpacity
                 key={chip.id}
+                onPress={() => handleBankChipPress(chip)}
+                activeOpacity={0.7}
                 style={[
                   styles.chip,
                   { backgroundColor: colors.cardBackground, borderColor: colors.border },
                 ]}
               >
                 <Text style={[styles.chipText, { color: colors.text }]}>{chip.display}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -343,20 +395,28 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 32 },
-  dropZonePlaceholder: {
+  dropZone: {
     marginHorizontal: 16,
     marginTop: 16,
-    minHeight: 80,
-    borderWidth: 1,
+    minHeight: 88,
+    borderWidth: 1.5,
     borderStyle: "dashed",
-    borderRadius: 14,
-    alignItems: "center",
+    borderRadius: 16,
+    padding: 12,
     justifyContent: "center",
-    padding: 16,
+  },
+  dropHint: {
+    fontSize: 13,
+    textAlign: "center",
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 16,
+    marginTop: 20,
   },
   wordBankContainer: {
     marginHorizontal: 16,
-    marginTop: 20,
+    marginTop: 16,
   },
   chipRow: {
     flexDirection: "row",
@@ -366,8 +426,11 @@ const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 9,
-    borderRadius: 20,
+    borderRadius: 22,
     borderWidth: 1.5,
+  },
+  chipPlaced: {
+    borderStyle: "solid",
   },
   chipText: {
     fontSize: 15,
