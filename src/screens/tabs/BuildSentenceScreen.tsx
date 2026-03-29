@@ -27,6 +27,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { HomeStackParamList, MainStackParamList, Sentence } from "@/types";
 import { buildWordChips, WordChip } from "@/utils/buildSentence";
+import { stripMarkers } from "@/utils/keywords";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, FREE_BUILD_SENTENCE_DAILY_LIMIT } from "@/utils/constants";
 import * as Haptics from "expo-haptics";
 import { supabase } from "@/lib/supabase";
