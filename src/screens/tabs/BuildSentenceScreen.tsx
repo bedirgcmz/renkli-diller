@@ -256,16 +256,17 @@ export default function BuildSentenceScreen() {
     loadTodayCount();
   }, []);
 
-  // Build & shuffle the learning list once after data loads
+  // Build & shuffle the learning list once after data loads.
+  // Read directly from Zustand store state to avoid stale-closure race between
+  // `setInitialized(true)` and the Zustand subscription re-render propagating.
   useEffect(() => {
     if (!initialized) return;
-    const all: Sentence[] = [
-      ...sentences,
-      ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
+    const { sentences: s, presetSentences: ps } = useSentenceStore.getState();
+    const { progressMap: pm } = useProgressStore.getState();
+    const learning = [
+      ...s.filter((sent) => sent.status === "learning"),
+      ...ps.filter((sent) => pm[sent.id] === "learning"),
     ];
-    const learning = all.filter(
-      (s) => s.status === "learning" || progressMap[s.id] === "learning"
-    );
     shuffledRef.current = [...learning].sort(() => Math.random() - 0.5);
     setCurrentIndex(0);
   }, [initialized]);
