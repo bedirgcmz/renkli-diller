@@ -511,5 +511,12 @@
     "important": "Viktigt",
     "tag_sentence": "Tagga mening",
     "tag_remove": "Ta bort tagg"
+  },
+  "build_sentence": {
+    "title": "Bygg mening",
+    "empty_title": "Inlärningslistan är tom",
+    "empty_desc": "Lägg till meningar i din inlärningslista och kom tillbaka.",
+    "source_label": "Översätt detta:",
+    "drop_hint": "Tryck på ord för att bygga meningen"
   }
 }

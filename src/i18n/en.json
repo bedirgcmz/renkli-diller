@@ -511,5 +511,12 @@
     "important": "Important",
     "tag_sentence": "Tag Sentence",
     "tag_remove": "Remove Tag"
+  },
+  "build_sentence": {
+    "title": "Build Sentence",
+    "empty_title": "Learning list is empty",
+    "empty_desc": "Add sentences to your learning list, then come back to practice here.",
+    "source_label": "Translate this:",
+    "drop_hint": "Tap words to build the sentence"
   }
 }

@@ -511,5 +511,12 @@
     "important": "Önemli",
     "tag_sentence": "Etiketle",
     "tag_remove": "Etiketi Kaldır"
+  },
+  "build_sentence": {
+    "title": "Cümle Kur",
+    "empty_title": "Öğrenme listesi boş",
+    "empty_desc": "Cümleleri öğrenme listene ekle, sonra buraya gelip sırala.",
+    "source_label": "Şunu çevir:",
+    "drop_hint": "Kelimelere dokunarak cümle kur"
   }
 }

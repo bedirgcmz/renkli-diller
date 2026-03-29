@@ -511,5 +511,12 @@
     "important": "Importante",
     "tag_sentence": "Etiquetar frase",
     "tag_remove": "Quitar etiqueta"
+  },
+  "build_sentence": {
+    "title": "Construir oración",
+    "empty_title": "Lista de aprendizaje vacía",
+    "empty_desc": "Agrega oraciones a tu lista de aprendizaje y regresa aquí.",
+    "source_label": "Traduce esto:",
+    "drop_hint": "Toca palabras para construir la oración"
   }
 }

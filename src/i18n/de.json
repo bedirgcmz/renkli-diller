@@ -511,5 +511,12 @@
     "important": "Wichtig",
     "tag_sentence": "Satz markieren",
     "tag_remove": "Markierung entfernen"
+  },
+  "build_sentence": {
+    "title": "Satz bauen",
+    "empty_title": "Lernliste ist leer",
+    "empty_desc": "Füge Sätze zur Lernliste hinzu und komm dann zurück.",
+    "source_label": "Übersetze das:",
+    "drop_hint": "Tippe auf Wörter, um den Satz zu bauen"
   }
 }
