@@ -450,6 +450,22 @@
     "first_automode": {
       "title": "Dinleyici",
       "description": "İlk otomatik mod oturumunu tamamladın"
+    },
+    "first_build": {
+      "title": "İlk İnşa",
+      "description": "İlk cümle kurma alıştırmasını tamamladın"
+    },
+    "build_10": {
+      "title": "Kelime Ustası",
+      "description": "10 cümle kur alıştırması yaptın"
+    },
+    "build_50": {
+      "title": "İnşaatçı",
+      "description": "50 cümle kur alıştırması yaptın"
+    },
+    "perfect_build": {
+      "title": "Mükemmel Yapı",
+      "description": "Bir oturumda tüm cümleleri doğru kurdu"
     }
   },
   "ai_translator": {

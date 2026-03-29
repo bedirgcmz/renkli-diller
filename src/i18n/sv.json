@@ -450,6 +450,22 @@
     "first_automode": {
       "title": "Aktiv Lyssnare",
       "description": "Du slutförde din första automatlägesession"
+    },
+    "first_build": {
+      "title": "Första bygget",
+      "description": "Slutförde din första meningsbyggarövning"
+    },
+    "build_10": {
+      "title": "Ordmästare",
+      "description": "Slutförde 10 meningsbyggarövningar"
+    },
+    "build_50": {
+      "title": "Byggare",
+      "description": "Slutförde 50 meningsbyggarövningar"
+    },
+    "perfect_build": {
+      "title": "Perfekt bygge",
+      "description": "Byggde alla meningar korrekt i en session"
     }
   },
   "ai_translator": {

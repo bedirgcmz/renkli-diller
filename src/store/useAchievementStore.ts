@@ -15,6 +15,8 @@ interface AchievementState {
     totalSentencesLearned: number;
     currentStreak: number;
     totalQuizQuestions: number;
+    totalBuildSentences?: number;
+    perfectBuildSession?: boolean;
   }) => Promise<void>;
 }
 
@@ -97,6 +99,12 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
           break;
         case "quiz_total":
           met = stats.totalQuizQuestions >= (achievement.conditionValue ?? 0);
+          break;
+        case "build_total":
+          met = (stats.totalBuildSentences ?? 0) >= (achievement.conditionValue ?? 0);
+          break;
+        case "perfect_build":
+          met = stats.perfectBuildSession === true;
           break;
         default:
           break;

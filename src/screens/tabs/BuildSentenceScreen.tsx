@@ -31,6 +31,7 @@ import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, FREE_BUILD_SENTENCE_DAILY_LIMIT }
 import * as Haptics from "expo-haptics";
 import { supabase } from "@/lib/supabase";
 import { usePremium } from "@/hooks/usePremium";
+import { useAchievementStore } from "@/store/useAchievementStore";
 
 type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<HomeStackParamList>,
@@ -316,7 +317,9 @@ export default function BuildSentenceScreen() {
     }
 
     setPhase(isCorrect ? "correct" : "wrong");
-    setScore((s) => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }));
+    const newTotal = score.total + 1;
+    const newCorrect = score.correct + (isCorrect ? 1 : 0);
+    setScore({ correct: newCorrect, total: newTotal });
     setDailyCount((c) => c + 1);
 
     // Persist to quiz_results for stats & daily limit tracking
@@ -329,17 +332,36 @@ export default function BuildSentenceScreen() {
         quiz_type: "build_sentence",
       });
     }
-  }, [dropZone, correctOrder, dailyLimitReached, currentSentence, recordQuizResult]);
+
+    // Achievement check for build_total milestones
+    useAchievementStore.getState().checkProgressAchievements({
+      totalSentencesLearned: 0,
+      currentStreak: 0,
+      totalQuizQuestions: 0,
+      totalBuildSentences: dailyCount + 1, // approximate; loadStats has exact total
+    });
+  }, [dropZone, correctOrder, dailyLimitReached, currentSentence, recordQuizResult, score, dailyCount]);
 
   const handleGoNext = useCallback(() => {
     const nextIndex = currentIndex + 1;
     if (nextIndex >= total) {
+      // Check perfect_build: all answers correct in this session
+      const finalCorrect = score.correct + (phase === "correct" ? 0 : 0); // score already updated
+      const isPerfect = score.total > 0 && score.correct === score.total;
+      if (isPerfect) {
+        useAchievementStore.getState().checkProgressAchievements({
+          totalSentencesLearned: 0,
+          currentStreak: 0,
+          totalQuizQuestions: 0,
+          perfectBuildSession: true,
+        });
+      }
       setSessionComplete(true);
       return;
     }
     setPhase("arranging");
     setCurrentIndex(nextIndex);
-  }, [currentIndex, total]);
+  }, [currentIndex, total, score, phase]);
 
   const handleRestart = useCallback(() => {
     const all: Sentence[] = [

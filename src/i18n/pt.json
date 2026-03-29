@@ -450,6 +450,22 @@
     "first_automode": {
       "title": "Ouvinte Ativo",
       "description": "Você completou sua primeira sessão em modo automático"
+    },
+    "first_build": {
+      "title": "Primeira construção",
+      "description": "Completou seu primeiro exercício de construção"
+    },
+    "build_10": {
+      "title": "Mestre das palavras",
+      "description": "Completou 10 exercícios de construção"
+    },
+    "build_50": {
+      "title": "Construtor",
+      "description": "Completou 50 exercícios de construção"
+    },
+    "perfect_build": {
+      "title": "Construção perfeita",
+      "description": "Construiu todas as frases corretamente"
     }
   },
   "ai_translator": {

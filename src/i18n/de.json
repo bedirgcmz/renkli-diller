@@ -450,6 +450,22 @@
     "first_automode": {
       "title": "Zuhörer",
       "description": "Du hast deine erste Auto-Modus-Sitzung abgeschlossen"
+    },
+    "first_build": {
+      "title": "Erstes Bauen",
+      "description": "Erste Satzbaüübung abgeschlossen"
+    },
+    "build_10": {
+      "title": "Wortmeister",
+      "description": "10 Satzbaüübungen abgeschlossen"
+    },
+    "build_50": {
+      "title": "Erbauer",
+      "description": "50 Satzbaüübungen abgeschlossen"
+    },
+    "perfect_build": {
+      "title": "Perfektes Bauen",
+      "description": "Alle Sätze in einer Sitzung richtig gebaut"
     }
   },
   "ai_translator": {

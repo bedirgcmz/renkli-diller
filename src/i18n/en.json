@@ -450,6 +450,22 @@
     "first_automode": {
       "title": "Active Listener",
       "description": "You completed your first auto mode session"
+    },
+    "first_build": {
+      "title": "First Build",
+      "description": "Completed your first sentence building exercise"
+    },
+    "build_10": {
+      "title": "Word Master",
+      "description": "Completed 10 sentence building exercises"
+    },
+    "build_50": {
+      "title": "Builder",
+      "description": "Completed 50 sentence building exercises"
+    },
+    "perfect_build": {
+      "title": "Perfect Build",
+      "description": "Built all sentences correctly in one session"
     }
   },
   "ai_translator": {
