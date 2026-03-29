@@ -394,7 +394,9 @@
     "streak_days": "dagar",
     "daily_goal": "Dagligt mål",
     "goal_hint": "Slutför ditt mål för idag",
-    "goal_done": "Mål nått idag 🎉"
+    "goal_done": "Mål nått idag 🎉",
+    "card_build_title": "Bygg",
+    "card_build_desc": "Sortera ord i ordning"
   },
   "achievements": {
     "title": "Prestationer",

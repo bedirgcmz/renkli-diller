@@ -394,7 +394,9 @@
     "streak_days": "days",
     "daily_goal": "Daily goal",
     "goal_hint": "Complete your goal for today",
-    "goal_done": "Goal reached today 🎉"
+    "goal_done": "Goal reached today 🎉",
+    "card_build_title": "Build",
+    "card_build_desc": "Arrange words in order"
   },
   "achievements": {
     "title": "Achievements",

@@ -75,6 +75,13 @@ export default function HomeScreen() {
       descKey: "home.card_explore_desc",
       onPress: (nav) => nav.navigate("CategoryBrowser"),
     },
+    {
+      icon: "text-outline",
+      iconColor: "#10B981",
+      titleKey: "home.card_build_title",
+      descKey: "home.card_build_desc",
+      onPress: (nav) => nav.navigate("BuildSentence"),
+    },
   ];
 
   return (

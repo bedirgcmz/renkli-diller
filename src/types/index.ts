@@ -75,7 +75,7 @@ export interface QuizResult {
   sentence_id: string | null;
   user_sentence_id?: number | null;
   is_correct: boolean;
-  quiz_type: "multiple_choice" | "fill_blank";
+  quiz_type: "multiple_choice" | "fill_blank" | "build_sentence";
   answered_at: string;
 }
 
@@ -116,6 +116,7 @@ export type HomeStackParamList = {
   Learn: { initialTab?: "study" | "listening" } | undefined;
   Quiz: undefined;
   Reading: undefined;
+  BuildSentence: undefined;
 };
 
 export type MainStackParamList = {

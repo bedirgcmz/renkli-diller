@@ -394,7 +394,9 @@
     "streak_days": "Tage",
     "daily_goal": "Tagesziel",
     "goal_hint": "Erreich dein heutiges Ziel",
-    "goal_done": "Tagesziel erreicht 🎉"
+    "goal_done": "Tagesziel erreicht 🎉",
+    "card_build_title": "Bauen",
+    "card_build_desc": "Wörter in Reihenfolge"
   },
   "achievements": {
     "title": "Erfolge",

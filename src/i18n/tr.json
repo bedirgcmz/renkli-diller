@@ -394,7 +394,9 @@
     "streak_days": "gün",
     "daily_goal": "Günlük hedef",
     "goal_hint": "Bugünkü hedefini tamamla",
-    "goal_done": "Bugünkü hedefine ulaştın 🎉"
+    "goal_done": "Bugünkü hedefine ulaştın 🎉",
+    "card_build_title": "Cümle Kur",
+    "card_build_desc": "Kelimeleri doğru sırala"
   },
   "achievements": {
     "title": "Başarılar",

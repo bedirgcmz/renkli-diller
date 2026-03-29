@@ -60,6 +60,7 @@ export const KEYWORD_TEXT_COLORS = {
 export const FREE_USER_SENTENCE_LIMIT = 30;
 export const FREE_QUIZ_DAILY_LIMIT = 5;
 export const FREE_AUTO_MODE_LIMIT = 10;
+export const FREE_BUILD_SENTENCE_DAILY_LIMIT = 5;
 export const PREMIUM_PRICE_MONTHLY = '€3.99';
 export const PREMIUM_PRICE_ANNUAL = '€19.99';
 

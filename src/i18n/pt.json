@@ -394,7 +394,9 @@
     "streak_days": "dias",
     "daily_goal": "Meta diária",
     "goal_hint": "Complete sua meta de hoje",
-    "goal_done": "Meta alcançada hoje 🎉"
+    "goal_done": "Meta alcançada hoje 🎉",
+    "card_build_title": "Construir",
+    "card_build_desc": "Ordene as palavras"
   },
   "achievements": {
     "title": "Conquistas",
