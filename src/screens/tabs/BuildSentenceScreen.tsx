@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -230,8 +230,9 @@ export default function BuildSentenceScreen() {
   const [dailyCount, setDailyCount] = useState(0);
   const dailyLimitReached = !isPremium && dailyCount >= FREE_BUILD_SENTENCE_DAILY_LIMIT;
 
-  // Shuffle once at session start; ref so it doesn't re-shuffle on re-render
-  const shuffledRef = useRef<Sentence[]>([]);
+  // Learning list — stored in state so updating it triggers a re-render and
+  // allows the word-chip effect ([currentSentence?.id]) to fire correctly.
+  const [learningSentences, setLearningSentences] = useState<Sentence[]>([]);
 
   useEffect(() => {
     setInitialized(false);
@@ -268,11 +269,10 @@ export default function BuildSentenceScreen() {
       ...s.filter((sent) => sent.status === "learning"),
       ...ps.filter((sent) => pm[sent.id] === "learning"),
     ];
-    shuffledRef.current = [...learning].sort(() => Math.random() - 0.5);
+    setLearningSentences([...learning].sort(() => Math.random() - 0.5));
     setCurrentIndex(0);
   }, [initialized]);
 
-  const learningSentences = shuffledRef.current;
   const total = learningSentences.length;
   const currentSentence = learningSentences[currentIndex] ?? null;
   const sentenceIcon = SENTENCE_ICONS[currentIndex % SENTENCE_ICONS.length];
@@ -366,19 +366,18 @@ export default function BuildSentenceScreen() {
   }, [currentIndex, total, score, phase]);
 
   const handleRestart = useCallback(() => {
-    const all: Sentence[] = [
-      ...sentences,
-      ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
+    const { sentences: s, presetSentences: ps } = useSentenceStore.getState();
+    const { progressMap: pm } = useProgressStore.getState();
+    const learning = [
+      ...s.filter((sent) => sent.status === "learning"),
+      ...ps.filter((sent) => pm[sent.id] === "learning"),
     ];
-    const learning = all.filter(
-      (s) => s.status === "learning" || progressMap[s.id] === "learning",
-    );
-    shuffledRef.current = [...learning].sort(() => Math.random() - 0.5);
+    setLearningSentences([...learning].sort(() => Math.random() - 0.5));
     setCurrentIndex(0);
     setPhase("arranging");
     setScore({ correct: 0, total: 0 });
     setSessionComplete(false);
-  }, [sentences, presetSentences, progressMap]);
+  }, []);
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (!initialized) {
