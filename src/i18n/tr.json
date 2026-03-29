@@ -76,7 +76,8 @@
     "empty_title": "Öğrenme listesi boş",
     "empty_hint": "Cümleler ekranından öğrenme listenize cümle ekleyerek quiz başlatabilirsiniz.",
     "go_to_sentences": "Cümlelere Git",
-    "no_keywords_title": "Boşluk doldurma için cümle yok"
+    "no_keywords_title": "Boşluk doldurma için cümle yok",
+    "build_sentence": "Cümle Kur"
   },
   "sentences": {
     "title": "Tüm Cümleler",
@@ -202,7 +203,8 @@
     "password_strength_strong": "Güçlü",
     "password_min_length": "En az 8 karakter",
     "password_has_number": "Rakam içermeli",
-    "password_has_upper": "Büyük harf içermeli"
+    "password_has_upper": "Büyük harf içermeli",
+    "build_sentence_total": "Cümle Kurma"
   },
   "settings": {
     "title": "Ayarlar",

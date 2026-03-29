@@ -76,7 +76,8 @@
     "empty_hint": "Ajoute des phrases à ta liste d'apprentissage pour démarrer un quiz.",
     "go_to_sentences": "Voir les phrases",
     "no_keywords_title": "Aucune phrase à compléter",
-    "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode."
+    "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode.",
+    "build_sentence": "Construire"
   },
   "sentences": {
     "title": "Toutes les phrases",
@@ -202,7 +203,8 @@
     "password_strength_strong": "Fort",
     "password_min_length": "Au moins 8 caractères",
     "password_has_number": "Contient un chiffre",
-    "password_has_upper": "Contient une majuscule"
+    "password_has_upper": "Contient une majuscule",
+    "build_sentence_total": "Phrases construites"
   },
   "settings": {
     "title": "Paramètres",

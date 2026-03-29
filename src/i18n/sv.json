@@ -76,7 +76,8 @@
     "empty_hint": "Lägg till meningar i din inlärningslista för att starta ett quiz.",
     "go_to_sentences": "Gå till Meningar",
     "no_keywords_title": "Inga meningar för ifyllnad",
-    "no_keywords": "Inga meningar med nyckelordsmärken hittades.\nLägg till **märken** i dina meningar för att använda det här läget."
+    "no_keywords": "Inga meningar med nyckelordsmärken hittades.\nLägg till **märken** i dina meningar för att använda det här läget.",
+    "build_sentence": "Bygg mening"
   },
   "sentences": {
     "title": "Alla meningar",
@@ -202,7 +203,8 @@
     "password_strength_strong": "Starkt",
     "password_min_length": "Minst 8 tecken",
     "password_has_number": "Innehåller en siffra",
-    "password_has_upper": "Innehåller stor bokstav"
+    "password_has_upper": "Innehåller stor bokstav",
+    "build_sentence_total": "Meningar byggda"
   },
   "settings": {
     "title": "Inställningar",

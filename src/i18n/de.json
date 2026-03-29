@@ -76,7 +76,8 @@
     "empty_hint": "Füge Sätze zu deiner Lernliste hinzu, um ein Quiz zu starten.",
     "go_to_sentences": "Zu Sätzen",
     "no_keywords_title": "Keine Sätze für Lückentext",
-    "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen."
+    "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen.",
+    "build_sentence": "Satz bauen"
   },
   "sentences": {
     "title": "Alle Sätze",
@@ -202,7 +203,8 @@
     "password_strength_strong": "Stark",
     "password_min_length": "Mindestens 8 Zeichen",
     "password_has_number": "Enthält eine Zahl",
-    "password_has_upper": "Enthält Großbuchstaben"
+    "password_has_upper": "Enthält Großbuchstaben",
+    "build_sentence_total": "Sätze gebaut"
   },
   "settings": {
     "title": "Einstellungen",

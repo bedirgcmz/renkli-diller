@@ -76,7 +76,8 @@
     "empty_hint": "Añade frases a tu lista de aprendizaje para iniciar un quiz.",
     "go_to_sentences": "Ir a Frases",
     "no_keywords_title": "Sin frases para completar",
-    "no_keywords": "No se encontraron oraciones con marcadores de palabras clave.\nAgrega **marcadores** a tus oraciones para usar este modo."
+    "no_keywords": "No se encontraron oraciones con marcadores de palabras clave.\nAgrega **marcadores** a tus oraciones para usar este modo.",
+    "build_sentence": "Construir"
   },
   "sentences": {
     "title": "Todas las frases",
@@ -202,7 +203,8 @@
     "password_strength_strong": "Fuerte",
     "password_min_length": "Mínimo 8 caracteres",
     "password_has_number": "Contiene un número",
-    "password_has_upper": "Contiene mayúscula"
+    "password_has_upper": "Contiene mayúscula",
+    "build_sentence_total": "Oraciones construidas"
   },
   "settings": {
     "title": "Ajustes",

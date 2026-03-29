@@ -19,7 +19,7 @@ interface ProgressStats {
   studyTimeThisWeek: number;
   studyTimeThisMonth: number;
   lastStudyDate: string | null;
-  quizByMode: { multiple_choice: ModeStats; fill_blank: ModeStats };
+  quizByMode: { multiple_choice: ModeStats; fill_blank: ModeStats; build_sentence: ModeStats };
   quizByCategory: Record<string, ModeStats>;
   todayLearnedUserSentences: number;
   userLearnedDates: string[];
@@ -62,7 +62,7 @@ const DEFAULT_STATS: ProgressStats = {
   studyTimeThisWeek: 0,
   studyTimeThisMonth: 0,
   lastStudyDate: null,
-  quizByMode: { multiple_choice: { correct: 0, total: 0 }, fill_blank: { correct: 0, total: 0 } },
+  quizByMode: { multiple_choice: { correct: 0, total: 0 }, fill_blank: { correct: 0, total: 0 }, build_sentence: { correct: 0, total: 0 } },
   quizByCategory: {},
   todayLearnedUserSentences: 0,
   userLearnedDates: [],
@@ -280,9 +280,10 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const quizByMode: ProgressStats["quizByMode"] = {
         multiple_choice: { correct: 0, total: 0 },
         fill_blank: { correct: 0, total: 0 },
+        build_sentence: { correct: 0, total: 0 },
       };
       for (const q of quizResults || []) {
-        const mode = q.quiz_type as "multiple_choice" | "fill_blank";
+        const mode = q.quiz_type as keyof typeof quizByMode;
         if (quizByMode[mode]) {
           quizByMode[mode].total++;
           if (q.is_correct) quizByMode[mode].correct++;
