@@ -15,7 +15,9 @@
     "google": "Mit Google fortfahren",
     "already_have_account": "Haben Sie bereits ein Konto?",
     "dont_have_account": "Haben Sie kein Konto?",
-    "forgot_password": "Passwort vergessen"
+    "forgot_password": "Passwort vergessen",
+    "show_password": "Zeigen",
+    "hide_password": "Verbergen"
   },
   "tabs": {
     "learn": "Lernen",
@@ -269,7 +271,9 @@
     "not_found_title": "Nicht gefunden",
     "not_found_body": "Kein aktiver Premium-Kauf für dieses Konto gefunden.",
     "error_purchase": "Kauf fehlgeschlagen.",
-    "error_restore": "Beim Wiederherstellen der Käufe ist ein Fehler aufgetreten."
+    "error_restore": "Beim Wiederherstellen der Käufe ist ein Fehler aufgetreten.",
+    "privacy_policy": "Datenschutzrichtlinie",
+    "terms_of_service": "Nutzungsbedingungen"
   },
   "pdf_export": {
     "title": "PDF herunterladen",

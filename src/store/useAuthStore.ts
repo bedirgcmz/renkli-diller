@@ -1,7 +1,9 @@
 import { create } from "zustand";
+import { Platform } from "react-native";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 interface User {
   id: string;
@@ -27,6 +29,7 @@ interface AuthState {
     fullName?: string,
   ) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  signInWithApple: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
@@ -124,6 +127,68 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       set({ loading: false });
       return { success: false, error: "An unexpected error occurred" };
+    }
+  },
+
+  signInWithApple: async () => {
+    if (Platform.OS !== "ios") return { success: false, error: "Apple Sign-In is only available on iOS" };
+    set({ loading: true });
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (!credential.identityToken) {
+        set({ loading: false });
+        return { success: false, error: "No identity token received from Apple" };
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: "apple",
+        token: credential.identityToken,
+      });
+
+      if (error) {
+        set({ loading: false });
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        // Apple provides full name only on first sign-in — save it if present
+        const displayName = credential.fullName
+          ? [credential.fullName.givenName, credential.fullName.familyName].filter(Boolean).join(" ")
+          : null;
+
+        if (displayName) {
+          await supabase.from("profiles").update({ display_name: displayName }).eq("id", data.user.id);
+        }
+
+        const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+        await logInUser(data.user.id).catch(console.error);
+        const rcPremium = await isPremiumActive().catch(() => false);
+
+        const user: User = {
+          id: data.user.id,
+          email: data.user.email || credential.email || "",
+          display_name: displayName || profile?.display_name || "",
+          avatar_url: profile?.avatar_url || "",
+          is_premium: profile?.is_premium || rcPremium,
+          leaderboard_visible: profile?.leaderboard_visible ?? true,
+          created_at: data.user.created_at,
+        };
+
+        set({ user, session: data.session, loading: false });
+        await AsyncStorage.setItem("supabase_session", JSON.stringify(data.session));
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      set({ loading: false });
+      if (error?.code === "ERR_REQUEST_CANCELED") return { success: false };
+      return { success: false, error: error.message ?? "Apple Sign-In failed" };
     }
   },
 

@@ -15,7 +15,9 @@
     "google": "Continue with Google",
     "already_have_account": "Already have an account?",
     "dont_have_account": "Don't have an account?",
-    "forgot_password": "Forgot password"
+    "forgot_password": "Forgot password",
+    "show_password": "Show",
+    "hide_password": "Hide"
   },
   "tabs": {
     "learn": "Learn",
@@ -269,7 +271,9 @@
     "not_found_title": "Not Found",
     "not_found_body": "No active premium purchase found for this account.",
     "error_purchase": "Purchase failed.",
-    "error_restore": "Something went wrong while restoring purchases."
+    "error_restore": "Something went wrong while restoring purchases.",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service"
   },
   "pdf_export": {
     "title": "Download PDF",

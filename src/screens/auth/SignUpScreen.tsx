@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTheme } from "@/hooks/useTheme";
@@ -100,7 +101,7 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
           >
             <Text style={[styles.eyeText, { color: colors.accent }]}>
               {" "}
-              {showPassword ? "Gizle" : "Göster"}
+              {showPassword ? t("onboarding.hide_password") : t("onboarding.show_password")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -143,6 +144,19 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
             <Text style={styles.primaryButtonText}>{t("onboarding.sign_up")}</Text>
           )}
         </TouchableOpacity>
+
+        {Platform.OS === "ios" && (
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
+            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+            cornerRadius={14}
+            style={styles.appleBtn}
+            onPress={async () => {
+              const { success, error: message } = await useAuthStore.getState().signInWithApple();
+              if (!success && message) setError(message);
+            }}
+          />
+        )}
 
         <View style={styles.actions}>
           <TouchableOpacity onPress={() => onSwitchToSignIn?.()}>
@@ -202,6 +216,11 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: "#fff",
     fontWeight: "700",
+  },
+  appleBtn: {
+    width: "100%",
+    height: 48,
+    marginTop: 12,
   },
   actions: {
     marginTop: 18,

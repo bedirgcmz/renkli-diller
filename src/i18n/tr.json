@@ -15,7 +15,9 @@
     "google": "Google ile devam et",
     "already_have_account": "Zaten hesabınız var mı?",
     "dont_have_account": "Hesabınız yok mu?",
-    "forgot_password": "Şifremi unuttum"
+    "forgot_password": "Şifremi unuttum",
+    "show_password": "Göster",
+    "hide_password": "Gizle"
   },
   "tabs": {
     "learn": "Öğren",
@@ -269,7 +271,9 @@
     "not_found_title": "Bulunamadı",
     "not_found_body": "Bu hesapta aktif bir premium satın alma bulunamadı.",
     "error_purchase": "Satın alma başarısız oldu.",
-    "error_restore": "Satın almalar geri yüklenirken bir sorun oluştu."
+    "error_restore": "Satın almalar geri yüklenirken bir sorun oluştu.",
+    "privacy_policy": "Gizlilik Politikası",
+    "terms_of_service": "Kullanım Koşulları"
   },
   "pdf_export": {
     "title": "PDF İndir",

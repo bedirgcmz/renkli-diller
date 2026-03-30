@@ -15,7 +15,9 @@
     "google": "Continuar com Google",
     "already_have_account": "Já tem uma conta?",
     "dont_have_account": "Não tem uma conta?",
-    "forgot_password": "Esqueci minha senha"
+    "forgot_password": "Esqueci minha senha",
+    "show_password": "Mostrar",
+    "hide_password": "Ocultar"
   },
   "tabs": {
     "learn": "Aprender",
@@ -269,7 +271,9 @@
     "not_found_title": "Não encontrado",
     "not_found_body": "Nenhuma compra premium ativa encontrada para esta conta.",
     "error_purchase": "A compra falhou.",
-    "error_restore": "Algo deu errado ao restaurar as compras."
+    "error_restore": "Algo deu errado ao restaurar as compras.",
+    "privacy_policy": "Política de Privacidade",
+    "terms_of_service": "Termos de Serviço"
   },
   "pdf_export": {
     "title": "Baixar PDF",

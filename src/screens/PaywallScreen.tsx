@@ -7,7 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Linking,
 } from "react-native";
+
+const PRIVACY_POLICY_URL = "https://drive.google.com/file/d/1f5d6o02r21XV3T4428uJ1Pqv1qMwjNUo/view?usp=sharing";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import type { PurchasesPackage } from "react-native-purchases";
@@ -225,6 +228,15 @@ export default function PaywallScreen() {
 
         {/* Yasal notlar */}
         <Text style={s.legalTxt}>{t("premium.legal")}</Text>
+        <View style={s.legalLinks}>
+          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+            <Text style={s.legalLink}>{t("premium.privacy_policy")}</Text>
+          </TouchableOpacity>
+          <Text style={s.legalLinkDivider}>·</Text>
+          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+            <Text style={s.legalLink}>{t("premium.terms_of_service")}</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -395,6 +407,22 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       color: colors.textTertiary,
       textAlign: "center",
       lineHeight: 16,
+    },
+    legalLinks: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginTop: 8,
+    },
+    legalLink: {
+      fontSize: 11,
+      color: colors.textTertiary,
+      textDecorationLine: "underline",
+    },
+    legalLinkDivider: {
+      fontSize: 11,
+      color: colors.textTertiary,
     },
   });
 }

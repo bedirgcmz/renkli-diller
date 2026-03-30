@@ -15,7 +15,9 @@
     "google": "Fortsätt med Google",
     "already_have_account": "Har du redan ett konto?",
     "dont_have_account": "Har du inget konto?",
-    "forgot_password": "Glömt lösenord"
+    "forgot_password": "Glömt lösenord",
+    "show_password": "Visa",
+    "hide_password": "Dölj"
   },
   "tabs": {
     "learn": "Lär",
@@ -269,7 +271,9 @@
     "not_found_title": "Hittades inte",
     "not_found_body": "Inget aktivt premiumköp hittades för det här kontot.",
     "error_purchase": "Köpet misslyckades.",
-    "error_restore": "Något gick fel vid återställning av köp."
+    "error_restore": "Något gick fel vid återställning av köp.",
+    "privacy_policy": "Integritetspolicy",
+    "terms_of_service": "Användarvillkor"
   },
   "pdf_export": {
     "title": "Ladda ner PDF",

@@ -15,7 +15,9 @@
     "google": "Continuer avec Google",
     "already_have_account": "Vous avez déjà un compte ?",
     "dont_have_account": "Pas encore de compte ?",
-    "forgot_password": "Mot de passe oublié"
+    "forgot_password": "Mot de passe oublié",
+    "show_password": "Afficher",
+    "hide_password": "Masquer"
   },
   "tabs": {
     "learn": "Apprendre",
@@ -269,7 +271,9 @@
     "not_found_title": "Non trouvé",
     "not_found_body": "Aucun achat premium actif trouvé pour ce compte.",
     "error_purchase": "L'achat a échoué.",
-    "error_restore": "Une erreur s'est produite lors de la restauration des achats."
+    "error_restore": "Une erreur s'est produite lors de la restauration des achats.",
+    "privacy_policy": "Politique de Confidentialité",
+    "terms_of_service": "Conditions d'Utilisation"
   },
   "pdf_export": {
     "title": "Télécharger PDF",
