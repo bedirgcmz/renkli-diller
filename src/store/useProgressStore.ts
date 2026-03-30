@@ -14,6 +14,7 @@ interface ProgressStats {
   longestStreak: number;
   quizAccuracy: number;
   totalQuizQuestions: number;
+  totalBuildSentences: number;
   correctQuizAnswers: number;
   studyTimeToday: number;
   studyTimeThisWeek: number;
@@ -57,6 +58,7 @@ const DEFAULT_STATS: ProgressStats = {
   longestStreak: 0,
   quizAccuracy: 0,
   totalQuizQuestions: 0,
+  totalBuildSentences: 0,
   correctQuizAnswers: 0,
   studyTimeToday: 0,
   studyTimeThisWeek: 0,
@@ -176,6 +178,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         totalSentencesLearned: stats.totalSentencesLearned,
         currentStreak: stats.currentStreak,
         totalQuizQuestions: stats.totalQuizQuestions,
+        totalBuildSentences: stats.totalBuildSentences,
       });
     } catch {
       if (__DEV__) console.error("markAsLearned failed");
@@ -272,8 +275,10 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const totalSentencesLearned =
         allProgressRows?.filter((r) => r.state === "learned").length || 0;
 
-      const totalQuizQuestions = quizResults?.length || 0;
-      const correctQuizAnswers = quizResults?.filter((q) => q.is_correct).length || 0;
+      const quizOnlyResults = quizResults?.filter((q) => q.quiz_type === "multiple_choice" || q.quiz_type === "fill_blank") || [];
+      const totalQuizQuestions = quizOnlyResults.length;
+      const totalBuildSentences = quizResults?.filter((q) => q.quiz_type === "build_sentence").length || 0;
+      const correctQuizAnswers = quizOnlyResults.filter((q) => q.is_correct).length;
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
@@ -367,6 +372,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           longestStreak,
           quizAccuracy,
           totalQuizQuestions,
+          totalBuildSentences,
           correctQuizAnswers,
           studyTimeToday: 0,
           studyTimeThisWeek: 0,
@@ -406,6 +412,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         totalSentencesLearned: stats.totalSentencesLearned,
         currentStreak: stats.currentStreak,
         totalQuizQuestions: stats.totalQuizQuestions,
+        totalBuildSentences: stats.totalBuildSentences,
       });
     } catch (error) {
       if (__DEV__) console.error("Error recording study session:", error);
@@ -439,6 +446,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         totalSentencesLearned: stats.totalSentencesLearned,
         currentStreak: stats.currentStreak,
         totalQuizQuestions: stats.totalQuizQuestions,
+        totalBuildSentences: stats.totalBuildSentences,
       });
     } catch (error) {
       if (__DEV__) console.error("Error recording quiz result:", error);

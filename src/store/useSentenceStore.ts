@@ -434,12 +434,13 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       const presetLearnedCount = Object.values(useProgressStore.getState().progressMap).filter(
         (s) => s === "learned"
       ).length;
-      const { currentStreak, totalQuizQuestions } = useProgressStore.getState().stats;
+      const { currentStreak, totalQuizQuestions, totalBuildSentences } = useProgressStore.getState().stats;
 
       await useAchievementStore.getState().checkProgressAchievements({
         totalSentencesLearned: userLearnedCount + presetLearnedCount,
         currentStreak,
         totalQuizQuestions,
+        totalBuildSentences,
       });
     }
   },
