@@ -225,7 +225,9 @@
     "notif_title": "Lernzeit! 📚",
     "notif_body": "Lerne ein paar Sätze, um dein Tagesziel zu erreichen.",
     "notif_permission_denied": "Benachrichtigungsberechtigung verweigert. Bitte in den App-Einstellungen aktivieren.",
-    "notif_scheduled": "Benachrichtigung gesetzt"
+    "notif_scheduled": "Benachrichtigung gesetzt",
+    "leaderboard_visible": "In Rangliste anzeigen",
+    "leaderboard_visible_desc": "Wenn aus, erscheinst du anonym"
   },
   "premium": {
     "title": "Premium werden",
@@ -530,6 +532,26 @@
     "important": "Wichtig",
     "tag_sentence": "Satz markieren",
     "tag_remove": "Markierung entfernen"
+  },
+  "leaderboard": {
+    "title": "Beste der Woche",
+    "badge_label": "Rangliste",
+    "badge_detail": "Details →",
+    "tab_learned": "Gelernt",
+    "tab_studied": "Geübt",
+    "rank_label": "#{{rank}}",
+    "you": "Du",
+    "your_rank": "Dein Rang: #{{rank}}",
+    "words_learned": "{{count}} Wörter",
+    "words_studied": "{{count}} Einheiten",
+    "week_resets": "Zurücksetzen jeden Montag",
+    "empty_title": "Keine Aktivität diese Woche",
+    "empty_desc": "Sei der Erste, der übt!",
+    "premium_blur_title": "Premium für die vollständige Liste",
+    "premium_blur_desc": "Kostenlose Nutzer sehen nur die Top 2.",
+    "unlock_premium": "Zu Premium wechseln",
+    "not_ranked": "Du bist diese Woche noch nicht eingestuft",
+    "anonymous": "Anonym"
   },
   "build_sentence": {
     "title": "Satz bauen",

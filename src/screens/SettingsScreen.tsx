@@ -75,7 +75,11 @@ export default function SettingsScreen() {
     setNotifications,
     setReminderTime,
   } = useSettingsStore();
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, updateProfile } = useAuthStore();
+
+  const handleLeaderboardVisibleToggle = async (value: boolean) => {
+    await updateProfile({ leaderboard_visible: value } as never);
+  };
 
   const handleUILanguageChange = async (lang: SupportedLanguage) => {
     await changeLanguage(lang);
@@ -292,6 +296,30 @@ export default function SettingsScreen() {
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
+        </View>
+
+        {/* ── Gizlilik ──────────────────────────────────── */}
+        <SectionTitle label={t("leaderboard.badge_label").toUpperCase()} colors={colors} />
+        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+          <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
+            <View style={[sStyles.rowLeft, { flex: 1, paddingRight: 8 }]}>
+              <Text style={sStyles.rowIcon}>🏆</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[sStyles.rowLabel, { color: colors.text }]}>
+                  {t("settings.leaderboard_visible")}
+                </Text>
+                <Text style={[{ fontSize: 11, color: colors.textTertiary, marginTop: 2 }]}>
+                  {t("settings.leaderboard_visible_desc")}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={user?.leaderboard_visible ?? true}
+              onValueChange={handleLeaderboardVisibleToggle}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#fff"
+            />
+          </View>
         </View>
 
         {/* ── Hakkında ──────────────────────────────────── */}

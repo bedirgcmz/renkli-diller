@@ -225,7 +225,9 @@
     "notif_title": "Studietid! 📚",
     "notif_body": "Lär dig några meningar för att nå ditt dagliga mål.",
     "notif_permission_denied": "Aviseringsbehörighet nekad. Aktivera den i appinställningarna.",
-    "notif_scheduled": "Avisering inställd"
+    "notif_scheduled": "Avisering inställd",
+    "leaderboard_visible": "Visa i rankning",
+    "leaderboard_visible_desc": "När av visas du som anonym"
   },
   "premium": {
     "title": "Gå Premium",
@@ -530,6 +532,26 @@
     "important": "Viktigt",
     "tag_sentence": "Tagga mening",
     "tag_remove": "Ta bort tagg"
+  },
+  "leaderboard": {
+    "title": "Veckans bästa",
+    "badge_label": "Ranking",
+    "badge_detail": "Detaljer →",
+    "tab_learned": "Inlärt",
+    "tab_studied": "Övat",
+    "rank_label": "#{{rank}}",
+    "you": "Du",
+    "your_rank": "Din plats: #{{rank}}",
+    "words_learned": "{{count}} ord",
+    "words_studied": "{{count}} sessioner",
+    "week_resets": "Återställs varje måndag",
+    "empty_title": "Ingen aktivitet denna vecka",
+    "empty_desc": "Var den första att studera!",
+    "premium_blur_title": "Skaffa Premium för hela listan",
+    "premium_blur_desc": "Gratisanvändare ser bara topp 2.",
+    "unlock_premium": "Uppgradera till Premium",
+    "not_ranked": "Du är inte rankad denna vecka ännu",
+    "anonymous": "Anonym"
   },
   "build_sentence": {
     "title": "Bygg mening",

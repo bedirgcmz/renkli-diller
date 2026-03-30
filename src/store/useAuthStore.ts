@@ -9,6 +9,7 @@ interface User {
   display_name?: string;
   avatar_url?: string;
   is_premium: boolean;
+  leaderboard_visible: boolean;
   created_at: string;
 }
 
@@ -79,6 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
           is_premium: profile?.is_premium || rcPremium,
+          leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
 
@@ -337,6 +339,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
             is_premium: profile?.is_premium || rcPremium,
+            leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
           };
 
@@ -371,6 +374,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
             is_premium: profile?.is_premium || false,
+            leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: session.user.created_at,
           };
 

@@ -225,7 +225,9 @@
     "notif_title": "Hora de estudar! 📚",
     "notif_body": "Aprenda algumas frases para atingir sua meta diária.",
     "notif_permission_denied": "Permissão de notificação negada. Ative nas configurações do app.",
-    "notif_scheduled": "Notificação configurada"
+    "notif_scheduled": "Notificação configurada",
+    "leaderboard_visible": "Mostrar na classificação",
+    "leaderboard_visible_desc": "Desativado: você aparece como anônimo"
   },
   "premium": {
     "title": "Assinar Premium",
@@ -530,6 +532,26 @@
     "important": "Importante",
     "tag_sentence": "Etiquetar frase",
     "tag_remove": "Remover etiqueta"
+  },
+  "leaderboard": {
+    "title": "Os melhores da semana",
+    "badge_label": "Classificação",
+    "badge_detail": "Detalhes →",
+    "tab_learned": "Aprendido",
+    "tab_studied": "Praticado",
+    "rank_label": "#{{rank}}",
+    "you": "Você",
+    "your_rank": "Sua posição: #{{rank}}",
+    "words_learned": "{{count}} palavras",
+    "words_studied": "{{count}} sessões",
+    "week_resets": "Reinicia toda segunda-feira",
+    "empty_title": "Sem atividade esta semana",
+    "empty_desc": "Seja o primeiro a estudar!",
+    "premium_blur_title": "Vá para Premium para ver a lista completa",
+    "premium_blur_desc": "Usuários gratuitos veem apenas o top 2.",
+    "unlock_premium": "Mudar para Premium",
+    "not_ranked": "Você ainda não está classificado esta semana",
+    "anonymous": "Anônimo"
   },
   "build_sentence": {
     "title": "Construir frase",

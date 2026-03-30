@@ -225,7 +225,9 @@
     "notif_title": "Study time! 📚",
     "notif_body": "Learn a few sentences to reach your daily goal.",
     "notif_permission_denied": "Notification permission denied. Please enable it in app settings.",
-    "notif_scheduled": "Notification set"
+    "notif_scheduled": "Notification set",
+    "leaderboard_visible": "Show in ranking",
+    "leaderboard_visible_desc": "When off, you appear as anonymous"
   },
   "premium": {
     "title": "Go Premium",
@@ -530,6 +532,26 @@
     "important": "Important",
     "tag_sentence": "Tag Sentence",
     "tag_remove": "Remove Tag"
+  },
+  "leaderboard": {
+    "title": "This Week's Top",
+    "badge_label": "Ranking",
+    "badge_detail": "Details →",
+    "tab_learned": "Learned",
+    "tab_studied": "Studied",
+    "rank_label": "#{{rank}}",
+    "you": "You",
+    "your_rank": "Your rank: #{{rank}}",
+    "words_learned": "{{count}} words",
+    "words_studied": "{{count}} sessions",
+    "week_resets": "Resets every Monday",
+    "empty_title": "No activity this week",
+    "empty_desc": "Be the first to study!",
+    "premium_blur_title": "Go Premium to see the full list",
+    "premium_blur_desc": "Free users see only the top 2.",
+    "unlock_premium": "Upgrade to Premium",
+    "not_ranked": "You're not ranked this week yet",
+    "anonymous": "Anonymous"
   },
   "build_sentence": {
     "title": "Build Sentence",

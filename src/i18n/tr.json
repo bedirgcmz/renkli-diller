@@ -225,7 +225,9 @@
     "notif_title": "Çalışma zamanı! 📚",
     "notif_body": "Bugünkü hedefine ulaşmak için birkaç cümle öğren.",
     "notif_permission_denied": "Bildirim izni verilmedi. Lütfen uygulama ayarlarından izin ver.",
-    "notif_scheduled": "Bildirim ayarlandı"
+    "notif_scheduled": "Bildirim ayarlandı",
+    "leaderboard_visible": "Sıralamada görün",
+    "leaderboard_visible_desc": "Kapalıyken listede anonim görünürsün"
   },
   "premium": {
     "title": "Premium'a Geç",
@@ -530,6 +532,26 @@
     "important": "Önemli",
     "tag_sentence": "Etiketle",
     "tag_remove": "Etiketi Kaldır"
+  },
+  "leaderboard": {
+    "title": "Haftanın Enleri",
+    "badge_label": "Sıralama",
+    "badge_detail": "Detay →",
+    "tab_learned": "Öğrenilen",
+    "tab_studied": "Çalışılan",
+    "rank_label": "#{{rank}}",
+    "you": "Sen",
+    "your_rank": "Senin sıran: #{{rank}}",
+    "words_learned": "{{count}} kelime",
+    "words_studied": "{{count}} çalışma",
+    "week_resets": "Hafta Pazartesi sıfırlanır",
+    "empty_title": "Bu hafta henüz kimse yok",
+    "empty_desc": "İlk çalışmayı yapan sen ol!",
+    "premium_blur_title": "Tam listeyi görmek için Premium ol",
+    "premium_blur_desc": "Free kullanıcılar yalnızca ilk 2 kişiyi görür.",
+    "unlock_premium": "Premium'a Geç",
+    "not_ranked": "Bu hafta henüz sıralamada değilsin",
+    "anonymous": "Anonim"
   },
   "build_sentence": {
     "title": "Cümle Kur",

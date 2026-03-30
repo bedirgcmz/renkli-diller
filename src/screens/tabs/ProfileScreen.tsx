@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -23,7 +24,9 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import ActivityChart from "@/components/ActivityChart";
+import LeaderboardModal from "@/components/LeaderboardModal";
 import { countTodayLearned } from "@/utils/progressHelpers";
+import { useLeaderboardStore } from "@/store/useLeaderboardStore";
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -38,14 +41,18 @@ export default function ProfileScreen() {
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
   const { isPremium } = usePremium();
+  const navigation = useNavigation();
   const [avatarKey, setAvatarKey] = useState(0);
   const [avatarLoadError, setAvatarLoadError] = useState(false);
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
+  const [leaderboardVisible, setLeaderboardVisible] = useState(false);
+  const { myEntry, loadLeaderboard } = useLeaderboardStore();
 
   useEffect(() => {
     loadSentences();
     loadProgress();
-  }, [loadSentences, loadProgress]);
+    loadLeaderboard();
+  }, [loadSentences, loadProgress, loadLeaderboard]);
 
   const presetLearnedCount = Object.values(progressMap).filter((s) => s === "learned").length;
   const presetLearningCount = Object.values(progressMap).filter((s) => s === "learning").length;
@@ -279,6 +286,28 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Leaderboard badge card */}
+        <TouchableOpacity
+          style={[styles.leaderboardCard, { backgroundColor: colors.cardBackground }]}
+          onPress={() => setLeaderboardVisible(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.leaderboardIcon}>🏆</Text>
+          <View style={styles.leaderboardInfo}>
+            <Text style={[styles.leaderboardLabel, { color: colors.text }]}>
+              {t("leaderboard.badge_label")}
+            </Text>
+            <Text style={[styles.leaderboardSub, { color: colors.textSecondary }]}>
+              {myEntry
+                ? t("leaderboard.your_rank", { rank: myEntry.learned_rank })
+                : t("leaderboard.not_ranked")}
+            </Text>
+          </View>
+          <Text style={[styles.leaderboardDetail, { color: colors.primary }]}>
+            {t("leaderboard.badge_detail")}
+          </Text>
+        </TouchableOpacity>
+
         {/* Stats grid */}
         <View style={styles.statsGrid}>
           {[
@@ -379,6 +408,13 @@ export default function ProfileScreen() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+
+      {/* Leaderboard modal */}
+      <LeaderboardModal
+        visible={leaderboardVisible}
+        onClose={() => setLeaderboardVisible(false)}
+        onUpgrade={() => navigation.navigate("Paywall" as never)}
+      />
 
       {/* Photo action sheet */}
       <Modal
@@ -596,4 +632,22 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   sheetItemText: { fontSize: 16 },
+  leaderboardCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    padding: 16,
+    gap: 12,
+    marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  leaderboardIcon: { fontSize: 26 },
+  leaderboardInfo: { flex: 1 },
+  leaderboardLabel: { fontSize: 14, fontWeight: "700" },
+  leaderboardSub: { fontSize: 12, marginTop: 2 },
+  leaderboardDetail: { fontSize: 13, fontWeight: "700" },
 });
