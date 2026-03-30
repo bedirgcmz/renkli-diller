@@ -227,7 +227,8 @@
     "notif_permission_denied": "Permission de notification refusée. Activez-la dans les paramètres de l'app.",
     "notif_scheduled": "Notification configurée",
     "leaderboard_visible": "Afficher dans le classement",
-    "leaderboard_visible_desc": "Désactivé : tu apparais comme anonyme"
+    "leaderboard_visible_desc": "Désactivé : tu apparais comme anonyme",
+    "privacy_terms": "Confidentialité & Conditions"
   },
   "premium": {
     "title": "Passer à Premium",

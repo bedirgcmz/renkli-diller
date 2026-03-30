@@ -227,7 +227,8 @@
     "notif_permission_denied": "Benachrichtigungsberechtigung verweigert. Bitte in den App-Einstellungen aktivieren.",
     "notif_scheduled": "Benachrichtigung gesetzt",
     "leaderboard_visible": "In Rangliste anzeigen",
-    "leaderboard_visible_desc": "Wenn aus, erscheinst du anonym"
+    "leaderboard_visible_desc": "Wenn aus, erscheinst du anonym",
+    "privacy_terms": "Datenschutz & Nutzungsbedingungen"
   },
   "premium": {
     "title": "Premium werden",

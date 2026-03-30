@@ -227,7 +227,8 @@
     "notif_permission_denied": "Bildirim izni verilmedi. Lütfen uygulama ayarlarından izin ver.",
     "notif_scheduled": "Bildirim ayarlandı",
     "leaderboard_visible": "Sıralamada görün",
-    "leaderboard_visible_desc": "Kapalıyken listede anonim görünürsün"
+    "leaderboard_visible_desc": "Kapalıyken listede anonim görünürsün",
+    "privacy_terms": "Gizlilik & Kullanım Koşulları"
   },
   "premium": {
     "title": "Premium'a Geç",

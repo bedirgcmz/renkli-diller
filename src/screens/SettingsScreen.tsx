@@ -7,7 +7,10 @@ import {
   StyleSheet,
   Switch,
   Alert,
+  Linking,
 } from "react-native";
+
+const PRIVACY_POLICY_URL = "PLACEHOLDER_URL";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -325,7 +328,7 @@ export default function SettingsScreen() {
         {/* ── Hakkında ──────────────────────────────────── */}
         <SectionTitle label={t("settings.about").toUpperCase()} colors={colors} />
         <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <View style={[sStyles.row, { borderBottomColor: "transparent" }]}>
+          <View style={[sStyles.row, { borderBottomColor: colors.divider }]}>
             <View style={sStyles.rowLeft}>
               <Text style={sStyles.rowIcon}>ℹ️</Text>
               <Text style={[sStyles.rowLabel, { color: colors.text }]}>
@@ -334,6 +337,19 @@ export default function SettingsScreen() {
             </View>
             <Text style={[sStyles.rowValue, { color: colors.textSecondary }]}>1.0.0</Text>
           </View>
+          <TouchableOpacity
+            style={[sStyles.row, { borderBottomColor: "transparent" }]}
+            onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+            activeOpacity={0.8}
+          >
+            <View style={sStyles.rowLeft}>
+              <Text style={sStyles.rowIcon}>📄</Text>
+              <Text style={[sStyles.rowLabel, { color: colors.text }]}>
+                {t("settings.privacy_terms")}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
         </View>
 
         <View style={{ height: 32 }} />

@@ -227,7 +227,8 @@
     "notif_permission_denied": "Aviseringsbehörighet nekad. Aktivera den i appinställningarna.",
     "notif_scheduled": "Avisering inställd",
     "leaderboard_visible": "Visa i rankning",
-    "leaderboard_visible_desc": "När av visas du som anonym"
+    "leaderboard_visible_desc": "När av visas du som anonym",
+    "privacy_terms": "Integritet & Villkor"
   },
   "premium": {
     "title": "Gå Premium",

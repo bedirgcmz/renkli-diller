@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Renkli Diller — Privacy Policy & Terms of Service</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #f9f9f9;
+    }
+
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #111;
+    }
+
+    header p {
+      font-size: 14px;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 40px;
+      background: #eee;
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: #666;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: #111;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #111;
+    }
+
+    .doc-subtitle {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 32px;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 32px;
+      margin-bottom: 8px;
+      color: #222;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    p { margin-bottom: 12px; color: #333; }
+
+    ul {
+      margin: 8px 0 12px 20px;
+      color: #333;
+    }
+
+    ul li { margin-bottom: 6px; }
+
+    a { color: #4f7df7; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .highlight-box {
+      background: #f0f4ff;
+      border-left: 3px solid #4f7df7;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 64px;
+      font-size: 13px;
+      color: #bbb;
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 22px; }
+      h2 { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Renkli Diller</h1>
+    <p>Legal Documents</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('privacy')">Privacy Policy</button>
+    <button class="tab-btn" onclick="showTab('terms')">Terms of Service</button>
+  </div>
+
+  <!-- ─── PRIVACY POLICY ─────────────────────────────────────────── -->
+  <div id="privacy" class="tab-content active">
+    <h2>Privacy Policy</h2>
+    <p class="doc-subtitle">Last updated: March 2025</p>
+
+    <div class="highlight-box">
+      We built Renkli Diller to help you learn languages. We collect only what is necessary to run the app and never sell your data to anyone.
+    </div>
+
+    <h3>1. Who We Are</h3>
+    <p>Renkli Diller is a mobile language learning application. For any privacy-related questions, contact us at <a href="mailto:renklidiller@gmail.com">renklidiller@gmail.com</a>.</p>
+
+    <h3>2. Data We Collect</h3>
+    <p>When you create an account and use the app, we collect:</p>
+    <ul>
+      <li><strong>Email address</strong> — for account creation and authentication</li>
+      <li><strong>Display name and profile photo</strong> — shown on your profile and the leaderboard (if you choose to participate)</li>
+      <li><strong>Learning progress</strong> — which sentences you have studied or learned, quiz results, streak count</li>
+      <li><strong>Custom sentences</strong> — sentences you add to the app yourself</li>
+      <li><strong>App settings</strong> — language preferences, theme, daily goal, notification preferences</li>
+    </ul>
+    <p>We do <strong>not</strong> collect location data, contacts, camera access, or any data unrelated to language learning.</p>
+
+    <h3>3. How We Use Your Data</h3>
+    <ul>
+      <li>To provide and improve the app's core features</li>
+      <li>To sync your progress across devices</li>
+      <li>To display your rank on the weekly leaderboard (only if you have not opted out)</li>
+      <li>To send daily practice reminders (only if you enable notifications)</li>
+    </ul>
+    <p>We do <strong>not</strong> use your data for advertising, profiling, or sell it to third parties.</p>
+
+    <h3>4. Leaderboard</h3>
+    <p>By default, your weekly learning activity (as a number only — not your specific words or sentences) and display name are visible to other users on the leaderboard. You can opt out at any time in <strong>Settings → Ranking</strong>, after which you will appear as anonymous.</p>
+
+    <h3>5. Data Storage & Security</h3>
+    <p>Your data is stored securely using <a href="https://supabase.com" target="_blank">Supabase</a>, a trusted cloud infrastructure provider. Data is encrypted in transit (TLS) and at rest. We apply row-level security so that users can only access their own data.</p>
+
+    <h3>6. In-App Purchases</h3>
+    <p>Premium subscriptions are processed by Apple App Store or Google Play Store. We do not receive or store your payment card information. Purchase records are managed by the respective platform.</p>
+
+    <h3>7. Push Notifications</h3>
+    <p>If you enable daily reminders, we schedule local push notifications on your device. No notification content is sent to our servers. You can disable notifications at any time in Settings.</p>
+
+    <h3>8. Your Rights</h3>
+    <p>You can at any time:</p>
+    <ul>
+      <li><strong>Access or update</strong> your data within the app</li>
+      <li><strong>Delete your account</strong> via Settings → Account → Delete Account, which permanently removes all your data from our servers</li>
+      <li><strong>Opt out of the leaderboard</strong> via Settings → Ranking</li>
+      <li><strong>Contact us</strong> to request a copy of your data or ask any questions</li>
+    </ul>
+
+    <h3>9. Children's Privacy</h3>
+    <p>Renkli Diller is not directed at children under 13. We do not knowingly collect personal data from children. If you believe we have collected such data, please contact us and we will delete it promptly.</p>
+
+    <h3>10. Changes to This Policy</h3>
+    <p>We may update this Privacy Policy from time to time. We will notify you of significant changes through the app. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+    <h3>11. Contact</h3>
+    <p>For any privacy questions or data requests: <a href="mailto:renklidiller@gmail.com">renklidiller@gmail.com</a></p>
+  </div>
+
+  <!-- ─── TERMS OF SERVICE ───────────────────────────────────────── -->
+  <div id="terms" class="tab-content">
+    <h2>Terms of Service</h2>
+    <p class="doc-subtitle">Last updated: March 2025</p>
+
+    <div class="highlight-box">
+      By downloading or using Renkli Diller, you agree to these terms. Please read them carefully.
+    </div>
+
+    <h3>1. Acceptance of Terms</h3>
+    <p>By creating an account or using the Renkli Diller app ("the App"), you agree to be bound by these Terms of Service. If you do not agree, do not use the App.</p>
+
+    <h3>2. Account</h3>
+    <p>You must provide a valid email address to create an account. You are responsible for keeping your account credentials secure. You must be at least 13 years old to use the App.</p>
+
+    <h3>3. Premium Subscription</h3>
+    <p>The App offers optional Premium subscriptions that unlock additional features:</p>
+    <ul>
+      <li>Subscriptions are billed through your Apple App Store or Google Play account</li>
+      <li>Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period</li>
+      <li>You can manage or cancel your subscription in your device's account settings</li>
+      <li>No refunds are provided for partially used subscription periods, except where required by applicable law</li>
+      <li>Prices may vary by region and are subject to change with reasonable notice</li>
+    </ul>
+
+    <h3>4. User Content</h3>
+    <p>You may add custom sentences and content to the App. You retain ownership of your content. By adding content, you grant us a limited license to store and display it to you within the App. You are responsible for ensuring your content does not violate any laws or third-party rights.</p>
+
+    <h3>5. Acceptable Use</h3>
+    <p>You agree not to:</p>
+    <ul>
+      <li>Use the App for any unlawful purpose</li>
+      <li>Attempt to reverse engineer, hack, or disrupt the App or its infrastructure</li>
+      <li>Create fake accounts or manipulate leaderboard rankings</li>
+      <li>Share your account with others</li>
+    </ul>
+
+    <h3>6. Intellectual Property</h3>
+    <p>All content in the App — including sentence databases, UI design, and brand assets — is the property of Renkli Diller and protected by applicable intellectual property laws. You may not copy, distribute, or create derivative works without written permission.</p>
+
+    <h3>7. Disclaimer of Warranties</h3>
+    <p>The App is provided "as is" without warranties of any kind. We do not guarantee that the App will be uninterrupted, error-free, or that learning outcomes will be achieved. Language learning results depend on your individual effort and practice.</p>
+
+    <h3>8. Limitation of Liability</h3>
+    <p>To the maximum extent permitted by law, Renkli Diller shall not be liable for any indirect, incidental, or consequential damages arising from your use of the App.</p>
+
+    <h3>9. Termination</h3>
+    <p>You may delete your account at any time via Settings → Account → Delete Account. We reserve the right to suspend or terminate accounts that violate these Terms. Upon termination, your data will be permanently deleted from our servers.</p>
+
+    <h3>10. Changes to Terms</h3>
+    <p>We may update these Terms from time to time. We will notify you through the App of any significant changes. Continued use of the App after changes constitutes your acceptance.</p>
+
+    <h3>11. Governing Law</h3>
+    <p>These Terms are governed by the laws of the Republic of Turkey. Any disputes shall be resolved in the courts of Turkey.</p>
+
+    <h3>12. Contact</h3>
+    <p>For any questions about these Terms: <a href="mailto:renklidiller@gmail.com">renklidiller@gmail.com</a></p>
+  </div>
+
+  <footer>
+    &copy; 2025 Renkli Diller. All rights reserved.
+  </footer>
+
+</div>
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(name).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

@@ -227,7 +227,8 @@
     "notif_permission_denied": "Notification permission denied. Please enable it in app settings.",
     "notif_scheduled": "Notification set",
     "leaderboard_visible": "Show in ranking",
-    "leaderboard_visible_desc": "When off, you appear as anonymous"
+    "leaderboard_visible_desc": "When off, you appear as anonymous",
+    "privacy_terms": "Privacy & Terms"
   },
   "premium": {
     "title": "Go Premium",
