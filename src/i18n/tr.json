@@ -105,6 +105,7 @@
     "lang_mismatch_body": "Bu cümleyi {{sourceLang}} → {{targetLang}} dil çifti için eklediniz. Şu anki ayarlarınız ({{currentSource}} → {{currentTarget}}) ile eşleşmiyor. Düzenleyerek güncelleyebilirsiniz.",
     "lang_mismatch_edit": "Düzenle",
     "lang_mismatch_strip": "Dil ayarları değişti  ·  Düzenle",
+    "lang_change_info": "Arayüz veya hedef dilinizi değiştirdiğiniz için bu cümleler yalnızca burada görünür; Quiz, Build Sentence, AutoMode gibi çalışma ekranlarında gösterilmez.",
     "remove_favorite": "Favoriden Çıkar"
   },
   "favorites": {

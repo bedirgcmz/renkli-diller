@@ -105,6 +105,7 @@
     "lang_mismatch_body": "Você adicionou esta frase para {{sourceLang}} → {{targetLang}}. Não corresponde às suas configurações atuais ({{currentSource}} → {{currentTarget}}). Você pode editá-la para atualizar.",
     "lang_mismatch_edit": "Editar",
     "lang_mismatch_strip": "Configurações de idioma alteradas  ·  Editar",
+    "lang_change_info": "Estas frases são visíveis apenas aqui porque seu idioma de interface ou destino foi alterado. Elas não aparecerão em telas de estudo como Quiz, Build Sentence ou AutoMode.",
     "remove_favorite": "Remover dos favoritos"
   },
   "favorites": {

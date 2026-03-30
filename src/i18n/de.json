@@ -105,6 +105,7 @@
     "lang_mismatch_body": "Du hast diesen Satz für {{sourceLang}} → {{targetLang}} hinzugefügt. Das stimmt nicht mit deinen aktuellen Einstellungen ({{currentSource}} → {{currentTarget}}) überein. Du kannst ihn bearbeiten, um ihn zu aktualisieren.",
     "lang_mismatch_edit": "Bearbeiten",
     "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten",
+    "lang_change_info": "Diese Sätze sind nur hier sichtbar, da sich deine Benutzeroberfläche oder Zielsprache geändert hat. Sie werden in Lernbereichen wie Quiz, Build Sentence oder AutoMode nicht angezeigt.",
     "remove_favorite": "Aus Favoriten entfernen"
   },
   "favorites": {

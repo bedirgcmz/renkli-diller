@@ -625,6 +625,16 @@ export default function SentencesScreen() {
       );
   }, [sourceList, statusFilter, categoryFilter, searchText]);
 
+  const mismatchedCount = useMemo(
+    () =>
+      sentences.filter(
+        (s) =>
+          (s.target_lang && s.target_lang !== targetLanguage) ||
+          (s.source_lang && s.source_lang !== uiLanguage),
+      ).length,
+    [sentences, targetLanguage, uiLanguage],
+  );
+
   const tabCounts = useMemo(() => {
     const applyFilters = (base: typeof presetSentences, isPreset: boolean) =>
       base
@@ -774,6 +784,16 @@ export default function SentencesScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         style={styles.list}
+        ListHeaderComponent={
+          activeTab === "mine" && mismatchedCount > 0 ? (
+            <View style={[bannerStyles.banner, { backgroundColor: colors.warning ? colors.warning + "18" : "#F59E0B18", borderColor: colors.warning ?? "#F59E0B" }]}>
+              <Ionicons name="information-circle-outline" size={16} color={colors.warning ?? "#F59E0B"} style={{ marginTop: 1 }} />
+              <Text style={[bannerStyles.bannerText, { color: colors.textSecondary }]}>
+                {t("sentences.lang_change_info")}
+              </Text>
+            </View>
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -923,5 +943,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
+  },
+});
+
+const bannerStyles = StyleSheet.create({
+  banner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  bannerText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
   },
 });

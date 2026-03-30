@@ -105,6 +105,7 @@
     "lang_mismatch_body": "You added this sentence for {{sourceLang}} → {{targetLang}}. It doesn't match your current settings ({{currentSource}} → {{currentTarget}}). You can edit it to update it.",
     "lang_mismatch_edit": "Edit",
     "lang_mismatch_strip": "Language settings changed  ·  Edit",
+    "lang_change_info": "These sentences are only visible here because your interface or target language has changed. They won't appear in study screens like Quiz, Build Sentence, or AutoMode.",
     "remove_favorite": "Remove Favorite"
   },
   "favorites": {

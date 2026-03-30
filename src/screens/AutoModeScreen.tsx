@@ -82,7 +82,7 @@ export default function AutoModeScreen() {
 
   // Tüm öğreniliyor cümleler: user sentences + preset sentences (progressMap)
   const allLearning = [
-    ...sentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage),
+    ...sentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 

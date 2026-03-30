@@ -105,6 +105,7 @@
     "lang_mismatch_body": "Du lade till den här meningen för {{sourceLang}} → {{targetLang}}. Det matchar inte dina nuvarande inställningar ({{currentSource}} → {{currentTarget}}). Du kan redigera den för att uppdatera.",
     "lang_mismatch_edit": "Redigera",
     "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera",
+    "lang_change_info": "Dessa meningar visas bara här eftersom ditt gränssnitt eller målspråk har ändrats. De visas inte i studieskärmar som Quiz, Build Sentence eller AutoMode.",
     "remove_favorite": "Ta bort från favoriter"
   },
   "favorites": {
