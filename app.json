@@ -48,7 +48,8 @@
           "photosPermission": "Parlio, profil fotoğrafı seçmek için fotoğraflara erişim istiyor.",
           "cameraPermission": "Parlio, profil fotoğrafı çekmek için kameraya erişim istiyor."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

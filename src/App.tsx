@@ -20,6 +20,10 @@ import { supabase } from "@/lib/supabase";
 import { AchievementToast } from "@/components/AchievementToast";
 import { useAchievementStore } from "@/store/useAchievementStore";
 
+// Module-level dedup guard — prevents double setSession when both
+// openAuthSessionAsync and Linking fire for the same callback URL.
+let lastHandledAuthUrl: string | null = null;
+
 export default function App() {
   const loadAchievements = useAchievementStore((s) => s.loadAchievements);
 
@@ -28,12 +32,17 @@ export default function App() {
     loadAchievements();
   }, []);
 
-  // Handle OAuth deep link callbacks (e.g. Google sign-in redirect)
+  // Shared handler for both cold-start and warm-start auth deep links.
   useEffect(() => {
-    const handleUrl = async (url: string) => {
-      if (!url.includes("auth/callback")) return;
+    const handleAuthCallback = async (url: string) => {
+      if (!url.includes("auth/callback") && !url.includes("auth/reset-password")) return;
 
-      // Supabase returns tokens in the URL fragment (#) or query string (?)
+      // Dedup: skip if this exact URL was already handled
+      if (lastHandledAuthUrl === url) return;
+      lastHandledAuthUrl = url;
+
+      console.log("HANDLE AUTH URL:", url);
+
       const tokenString = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
       if (!tokenString) return;
 
@@ -44,18 +53,23 @@ export default function App() {
       const accessToken = params["access_token"];
       const refreshToken = params["refresh_token"];
 
+      console.log("TOKENS FOUND:", { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
+
       if (accessToken && refreshToken) {
         await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
       }
     };
 
-    // Handle URL that launched the app (cold start)
+    // Cold-start: app was killed and opened via deep link
     Linking.getInitialURL().then((url) => {
-      if (url) handleUrl(url);
+      if (url) handleAuthCallback(url);
     });
 
-    // Handle URL while app is already open (warm start)
-    const subscription = Linking.addEventListener("url", ({ url }) => handleUrl(url));
+    // Warm-start: app is already running and receives a deep link
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      handleAuthCallback(url);
+    });
+
     return () => subscription.remove();
   }, []);
 

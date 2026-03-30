@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Platform } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
@@ -33,11 +34,17 @@ interface AuthState {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
-  uploadAvatar: (uri: string, base64?: string) => Promise<{ success: boolean; url?: string; error?: string }>;
+  uploadAvatar: (
+    uri: string,
+    base64?: string,
+  ) => Promise<{ success: boolean; url?: string; error?: string }>;
   removeAvatar: () => Promise<{ success: boolean; error?: string }>;
   updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
-  verifyAndUpdatePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; wrongPassword?: boolean; error?: string }>;
+  verifyAndUpdatePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<{ success: boolean; wrongPassword?: boolean; error?: string }>;
   initialize: () => Promise<void>;
   clear: () => void;
 }
@@ -131,7 +138,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signInWithApple: async () => {
-    if (Platform.OS !== "ios") return { success: false, error: "Apple Sign-In is only available on iOS" };
+    if (Platform.OS !== "ios")
+      return { success: false, error: "Apple Sign-In is only available on iOS" };
     set({ loading: true });
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -159,14 +167,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (data.user) {
         // Apple provides full name only on first sign-in — save it if present
         const displayName = credential.fullName
-          ? [credential.fullName.givenName, credential.fullName.familyName].filter(Boolean).join(" ")
+          ? [credential.fullName.givenName, credential.fullName.familyName]
+              .filter(Boolean)
+              .join(" ")
           : null;
 
         if (displayName) {
-          await supabase.from("profiles").update({ display_name: displayName }).eq("id", data.user.id);
+          await supabase
+            .from("profiles")
+            .update({ display_name: displayName })
+            .eq("id", data.user.id);
         }
 
-        const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
         await logInUser(data.user.id).catch(console.error);
         const rcPremium = await isPremiumActive().catch(() => false);
 
@@ -195,23 +212,83 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signInWithGoogle: async () => {
     set({ loading: true });
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: "parlio://auth/callback",
+          skipBrowserRedirect: true,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
 
-      if (error) {
-        set({ loading: false });
-        return { success: false, error: error.message };
+      if (error || !data.url) {
+        return { success: false, error: error?.message || "Could not get OAuth URL" };
       }
 
-      set({ loading: false });
+      console.log("OAUTH URL:", data.url);
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, "parlio://auth/callback");
+
+      console.log("AUTH RESULT:", result);
+      console.log("CALLBACK URL:", result?.url);
+      console.log("AUTH RESULT TYPE:", result.type);
+
+      if (result.type !== "success") {
+        return { success: false };
+      }
+
+      // Parse tokens from the callback URL (fragment or query string)
+      const callbackUrl = result.url;
+      const tokenString = callbackUrl.includes("#")
+        ? callbackUrl.split("#")[1]
+        : callbackUrl.split("?")[1];
+
+      if (!tokenString) {
+        return { success: false, error: "No tokens in callback URL" };
+      }
+
+      const params = Object.fromEntries(
+        tokenString.split("&").map((pair) => pair.split("=").map(decodeURIComponent)),
+      );
+
+      const accessToken = params["access_token"];
+      const refreshToken = params["refresh_token"];
+
+      console.log("PARSED TOKENS:", {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+      });
+
+      if (!accessToken || !refreshToken) {
+        return { success: false, error: "Missing tokens in callback" };
+      }
+
+      console.log("BEFORE setSession");
+
+      // Fire-and-forget: setSession hangs on React Native + AsyncStorage (deadlock
+      // between Supabase's internal storage write and onAuthStateChange handler's
+      // AsyncStorage.setItem). onAuthStateChange SIGNED_IN handles user state.
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ data: sessionData, error: sessionError }) => {
+          console.log("AFTER setSession", {
+            hasSession: !!sessionData?.session,
+            hasUser: !!sessionData?.user,
+            sessionError: sessionError?.message ?? null,
+          });
+        })
+        .catch((e) => console.log("setSession rejected:", e));
+
+      console.log("SIGN IN WITH GOOGLE SUCCESS PATH");
       return { success: true };
     } catch (error) {
-      set({ loading: false });
+      console.log("SIGN IN WITH GOOGLE CATCH:", error);
       return { success: false, error: "An unexpected error occurred" };
+    } finally {
+      set({ loading: false });
+      console.log("GOOGLE LOADING FALSE");
     }
   },
 
@@ -423,39 +500,54 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         authSubscription = null;
       }
 
-      // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Listen for auth changes.
+      // IMPORTANT: callback must be synchronous — async callbacks inside
+      // onAuthStateChange cause a Supabase internal queue deadlock where
+      // setSession never resolves because the async callback holds the lock.
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log("AUTH STATE CHANGE EVENT:", event, !!session?.user);
         if (event === "SIGNED_IN" && session?.user) {
-          // Fetch user profile
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .single();
-
-          const user: User = {
+          // Set minimal user state synchronously so navigation unblocks immediately.
+          const basicUser: User = {
             id: session.user.id,
             email: session.user.email!,
-            display_name: profile?.display_name || "",
-            avatar_url: profile?.avatar_url || "",
-            is_premium: profile?.is_premium || false,
-            leaderboard_visible: profile?.leaderboard_visible ?? true,
+            display_name: "",
+            avatar_url: "",
+            is_premium: false,
+            leaderboard_visible: true,
             created_at: session.user.created_at,
           };
+          set({ user: basicUser, session });
 
-          set({
-            user,
-            session,
-          });
+          // Defer all async work outside the callback to avoid the deadlock.
+          void (async () => {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", session.user.id)
+              .single();
 
-          // Store session
-          await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
+            await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
+
+            if (profile) {
+              set((state) => ({
+                user: state.user
+                  ? {
+                      ...state.user,
+                      display_name: profile.display_name || "",
+                      avatar_url: profile.avatar_url || "",
+                      is_premium: profile.is_premium || false,
+                      leaderboard_visible: profile.leaderboard_visible ?? true,
+                    }
+                  : state.user,
+              }));
+            }
+          })();
         } else if (event === "SIGNED_OUT") {
-          await AsyncStorage.removeItem("supabase_session");
-          set({
-            user: null,
-            session: null,
-          });
+          set({ user: null, session: null });
+          void AsyncStorage.removeItem("supabase_session");
         }
       });
       authSubscription = subscription;
