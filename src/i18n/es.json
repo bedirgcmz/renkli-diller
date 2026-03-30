@@ -551,7 +551,10 @@
     "premium_blur_desc": "Los usuarios gratuitos ven solo el top 2.",
     "unlock_premium": "Pasarse a Premium",
     "not_ranked": "Aún no estás clasificado esta semana",
-    "anonymous": "Anónimo"
+    "anonymous": "Anónimo",
+    "day_unit_one": "día",
+    "day_unit_other": "días",
+    "more_entries": "+{{count}} más"
   },
   "build_sentence": {
     "title": "Construir oración",

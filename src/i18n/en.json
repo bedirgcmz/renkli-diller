@@ -551,7 +551,10 @@
     "premium_blur_desc": "Free users see only the top 2.",
     "unlock_premium": "Upgrade to Premium",
     "not_ranked": "You're not ranked this week yet",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "day_unit_one": "day",
+    "day_unit_other": "days",
+    "more_entries": "+{{count}} more"
   },
   "build_sentence": {
     "title": "Build Sentence",

@@ -551,7 +551,10 @@
     "premium_blur_desc": "Usuários gratuitos veem apenas o top 2.",
     "unlock_premium": "Mudar para Premium",
     "not_ranked": "Você ainda não está classificado esta semana",
-    "anonymous": "Anônimo"
+    "anonymous": "Anônimo",
+    "day_unit_one": "dia",
+    "day_unit_other": "dias",
+    "more_entries": "+{{count}} mais"
   },
   "build_sentence": {
     "title": "Construir frase",

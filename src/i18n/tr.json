@@ -551,7 +551,10 @@
     "premium_blur_desc": "Free kullanıcılar yalnızca ilk 2 kişiyi görür.",
     "unlock_premium": "Premium'a Geç",
     "not_ranked": "Bu hafta henüz sıralamada değilsin",
-    "anonymous": "Anonim"
+    "anonymous": "Anonim",
+    "day_unit_one": "gün",
+    "day_unit_other": "gün",
+    "more_entries": "+{{count}} daha"
   },
   "build_sentence": {
     "title": "Cümle Kur",

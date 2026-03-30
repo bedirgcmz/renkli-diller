@@ -262,7 +262,7 @@ export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props)
           <Text style={[styles.weekNote, { color: colors.textTertiary }]}>
             <Ionicons name="refresh-outline" size={11} color={colors.textTertiary} />{" "}
             {t("leaderboard.week_resets")} ({daysUntilReset}{" "}
-            {daysUntilReset === 1 ? "gün" : "gün"})
+            {t("leaderboard.day_unit", { count: daysUntilReset })})
           </Text>
 
           {/* Tabs */}
@@ -358,7 +358,7 @@ export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props)
               {/* Premium: show "..." if > 20 */}
               {isPremium && hiddenCount > 0 && (
                 <Text style={[styles.moreText, { color: colors.textTertiary }]}>
-                  +{hiddenCount} daha
+                  {t("leaderboard.more_entries", { count: hiddenCount })}
                 </Text>
               )}
             </ScrollView>

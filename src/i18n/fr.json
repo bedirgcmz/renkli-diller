@@ -551,7 +551,10 @@
     "premium_blur_desc": "Les utilisateurs gratuits voient seulement le top 2.",
     "unlock_premium": "Passer à Premium",
     "not_ranked": "Tu n'es pas encore classé cette semaine",
-    "anonymous": "Anonyme"
+    "anonymous": "Anonyme",
+    "day_unit_one": "jour",
+    "day_unit_other": "jours",
+    "more_entries": "+{{count}} de plus"
   },
   "build_sentence": {
     "title": "Construire une phrase",

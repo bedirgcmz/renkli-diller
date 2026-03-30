@@ -551,7 +551,10 @@
     "premium_blur_desc": "Gratisanvändare ser bara topp 2.",
     "unlock_premium": "Uppgradera till Premium",
     "not_ranked": "Du är inte rankad denna vecka ännu",
-    "anonymous": "Anonym"
+    "anonymous": "Anonym",
+    "day_unit_one": "dag",
+    "day_unit_other": "dagar",
+    "more_entries": "+{{count}} till"
   },
   "build_sentence": {
     "title": "Bygg mening",
