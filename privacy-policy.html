@@ -126,6 +126,15 @@
       header h1 { font-size: 22px; }
       h2 { font-size: 19px; }
     }
+
+    @media print {
+      body { background: #fff; font-size: 13px; }
+      .tabs { display: none; }
+      .tab-content { display: block !important; }
+      #terms { page-break-before: always; margin-top: 0; }
+      .container { padding: 24px 16px; }
+      a { color: #000; }
+    }
   </style>
 </head>
 <body>

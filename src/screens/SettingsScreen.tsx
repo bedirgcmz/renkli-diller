@@ -10,7 +10,7 @@ import {
   Linking,
 } from "react-native";
 
-const PRIVACY_POLICY_URL = "PLACEHOLDER_URL";
+const PRIVACY_POLICY_URL = "https://drive.google.com/file/d/1f5d6o02r21XV3T4428uJ1Pqv1qMwjNUo/view?usp=sharing";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
