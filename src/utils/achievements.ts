@@ -3,7 +3,7 @@ export interface Achievement {
   icon: string;
   title_key: string;
   description_key: string;
-  conditionType: "learned_count" | "streak" | "quiz_total" | "perfect_quiz" | "automode";
+  conditionType: "learned_count" | "streak" | "quiz_total" | "perfect_quiz" | "automode" | "build_total" | "perfect_build";
   conditionValue?: number;
   requiresPremium?: boolean;
 }
@@ -94,5 +94,36 @@ export const ACHIEVEMENTS: Achievement[] = [
     title_key: "achievements.first_automode.title",
     description_key: "achievements.first_automode.description",
     conditionType: "automode",
+  },
+  {
+    id: "first_build",
+    icon: "🧩",
+    title_key: "achievements.first_build.title",
+    description_key: "achievements.first_build.description",
+    conditionType: "build_total",
+    conditionValue: 1,
+  },
+  {
+    id: "build_10",
+    icon: "🔧",
+    title_key: "achievements.build_10.title",
+    description_key: "achievements.build_10.description",
+    conditionType: "build_total",
+    conditionValue: 10,
+  },
+  {
+    id: "build_50",
+    icon: "🏗️",
+    title_key: "achievements.build_50.title",
+    description_key: "achievements.build_50.description",
+    conditionType: "build_total",
+    conditionValue: 50,
+  },
+  {
+    id: "perfect_build",
+    icon: "💎",
+    title_key: "achievements.perfect_build.title",
+    description_key: "achievements.perfect_build.description",
+    conditionType: "perfect_build",
   },
 ];

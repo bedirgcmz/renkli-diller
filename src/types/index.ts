@@ -16,6 +16,21 @@ export type SentenceCategory =
   | "health"
   | "social_modern";
 
+export type SentenceTag =
+  | "this_week"
+  | "this_month"
+  | "work"
+  | "school"
+  | "home"
+  | "travel"
+  | "shopping"
+  | "social"
+  | "health"
+  | "food"
+  | "easy"
+  | "hard"
+  | "important";
+
 export interface Sentence {
   id: string;
   user_id?: string;
@@ -27,6 +42,8 @@ export interface Sentence {
   status: SentenceStatus;
   is_preset: boolean;
   is_favorite?: boolean;
+  is_ai_generated?: boolean;
+  tag?: SentenceTag | null;
   source_lang?: SupportedLanguage;
   target_lang?: SupportedLanguage;
   created_at?: string;
@@ -58,7 +75,7 @@ export interface QuizResult {
   sentence_id: string | null;
   user_sentence_id?: number | null;
   is_correct: boolean;
-  quiz_type: "multiple_choice" | "fill_blank";
+  quiz_type: "multiple_choice" | "fill_blank" | "build_sentence";
   answered_at: string;
 }
 
@@ -99,6 +116,7 @@ export type HomeStackParamList = {
   Learn: { initialTab?: "study" | "listening" } | undefined;
   Quiz: undefined;
   Reading: undefined;
+  BuildSentence: undefined;
 };
 
 export type MainStackParamList = {
@@ -114,6 +132,7 @@ export type MainStackParamList = {
   LearnedSentences: undefined;
   FavoriteSentences: undefined;
   Achievements: undefined;
+  AITranslator: undefined;
 };
 
 export type AuthStackParamList = {
@@ -234,8 +253,14 @@ export interface UserReadingProgress {
   id: string;
   user_id: string;
   reading_text_id: string;
-  status: "read" | "learned" | "completed";
-  completed_at: string;
+  status: "read" | "learned" | "completed" | "assigned";
+  completed_at: string | null;
+  shown_at: string | null;
+}
+
+export interface CompletedReadingEntry {
+  progress: UserReadingProgress;
+  text: ReadingText;
 }
 
 // Legacy types (for backward compatibility)

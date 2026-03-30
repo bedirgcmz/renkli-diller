@@ -76,7 +76,8 @@
     "empty_hint": "Ajoute des phrases à ta liste d'apprentissage pour démarrer un quiz.",
     "go_to_sentences": "Voir les phrases",
     "no_keywords_title": "Aucune phrase à compléter",
-    "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode."
+    "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode.",
+    "build_sentence": "Construire"
   },
   "sentences": {
     "title": "Toutes les phrases",
@@ -104,6 +105,7 @@
     "lang_mismatch_body": "Vous avez ajouté cette phrase pour {{sourceLang}} → {{targetLang}}. Cela ne correspond pas à vos paramètres actuels ({{currentSource}} → {{currentTarget}}). Vous pouvez la modifier pour la mettre à jour.",
     "lang_mismatch_edit": "Modifier",
     "lang_mismatch_strip": "Paramètres de langue modifiés  ·  Modifier",
+    "lang_change_info": "Ces phrases ne sont visibles qu'ici car votre langue d'interface ou cible a changé. Elles n'apparaîtront pas dans les écrans d'étude comme Quiz, Build Sentence ou AutoMode.",
     "remove_favorite": "Retirer des favoris"
   },
   "favorites": {
@@ -202,7 +204,8 @@
     "password_strength_strong": "Fort",
     "password_min_length": "Au moins 8 caractères",
     "password_has_number": "Contient un chiffre",
-    "password_has_upper": "Contient une majuscule"
+    "password_has_upper": "Contient une majuscule",
+    "build_sentence_total": "Phrases construites"
   },
   "settings": {
     "title": "Paramètres",
@@ -229,6 +232,7 @@
     "subtitle": "Déverrouillez toutes les fonctionnalités",
     "price": "14.99",
     "lifetime": "Paiement unique",
+    "feature_ai": "Traducteur IA (illimité)",
     "feature_sentences": "300 phrases prédéfinies",
     "feature_unlimited_add": "Phrases illimitées",
     "feature_tts": "Audio dans deux langues",
@@ -365,7 +369,14 @@
     "next_text_btn": "Texte suivant",
     "daily_limit_free": "Tu as complété le texte du jour. Passe en Premium pour lire plus de textes par jour.",
     "daily_limit_premium": "Tu as lu 3 textes aujourd'hui. Reviens demain !",
-    "texts_today": "{{count}}/3 textes aujourd'hui"
+    "texts_today": "{{count}}/3 textes aujourd'hui",
+    "history_btn": "Historique",
+    "history_title": "Textes Complétés",
+    "history_empty": "Aucun texte complété pour l'instant.",
+    "history_premium_title": "Fonctionnalité Premium",
+    "history_premium": "Passe en Premium pour accéder à ton historique de lecture et réapprendre des textes.",
+    "relearn_btn": "Réapprendre",
+    "relearn_feedback": "Ce texte réapparaîtra dans le futur."
   },
   "home": {
     "card_learn_title": "Étudier",
@@ -386,7 +397,9 @@
     "streak_days": "jours",
     "daily_goal": "Objectif quotidien",
     "goal_hint": "Complète ton objectif du jour",
-    "goal_done": "Objectif atteint aujourd'hui 🎉"
+    "goal_done": "Objectif atteint aujourd'hui 🎉",
+    "card_build_title": "Construire",
+    "card_build_desc": "Ordonne les mots"
   },
   "achievements": {
     "title": "Succès",
@@ -438,6 +451,101 @@
     "first_automode": {
       "title": "Auditeur Actif",
       "description": "Tu as complété ta première session en mode automatique"
+    },
+    "first_build": {
+      "title": "Première construction",
+      "description": "Premier exercice de construction terminé"
+    },
+    "build_10": {
+      "title": "Maître des mots",
+      "description": "10 exercices de construction terminés"
+    },
+    "build_50": {
+      "title": "Constructeur",
+      "description": "50 exercices de construction terminés"
+    },
+    "perfect_build": {
+      "title": "Construction parfaite",
+      "description": "Toutes les phrases construites correctement"
     }
+  },
+  "ai_translator": {
+    "title": "Traducteur IA",
+    "subtitle": "Traduction naturelle et idiomatique",
+    "card_title": "Traducteur IA",
+    "card_desc": "Traduction intelligente de phrases",
+    "placeholder": "Tapez une phrase... mettez **les mots** entre astérisques",
+    "translate_btn": "Traduire",
+    "retranslate_btn": "Retraduire",
+    "copy_btn": "Copier",
+    "add_to_list": "Ajouter à mes phrases",
+    "trial_days_left": "{{count}} jour(s) d'essai restant(s)",
+    "trial_expired_title": "Période d'essai terminée",
+    "trial_expired_body": "Passez à Premium pour continuer à utiliser le Traducteur IA",
+    "go_premium": "Passer à Premium",
+    "recent_title": "Traductions récentes",
+    "save_modal_title": "Enregistrer la phrase",
+    "category_label": "Catégorie",
+    "new_category_label": "Nouvelle catégorie",
+    "new_category_placeholder": "Nom de nouvelle catégorie...",
+    "keywords_label": "Mots-clés",
+    "keywords_hint": "Facultatif · max. 3",
+    "keyword_placeholder": "mot-clé {{n}}",
+    "save_btn": "Enregistrer",
+    "save_success": "Phrase enregistrée !",
+    "save_error": "Échec de l'enregistrement.",
+    "translate_error": "Traduction échouée. Veuillez réessayer.",
+    "char_limit": "{{count}}/200",
+    "loading": "Traduction en cours...",
+    "no_category": "Sans catégorie",
+    "source_label": "Source",
+    "result_label": "Traduction",
+    "tap_to_restore": "Appuyer pour restaurer",
+    "tips_title": "Conseils de traduction",
+    "tips_body": "• Ferme les étoiles avant la ponctuation : écris **mot**?, pas **mot?**\n• Les étoiles marquent le mot ou l'expression à apprendre — reste précis\n• Écris des phrases naturelles pour de meilleurs résultats"
+  },
+  "tags": {
+    "label": "Étiquette",
+    "none": "Aucune étiquette",
+    "filter_all": "Tous",
+    "group_time": "Temps",
+    "group_topic": "Sujet",
+    "group_difficulty": "Difficulté",
+    "filter_title": "Filtrer",
+    "filter_clear": "Tout effacer",
+    "filter_show_results": "Afficher {{sentenceCount}} phrases dans {{tagCount}} étiquette(s)",
+    "filter_show_all": "Afficher toutes les phrases",
+    "this_week": "Cette semaine",
+    "this_month": "Ce mois-ci",
+    "work": "Travail",
+    "school": "École",
+    "home": "Maison",
+    "travel": "Voyage",
+    "shopping": "Courses",
+    "social": "Social",
+    "health": "Santé",
+    "food": "Nourriture",
+    "easy": "Facile",
+    "hard": "Difficile",
+    "important": "Important",
+    "tag_sentence": "Étiqueter",
+    "tag_remove": "Supprimer l'étiquette"
+  },
+  "build_sentence": {
+    "title": "Construire une phrase",
+    "empty_title": "Liste d'apprentissage vide",
+    "empty_desc": "Ajoute des phrases à ta liste d'apprentissage et reviens ici.",
+    "source_label": "Traduis ceci :",
+    "drop_hint": "Appuie sur les mots pour construire la phrase",
+    "validate": "Vérifier",
+    "continue": "Continuer",
+    "correct_feedback": "Super ! Bonne réponse 🎉",
+    "wrong_feedback": "Incorrect",
+    "correct_answer_label": "Bonne réponse :",
+    "session_complete": "Session terminée !",
+    "session_score": "{{correct}} / {{total}} correctes",
+    "restart": "Recommencer",
+    "limit_title": "Limite journalière atteinte",
+    "limit_desc": "Les utilisateurs gratuits peuvent construire 5 phrases par jour. Premium pour une pratique illimitée."
   }
 }

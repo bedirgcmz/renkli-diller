@@ -290,6 +290,11 @@ export default function ProfileScreen() {
               icon: "🎯",
             },
             { label: t("profile.learning"), value: learningCount, icon: "📝" },
+            {
+              label: t("profile.build_sentence_total"),
+              value: stats.quizByMode.build_sentence.total,
+              icon: "🧩",
+            },
           ].map((stat, i) => (
             <View key={i} style={[styles.statCard, { backgroundColor: colors.cardBackground }]}>
               <Text style={styles.statIcon}>{stat.icon}</Text>
@@ -309,7 +314,7 @@ export default function ProfileScreen() {
             </Text>
 
             {/* Mode rows */}
-            {(["multiple_choice", "fill_blank"] as const).map((mode) => {
+            {(["multiple_choice", "fill_blank", "build_sentence"] as const).map((mode) => {
               const s = stats.quizByMode[mode];
               if (s.total === 0) return null;
               const pct = Math.round((s.correct / s.total) * 100);

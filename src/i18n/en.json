@@ -76,7 +76,8 @@
     "empty_title": "Learning list is empty",
     "empty_hint": "Add sentences to your learning list from the Sentences screen to start a quiz.",
     "go_to_sentences": "Go to Sentences",
-    "no_keywords_title": "No sentences for fill-in-the-blank"
+    "no_keywords_title": "No sentences for fill-in-the-blank",
+    "build_sentence": "Build Sentence"
   },
   "sentences": {
     "title": "All Sentences",
@@ -104,6 +105,7 @@
     "lang_mismatch_body": "You added this sentence for {{sourceLang}} → {{targetLang}}. It doesn't match your current settings ({{currentSource}} → {{currentTarget}}). You can edit it to update it.",
     "lang_mismatch_edit": "Edit",
     "lang_mismatch_strip": "Language settings changed  ·  Edit",
+    "lang_change_info": "These sentences are only visible here because your interface or target language has changed. They won't appear in study screens like Quiz, Build Sentence, or AutoMode.",
     "remove_favorite": "Remove Favorite"
   },
   "favorites": {
@@ -202,7 +204,8 @@
     "password_strength_strong": "Strong",
     "password_min_length": "At least 8 characters",
     "password_has_number": "Contains a number",
-    "password_has_upper": "Contains uppercase letter"
+    "password_has_upper": "Contains uppercase letter",
+    "build_sentence_total": "Sentences Built"
   },
   "settings": {
     "title": "Settings",
@@ -229,6 +232,7 @@
     "subtitle": "Unlock all features",
     "price": "14.99",
     "lifetime": "One-time payment",
+    "feature_ai": "AI Translator (unlimited)",
     "feature_sentences": "300 preset sentences",
     "feature_unlimited_add": "Unlimited sentence adding",
     "feature_tts": "Dual language TTS",
@@ -365,7 +369,14 @@
     "next_text_btn": "Next Text",
     "daily_limit_free": "You've completed today's text. Go Premium to read more texts per day.",
     "daily_limit_premium": "You've read 3 texts today. Come back tomorrow!",
-    "texts_today": "{{count}}/3 texts today"
+    "texts_today": "{{count}}/3 texts today",
+    "history_btn": "History",
+    "history_title": "Completed Texts",
+    "history_empty": "No completed texts yet.",
+    "history_premium_title": "Premium Feature",
+    "history_premium": "Upgrade to Premium to access your reading history and re-learn texts.",
+    "relearn_btn": "Re-learn",
+    "relearn_feedback": "This text will appear again in the future."
   },
   "home": {
     "card_learn_title": "Study",
@@ -386,7 +397,9 @@
     "streak_days": "days",
     "daily_goal": "Daily goal",
     "goal_hint": "Complete your goal for today",
-    "goal_done": "Goal reached today 🎉"
+    "goal_done": "Goal reached today 🎉",
+    "card_build_title": "Build",
+    "card_build_desc": "Arrange words in order"
   },
   "achievements": {
     "title": "Achievements",
@@ -438,6 +451,101 @@
     "first_automode": {
       "title": "Active Listener",
       "description": "You completed your first auto mode session"
+    },
+    "first_build": {
+      "title": "First Build",
+      "description": "Completed your first sentence building exercise"
+    },
+    "build_10": {
+      "title": "Word Master",
+      "description": "Completed 10 sentence building exercises"
+    },
+    "build_50": {
+      "title": "Builder",
+      "description": "Completed 50 sentence building exercises"
+    },
+    "perfect_build": {
+      "title": "Perfect Build",
+      "description": "Built all sentences correctly in one session"
     }
+  },
+  "ai_translator": {
+    "title": "AI Translator",
+    "subtitle": "Natural, idiomatic translation",
+    "card_title": "AI Translator",
+    "card_desc": "Smart sentence translation",
+    "placeholder": "Type a sentence... wrap **keywords** in stars",
+    "translate_btn": "Translate",
+    "retranslate_btn": "Translate Again",
+    "copy_btn": "Copy",
+    "add_to_list": "Add to My Sentences",
+    "trial_days_left": "{{count}} day(s) left in trial",
+    "trial_expired_title": "Trial Period Ended",
+    "trial_expired_body": "Upgrade to Premium to continue using AI Translator",
+    "go_premium": "Go Premium",
+    "recent_title": "Recent Translations",
+    "save_modal_title": "Save Sentence",
+    "category_label": "Category",
+    "new_category_label": "New Category",
+    "new_category_placeholder": "New category name...",
+    "keywords_label": "Keywords",
+    "keywords_hint": "Optional · max 3",
+    "keyword_placeholder": "keyword {{n}}",
+    "save_btn": "Save",
+    "save_success": "Sentence saved!",
+    "save_error": "Failed to save sentence.",
+    "translate_error": "Translation failed. Please try again.",
+    "char_limit": "{{count}}/200",
+    "loading": "Translating...",
+    "no_category": "No category",
+    "source_label": "Source",
+    "result_label": "Translation",
+    "tap_to_restore": "Tap to restore",
+    "tips_title": "Translation Tips",
+    "tips_body": "• Close the stars before punctuation: write **word**? not **word?**\n• Stars highlight the word or phrase to learn — keep it focused\n• Write natural sentences for the best results"
+  },
+  "tags": {
+    "label": "Tag",
+    "none": "No tag",
+    "filter_all": "All",
+    "group_time": "Time",
+    "group_topic": "Topic",
+    "group_difficulty": "Difficulty",
+    "filter_title": "Filter",
+    "filter_clear": "Clear All",
+    "filter_show_results": "Show {{sentenceCount}} sentences in {{tagCount}} tag(s)",
+    "filter_show_all": "Show all sentences",
+    "this_week": "This Week",
+    "this_month": "This Month",
+    "work": "Work",
+    "school": "School",
+    "home": "Home",
+    "travel": "Travel",
+    "shopping": "Shopping",
+    "social": "Social",
+    "health": "Health",
+    "food": "Food",
+    "easy": "Easy",
+    "hard": "Hard",
+    "important": "Important",
+    "tag_sentence": "Tag Sentence",
+    "tag_remove": "Remove Tag"
+  },
+  "build_sentence": {
+    "title": "Build Sentence",
+    "empty_title": "Learning list is empty",
+    "empty_desc": "Add sentences to your learning list, then come back to practice here.",
+    "source_label": "Translate this:",
+    "drop_hint": "Tap words to build the sentence",
+    "validate": "Check",
+    "continue": "Continue",
+    "correct_feedback": "Great! Correct answer 🎉",
+    "wrong_feedback": "Incorrect",
+    "correct_answer_label": "Correct answer:",
+    "session_complete": "Session complete!",
+    "session_score": "{{correct}} / {{total}} correct",
+    "restart": "Restart",
+    "limit_title": "Daily limit reached",
+    "limit_desc": "Free users can build 5 sentences per day. Go Premium for unlimited practice."
   }
 }

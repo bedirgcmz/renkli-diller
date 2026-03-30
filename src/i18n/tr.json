@@ -76,7 +76,8 @@
     "empty_title": "Öğrenme listesi boş",
     "empty_hint": "Cümleler ekranından öğrenme listenize cümle ekleyerek quiz başlatabilirsiniz.",
     "go_to_sentences": "Cümlelere Git",
-    "no_keywords_title": "Boşluk doldurma için cümle yok"
+    "no_keywords_title": "Boşluk doldurma için cümle yok",
+    "build_sentence": "Cümle Kur"
   },
   "sentences": {
     "title": "Tüm Cümleler",
@@ -104,6 +105,7 @@
     "lang_mismatch_body": "Bu cümleyi {{sourceLang}} → {{targetLang}} dil çifti için eklediniz. Şu anki ayarlarınız ({{currentSource}} → {{currentTarget}}) ile eşleşmiyor. Düzenleyerek güncelleyebilirsiniz.",
     "lang_mismatch_edit": "Düzenle",
     "lang_mismatch_strip": "Dil ayarları değişti  ·  Düzenle",
+    "lang_change_info": "Arayüz veya hedef dilinizi değiştirdiğiniz için bu cümleler yalnızca burada görünür; Quiz, Build Sentence, AutoMode gibi çalışma ekranlarında gösterilmez.",
     "remove_favorite": "Favoriden Çıkar"
   },
   "favorites": {
@@ -202,7 +204,8 @@
     "password_strength_strong": "Güçlü",
     "password_min_length": "En az 8 karakter",
     "password_has_number": "Rakam içermeli",
-    "password_has_upper": "Büyük harf içermeli"
+    "password_has_upper": "Büyük harf içermeli",
+    "build_sentence_total": "Cümle Kurma"
   },
   "settings": {
     "title": "Ayarlar",
@@ -229,6 +232,7 @@
     "subtitle": "Tüm özelliklerin kilidini açın",
     "price": "14.99",
     "lifetime": "Tek seferlik ödeme",
+    "feature_ai": "AI Çevirmen (sınırsız)",
     "feature_sentences": "300 hazır cümle",
     "feature_unlimited_add": "Sınırsız cümle ekleme",
     "feature_tts": "Çift dil seslendirme",
@@ -365,7 +369,14 @@
     "next_text_btn": "Sonraki Metin",
     "daily_limit_free": "Bugünkü metni tamamladın. Günde daha fazla metin okumak için Premium ol.",
     "daily_limit_premium": "Bugün 3 metin tamamladın. Yarın devam et!",
-    "texts_today": "Bugün {{count}}/3 metin"
+    "texts_today": "Bugün {{count}}/3 metin",
+    "history_btn": "Geçmişim",
+    "history_title": "Tamamlanan Metinler",
+    "history_empty": "Henüz tamamlanan metin yok.",
+    "history_premium_title": "Premium Özellik",
+    "history_premium": "Tamamladığın metinlere ulaşmak ve yeniden çalışmak için Premium'a geçin.",
+    "relearn_btn": "Tekrar Öğren",
+    "relearn_feedback": "Bu metin ilerleyen günlerde tekrar önünüze gelecektir."
   },
   "home": {
     "card_learn_title": "Çalış",
@@ -386,7 +397,9 @@
     "streak_days": "gün",
     "daily_goal": "Günlük hedef",
     "goal_hint": "Bugünkü hedefini tamamla",
-    "goal_done": "Bugünkü hedefine ulaştın 🎉"
+    "goal_done": "Bugünkü hedefine ulaştın 🎉",
+    "card_build_title": "Cümle Kur",
+    "card_build_desc": "Kelimeleri doğru sırala"
   },
   "achievements": {
     "title": "Başarılar",
@@ -438,6 +451,101 @@
     "first_automode": {
       "title": "Dinleyici",
       "description": "İlk otomatik mod oturumunu tamamladın"
+    },
+    "first_build": {
+      "title": "İlk İnşa",
+      "description": "İlk cümle kurma alıştırmasını tamamladın"
+    },
+    "build_10": {
+      "title": "Kelime Ustası",
+      "description": "10 cümle kur alıştırması yaptın"
+    },
+    "build_50": {
+      "title": "İnşaatçı",
+      "description": "50 cümle kur alıştırması yaptın"
+    },
+    "perfect_build": {
+      "title": "Mükemmel Yapı",
+      "description": "Bir oturumda tüm cümleleri doğru kurdu"
     }
+  },
+  "ai_translator": {
+    "title": "AI Çevirmen",
+    "subtitle": "Doğal, deyimsel çeviri",
+    "card_title": "AI Çevirmen",
+    "card_desc": "Akıllı cümle çevirisi",
+    "placeholder": "Bir cümle yaz... **kelimeleri** yıldızla işaretle",
+    "translate_btn": "Çevir",
+    "retranslate_btn": "Yeniden Çevir",
+    "copy_btn": "Kopyala",
+    "add_to_list": "Cümlelerime Ekle",
+    "trial_days_left": "{{count}} gün deneme hakkın kaldı",
+    "trial_expired_title": "Deneme Süren Doldu",
+    "trial_expired_body": "AI Çevirmen'i kullanmaya devam etmek için Premium'a geçin",
+    "go_premium": "Premium'a Geç",
+    "recent_title": "Son Çeviriler",
+    "save_modal_title": "Cümleyi Kaydet",
+    "category_label": "Kategori",
+    "new_category_label": "Yeni Kategori",
+    "new_category_placeholder": "Yeni kategori adı...",
+    "keywords_label": "Anahtar Kelimeler",
+    "keywords_hint": "Opsiyonel · maks 3",
+    "keyword_placeholder": "anahtar kelime {{n}}",
+    "save_btn": "Kaydet",
+    "save_success": "Cümle kaydedildi!",
+    "save_error": "Cümle kaydedilemedi.",
+    "translate_error": "Çeviri başarısız. Tekrar deneyin.",
+    "char_limit": "{{count}}/200",
+    "loading": "Çevriliyor...",
+    "no_category": "Kategorisiz",
+    "source_label": "Kaynak",
+    "result_label": "Çeviri",
+    "tap_to_restore": "Geri yüklemek için dokun",
+    "tips_title": "Çeviri İpuçları",
+    "tips_body": "• Yıldızı noktalama işaretinden önce kapat: **kimsin**? yaz, **kimsin?** değil\n• Yıldızlar öğrenmek istediğin kelimeyi işaretler — odaklı tut\n• En iyi sonuç için doğal cümleler yaz"
+  },
+  "tags": {
+    "label": "Etiket",
+    "none": "Etiket yok",
+    "filter_all": "Tümü",
+    "group_time": "Zaman",
+    "group_topic": "Konu",
+    "group_difficulty": "Zorluk",
+    "filter_title": "Filtrele",
+    "filter_clear": "Temizle",
+    "filter_show_results": "{{tagCount}} etiketteki {{sentenceCount}} cümleyi göster",
+    "filter_show_all": "Tüm cümleleri göster",
+    "this_week": "Bu Hafta",
+    "this_month": "Bu Ay",
+    "work": "İş",
+    "school": "Okul",
+    "home": "Ev",
+    "travel": "Seyahat",
+    "shopping": "Alışveriş",
+    "social": "Sosyal",
+    "health": "Sağlık",
+    "food": "Yemek",
+    "easy": "Kolay",
+    "hard": "Zor",
+    "important": "Önemli",
+    "tag_sentence": "Etiketle",
+    "tag_remove": "Etiketi Kaldır"
+  },
+  "build_sentence": {
+    "title": "Cümle Kur",
+    "empty_title": "Öğrenme listesi boş",
+    "empty_desc": "Cümleleri öğrenme listene ekle, sonra buraya gelip sırala.",
+    "source_label": "Şunu çevir:",
+    "drop_hint": "Kelimelere dokunarak cümle kur",
+    "validate": "Doğrula",
+    "continue": "Devam",
+    "correct_feedback": "Harika! Doğru cevap 🎉",
+    "wrong_feedback": "Yanlış",
+    "correct_answer_label": "Doğru cevap:",
+    "session_complete": "Oturum tamamlandı!",
+    "session_score": "{{correct}} / {{total}} doğru",
+    "restart": "Yeniden Başla",
+    "limit_title": "Günlük limit doldu",
+    "limit_desc": "Ücretsiz kullanıcılar günde 5 cümle kurabilir. Premium ile sınırsız çalış."
   }
 }

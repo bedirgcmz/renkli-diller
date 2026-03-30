@@ -76,7 +76,8 @@
     "empty_hint": "Lägg till meningar i din inlärningslista för att starta ett quiz.",
     "go_to_sentences": "Gå till Meningar",
     "no_keywords_title": "Inga meningar för ifyllnad",
-    "no_keywords": "Inga meningar med nyckelordsmärken hittades.\nLägg till **märken** i dina meningar för att använda det här läget."
+    "no_keywords": "Inga meningar med nyckelordsmärken hittades.\nLägg till **märken** i dina meningar för att använda det här läget.",
+    "build_sentence": "Bygg mening"
   },
   "sentences": {
     "title": "Alla meningar",
@@ -104,6 +105,7 @@
     "lang_mismatch_body": "Du lade till den här meningen för {{sourceLang}} → {{targetLang}}. Det matchar inte dina nuvarande inställningar ({{currentSource}} → {{currentTarget}}). Du kan redigera den för att uppdatera.",
     "lang_mismatch_edit": "Redigera",
     "lang_mismatch_strip": "Språkinställningar ändrades  ·  Redigera",
+    "lang_change_info": "Dessa meningar visas bara här eftersom ditt gränssnitt eller målspråk har ändrats. De visas inte i studieskärmar som Quiz, Build Sentence eller AutoMode.",
     "remove_favorite": "Ta bort från favoriter"
   },
   "favorites": {
@@ -202,7 +204,8 @@
     "password_strength_strong": "Starkt",
     "password_min_length": "Minst 8 tecken",
     "password_has_number": "Innehåller en siffra",
-    "password_has_upper": "Innehåller stor bokstav"
+    "password_has_upper": "Innehåller stor bokstav",
+    "build_sentence_total": "Meningar byggda"
   },
   "settings": {
     "title": "Inställningar",
@@ -229,6 +232,7 @@
     "subtitle": "Lås upp alla funktioner",
     "price": "14.99",
     "lifetime": "Engångsbetalning",
+    "feature_ai": "AI-översättare (obegränsat)",
     "feature_sentences": "300 förinställda meningar",
     "feature_unlimited_add": "Obegränsat tillägg av meningar",
     "feature_tts": "Dubbel språk TTS",
@@ -365,7 +369,14 @@
     "next_text_btn": "Nästa text",
     "daily_limit_free": "Du har slutfört dagens text. Bli Premium för att läsa fler texter per dag.",
     "daily_limit_premium": "Du har läst 3 texter idag. Kom tillbaka imorgon!",
-    "texts_today": "{{count}}/3 texter idag"
+    "texts_today": "{{count}}/3 texter idag",
+    "history_btn": "Historik",
+    "history_title": "Avslutade Texter",
+    "history_empty": "Inga avslutade texter ännu.",
+    "history_premium_title": "Premiumfunktion",
+    "history_premium": "Bli Premium för att se din läshistorik och lära om texter.",
+    "relearn_btn": "Lär om",
+    "relearn_feedback": "Den här texten kommer att dyka upp igen i framtiden."
   },
   "home": {
     "card_learn_title": "Studera",
@@ -386,7 +397,9 @@
     "streak_days": "dagar",
     "daily_goal": "Dagligt mål",
     "goal_hint": "Slutför ditt mål för idag",
-    "goal_done": "Mål nått idag 🎉"
+    "goal_done": "Mål nått idag 🎉",
+    "card_build_title": "Bygg",
+    "card_build_desc": "Sortera ord i ordning"
   },
   "achievements": {
     "title": "Prestationer",
@@ -438,6 +451,101 @@
     "first_automode": {
       "title": "Aktiv Lyssnare",
       "description": "Du slutförde din första automatlägesession"
+    },
+    "first_build": {
+      "title": "Första bygget",
+      "description": "Slutförde din första meningsbyggarövning"
+    },
+    "build_10": {
+      "title": "Ordmästare",
+      "description": "Slutförde 10 meningsbyggarövningar"
+    },
+    "build_50": {
+      "title": "Byggare",
+      "description": "Slutförde 50 meningsbyggarövningar"
+    },
+    "perfect_build": {
+      "title": "Perfekt bygge",
+      "description": "Byggde alla meningar korrekt i en session"
     }
+  },
+  "ai_translator": {
+    "title": "AI-Översättare",
+    "subtitle": "Naturlig, idiomatisk översättning",
+    "card_title": "AI-Översättare",
+    "card_desc": "Smart meningsöversättning",
+    "placeholder": "Skriv en mening... markera **ord** med stjärnor",
+    "translate_btn": "Översätt",
+    "retranslate_btn": "Översätt igen",
+    "copy_btn": "Kopiera",
+    "add_to_list": "Lägg till mina meningar",
+    "trial_days_left": "{{count}} dag(ar) kvar av testperioden",
+    "trial_expired_title": "Testperioden har gått ut",
+    "trial_expired_body": "Uppgradera till Premium för att fortsätta använda AI-Översättaren",
+    "go_premium": "Bli Premium",
+    "recent_title": "Senaste översättningar",
+    "save_modal_title": "Spara mening",
+    "category_label": "Kategori",
+    "new_category_label": "Ny kategori",
+    "new_category_placeholder": "Nytt kategorinamn...",
+    "keywords_label": "Nyckelord",
+    "keywords_hint": "Valfritt · max 3",
+    "keyword_placeholder": "nyckelord {{n}}",
+    "save_btn": "Spara",
+    "save_success": "Meningen sparad!",
+    "save_error": "Det gick inte att spara meningen.",
+    "translate_error": "Översättning misslyckades. Försök igen.",
+    "char_limit": "{{count}}/200",
+    "loading": "Översätter...",
+    "no_category": "Ingen kategori",
+    "source_label": "Källa",
+    "result_label": "Översättning",
+    "tap_to_restore": "Tryck för att återställa",
+    "tips_title": "Översättningstips",
+    "tips_body": "• Stäng stjärnorna före skiljetecknet: skriv **ord**?, inte **ord?**\n• Stjärnorna markerar ordet eller uttrycket du vill lära dig — håll det fokuserat\n• Skriv naturliga meningar för bästa resultat"
+  },
+  "tags": {
+    "label": "Tagg",
+    "none": "Ingen tagg",
+    "filter_all": "Alla",
+    "group_time": "Tid",
+    "group_topic": "Ämne",
+    "group_difficulty": "Svårighet",
+    "filter_title": "Filtrera",
+    "filter_clear": "Rensa allt",
+    "filter_show_results": "Visa {{sentenceCount}} meningar i {{tagCount}} tagg(ar)",
+    "filter_show_all": "Visa alla meningar",
+    "this_week": "Den här veckan",
+    "this_month": "Den här månaden",
+    "work": "Arbete",
+    "school": "Skola",
+    "home": "Hem",
+    "travel": "Resa",
+    "shopping": "Shopping",
+    "social": "Socialt",
+    "health": "Hälsa",
+    "food": "Mat",
+    "easy": "Lätt",
+    "hard": "Svårt",
+    "important": "Viktigt",
+    "tag_sentence": "Tagga mening",
+    "tag_remove": "Ta bort tagg"
+  },
+  "build_sentence": {
+    "title": "Bygg mening",
+    "empty_title": "Inlärningslistan är tom",
+    "empty_desc": "Lägg till meningar i din inlärningslista och kom tillbaka.",
+    "source_label": "Översätt detta:",
+    "drop_hint": "Tryck på ord för att bygga meningen",
+    "validate": "Kontrollera",
+    "continue": "Fortsätt",
+    "correct_feedback": "Bra! Rätt svar 🎉",
+    "wrong_feedback": "Fel",
+    "correct_answer_label": "Rätt svar:",
+    "session_complete": "Sessionen klar!",
+    "session_score": "{{correct}} / {{total}} rätt",
+    "restart": "Börja om",
+    "limit_title": "Daglig gräns nådd",
+    "limit_desc": "Gratisanvändare kan bygga 5 meningar per dag. Skaffa Premium för obegränsad träning."
   }
 }

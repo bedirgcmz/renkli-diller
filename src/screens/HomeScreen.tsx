@@ -34,6 +34,13 @@ export default function HomeScreen() {
 
   const cards: ActivityCard[] = [
     {
+      icon: "sparkles",
+      iconColor: "#7C5CF6",
+      titleKey: "ai_translator.card_title",
+      descKey: "ai_translator.card_desc",
+      onPress: (nav) => nav.navigate("AITranslator"),
+    },
+    {
       icon: "book-outline",
       iconColor: "#4DA3FF",
       titleKey: "home.card_learn_title",
@@ -48,11 +55,11 @@ export default function HomeScreen() {
       onPress: (nav) => nav.navigate("Quiz"),
     },
     {
-      icon: "headset-outline",
-      iconColor: "#49C98A",
-      titleKey: "home.card_listen_title",
-      descKey: "home.card_listen_desc",
-      onPress: (nav) => nav.navigate("Learn", { initialTab: "listening" }),
+      icon: "extension-puzzle-outline",
+      iconColor: "#10B981",
+      titleKey: "home.card_build_title",
+      descKey: "home.card_build_desc",
+      onPress: (nav) => nav.navigate("BuildSentence"),
     },
     {
       icon: "newspaper-outline",
@@ -60,6 +67,13 @@ export default function HomeScreen() {
       titleKey: "home.card_read_title",
       descKey: "home.card_read_desc",
       onPress: (nav) => nav.navigate("Reading"),
+    },
+    {
+      icon: "headset-outline",
+      iconColor: "#49C98A",
+      titleKey: "home.card_listen_title",
+      descKey: "home.card_listen_desc",
+      onPress: (nav) => nav.navigate("Learn", { initialTab: "listening" }),
     },
     {
       icon: "play-circle-outline",

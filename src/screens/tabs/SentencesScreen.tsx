@@ -25,6 +25,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { QuickTagButton } from "@/components/QuickTagButton";
 import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -99,6 +100,11 @@ function SentenceItem({
       <View style={[itemStyles.statusBar, { backgroundColor: barColor }]} />
       <View style={itemStyles.body}>
         <View style={itemStyles.iconRow}>
+          {sentence.is_ai_generated && (
+            <View style={[itemStyles.aiBadge, { backgroundColor: colors.primary + "18" }]}>
+              <Ionicons name="sparkles" size={11} color={colors.primary} />
+            </View>
+          )}
           {hasMismatch && (
             <Pressable
               onPress={handleMismatchPress}
@@ -108,6 +114,11 @@ function SentenceItem({
               <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
             </Pressable>
           )}
+          <QuickTagButton
+            sentenceId={sentence.id}
+            isPreset={sentence.is_preset ?? false}
+            status={sentence.effectiveStatus}
+          />
           <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
           <Pressable
             onPress={onEdit}
@@ -327,6 +338,13 @@ const itemStyles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
+  },
+  aiBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionBtnText: {
     fontSize: 13,
@@ -607,6 +625,16 @@ export default function SentencesScreen() {
       );
   }, [sourceList, statusFilter, categoryFilter, searchText]);
 
+  const mismatchedCount = useMemo(
+    () =>
+      sentences.filter(
+        (s) =>
+          (s.target_lang && s.target_lang !== targetLanguage) ||
+          (s.source_lang && s.source_lang !== uiLanguage),
+      ).length,
+    [sentences, targetLanguage, uiLanguage],
+  );
+
   const tabCounts = useMemo(() => {
     const applyFilters = (base: typeof presetSentences, isPreset: boolean) =>
       base
@@ -650,22 +678,31 @@ export default function SentencesScreen() {
       {/* ── Başlık ───────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("sentences.title")}</Text>
-        <TouchableOpacity
-          onPress={() => setFilterVisible(true)}
-          style={styles.filterBtn}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name="options-outline"
-            size={24}
-            color={activeFilterCount > 0 ? colors.primary : colors.textSecondary}
-          />
-          {activeFilterCount > 0 && (
-            <View style={[styles.filterBadge, { backgroundColor: colors.primary }]}>
-              <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("AITranslator")}
+            style={[styles.filterBtn, { backgroundColor: colors.primary + "15", borderRadius: 10 }]}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="sparkles" size={20} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setFilterVisible(true)}
+            style={styles.filterBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="options-outline"
+              size={24}
+              color={activeFilterCount > 0 ? colors.primary : colors.textSecondary}
+            />
+            {activeFilterCount > 0 && (
+              <View style={[styles.filterBadge, { backgroundColor: colors.primary }]}>
+                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* ── Arama ────────────────────────────────────────────────────── */}
@@ -747,6 +784,16 @@ export default function SentencesScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         style={styles.list}
+        ListHeaderComponent={
+          activeTab === "mine" && mismatchedCount > 0 ? (
+            <View style={[bannerStyles.banner, { backgroundColor: colors.warning ? colors.warning + "18" : "#F59E0B18", borderColor: colors.warning ?? "#F59E0B" }]}>
+              <Ionicons name="information-circle-outline" size={16} color={colors.warning ?? "#F59E0B"} style={{ marginTop: 1 }} />
+              <Text style={[bannerStyles.bannerText, { color: colors.textSecondary }]}>
+                {t("sentences.lang_change_info")}
+              </Text>
+            </View>
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -896,5 +943,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
+  },
+});
+
+const bannerStyles = StyleSheet.create({
+  banner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  bannerText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
   },
 });

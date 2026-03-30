@@ -26,7 +26,8 @@ import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/util
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
-import { HomeStackParamList, MainStackParamList, PillSegment, Sentence } from "@/types";
+import { HomeStackParamList, MainStackParamList, PillSegment, Sentence, SentenceTag } from "@/types";
+import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import { speak, stopSpeaking } from "@/services/tts";
 import { useAchievementStore } from "@/store/useAchievementStore";
 
@@ -111,7 +112,7 @@ export default function QuizScreen() {
     NativeStackNavigationProp<MainStackParamList>
   >>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
+  const { progressMap, tagMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
   const { isPremium } = usePremium();
   const isFocused = useIsFocused();
@@ -133,6 +134,8 @@ export default function QuizScreen() {
   const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
   const [refreshing, setRefreshing] = useState(false);
   const [quizMuted, setQuizMuted] = useState(false);
+  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // perfect_quiz: 100% accuracy in a main session (no wrong answers → no retry phase)
@@ -157,6 +160,7 @@ export default function QuizScreen() {
         .from("quiz_results")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
+        .in("quiz_type", ["multiple_choice", "fill_blank"])
         .gte("answered_at", todayStart.toISOString());
 
       setDailyCount(count ?? 0);
@@ -205,7 +209,7 @@ export default function QuizScreen() {
   }, [currentIdx, mode, questions, ttsEnabled, quizMuted, initialized, isFocused]);
 
   const allSentences: Sentence[] = [
-    ...sentences,
+    ...sentences.filter((s) => (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
   ];
 
@@ -213,12 +217,19 @@ export default function QuizScreen() {
     (s) => s.status === "learning" || progressMap[s.id] === "learning",
   );
 
+  const filteredLearningSentences = activeTagFilters.length === 0
+    ? learningSentences
+    : learningSentences.filter((s) => {
+        const tag = s.is_preset ? tagMap[s.id] : s.tag;
+        return tag != null && activeTagFilters.includes(tag);
+      });
+
   const sessionSize = isPremium ? 20 : FREE_QUIZ_DAILY_LIMIT;
   const dailyLimitReached = !isPremium && dailyCount >= FREE_QUIZ_DAILY_LIMIT;
 
   const startSession = () => {
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
-    const qs = buildSession(learningSentences, mode, sessionSize, allSentences);
+    const qs = buildSession(filteredLearningSentences, mode, sessionSize, allSentences);
     setQuestions(qs);
     setCurrentIdx(0);
     setSelectedOption(null);
@@ -233,8 +244,8 @@ export default function QuizScreen() {
   };
 
   useEffect(() => {
-    if (learningSentences.length > 0) startSession();
-  }, [mode, sentences.length, presetSentences.length, initialized]);
+    if (filteredLearningSentences.length > 0) startSession();
+  }, [mode, sentences.length, presetSentences.length, initialized, activeTagFilters]);
 
   const currentQ = questions[currentIdx];
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
@@ -364,12 +375,32 @@ export default function QuizScreen() {
     <>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
-        <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
-          <Text style={[styles.scoreText, { color: colors.primary }]}>
-            ✓ {score.correct}/{score.total}
-          </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
+            <Text style={[styles.scoreText, { color: colors.primary }]}>
+              ✓ {score.correct}/{score.total}
+            </Text>
+          </View>
+          <FilterButton
+            activeCount={activeTagFilters.length}
+            onPress={() => setFilterModalVisible(true)}
+          />
         </View>
       </View>
+      <TagFilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        selectedTags={activeTagFilters}
+        onApply={setActiveTagFilters}
+        getMatchCount={(draft) =>
+          draft.length === 0
+            ? learningSentences.length
+            : learningSentences.filter((s) => {
+                const tag = s.is_preset ? tagMap[s.id] : s.tag;
+                return tag != null && draft.includes(tag);
+              }).length
+        }
+      />
 
       <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
         {(["multiple_choice", "fill_blank"] as QuizMode[]).map((m) => (

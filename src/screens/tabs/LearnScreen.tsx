@@ -28,7 +28,8 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
-import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
+import { Sentence, SentenceTag, HomeStackParamList, MainStackParamList } from "@/types";
+import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import * as Haptics from "expo-haptics";
 
 type TabKey = "learning" | "listening";
@@ -286,6 +287,7 @@ export default function LearnScreen() {
   } = useSentenceStore();
   const {
     progressMap,
+    tagMap,
     loadProgress,
     addToLearning,
   } = useProgressStore();
@@ -294,6 +296,8 @@ export default function LearnScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   // ── Listening state ──────────────────────────────────────────────────────────
   const [listenIdx, setListenIdx] = useState(0);
@@ -328,18 +332,31 @@ export default function LearnScreen() {
   }, [targetLanguage, uiLanguage]);
 
   const learningList: Sentence[] = [
-    ...userSentences.filter((s) => s.status === "learning"),
+    ...userSentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 
   const learnedList: Sentence[] = [
-    ...userSentences.filter((s) => s.status === "learned"),
+    ...userSentences.filter((s) => s.status === "learned" && (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 
-  const total = learningList.length;
-  const listenTotal = learningList.length;
-  const currentSentence = learningList[currentIndex] ?? null;
+  const filteredLearningList: Sentence[] = activeTagFilters.length === 0
+    ? learningList
+    : learningList.filter((s) => {
+        const tag = s.is_preset ? tagMap[s.id] : s.tag;
+        return tag != null && activeTagFilters.includes(tag);
+      });
+
+  const total = filteredLearningList.length;
+  const listenTotal = filteredLearningList.length;
+  const currentSentence = filteredLearningList[currentIndex] ?? null;
+
+  // Reset card index when filter changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setListenIdx(0);
+  }, [activeTagFilters]);
 
   // index guard
   useEffect(() => {
@@ -354,7 +371,7 @@ export default function LearnScreen() {
   useEffect(() => {
     if (!initialized || !isFocused) return;
     if (activeTab !== "listening") return;
-    const sentence = learningList[listenIdx];
+    const sentence = filteredLearningList[listenIdx];
     if (!sentence) return;
 
     setShowTarget(false);
@@ -543,12 +560,12 @@ export default function LearnScreen() {
   };
 
   const handleReplay = () => {
-    const s = learningList[listenIdx];
+    const s = filteredLearningList[listenIdx];
     if (s) speak(stripMarkers(s.target_text), targetLanguage);
   };
 
   const handleReplaySlow = () => {
-    const s = learningList[listenIdx];
+    const s = filteredLearningList[listenIdx];
     if (s) speak(stripMarkers(s.target_text), targetLanguage, 0.5);
   };
 
@@ -622,21 +639,63 @@ export default function LearnScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t("learn.title")}</Text>
-          {activeTab === "learning" && total > 0 && (
-            <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
-              <Text style={[styles.counterText, { color: colors.primary }]}>
-                {currentIndex + 1}/{total}
-              </Text>
-            </View>
-          )}
-          {activeTab === "listening" && listenTotal > 0 && (
-            <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
-              <Text style={[styles.counterText, { color: colors.primary }]}>
-                {listenIdx + 1}/{listenTotal}
-              </Text>
-            </View>
-          )}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {activeTab === "learning" && total > 0 && (
+              <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
+                <Text style={[styles.counterText, { color: colors.primary }]}>
+                  {currentIndex + 1}/{total}
+                </Text>
+              </View>
+            )}
+            {activeTab === "listening" && listenTotal > 0 && (
+              <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
+                <Text style={[styles.counterText, { color: colors.primary }]}>
+                  {listenIdx + 1}/{listenTotal}
+                </Text>
+              </View>
+            )}
+            {learningList.length > 0 && (
+              <FilterButton
+                activeCount={activeTagFilters.length}
+                onPress={() => setFilterModalVisible(true)}
+              />
+            )}
+          </View>
         </View>
+        <TagFilterModal
+          visible={filterModalVisible}
+          onClose={() => setFilterModalVisible(false)}
+          selectedTags={activeTagFilters}
+          onApply={setActiveTagFilters}
+          getMatchCount={(draft) =>
+            draft.length === 0
+              ? learningList.length
+              : learningList.filter((s) => {
+                  const tag = s.is_preset ? tagMap[s.id] : s.tag;
+                  return tag != null && draft.includes(tag);
+                }).length
+          }
+        />
+
+        {/* AI Translator card */}
+        <TouchableOpacity
+          style={[aiCardStyles.card, { backgroundColor: colors.cardBackground, borderColor: colors.primary + "30" }]}
+          onPress={() => navigation.navigate("AITranslator")}
+          activeOpacity={0.8}
+        >
+          <View style={[aiCardStyles.iconWrap, { backgroundColor: colors.primary + "18" }]}>
+            <Ionicons name="sparkles" size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[aiCardStyles.cardTitle, { color: colors.text }]}>
+              {t("ai_translator.card_title")}
+            </Text>
+            <Text style={[aiCardStyles.cardDesc, { color: colors.textSecondary }]}>
+              {t("ai_translator.card_desc")}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+        </TouchableOpacity>
 
         {/* Segment control */}
         <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
@@ -655,9 +714,9 @@ export default function LearnScreen() {
               >
                 <Ionicons name="book-outline" size={14} color="#fff" />
                 <Text style={[styles.segmentLabel, { color: "#fff" }]}>{t("learn.tab_study")}</Text>
-                {learningList.length > 0 && (
+                {filteredLearningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.3)" }]}>
-                    <Text style={styles.badgeText}>{learningList.length}</Text>
+                    <Text style={styles.badgeText}>{filteredLearningList.length}</Text>
                   </View>
                 )}
               </GradientView>
@@ -667,9 +726,9 @@ export default function LearnScreen() {
                 <Text style={[styles.segmentLabel, { color: colors.textSecondary }]}>
                   {t("learn.tab_study")}
                 </Text>
-                {learningList.length > 0 && (
+                {filteredLearningList.length > 0 && (
                   <View style={[styles.badge, { backgroundColor: "#4DA3FF" }]}>
-                    <Text style={styles.badgeText}>{learningList.length}</Text>
+                    <Text style={styles.badgeText}>{filteredLearningList.length}</Text>
                   </View>
                 )}
               </View>
@@ -704,6 +763,7 @@ export default function LearnScreen() {
             )}
           </TouchableOpacity>
         </View>
+
 
         {/* Progress bar — only on learning tab */}
         {activeTab === "learning" && initialized && total > 0 && (
@@ -813,7 +873,7 @@ export default function LearnScreen() {
                   renderToHardwareTextureAndroid
                 >
                   <ListenCard
-                    sentence={learningList[listenIdx]}
+                    sentence={filteredLearningList[listenIdx]}
                     showTarget={showTarget}
                     onToggleTarget={() => setShowTarget((v) => !v)}
                     options={listenOptions}
@@ -897,6 +957,42 @@ function MotivationBar({
     </View>
   );
 }
+
+// ─── AI card styles ────────────────────────────────────────────────────────────
+
+const aiCardStyles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 14,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  cardDesc: {
+    fontSize: 12,
+    marginTop: 1,
+  },
+});
 
 // ─── Stiller ───────────────────────────────────────────────────────────────────
 

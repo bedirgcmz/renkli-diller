@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
-import { UserProgress, QuizResult, StudySession } from "@/types";
+import { UserProgress, QuizResult, StudySession, SentenceTag } from "@/types";
 import { useAchievementStore } from "./useAchievementStore";
 
 // TODO: daily_stats tablosuna yazma — şu an streak user_progress.learned_at'tan hesaplanıyor.
@@ -14,12 +14,13 @@ interface ProgressStats {
   longestStreak: number;
   quizAccuracy: number;
   totalQuizQuestions: number;
+  totalBuildSentences: number;
   correctQuizAnswers: number;
   studyTimeToday: number;
   studyTimeThisWeek: number;
   studyTimeThisMonth: number;
   lastStudyDate: string | null;
-  quizByMode: { multiple_choice: ModeStats; fill_blank: ModeStats };
+  quizByMode: { multiple_choice: ModeStats; fill_blank: ModeStats; build_sentence: ModeStats };
   quizByCategory: Record<string, ModeStats>;
   todayLearnedUserSentences: number;
   userLearnedDates: string[];
@@ -28,6 +29,7 @@ interface ProgressStats {
 interface ProgressState {
   progress: UserProgress[];
   progressMap: Record<string, "learning" | "learned">;
+  tagMap: Record<string, SentenceTag | null>;
   stats: ProgressStats;
   loading: boolean;
   error: string | null;
@@ -38,6 +40,7 @@ interface ProgressState {
   addToLearning: (sentenceId: string) => Promise<void>;
   markAsLearned: (sentenceId: string) => Promise<void>;
   forgot: (sentenceId: string) => Promise<void>;
+  updatePresetTag: (sentenceId: string, tag: SentenceTag | null) => Promise<void>;
   // Legacy quiz tracking
   recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
   recordQuizResult: (result: Omit<QuizResult, "id" | "answered_at">) => Promise<void>;
@@ -55,12 +58,13 @@ const DEFAULT_STATS: ProgressStats = {
   longestStreak: 0,
   quizAccuracy: 0,
   totalQuizQuestions: 0,
+  totalBuildSentences: 0,
   correctQuizAnswers: 0,
   studyTimeToday: 0,
   studyTimeThisWeek: 0,
   studyTimeThisMonth: 0,
   lastStudyDate: null,
-  quizByMode: { multiple_choice: { correct: 0, total: 0 }, fill_blank: { correct: 0, total: 0 } },
+  quizByMode: { multiple_choice: { correct: 0, total: 0 }, fill_blank: { correct: 0, total: 0 }, build_sentence: { correct: 0, total: 0 } },
   quizByCategory: {},
   todayLearnedUserSentences: 0,
   userLearnedDates: [],
@@ -69,6 +73,7 @@ const DEFAULT_STATS: ProgressStats = {
 export const useProgressStore = create<ProgressState>((set, get) => ({
   progress: [],
   progressMap: {},
+  tagMap: {},
   stats: DEFAULT_STATS,
   loading: false,
   error: null,
@@ -96,15 +101,19 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         return;
       }
 
-      // Build progressMap from rows that have a state field
+      // Build progressMap and tagMap from rows
       const progressMap: Record<string, "learning" | "learned"> = {};
+      const tagMap: Record<string, SentenceTag | null> = {};
       for (const row of data || []) {
         if (row.state === "learning" || row.state === "learned") {
           progressMap[String(row.sentence_id)] = row.state;
         }
+        if (row.tag) {
+          tagMap[String(row.sentence_id)] = row.tag as SentenceTag;
+        }
       }
 
-      set({ progress: data || [], progressMap, loading: false });
+      set({ progress: data || [], progressMap, tagMap, loading: false });
       await get().loadStats();
     } catch {
       set({ error: "Failed to load progress", loading: false });
@@ -169,9 +178,27 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         totalSentencesLearned: stats.totalSentencesLearned,
         currentStreak: stats.currentStreak,
         totalQuizQuestions: stats.totalQuizQuestions,
+        totalBuildSentences: stats.totalBuildSentences,
       });
     } catch {
       if (__DEV__) console.error("markAsLearned failed");
+    }
+  },
+
+  updatePresetTag: async (sentenceId: string, tag: SentenceTag | null) => {
+    set((state) => ({
+      tagMap: { ...state.tagMap, [sentenceId]: tag },
+    }));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("user_progress")
+        .update({ tag: tag ?? null })
+        .eq("user_id", user.id)
+        .eq("sentence_id", sentenceId);
+    } catch {
+      if (__DEV__) console.error("updatePresetTag failed");
     }
   },
 
@@ -248,17 +275,20 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       const totalSentencesLearned =
         allProgressRows?.filter((r) => r.state === "learned").length || 0;
 
-      const totalQuizQuestions = quizResults?.length || 0;
-      const correctQuizAnswers = quizResults?.filter((q) => q.is_correct).length || 0;
+      const quizOnlyResults = quizResults?.filter((q) => q.quiz_type === "multiple_choice" || q.quiz_type === "fill_blank") || [];
+      const totalQuizQuestions = quizOnlyResults.length;
+      const totalBuildSentences = quizResults?.filter((q) => q.quiz_type === "build_sentence").length || 0;
+      const correctQuizAnswers = quizOnlyResults.filter((q) => q.is_correct).length;
       const quizAccuracy =
         totalQuizQuestions > 0 ? (correctQuizAnswers / totalQuizQuestions) * 100 : 0;
 
       const quizByMode: ProgressStats["quizByMode"] = {
         multiple_choice: { correct: 0, total: 0 },
         fill_blank: { correct: 0, total: 0 },
+        build_sentence: { correct: 0, total: 0 },
       };
       for (const q of quizResults || []) {
-        const mode = q.quiz_type as "multiple_choice" | "fill_blank";
+        const mode = q.quiz_type as keyof typeof quizByMode;
         if (quizByMode[mode]) {
           quizByMode[mode].total++;
           if (q.is_correct) quizByMode[mode].correct++;
@@ -342,6 +372,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
           longestStreak,
           quizAccuracy,
           totalQuizQuestions,
+          totalBuildSentences,
           correctQuizAnswers,
           studyTimeToday: 0,
           studyTimeThisWeek: 0,
@@ -381,6 +412,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         totalSentencesLearned: stats.totalSentencesLearned,
         currentStreak: stats.currentStreak,
         totalQuizQuestions: stats.totalQuizQuestions,
+        totalBuildSentences: stats.totalBuildSentences,
       });
     } catch (error) {
       if (__DEV__) console.error("Error recording study session:", error);
@@ -414,6 +446,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         totalSentencesLearned: stats.totalSentencesLearned,
         currentStreak: stats.currentStreak,
         totalQuizQuestions: stats.totalQuizQuestions,
+        totalBuildSentences: stats.totalBuildSentences,
       });
     } catch (error) {
       if (__DEV__) console.error("Error recording quiz result:", error);
@@ -446,6 +479,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     set({
       progress: [],
       progressMap: {},
+      tagMap: {},
       stats: DEFAULT_STATS,
       loading: false,
       error: null,

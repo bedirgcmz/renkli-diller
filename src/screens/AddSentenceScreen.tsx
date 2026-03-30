@@ -20,8 +20,8 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
-import { FREE_USER_SENTENCE_LIMIT } from "@/utils/constants";
-import { MainStackParamList } from "@/types";
+import { FREE_USER_SENTENCE_LIMIT, TAG_OPTIONS } from "@/utils/constants";
+import { MainStackParamList, SentenceTag } from "@/types";
 
 
 export default function AddSentenceScreen() {
@@ -39,6 +39,7 @@ export default function AddSentenceScreen() {
     categories[0]?.id
   );
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<SentenceTag | null>(null);
 
   useEffect(() => {
     if (categories.length === 0) loadCategories();
@@ -74,6 +75,7 @@ export default function AddSentenceScreen() {
       category_id: categoryId,
       source_lang: uiLanguage,
       target_lang: targetLanguage,
+      tag: selectedTag,
     });
     setSaving(false);
 
@@ -261,6 +263,31 @@ export default function AddSentenceScreen() {
             )}
           </View>
 
+          {/* Tag */}
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: colors.text }]}>
+              {t("tags.label")} ({t("common.optional")})
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tagRow}>
+              {TAG_OPTIONS.map((opt) => {
+                const active = selectedTag === opt.value;
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={[styles.tagChip, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "18" : colors.backgroundSecondary }]}
+                    onPress={() => setSelectedTag(active ? null : opt.value)}
+                    activeOpacity={0.75}
+                  >
+                    <Ionicons name={opt.icon as any} size={14} color={active ? colors.primary : colors.textSecondary} />
+                    <Text style={[styles.tagChipText, { color: active ? colors.primary : colors.textSecondary }]}>
+                      {t(opt.i18nKey)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+
           {/* Save button */}
           <TouchableOpacity
             style={[styles.saveBtn, { backgroundColor: saving ? colors.primaryLight : colors.primary }]}
@@ -368,4 +395,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  tagRow: { flexDirection: "row", gap: 8, paddingVertical: 2 },
+  tagChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  tagChipText: { fontSize: 13, fontWeight: "500" },
 });

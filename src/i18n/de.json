@@ -76,7 +76,8 @@
     "empty_hint": "Füge Sätze zu deiner Lernliste hinzu, um ein Quiz zu starten.",
     "go_to_sentences": "Zu Sätzen",
     "no_keywords_title": "Keine Sätze für Lückentext",
-    "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen."
+    "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen.",
+    "build_sentence": "Satz bauen"
   },
   "sentences": {
     "title": "Alle Sätze",
@@ -104,6 +105,7 @@
     "lang_mismatch_body": "Du hast diesen Satz für {{sourceLang}} → {{targetLang}} hinzugefügt. Das stimmt nicht mit deinen aktuellen Einstellungen ({{currentSource}} → {{currentTarget}}) überein. Du kannst ihn bearbeiten, um ihn zu aktualisieren.",
     "lang_mismatch_edit": "Bearbeiten",
     "lang_mismatch_strip": "Spracheinstellungen geändert  ·  Bearbeiten",
+    "lang_change_info": "Diese Sätze sind nur hier sichtbar, da sich deine Benutzeroberfläche oder Zielsprache geändert hat. Sie werden in Lernbereichen wie Quiz, Build Sentence oder AutoMode nicht angezeigt.",
     "remove_favorite": "Aus Favoriten entfernen"
   },
   "favorites": {
@@ -202,7 +204,8 @@
     "password_strength_strong": "Stark",
     "password_min_length": "Mindestens 8 Zeichen",
     "password_has_number": "Enthält eine Zahl",
-    "password_has_upper": "Enthält Großbuchstaben"
+    "password_has_upper": "Enthält Großbuchstaben",
+    "build_sentence_total": "Sätze gebaut"
   },
   "settings": {
     "title": "Einstellungen",
@@ -229,6 +232,7 @@
     "subtitle": "Alle Funktionen freischalten",
     "price": "14.99",
     "lifetime": "Einmalzahlung",
+    "feature_ai": "KI-Übersetzer (unbegrenzt)",
     "feature_sentences": "300 voreingestellte Sätze",
     "feature_unlimited_add": "Unbegrenztes Hinzufügen von Sätzen",
     "feature_tts": "Zweisprachige TTS",
@@ -365,7 +369,14 @@
     "next_text_btn": "Nächster Text",
     "daily_limit_free": "Du hast den heutigen Text abgeschlossen. Werde Premium, um täglich mehr Texte zu lesen.",
     "daily_limit_premium": "Du hast heute 3 Texte gelesen. Komm morgen wieder!",
-    "texts_today": "Heute {{count}}/3 Texte"
+    "texts_today": "Heute {{count}}/3 Texte",
+    "history_btn": "Verlauf",
+    "history_title": "Abgeschlossene Texte",
+    "history_empty": "Noch keine abgeschlossenen Texte.",
+    "history_premium_title": "Premium-Funktion",
+    "history_premium": "Werde Premium, um deinen Leseverlauf zu sehen und Texte erneut zu lernen.",
+    "relearn_btn": "Erneut lernen",
+    "relearn_feedback": "Dieser Text wird dir in Zukunft wieder angezeigt."
   },
   "home": {
     "card_learn_title": "Lernen",
@@ -386,7 +397,9 @@
     "streak_days": "Tage",
     "daily_goal": "Tagesziel",
     "goal_hint": "Erreich dein heutiges Ziel",
-    "goal_done": "Tagesziel erreicht 🎉"
+    "goal_done": "Tagesziel erreicht 🎉",
+    "card_build_title": "Bauen",
+    "card_build_desc": "Wörter in Reihenfolge"
   },
   "achievements": {
     "title": "Erfolge",
@@ -438,6 +451,101 @@
     "first_automode": {
       "title": "Zuhörer",
       "description": "Du hast deine erste Auto-Modus-Sitzung abgeschlossen"
+    },
+    "first_build": {
+      "title": "Erstes Bauen",
+      "description": "Erste Satzbaüübung abgeschlossen"
+    },
+    "build_10": {
+      "title": "Wortmeister",
+      "description": "10 Satzbaüübungen abgeschlossen"
+    },
+    "build_50": {
+      "title": "Erbauer",
+      "description": "50 Satzbaüübungen abgeschlossen"
+    },
+    "perfect_build": {
+      "title": "Perfektes Bauen",
+      "description": "Alle Sätze in einer Sitzung richtig gebaut"
     }
+  },
+  "ai_translator": {
+    "title": "KI-Übersetzer",
+    "subtitle": "Natürliche, idiomatische Übersetzung",
+    "card_title": "KI-Übersetzer",
+    "card_desc": "Intelligente Satzübersetzung",
+    "placeholder": "Gib einen Satz ein... **Wörter** mit Sternchen markieren",
+    "translate_btn": "Übersetzen",
+    "retranslate_btn": "Erneut übersetzen",
+    "copy_btn": "Kopieren",
+    "add_to_list": "Zu meinen Sätzen hinzufügen",
+    "trial_days_left": "{{count}} Tag(e) Testzeit übrig",
+    "trial_expired_title": "Testzeit abgelaufen",
+    "trial_expired_body": "Upgrade auf Premium, um den KI-Übersetzer weiter zu nutzen",
+    "go_premium": "Premium werden",
+    "recent_title": "Letzte Übersetzungen",
+    "save_modal_title": "Satz speichern",
+    "category_label": "Kategorie",
+    "new_category_label": "Neue Kategorie",
+    "new_category_placeholder": "Neuer Kategoriename...",
+    "keywords_label": "Schlüsselwörter",
+    "keywords_hint": "Optional · max. 3",
+    "keyword_placeholder": "Schlüsselwort {{n}}",
+    "save_btn": "Speichern",
+    "save_success": "Satz gespeichert!",
+    "save_error": "Satz konnte nicht gespeichert werden.",
+    "translate_error": "Übersetzung fehlgeschlagen. Bitte erneut versuchen.",
+    "char_limit": "{{count}}/200",
+    "loading": "Wird übersetzt...",
+    "no_category": "Keine Kategorie",
+    "source_label": "Quelle",
+    "result_label": "Übersetzung",
+    "tap_to_restore": "Zum Wiederherstellen tippen",
+    "tips_title": "Übersetzungstipps",
+    "tips_body": "• Sterne vor dem Satzzeichen schließen: **Wort**? schreiben, nicht **Wort?**\n• Sterne markieren das zu lernende Wort — halte es fokussiert\n• Natürliche Sätze liefern die besten Ergebnisse"
+  },
+  "tags": {
+    "label": "Tag",
+    "none": "Kein Tag",
+    "filter_all": "Alle",
+    "group_time": "Zeit",
+    "group_topic": "Thema",
+    "group_difficulty": "Schwierigkeit",
+    "filter_title": "Filtern",
+    "filter_clear": "Alle löschen",
+    "filter_show_results": "{{sentenceCount}} Sätze in {{tagCount}} Tag(s) anzeigen",
+    "filter_show_all": "Alle Sätze anzeigen",
+    "this_week": "Diese Woche",
+    "this_month": "Diesen Monat",
+    "work": "Arbeit",
+    "school": "Schule",
+    "home": "Zuhause",
+    "travel": "Reise",
+    "shopping": "Einkaufen",
+    "social": "Sozial",
+    "health": "Gesundheit",
+    "food": "Essen",
+    "easy": "Leicht",
+    "hard": "Schwer",
+    "important": "Wichtig",
+    "tag_sentence": "Satz markieren",
+    "tag_remove": "Markierung entfernen"
+  },
+  "build_sentence": {
+    "title": "Satz bauen",
+    "empty_title": "Lernliste ist leer",
+    "empty_desc": "Füge Sätze zur Lernliste hinzu und komm dann zurück.",
+    "source_label": "Übersetze das:",
+    "drop_hint": "Tippe auf Wörter, um den Satz zu bauen",
+    "validate": "Prüfen",
+    "continue": "Weiter",
+    "correct_feedback": "Super! Richtige Antwort 🎉",
+    "wrong_feedback": "Falsch",
+    "correct_answer_label": "Richtige Antwort:",
+    "session_complete": "Sitzung abgeschlossen!",
+    "session_score": "{{correct}} / {{total}} richtig",
+    "restart": "Neu starten",
+    "limit_title": "Tageslimit erreicht",
+    "limit_desc": "Kostenlose Nutzer können 5 Sätze pro Tag bauen. Premium für unbegrenzte Übung."
   }
 }

@@ -9,6 +9,7 @@ import { stripMarkers } from "@/utils/keywords";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { QuickTagButton } from "@/components/QuickTagButton";
 import { Sentence, SupportedLanguage } from "@/types";
 
 // State-aware top accent colors (subtle, not a bar)
@@ -137,8 +138,13 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           end={{ x: 0.8, y: 1 }}
         />
 
-        {/* Favorite button — absolute top-right */}
-        <View style={{ position: "absolute", top: 4, right: 4, zIndex: 1 }}>
+        {/* Top-right: QuickTagButton + FavoriteButton */}
+        <View style={{ position: "absolute", top: 4, right: 4, zIndex: 1, flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <QuickTagButton
+            sentenceId={sentence.id}
+            isPreset={sentence.is_preset ?? false}
+            status={state}
+          />
           <FavoriteButton
             sentenceId={sentence.id}
             isPreset={sentence.is_preset ?? false}

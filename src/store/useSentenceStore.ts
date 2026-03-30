@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
-import { Sentence, SentenceStatus, Category, SupportedLanguage } from "@/types";
+import { Sentence, SentenceStatus, SentenceTag, Category, SupportedLanguage } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
@@ -54,6 +54,8 @@ interface SentenceState {
     category_id?: number;
     source_lang?: string;
     target_lang?: string;
+    is_ai_generated?: boolean;
+    tag?: SentenceTag | null;
   }) => Promise<{ success: boolean; error?: string }>;
   updateSentence: (
     id: string,
@@ -63,6 +65,7 @@ interface SentenceState {
       keywords?: string[];
       category_id?: number;
       status?: SentenceStatus;
+      tag?: SentenceTag | null;
     }
   ) => Promise<{ success: boolean; error?: string }>;
   deleteSentence: (id: string) => Promise<{ success: boolean; error?: string }>;
@@ -180,13 +183,14 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return;
       }
 
-      const mapped: Sentence[] = (data || []).map((row: DbRow) => ({
+      const rows = (data || []) as unknown as DbRow[];
+      const mapped: Sentence[] = rows.map((row) => ({
         id: String(row.id),
         source_text: getLangText(row, uiLanguage),
         target_text: getLangText(row, targetLanguage),
         keywords: getLangKeywords(row, targetLanguage),
-        category_id: row.category_id,
-        category_name: getCatName(row.categories, uiLanguage),
+        category_id: row.category_id as number | undefined,
+        category_name: getCatName(row.categories as DbRow | null, uiLanguage),
         status: "new" as SentenceStatus,
         is_preset: true,
       }));
@@ -239,18 +243,20 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         const cat = categories.find((c) => c.id === row.category_id);
         return {
           id: String(row.id),
-          user_id: row.user_id,
-          source_text: row.source_text || "",
-          target_text: row.target_text || "",
+          user_id: row.user_id as string | undefined,
+          source_text: (row.source_text as string) || "",
+          target_text: (row.target_text as string) || "",
           keywords: toKeywordsArray(row.keywords),
-          category_id: row.category_id,
+          category_id: row.category_id as number | undefined,
           category_name: cat ? getCategoryName(cat, uiLanguage) : "",
-          status: (row.state || "new") as SentenceStatus,
+          status: ((row.state as string) || "new") as SentenceStatus,
           is_preset: false,
-          source_lang: row.source_lang ?? uiLanguage,
-          target_lang: row.target_lang ?? targetLanguage,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
+          is_ai_generated: (row.is_ai_generated as boolean) ?? false,
+          tag: (row.tag as SentenceTag | null) ?? null,
+          source_lang: (row.source_lang as SupportedLanguage | undefined) ?? uiLanguage,
+          target_lang: (row.target_lang as SupportedLanguage | undefined) ?? targetLanguage,
+          created_at: row.created_at as string | undefined,
+          updated_at: row.updated_at as string | undefined,
         };
       });
 
@@ -260,7 +266,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     }
   },
 
-  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang }) => {
+  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang, is_ai_generated, tag }) => {
     set({ loading: true, error: null });
     try {
       const {
@@ -282,6 +288,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           state: "learning",
           source_lang: source_lang ?? null,
           target_lang: target_lang ?? null,
+          is_ai_generated: is_ai_generated ?? false,
+          tag: tag ?? null,
         })
         .select()
         .single();
@@ -304,6 +312,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         category_name: cat ? getCategoryName(cat, uiLanguage) : "",
         status: "learning",
         is_preset: false,
+        tag: tag ?? null,
         source_lang: source_lang as Sentence["source_lang"],
         target_lang: target_lang as Sentence["target_lang"],
         created_at: data.created_at,
@@ -327,6 +336,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       if (updates.keywords !== undefined) dbUpdates.keywords = updates.keywords;
       if (updates.category_id !== undefined) dbUpdates.category_id = updates.category_id;
       if (updates.status !== undefined) dbUpdates.state = updates.status;
+      if ("tag" in updates) dbUpdates.tag = updates.tag ?? null;
 
       const { error } = await supabase
         .from("user_sentences")
@@ -424,12 +434,13 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       const presetLearnedCount = Object.values(useProgressStore.getState().progressMap).filter(
         (s) => s === "learned"
       ).length;
-      const { currentStreak, totalQuizQuestions } = useProgressStore.getState().stats;
+      const { currentStreak, totalQuizQuestions, totalBuildSentences } = useProgressStore.getState().stats;
 
       await useAchievementStore.getState().checkProgressAchievements({
         totalSentencesLearned: userLearnedCount + presetLearnedCount,
         currentStreak,
         totalQuizQuestions,
+        totalBuildSentences,
       });
     }
   },

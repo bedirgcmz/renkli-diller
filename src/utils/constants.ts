@@ -1,4 +1,4 @@
-import { SupportedLanguage } from '@/types';
+import { SentenceTag, SupportedLanguage } from '@/types';
 
 export const PILL_COLORS = {
   light: [
@@ -60,6 +60,7 @@ export const KEYWORD_TEXT_COLORS = {
 export const FREE_USER_SENTENCE_LIMIT = 30;
 export const FREE_QUIZ_DAILY_LIMIT = 5;
 export const FREE_AUTO_MODE_LIMIT = 10;
+export const FREE_BUILD_SENTENCE_DAILY_LIMIT = 5;
 export const PREMIUM_PRICE_MONTHLY = '€3.99';
 export const PREMIUM_PRICE_ANNUAL = '€19.99';
 
@@ -79,6 +80,37 @@ export const LANG_CODE: Record<SupportedLanguage, string> = {
   fr: "fr-FR",
   pt: "pt-BR",
 };
+
+export const TAG_OPTIONS: { value: SentenceTag; i18nKey: string; icon: string }[] = [
+  { value: "this_week",  i18nKey: "tags.this_week",  icon: "calendar-outline" },
+  { value: "this_month", i18nKey: "tags.this_month", icon: "calendar-clear-outline" },
+  { value: "work",       i18nKey: "tags.work",       icon: "briefcase-outline" },
+  { value: "school",     i18nKey: "tags.school",     icon: "school-outline" },
+  { value: "home",       i18nKey: "tags.home",       icon: "home-outline" },
+  { value: "travel",     i18nKey: "tags.travel",     icon: "airplane-outline" },
+  { value: "shopping",   i18nKey: "tags.shopping",   icon: "cart-outline" },
+  { value: "social",     i18nKey: "tags.social",     icon: "people-outline" },
+  { value: "health",     i18nKey: "tags.health",     icon: "heart-outline" },
+  { value: "food",       i18nKey: "tags.food",       icon: "restaurant-outline" },
+  { value: "easy",       i18nKey: "tags.easy",       icon: "sunny-outline" },
+  { value: "hard",       i18nKey: "tags.hard",       icon: "barbell-outline" },
+  { value: "important",  i18nKey: "tags.important",  icon: "star-outline" },
+];
+
+export const TAG_GROUPS: { labelKey: string; tags: SentenceTag[] }[] = [
+  {
+    labelKey: "tags.group_time",
+    tags: ["this_week", "this_month"],
+  },
+  {
+    labelKey: "tags.group_topic",
+    tags: ["work", "school", "home", "travel", "shopping", "social", "health", "food"],
+  },
+  {
+    labelKey: "tags.group_difficulty",
+    tags: ["easy", "hard", "important"],
+  },
+];
 
 export const APP_NAMES: Record<SupportedLanguage, string> = {
   tr: 'Parlio',
