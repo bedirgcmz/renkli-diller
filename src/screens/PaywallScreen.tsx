@@ -199,9 +199,9 @@ export default function PaywallScreen() {
 
         {/* Satın al butonu */}
         <TouchableOpacity
-          style={[s.purchaseBtn, (!selectedPkg || purchasing) && { opacity: 0.6 }]}
+          style={[s.purchaseBtn, (packages.length === 0 || !selectedPkg || purchasing) && { opacity: 0.4 }]}
           onPress={handlePurchase}
-          disabled={!selectedPkg || purchasing}
+          disabled={packages.length === 0 || !selectedPkg || purchasing}
           activeOpacity={0.85}
         >
           <LinearGradient
