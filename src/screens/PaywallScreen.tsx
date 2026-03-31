@@ -8,7 +8,15 @@ import {
   Alert,
   ScrollView,
   Linking,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  useWindowDimensions,
 } from "react-native";
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const PRIVACY_POLICY_URL = "https://parlio-privacy-terms-page.vercel.app/privacy";
 const TERMS_URL = "https://parlio-privacy-terms-page.vercel.app/terms";
@@ -31,11 +39,29 @@ interface PackageOption {
   badge?: string;
 }
 
+const ALL_FEATURES = [
+  "feature_ai",
+  "feature_unlimited_add",
+  "feature_sentences",
+  "feature_reading",
+  "feature_quiz",
+  "feature_build",
+  "feature_categories",
+  "feature_auto",
+] as const;
+
+const COLLAPSED_COUNT = 3;
+
 export default function PaywallScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { refresh } = usePremium();
+  const { height: windowHeight } = useWindowDimensions();
+
+  // On tall screens (>= 700pt, e.g. iPhone 14+) show all features by default
+  const isLargeScreen = windowHeight >= 700;
+  const [showAllFeatures, setShowAllFeatures] = useState(isLargeScreen);
 
   const [packages, setPackages] = useState<PackageOption[]>([]);
   const [selectedPkg, setSelectedPkg] = useState<PurchasesPackage | null>(null);
@@ -151,12 +177,24 @@ export default function PaywallScreen() {
 
         {/* Özellik listesi */}
         <View style={s.featureList}>
-          {(["feature_ai", "feature_unlimited_add", "feature_sentences", "feature_quiz", "feature_build", "feature_categories", "feature_auto"] as const).map((key) => (
+          {(showAllFeatures ? ALL_FEATURES : ALL_FEATURES.slice(0, COLLAPSED_COUNT)).map((key) => (
             <View key={key} style={s.featureRow}>
               <Text style={s.featureCheck}>✓</Text>
               <Text style={s.featureText}>{t(`premium.${key}`)}</Text>
             </View>
           ))}
+          {!showAllFeatures && (
+            <TouchableOpacity
+              style={s.showAllBtn}
+              onPress={() => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setShowAllFeatures(true);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={s.showAllTxt}>{t("premium.show_all_features")} ↓</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Paket seçimi */}
@@ -366,6 +404,16 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       fontSize: 11,
       color: colors.textTertiary,
       marginTop: 2,
+    },
+    showAllBtn: {
+      marginTop: 4,
+      paddingVertical: 4,
+      alignSelf: "flex-start",
+    },
+    showAllTxt: {
+      fontSize: 13,
+      color: colors.premiumAccent,
+      fontWeight: "600",
     },
     offlineNote: {
       padding: 16,
