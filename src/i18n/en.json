@@ -225,6 +225,7 @@
     "version": "Version",
     "delete_account_warning": "This action cannot be undone. Your account and all data will be deleted.",
     "delete_account_error": "An error occurred while deleting your account. Please try again.",
+    "manage_subscription": "Manage Subscription",
     "notif_title": "Study time! 📚",
     "notif_body": "Learn a few sentences to reach your daily goal.",
     "notif_permission_denied": "Notification permission denied. Please enable it in app settings.",

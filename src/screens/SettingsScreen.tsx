@@ -290,6 +290,21 @@ export default function SettingsScreen() {
               {user?.email}
             </Text>
           </View>
+          {user?.is_premium && (
+            <TouchableOpacity
+              style={[sStyles.row, { borderBottomColor: colors.divider }]}
+              onPress={() => Linking.openURL("https://apps.apple.com/account/subscriptions")}
+              activeOpacity={0.8}
+            >
+              <View style={sStyles.rowLeft}>
+                <Text style={sStyles.rowIcon}>⭐</Text>
+                <Text style={[sStyles.rowLabel, { color: colors.text }]}>
+                  {t("settings.manage_subscription")}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={[sStyles.row, { borderBottomColor: "transparent" }]}
             onPress={handleDeleteAccount}

@@ -225,6 +225,7 @@
     "version": "Versão",
     "delete_account_warning": "Esta ação é irreversível. Sua conta e todos os seus dados serão excluídos.",
     "delete_account_error": "Ocorreu um erro ao excluir a conta. Por favor, tente novamente.",
+    "manage_subscription": "Gerenciar assinatura",
     "notif_title": "Hora de estudar! 📚",
     "notif_body": "Aprenda algumas frases para atingir sua meta diária.",
     "notif_permission_denied": "Permissão de notificação negada. Ative nas configurações do app.",

@@ -225,6 +225,7 @@
     "version": "Version",
     "delete_account_warning": "Den här åtgärden kan inte ångras. Ditt konto och all data kommer att raderas.",
     "delete_account_error": "Ett fel uppstod när kontot skulle raderas. Försök igen.",
+    "manage_subscription": "Hantera prenumeration",
     "notif_title": "Studietid! 📚",
     "notif_body": "Lär dig några meningar för att nå ditt dagliga mål.",
     "notif_permission_denied": "Aviseringsbehörighet nekad. Aktivera den i appinställningarna.",
