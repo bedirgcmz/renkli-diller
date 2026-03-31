@@ -79,7 +79,7 @@ export default function SettingsScreen() {
     setNotifications,
     setReminderTime,
   } = useSettingsStore();
-  const { user, signOut, updateProfile } = useAuthStore();
+  const { user, signOut, deleteAccount, updateProfile } = useAuthStore();
 
   const handleLeaderboardVisibleToggle = async (value: boolean) => {
     await updateProfile({ leaderboard_visible: value } as never);
@@ -132,8 +132,11 @@ export default function SettingsScreen() {
         {
           text: t("common.delete"),
           style: "destructive",
-          onPress: () => {
-            signOut();
+          onPress: async () => {
+            const result = await deleteAccount();
+            if (!result.success) {
+              Alert.alert(t("common.error"), result.error ?? t("settings.delete_account_error"));
+            }
           },
         },
       ],

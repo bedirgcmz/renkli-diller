@@ -224,6 +224,7 @@
     "about": "À propos",
     "version": "Version",
     "delete_account_warning": "Cette action est irréversible. Votre compte et toutes vos données seront supprimés.",
+    "delete_account_error": "Une erreur s'est produite lors de la suppression du compte. Veuillez réessayer.",
     "notif_title": "Temps d'étude ! 📚",
     "notif_body": "Apprenez quelques phrases pour atteindre votre objectif quotidien.",
     "notif_permission_denied": "Permission de notification refusée. Activez-la dans les paramètres de l'app.",

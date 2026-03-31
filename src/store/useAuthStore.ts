@@ -32,6 +32,7 @@ interface AuthState {
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signInWithApple: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
   uploadAvatar: (
@@ -296,7 +297,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       await supabase.auth.signOut();
-      await AsyncStorage.removeItem("supabase_session");
+      await AsyncStorage.multiRemove(["supabase_session", "user_settings"]);
       await logOutUser().catch(console.error);
       set({
         user: null,
@@ -306,6 +307,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       set({ loading: false });
       if (__DEV__) console.error("Sign out error:", error);
+    }
+  },
+
+  deleteAccount: async () => {
+    set({ loading: true });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        set({ loading: false });
+        return { success: false, error: "No active session" };
+      }
+
+      const { error } = await supabase.functions.invoke("delete-account", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) {
+        set({ loading: false });
+        return { success: false, error: error.message };
+      }
+
+      // Edge function deleted the user — clean up locally
+      await AsyncStorage.multiRemove(["supabase_session", "user_settings"]);
+      await logOutUser().catch(console.error);
+      set({ user: null, session: null, loading: false });
+      return { success: true };
+    } catch (error: any) {
+      set({ loading: false });
+      if (__DEV__) console.error("Delete account error:", error);
+      return { success: false, error: error.message ?? "An unexpected error occurred" };
     }
   },
 
