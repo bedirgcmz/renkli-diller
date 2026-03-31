@@ -10,7 +10,8 @@ import {
   Linking,
 } from "react-native";
 
-const PRIVACY_POLICY_URL = "https://drive.google.com/file/d/1f5d6o02r21XV3T4428uJ1Pqv1qMwjNUo/view?usp=sharing";
+const PRIVACY_POLICY_URL = "https://parlio-privacy-terms-page.vercel.app/privacy";
+const TERMS_URL = "https://parlio-privacy-terms-page.vercel.app/terms";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import type { PurchasesPackage } from "react-native-purchases";
@@ -150,7 +151,7 @@ export default function PaywallScreen() {
 
         {/* Özellik listesi */}
         <View style={s.featureList}>
-          {(["feature_ai", "feature_unlimited_add", "feature_sentences", "feature_quiz", "feature_categories", "feature_auto"] as const).map((key) => (
+          {(["feature_ai", "feature_unlimited_add", "feature_sentences", "feature_quiz", "feature_build", "feature_categories", "feature_auto"] as const).map((key) => (
             <View key={key} style={s.featureRow}>
               <Text style={s.featureCheck}>✓</Text>
               <Text style={s.featureText}>{t(`premium.${key}`)}</Text>
@@ -233,7 +234,7 @@ export default function PaywallScreen() {
             <Text style={s.legalLink}>{t("premium.privacy_policy")}</Text>
           </TouchableOpacity>
           <Text style={s.legalLinkDivider}>·</Text>
-          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+          <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)}>
             <Text style={s.legalLink}>{t("premium.terms_of_service")}</Text>
           </TouchableOpacity>
         </View>
