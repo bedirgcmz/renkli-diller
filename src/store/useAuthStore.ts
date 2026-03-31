@@ -313,14 +313,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   deleteAccount: async () => {
     set({ loading: true });
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // Refresh session to ensure a fresh, non-expired access token
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError || !refreshData.session) {
         set({ loading: false });
-        return { success: false, error: "No active session" };
+        return { success: false, error: "Session expired. Please sign in again." };
       }
 
       const { error } = await supabase.functions.invoke("delete-account", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${refreshData.session.access_token}` },
       });
       if (error) {
         set({ loading: false });
