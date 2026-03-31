@@ -250,7 +250,7 @@
     "feature_categories": "Alla kategorier",
     "feature_stats": "Detaljerad statistik",
     "feature_reading": "Premium-lästexter",
-    "show_all_features": "Se alla funktioner",
+    "show_all_features": "Se +{{count}} fler funktioner",
     "purchase": "Köp",
     "restore": "Återställ köp",
     "already_premium": "Du är redan Premium!",

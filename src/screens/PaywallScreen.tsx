@@ -144,7 +144,7 @@ export default function PaywallScreen() {
     }
   }
 
-  const s = styles(colors);
+  const s = styles(colors, isLargeScreen);
 
   if (loading) {
     return (
@@ -192,7 +192,7 @@ export default function PaywallScreen() {
               }}
               activeOpacity={0.7}
             >
-              <Text style={s.showAllTxt}>{t("premium.show_all_features")} ↓</Text>
+              <Text style={s.showAllTxt}>{t("premium.show_all_features", { count: ALL_FEATURES.length - COLLAPSED_COUNT })}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -281,15 +281,15 @@ export default function PaywallScreen() {
   );
 }
 
-function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").useTheme>["colors"]) {
+function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").useTheme>["colors"], isLargeScreen: boolean) {
   return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
     },
     scroll: {
-      padding: 24,
-      paddingBottom: 40,
+      padding: isLargeScreen ? 24 : 16,
+      paddingBottom: isLargeScreen ? 40 : 24,
       alignItems: "center",
     },
     closeBtn: {
@@ -304,8 +304,8 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       borderRadius: 20,
       paddingHorizontal: 16,
       paddingVertical: 6,
-      marginTop: 8,
-      marginBottom: 16,
+      marginTop: isLargeScreen ? 8 : 2,
+      marginBottom: isLargeScreen ? 16 : 8,
     },
     badgeTxt: {
       color: "#fff",
@@ -314,22 +314,22 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       letterSpacing: 1.5,
     },
     title: {
-      fontSize: 30,
+      fontSize: isLargeScreen ? 30 : 24,
       fontWeight: "800",
       color: colors.textPrimary,
       textAlign: "center",
-      lineHeight: 38,
+      lineHeight: isLargeScreen ? 38 : 30,
     },
     subtitle: {
-      fontSize: 16,
+      fontSize: isLargeScreen ? 16 : 14,
       color: colors.textSecondary,
-      marginTop: 8,
-      marginBottom: 24,
+      marginTop: 6,
+      marginBottom: isLargeScreen ? 24 : 12,
       textAlign: "center",
     },
     featureList: {
       width: "100%",
-      marginBottom: 28,
+      marginBottom: isLargeScreen ? 28 : 14,
     },
     featureRow: {
       flexDirection: "row",
@@ -353,7 +353,7 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       flexDirection: "row",
       gap: 10,
       width: "100%",
-      marginBottom: 24,
+      marginBottom: isLargeScreen ? 24 : 14,
     },
     packageCard: {
       flex: 1,
@@ -431,10 +431,10 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       width: "100%",
       borderRadius: 16,
       overflow: "hidden",
-      marginBottom: 14,
+      marginBottom: isLargeScreen ? 14 : 8,
     },
     purchaseBtnGradient: {
-      paddingVertical: 18,
+      paddingVertical: isLargeScreen ? 18 : 14,
       alignItems: "center",
     },
     purchaseBtnTxt: {
@@ -443,8 +443,8 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       fontWeight: "700",
     },
     restoreBtn: {
-      paddingVertical: 10,
-      marginBottom: 16,
+      paddingVertical: isLargeScreen ? 10 : 6,
+      marginBottom: isLargeScreen ? 16 : 10,
     },
     restoreTxt: {
       color: colors.textSecondary,

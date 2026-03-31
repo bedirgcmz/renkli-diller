@@ -250,7 +250,7 @@
     "feature_categories": "Tüm kategoriler",
     "feature_stats": "Detaylı istatistikler",
     "feature_reading": "Premium okuma metinleri",
-    "show_all_features": "Tüm özellikleri gör",
+    "show_all_features": "+{{count}} özelliği daha gör",
     "purchase": "Satın Al",
     "restore": "Satın Almayı Geri Yükle",
     "already_premium": "Zaten Premium üyesiniz!",

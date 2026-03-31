@@ -250,7 +250,7 @@
     "feature_categories": "All categories",
     "feature_stats": "Detailed statistics",
     "feature_reading": "Premium reading texts",
-    "show_all_features": "See all features",
+    "show_all_features": "See +{{count}} more features",
     "purchase": "Purchase",
     "restore": "Restore Purchase",
     "already_premium": "You're already Premium!",
