@@ -404,10 +404,10 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
       textDecorationLine: "underline",
     },
     legalTxt: {
-      fontSize: 11,
-      color: colors.textTertiary,
+      fontSize: 13,
+      color: colors.textSecondary,
       textAlign: "center",
-      lineHeight: 16,
+      lineHeight: 18,
     },
     legalLinks: {
       flexDirection: "row",
