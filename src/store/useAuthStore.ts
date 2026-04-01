@@ -554,26 +554,30 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           // Defer all async work outside the callback to avoid the deadlock.
           void (async () => {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("*")
-              .eq("id", session.user.id)
-              .single();
+            try {
+              const { data: profile } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", session.user.id)
+                .single();
 
-            await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
+              await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
 
-            if (profile) {
-              set((state) => ({
-                user: state.user
-                  ? {
-                      ...state.user,
-                      display_name: profile.display_name || "",
-                      avatar_url: profile.avatar_url || "",
-                      is_premium: profile.is_premium || false,
-                      leaderboard_visible: profile.leaderboard_visible ?? true,
-                    }
-                  : state.user,
-              }));
+              if (profile) {
+                set((state) => ({
+                  user: state.user
+                    ? {
+                        ...state.user,
+                        display_name: profile.display_name || "",
+                        avatar_url: profile.avatar_url || "",
+                        is_premium: profile.is_premium || false,
+                        leaderboard_visible: profile.leaderboard_visible ?? true,
+                      }
+                    : state.user,
+                }));
+              }
+            } catch (e) {
+              console.error("[onAuthStateChange] deferred async error:", e);
             }
           })();
         } else if (event === "SIGNED_OUT") {

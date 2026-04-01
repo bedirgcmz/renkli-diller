@@ -33,7 +33,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
       }
     };
 
-    initializeI18n();
+    initializeI18n().catch((e) => console.error("[I18nProvider] init failed:", e));
   }, []);
 
   useEffect(() => {

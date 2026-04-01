@@ -21,7 +21,7 @@ export default function AppNavigator() {
       await initialize();
       await loadSettings();
     };
-    initApp();
+    initApp().catch((e) => console.error("[AppNavigator] init failed:", e));
   }, [initialize, loadSettings]);
 
   // Show loading while initializing

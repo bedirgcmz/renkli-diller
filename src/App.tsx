@@ -29,7 +29,7 @@ export default function App() {
 
   useEffect(() => {
     initRevenueCat().catch(() => {});
-    loadAchievements();
+    loadAchievements().catch((e) => console.error("[App] loadAchievements error:", e));
   }, []);
 
   // Shared handler for both cold-start and warm-start auth deep links.
@@ -61,13 +61,15 @@ export default function App() {
     };
 
     // Cold-start: app was killed and opened via deep link
-    Linking.getInitialURL().then((url) => {
-      if (url) handleAuthCallback(url);
-    });
+    Linking.getInitialURL()
+      .then((url) => {
+        if (url) handleAuthCallback(url).catch((e) => console.error("[App] cold-start auth error:", e));
+      })
+      .catch((e) => console.error("[App] getInitialURL error:", e));
 
     // Warm-start: app is already running and receives a deep link
     const subscription = Linking.addEventListener("url", ({ url }) => {
-      handleAuthCallback(url);
+      handleAuthCallback(url).catch((e) => console.error("[App] warm-start auth error:", e));
     });
 
     return () => subscription.remove();
