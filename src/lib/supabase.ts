@@ -6,7 +6,10 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables");
+  console.error(
+    "[Supabase] CRITICAL: EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY is missing. " +
+      "Auth and data features will not work. Check your EAS secrets or .env file.",
+  );
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

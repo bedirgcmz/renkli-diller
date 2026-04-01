@@ -33,7 +33,7 @@ export function usePremium() {
 
   useEffect(() => {
     if (user) {
-      refresh();
+      refresh().catch((e) => console.error("[usePremium] refresh error:", e));
     } else {
       setIsPremium(false);
     }
