@@ -8,6 +8,7 @@ import {
   Switch,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
 
 const PRIVACY_POLICY_URL = "https://parlio-privacy-terms-page.vercel.app/privacy";
@@ -293,7 +294,13 @@ export default function SettingsScreen() {
           {user?.is_premium && (
             <TouchableOpacity
               style={[sStyles.row, { borderBottomColor: colors.divider }]}
-              onPress={() => Linking.openURL("https://apps.apple.com/account/subscriptions")}
+              onPress={() =>
+                Linking.openURL(
+                  Platform.OS === "android"
+                    ? "https://play.google.com/store/account/subscriptions?package=com.parlio.app"
+                    : "https://apps.apple.com/account/subscriptions",
+                )
+              }
               activeOpacity={0.8}
             >
               <View style={sStyles.rowLeft}>
