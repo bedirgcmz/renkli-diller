@@ -232,7 +232,9 @@
     "notif_scheduled": "Bildirim ayarlandı",
     "leaderboard_visible": "Sıralamada görün",
     "leaderboard_visible_desc": "Kapalıyken listede anonim görünürsün",
-    "privacy_terms": "Gizlilik & Kullanım Koşulları"
+    "privacy_terms": "Gizlilik & Kullanım Koşulları",
+    "send_feedback": "Öneri / Şikayet Gönder",
+    "rate_app": "Uygulamayı Değerlendirin"
   },
   "premium": {
     "title": "Premium'a Geç",

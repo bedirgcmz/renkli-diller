@@ -232,7 +232,9 @@
     "notif_scheduled": "Notification set",
     "leaderboard_visible": "Show in ranking",
     "leaderboard_visible_desc": "When off, you appear as anonymous",
-    "privacy_terms": "Privacy & Terms"
+    "privacy_terms": "Privacy & Terms",
+    "send_feedback": "Send Feedback",
+    "rate_app": "Rate the App"
   },
   "premium": {
     "title": "Go Premium",

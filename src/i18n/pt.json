@@ -232,7 +232,9 @@
     "notif_scheduled": "Notificação configurada",
     "leaderboard_visible": "Mostrar na classificação",
     "leaderboard_visible_desc": "Desativado: você aparece como anônimo",
-    "privacy_terms": "Privacidade & Termos"
+    "privacy_terms": "Privacidade & Termos",
+    "send_feedback": "Enviar feedback",
+    "rate_app": "Avaliar o app"
   },
   "premium": {
     "title": "Assinar Premium",

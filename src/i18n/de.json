@@ -232,7 +232,9 @@
     "notif_scheduled": "Benachrichtigung gesetzt",
     "leaderboard_visible": "In Rangliste anzeigen",
     "leaderboard_visible_desc": "Wenn aus, erscheinst du anonym",
-    "privacy_terms": "Datenschutz & Nutzungsbedingungen"
+    "privacy_terms": "Datenschutz & Nutzungsbedingungen",
+    "send_feedback": "Feedback senden",
+    "rate_app": "App bewerten"
   },
   "premium": {
     "title": "Premium werden",

@@ -232,7 +232,9 @@
     "notif_scheduled": "Avisering inställd",
     "leaderboard_visible": "Visa i rankning",
     "leaderboard_visible_desc": "När av visas du som anonym",
-    "privacy_terms": "Integritet & Villkor"
+    "privacy_terms": "Integritet & Villkor",
+    "send_feedback": "Skicka feedback",
+    "rate_app": "Betygsätt appen"
   },
   "premium": {
     "title": "Gå Premium",

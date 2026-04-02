@@ -13,6 +13,9 @@ import {
 
 const PRIVACY_POLICY_URL = "https://parlio-privacy-terms-page.vercel.app/privacy";
 const TERMS_URL = "https://parlio-privacy-terms-page.vercel.app/terms";
+const FEEDBACK_EMAIL = "bgswedenappdev@gmail.com";
+// TODO: Replace with numeric App Store ID after app is live (e.g. "1234567890")
+const IOS_APP_STORE_ID = "";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -121,6 +124,27 @@ export default function SettingsScreen() {
     if (notifications) {
       const { hour, minute } = parseReminderTime(time);
       await scheduleDailyReminder(hour, minute, t("settings.notif_title"), t("settings.notif_body"));
+    }
+  };
+
+  const handleFeedback = () => {
+    const subject = encodeURIComponent("Parlio – Geri Bildirim");
+    const body = encodeURIComponent(
+      "Merhaba Parlio ekibi,\n\nUygulama hakkında bir önerim / şikayetim var:\n\n[Mesajınızı buraya yazın]\n\n---\nParlio uygulamasından gönderildi.",
+    );
+    Linking.openURL(`mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`);
+  };
+
+  const handleRateApp = () => {
+    if (Platform.OS === "android") {
+      Linking.openURL("https://play.google.com/store/apps/details?id=com.parlio.app").catch(() =>
+        Linking.openURL("market://details?id=com.parlio.app"),
+      );
+    } else {
+      const url = IOS_APP_STORE_ID
+        ? `https://apps.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`
+        : "https://apps.apple.com/developer/id000000000";
+      Linking.openURL(url);
     }
   };
 
@@ -377,7 +401,7 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[sStyles.row, { borderBottomColor: "transparent" }]}
+            style={[sStyles.row, { borderBottomColor: colors.divider }]}
             onPress={() => Linking.openURL(TERMS_URL)}
             activeOpacity={0.8}
           >
@@ -385,6 +409,32 @@ export default function SettingsScreen() {
               <Text style={sStyles.rowIcon}>📋</Text>
               <Text style={[sStyles.rowLabel, { color: colors.text }]}>
                 {t("premium.terms_of_service")}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[sStyles.row, { borderBottomColor: colors.divider }]}
+            onPress={handleFeedback}
+            activeOpacity={0.8}
+          >
+            <View style={sStyles.rowLeft}>
+              <Text style={sStyles.rowIcon}>💬</Text>
+              <Text style={[sStyles.rowLabel, { color: colors.text }]}>
+                {t("settings.send_feedback")}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[sStyles.row, { borderBottomColor: "transparent" }]}
+            onPress={handleRateApp}
+            activeOpacity={0.8}
+          >
+            <View style={sStyles.rowLeft}>
+              <Text style={sStyles.rowIcon}>⭐</Text>
+              <Text style={[sStyles.rowLabel, { color: colors.text }]}>
+                {t("settings.rate_app")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />

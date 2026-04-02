@@ -232,7 +232,9 @@
     "notif_scheduled": "Notification configurée",
     "leaderboard_visible": "Afficher dans le classement",
     "leaderboard_visible_desc": "Désactivé : tu apparais comme anonyme",
-    "privacy_terms": "Confidentialité & Conditions"
+    "privacy_terms": "Confidentialité & Conditions",
+    "send_feedback": "Envoyer un avis",
+    "rate_app": "Évaluer l'application"
   },
   "premium": {
     "title": "Passer à Premium",
