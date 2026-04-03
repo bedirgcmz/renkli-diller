@@ -14,8 +14,7 @@ import {
 const PRIVACY_POLICY_URL = "https://parlio-privacy-terms-page.vercel.app/privacy";
 const TERMS_URL = "https://parlio-privacy-terms-page.vercel.app/terms";
 const FEEDBACK_EMAIL = "bgswedenappdev@gmail.com";
-// TODO: Replace with numeric App Store ID after app is live (e.g. "1234567890")
-const IOS_APP_STORE_ID = "";
+const IOS_APP_STORE_ID = "6761177577";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
