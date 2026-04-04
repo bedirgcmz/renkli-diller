@@ -77,15 +77,20 @@ export async function getOfferings(): Promise<PurchasesOffering | null> {
 
 // RevenueCat errors are plain objects with optional typed fields.
 function asRCError(e: unknown): { userCancelled?: boolean; message?: string } {
-  if (typeof e === "object" && e !== null) return e as { userCancelled?: boolean; message?: string };
+  if (typeof e === "object" && e !== null)
+    return e as { userCancelled?: boolean; message?: string };
   return {};
 }
 
-export async function purchasePackage(
-  pkg: PurchasesPackage
-): Promise<{ success: boolean; customerInfo?: CustomerInfo; error?: string; userCancelled?: boolean }> {
+export async function purchasePackage(pkg: PurchasesPackage): Promise<{
+  success: boolean;
+  customerInfo?: CustomerInfo;
+  error?: string;
+  userCancelled?: boolean;
+}> {
   if (isExpoGo) return { success: false, error: "Not available in Expo Go" };
-  if (!(await Purchases.isConfigured())) return { success: false, error: "RevenueCat not configured" };
+  if (!(await Purchases.isConfigured()))
+    return { success: false, error: "RevenueCat not configured" };
   try {
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     const premium = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
@@ -105,7 +110,8 @@ export async function restorePurchases(): Promise<{
   error?: string;
 }> {
   if (isExpoGo) return { success: false, isPremium: false, error: "Not available in Expo Go" };
-  if (!(await Purchases.isConfigured())) return { success: false, isPremium: false, error: "RevenueCat not configured" };
+  if (!(await Purchases.isConfigured()))
+    return { success: false, isPremium: false, error: "RevenueCat not configured" };
   try {
     const customerInfo = await Purchases.restorePurchases();
     const isPremium = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;

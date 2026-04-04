@@ -59,9 +59,8 @@ export default function PaywallScreen() {
   const { refresh } = usePremium();
   const { height: windowHeight } = useWindowDimensions();
 
-  // On tall screens (>= 700pt, e.g. iPhone 14+) show all features by default
   const isLargeScreen = windowHeight >= 700;
-  const [showAllFeatures, setShowAllFeatures] = useState(isLargeScreen);
+  const [showAllFeatures, setShowAllFeatures] = useState(false);
 
   const [packages, setPackages] = useState<PackageOption[]>([]);
   const [selectedPkg, setSelectedPkg] = useState<PurchasesPackage | null>(null);
@@ -303,9 +302,9 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
     badge: {
       borderRadius: 20,
       paddingHorizontal: 16,
-      paddingVertical: 6,
-      marginTop: isLargeScreen ? 8 : 2,
-      marginBottom: isLargeScreen ? 16 : 8,
+      paddingVertical: 4,
+      marginTop: 2,
+      marginBottom: isLargeScreen ? 10 : 6,
     },
     badgeTxt: {
       color: "#fff",
@@ -323,8 +322,8 @@ function styles(colors: ReturnType<typeof import("@/providers/ThemeProvider").us
     subtitle: {
       fontSize: isLargeScreen ? 16 : 14,
       color: colors.textSecondary,
-      marginTop: 6,
-      marginBottom: isLargeScreen ? 24 : 12,
+      marginTop: 4,
+      marginBottom: isLargeScreen ? 16 : 10,
       textAlign: "center",
     },
     featureList: {
