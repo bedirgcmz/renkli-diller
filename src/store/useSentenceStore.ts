@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
-import { Sentence, SentenceStatus, SentenceTag, Category, SupportedLanguage } from "@/types";
+import { Sentence, SentenceDifficulty, SentenceStatus, SentenceTag, Category, SupportedLanguage } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
@@ -146,7 +146,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
 
       // Only fetch columns needed for the active language pair + fallback columns
       const sentenceCols = [...new Set([
-        "id", "category_id", "sort_order",
+        "id", "category_id", "sort_order", "difficulty",
         `text_${uiLanguage}`,
         `text_${targetLanguage}`,
         "text_en",   // getLangText fallback
@@ -193,6 +193,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         category_name: getCatName(row.categories as DbRow | null, uiLanguage),
         status: "new" as SentenceStatus,
         is_preset: true,
+        difficulty: (row.difficulty as SentenceDifficulty) ?? undefined,
       }));
 
       set({ presetSentences: mapped, loading: false });

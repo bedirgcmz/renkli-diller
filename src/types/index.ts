@@ -16,6 +16,8 @@ export type SentenceCategory =
   | "health"
   | "social_modern";
 
+export type SentenceDifficulty = "beginner" | "intermediate" | "advanced";
+
 export type SentenceTag =
   | "this_week"
   | "this_month"
@@ -41,6 +43,7 @@ export interface Sentence {
   category_name?: string;
   status: SentenceStatus;
   is_preset: boolean;
+  difficulty?: SentenceDifficulty;
   is_favorite?: boolean;
   is_ai_generated?: boolean;
   tag?: SentenceTag | null;
