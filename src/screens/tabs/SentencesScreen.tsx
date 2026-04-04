@@ -496,11 +496,36 @@ function FilterModal({
           ))}
         </View>
 
+        {/* Difficulty chips — only for preset sentences */}
+        {isPresetTab && (
+          <>
+            <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
+              {t("sentences.filter_difficulty")}
+            </Text>
+            <View style={filterStyles.chipsWrap}>
+              {DIFFICULTY_FILTERS.map((f) => (
+                <TouchableOpacity
+                  key={f.key}
+                  style={[filterStyles.chip, chipActive(difficultyFilter === f.key)]}
+                  onPress={() => setDifficultyFilter(f.key)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[filterStyles.chipText, { color: chipTextColor(difficultyFilter === f.key) }]}
+                  >
+                    {t(f.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
         {/* Category chips */}
         <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
           {t("sentences.filter_category") || "Kategori"}
         </Text>
-        <View style={filterStyles.chipsWrap}>
+        <View style={[filterStyles.chipsWrap, { marginBottom: 4 }]}>
           <TouchableOpacity
             style={[filterStyles.chip, chipActive(categoryFilter === "all")]}
             onPress={() => setCategoryFilter("all")}
@@ -527,31 +552,6 @@ function FilterModal({
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Difficulty chips — only for preset sentences */}
-        {isPresetTab && (
-          <>
-            <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
-              {t("sentences.filter_difficulty")}
-            </Text>
-            <View style={[filterStyles.chipsWrap, { marginBottom: 4 }]}>
-              {DIFFICULTY_FILTERS.map((f) => (
-                <TouchableOpacity
-                  key={f.key}
-                  style={[filterStyles.chip, chipActive(difficultyFilter === f.key)]}
-                  onPress={() => setDifficultyFilter(f.key)}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={[filterStyles.chipText, { color: chipTextColor(difficultyFilter === f.key) }]}
-                  >
-                    {t(f.labelKey)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        )}
       </Animated.View>
     </Modal>
   );
