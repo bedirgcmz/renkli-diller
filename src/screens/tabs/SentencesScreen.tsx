@@ -26,10 +26,18 @@ import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { QuickTagButton } from "@/components/QuickTagButton";
-import { Sentence, SentenceStatus, MainStackParamList } from "@/types";
+import { Sentence, SentenceDifficulty, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
+type DifficultyFilter = "all" | SentenceDifficulty;
 type SentenceTab = "preset" | "mine";
+
+const DIFFICULTY_FILTERS: Array<{ key: DifficultyFilter; labelKey: string }> = [
+  { key: "all", labelKey: "sentences.difficulty_all" },
+  { key: "beginner", labelKey: "sentences.difficulty_beginner" },
+  { key: "intermediate", labelKey: "sentences.difficulty_intermediate" },
+  { key: "advanced", labelKey: "sentences.difficulty_advanced" },
+];
 
 const STATUS_FILTERS: Array<{ key: StatusFilter; labelKey: string }> = [
   { key: "all", labelKey: "sentences.filter_all" },
@@ -361,6 +369,9 @@ interface FilterModalProps {
   setStatusFilter: (f: StatusFilter) => void;
   categoryFilter: number | "all";
   setCategoryFilter: (f: number | "all") => void;
+  difficultyFilter: DifficultyFilter;
+  setDifficultyFilter: (f: DifficultyFilter) => void;
+  isPresetTab: boolean;
   categories: any[];
   uiLanguage: string;
   colors: any;
@@ -376,6 +387,9 @@ function FilterModal({
   setStatusFilter,
   categoryFilter,
   setCategoryFilter,
+  difficultyFilter,
+  setDifficultyFilter,
+  isPresetTab,
   categories,
   uiLanguage,
   colors,
@@ -447,6 +461,7 @@ function FilterModal({
                 onPress={() => {
                   setStatusFilter("all");
                   setCategoryFilter("all");
+                  setDifficultyFilter("all");
                 }}
               >
                 <Text style={{ color: colors.primary, fontSize: 13 }}>
@@ -512,6 +527,31 @@ function FilterModal({
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Difficulty chips — only for preset sentences */}
+        {isPresetTab && (
+          <>
+            <Text style={[filterStyles.sectionLabel, { color: colors.textTertiary }]}>
+              {t("sentences.filter_difficulty")}
+            </Text>
+            <View style={[filterStyles.chipsWrap, { marginBottom: 4 }]}>
+              {DIFFICULTY_FILTERS.map((f) => (
+                <TouchableOpacity
+                  key={f.key}
+                  style={[filterStyles.chip, chipActive(difficultyFilter === f.key)]}
+                  onPress={() => setDifficultyFilter(f.key)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[filterStyles.chipText, { color: chipTextColor(difficultyFilter === f.key) }]}
+                  >
+                    {t(f.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
       </Animated.View>
     </Modal>
   );
@@ -582,11 +622,15 @@ export default function SentencesScreen() {
   const [activeTab, setActiveTab] = useState<SentenceTab>("preset");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<number | "all">("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [searchText, setSearchText] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
 
-  const activeFilterCount = (statusFilter !== "all" ? 1 : 0) + (categoryFilter !== "all" ? 1 : 0);
+  const activeFilterCount =
+    (statusFilter !== "all" ? 1 : 0) +
+    (categoryFilter !== "all" ? 1 : 0) +
+    (activeTab === "preset" && difficultyFilter !== "all" ? 1 : 0);
 
   // Tab underline color: primary for both modes (works well on dark & light)
   const tabActiveColor = isDark ? colors.primary : colors.primaryDark;
@@ -617,13 +661,14 @@ export default function SentencesScreen() {
     return sourceList
       .filter((s) => statusFilter === "all" || s.effectiveStatus === statusFilter)
       .filter((s) => categoryFilter === "all" || s.category_id === categoryFilter)
+      .filter((s) => activeTab === "mine" || difficultyFilter === "all" || s.difficulty === difficultyFilter)
       .filter(
         (s) =>
           !searchText ||
           s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
           s.target_text.toLowerCase().includes(searchText.toLowerCase()),
       );
-  }, [sourceList, statusFilter, categoryFilter, searchText]);
+  }, [sourceList, statusFilter, categoryFilter, difficultyFilter, activeTab, searchText]);
 
   const mismatchedCount = useMemo(
     () =>
@@ -641,11 +686,13 @@ export default function SentencesScreen() {
         .map((s) => ({
           effectiveStatus: (isPreset ? (progressMap[s.id] ?? "new") : s.status) as SentenceStatus,
           category_id: s.category_id,
+          difficulty: s.difficulty,
           source_text: s.source_text,
           target_text: s.target_text,
         }))
         .filter((s) => statusFilter === "all" || s.effectiveStatus === statusFilter)
         .filter((s) => categoryFilter === "all" || s.category_id === categoryFilter)
+        .filter((s) => !isPreset || difficultyFilter === "all" || s.difficulty === difficultyFilter)
         .filter(
           (s) =>
             !searchText ||
@@ -657,7 +704,7 @@ export default function SentencesScreen() {
       preset: applyFilters(presetSentences, true),
       mine: applyFilters(sentences, false),
     };
-  }, [presetSentences, sentences, progressMap, statusFilter, categoryFilter, searchText]);
+  }, [presetSentences, sentences, progressMap, statusFilter, categoryFilter, difficultyFilter, searchText]);
 
   const handleDelete = (sentence: Sentence) => {
     Alert.alert(t("sentences.delete"), t("sentences.delete_confirm"), [
@@ -848,6 +895,9 @@ export default function SentencesScreen() {
         setStatusFilter={setStatusFilter}
         categoryFilter={categoryFilter}
         setCategoryFilter={setCategoryFilter}
+        difficultyFilter={difficultyFilter}
+        setDifficultyFilter={setDifficultyFilter}
+        isPresetTab={activeTab === "preset"}
         categories={visibleCategories}
         uiLanguage={uiLanguage}
         colors={colors}
