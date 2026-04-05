@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 
@@ -35,6 +36,8 @@ Rules:
 4. If the source sentence contains text wrapped in double asterisks (**word**), you MUST wrap the equivalent translated expression in ** markers too. Preserve the exact same number of marked segments. Do not remove, merge, or add ** markers. Even if two source markers translate to the same word in the target language, each must have its own ** marker (e.g. **the more** you work, **the more** you learn).
 5. Always close every ** marker you open. Never leave an unclosed **.
 6. Return ONLY the translated sentence. No explanations, no alternatives, no extra text.`;
+
+const TRIAL_DURATION_DAYS = 3;
 
 function countMarkers(text: string): number {
   return (text.match(/\*\*[^*]+\*\*/g) ?? []).length;
@@ -84,16 +87,80 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // ── 1. Identify user from JWT ────────────────────────────────────────────────
+  // Gateway verifies the JWT (verify_jwt = true in config).
+  // We still need the token to identify the user and query their profile.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data: { user }, error: userError } = await userClient.auth.getUser();
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  // ── 2. Check premium / trial access ─────────────────────────────────────────
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: profile } = await adminClient
+    .from("profiles")
+    .select("is_premium, ai_trial_started_at")
+    .eq("id", user.id)
+    .single();
+
+  const isPremium = profile?.is_premium ?? false;
+
+  if (!isPremium) {
+    const now = new Date();
+    let trialStartedAt: Date;
+
+    if (!profile?.ai_trial_started_at) {
+      // First use — start the trial server-side
+      await adminClient
+        .from("profiles")
+        .update({ ai_trial_started_at: now.toISOString() })
+        .eq("id", user.id);
+      trialStartedAt = now;
+    } else {
+      trialStartedAt = new Date(profile.ai_trial_started_at);
+    }
+
+    const diffDays =
+      (now.getTime() - trialStartedAt.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffDays >= TRIAL_DURATION_DAYS) {
+      return new Response(
+        JSON.stringify({ error: "trial_expired" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  // ── 3. Translate ─────────────────────────────────────────────────────────────
   try {
     const { sourceText, sourceLang, targetLang } = await req.json();
 
     if (!sourceText || !sourceLang || !targetLang) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -120,28 +187,19 @@ serve(async (req) => {
     if (!translatedText) {
       return new Response(
         JSON.stringify({ error: "Translation service error" }),
-        {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     return new Response(
       JSON.stringify({ translatedText, model: usedModel }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
     console.error("Edge function error:", err);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

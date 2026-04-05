@@ -342,7 +342,12 @@ export default function AITranslateScreen() {
       });
     } catch (err) {
       console.error("[AI Translate] error:", err);
-      Alert.alert(t("common.error"), t("ai_translator.translate_error"));
+      if (err instanceof Error && err.message === "trial_expired") {
+        setHasAccess(false);
+        navigation.navigate("Paywall");
+      } else {
+        Alert.alert(t("common.error"), t("ai_translator.translate_error"));
+      }
     } finally {
       setLoading(false);
     }
