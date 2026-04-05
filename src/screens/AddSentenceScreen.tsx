@@ -164,6 +164,7 @@ export default function AddSentenceScreen() {
               placeholderTextColor={colors.textTertiary}
               multiline
               textAlignVertical="top"
+              maxLength={500}
             />
             {sourceText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
@@ -188,6 +189,7 @@ export default function AddSentenceScreen() {
               placeholderTextColor={colors.textTertiary}
               multiline
               textAlignVertical="top"
+              maxLength={500}
             />
             {targetText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
@@ -212,6 +214,7 @@ export default function AddSentenceScreen() {
                 onChangeText={(v) => updateKeyword(idx, v)}
                 placeholder={`${t("add_sentence.word_placeholder")} ${idx + 1}`}
                 placeholderTextColor={colors.textTertiary}
+                maxLength={100}
               />
             ))}
           </View>

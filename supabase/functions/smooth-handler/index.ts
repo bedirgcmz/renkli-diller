@@ -165,6 +165,13 @@ serve(async (req) => {
       );
     }
 
+    if (typeof sourceText !== "string" || sourceText.length > 500) {
+      return new Response(
+        JSON.stringify({ error: "sourceText must be 500 characters or fewer" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const sourceLanguage = LANGUAGE_NAMES[sourceLang] ?? sourceLang;
     const targetLanguage = LANGUAGE_NAMES[targetLang] ?? targetLang;
     const expectedMarkers = countMarkers(sourceText);

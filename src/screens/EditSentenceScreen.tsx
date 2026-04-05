@@ -163,6 +163,7 @@ export default function EditSentenceScreen() {
               editable={isUserSentence}
               multiline
               textAlignVertical="top"
+              maxLength={500}
             />
             {sourceText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
@@ -194,6 +195,7 @@ export default function EditSentenceScreen() {
               editable={isUserSentence}
               multiline
               textAlignVertical="top"
+              maxLength={500}
             />
             {targetText ? (
               <View style={[styles.preview, { backgroundColor: colors.backgroundTertiary }]}>
@@ -228,6 +230,7 @@ export default function EditSentenceScreen() {
                 editable={isUserSentence}
                 placeholder={`${t("add_sentence.word_placeholder")} ${idx + 1}`}
                 placeholderTextColor={colors.textTertiary}
+                maxLength={100}
               />
             ))}
           </View>
