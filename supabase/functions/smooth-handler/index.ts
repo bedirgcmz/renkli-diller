@@ -87,6 +87,7 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  try {
   // ── 1. Identify user from JWT ────────────────────────────────────────────────
   // Gateway verifies the JWT (verify_jwt = true in config).
   // We still need the token to identify the user and query their profile.
@@ -196,7 +197,15 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("Edge function error:", err);
+    console.error("[smooth-handler] translate error:", err);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  } catch (err) {
+    console.error("[smooth-handler] unhandled error:", err);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -18,6 +18,18 @@ export async function translateWithAI(
   });
 
   if (error) {
+    // error.context contains the raw response text for non-2xx responses
+    try {
+      const body = typeof error.context === "string"
+        ? JSON.parse(error.context)
+        : error.context;
+      if (body?.error === "trial_expired") throw new Error("trial_expired");
+      if (body?.error) throw new Error(body.error);
+    } catch (parseErr) {
+      if (parseErr instanceof Error && parseErr.message !== error.message) {
+        throw parseErr; // re-throw the specific error (trial_expired etc.)
+      }
+    }
     throw new Error(error.message ?? "Translation failed");
   }
 
