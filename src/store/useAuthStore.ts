@@ -366,11 +366,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ loading: true });
     try {
-      const { error } = await supabase.from("profiles").update(updates).eq("id", user.id);
+      // is_premium is protected by a DB trigger — it can only be changed via
+      // the set_premium() RPC (SECURITY DEFINER). Strip it from direct updates
+      // so the trigger doesn't reject the request; local state is still synced below.
+      const { is_premium: _ignored, ...dbUpdates } = updates;
 
-      if (error) {
-        set({ loading: false });
-        return { success: false, error: error.message };
+      if (Object.keys(dbUpdates).length > 0) {
+        const { error } = await supabase.from("profiles").update(dbUpdates).eq("id", user.id);
+        if (error) {
+          set({ loading: false });
+          return { success: false, error: error.message };
+        }
       }
 
       set({

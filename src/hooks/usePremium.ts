@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { isPremiumActive } from "@/services/revenueCat";
+import { supabase } from "@/lib/supabase";
 
 export function usePremium() {
   const user = useAuthStore((s) => s.user);
@@ -20,7 +21,10 @@ export function usePremium() {
       setIsPremium(effective);
 
       // Supabase'e sadece RevenueCat premium onayladığında yaz (false ile ezme)
+      // is_premium doğrudan yazılamaz; set_premium() RPC (SECURITY DEFINER) kullanılır
       if (user && active && !user.is_premium) {
+        await supabase.rpc("set_premium");
+        // Yerel store'u da güncelle
         await updateProfile({ is_premium: true });
       }
     } catch {
