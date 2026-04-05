@@ -827,6 +827,12 @@ export default function ReadingScreen() {
     fetchNextText(userId, false, isPremium);
   }, [userId]);
 
+  // Stop any active TTS when language settings change
+  useEffect(() => {
+    Speech.stop();
+    setSpeaking(null);
+  }, [targetLanguage, uiLanguage]);
+
   // Strip ** markers for TTS
   const speakText = useCallback(
     async (lang: SupportedLanguage, type: "source" | "target") => {
