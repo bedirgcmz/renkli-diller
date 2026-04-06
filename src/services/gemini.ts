@@ -2,7 +2,11 @@ import { supabase } from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AI_TRIAL_START_KEY = "@ai_trial_start";
-const TRIAL_DURATION_DAYS = 3;
+const AI_TRIAL_DAILY_COUNT_KEY = "@ai_trial_daily_count";
+const AI_TRIAL_DAILY_DATE_KEY = "@ai_trial_daily_date";
+
+export const TRIAL_DURATION_DAYS = 3;
+export const TRIAL_DAILY_LIMIT = 15;
 
 export interface TranslateResult {
   translatedText: string;
@@ -24,10 +28,11 @@ export async function translateWithAI(
         ? JSON.parse(error.context)
         : error.context;
       if (body?.error === "trial_expired") throw new Error("trial_expired");
+      if (body?.error === "daily_limit_reached") throw new Error("daily_limit_reached");
       if (body?.error) throw new Error(body.error);
     } catch (parseErr) {
       if (parseErr instanceof Error && parseErr.message !== error.message) {
-        throw parseErr; // re-throw the specific error (trial_expired etc.)
+        throw parseErr; // re-throw the specific error (trial_expired, daily_limit_reached, etc.)
       }
     }
     throw new Error(error.message ?? "Translation failed");
@@ -35,6 +40,10 @@ export async function translateWithAI(
 
   if (data?.error === "trial_expired") {
     throw new Error("trial_expired");
+  }
+
+  if (data?.error === "daily_limit_reached") {
+    throw new Error("daily_limit_reached");
   }
 
   if (data?.error) {
@@ -87,19 +96,52 @@ export async function initAITrial(): Promise<Date | null> {
   return getAITrialStartDate();
 }
 
+// ── Daily count (local cache) ─────────────────────────────────────────────────
+
+export async function getDailyCount(): Promise<{ count: number; date: string }> {
+  const today = new Date().toISOString().split("T")[0];
+  try {
+    const storedDate = await AsyncStorage.getItem(AI_TRIAL_DAILY_DATE_KEY);
+    if (storedDate !== today) {
+      return { count: 0, date: today };
+    }
+    const stored = await AsyncStorage.getItem(AI_TRIAL_DAILY_COUNT_KEY);
+    return { count: stored ? parseInt(stored, 10) : 0, date: today };
+  } catch {
+    return { count: 0, date: today };
+  }
+}
+
+export async function incrementLocalDailyCount(): Promise<number> {
+  const today = new Date().toISOString().split("T")[0];
+  const { count } = await getDailyCount();
+  const newCount = count + 1;
+  try {
+    await AsyncStorage.setItem(AI_TRIAL_DAILY_COUNT_KEY, String(newCount));
+    await AsyncStorage.setItem(AI_TRIAL_DAILY_DATE_KEY, today);
+  } catch {
+    // ignore storage errors
+  }
+  return newCount;
+}
+
+// ── Status ────────────────────────────────────────────────────────────────────
+
 export async function getAITrialStatus(isPremium: boolean): Promise<{
   hasAccess: boolean;
   daysLeft: number;
   trialStarted: boolean;
+  dailyCount: number;
+  dailyLimitReached: boolean;
 }> {
   if (isPremium) {
-    return { hasAccess: true, daysLeft: Infinity, trialStarted: true };
+    return { hasAccess: true, daysLeft: Infinity, trialStarted: true, dailyCount: 0, dailyLimitReached: false };
   }
 
   const startDate = await getAITrialStartDate();
   if (!startDate) {
     // Trial not started yet — will start on first translation
-    return { hasAccess: true, daysLeft: TRIAL_DURATION_DAYS, trialStarted: false };
+    return { hasAccess: true, daysLeft: TRIAL_DURATION_DAYS, trialStarted: false, dailyCount: 0, dailyLimitReached: false };
   }
 
   const now = new Date();
@@ -107,9 +149,18 @@ export async function getAITrialStatus(isPremium: boolean): Promise<{
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const daysLeft = Math.max(0, TRIAL_DURATION_DAYS - diffDays);
 
+  if (daysLeft === 0) {
+    return { hasAccess: false, daysLeft: 0, trialStarted: true, dailyCount: 0, dailyLimitReached: false };
+  }
+
+  const { count: dailyCount } = await getDailyCount();
+  const dailyLimitReached = dailyCount >= TRIAL_DAILY_LIMIT;
+
   return {
-    hasAccess: daysLeft > 0,
+    hasAccess: !dailyLimitReached,
     daysLeft,
     trialStarted: true,
+    dailyCount,
+    dailyLimitReached,
   };
 }

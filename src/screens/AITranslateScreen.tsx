@@ -24,7 +24,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { GradientView } from "@/components/GradientView";
-import { translateWithAI, initAITrial, getAITrialStatus } from "@/services/gemini";
+import { translateWithAI, initAITrial, getAITrialStatus, incrementLocalDailyCount, TRIAL_DAILY_LIMIT } from "@/services/gemini";
 import { parseKeywords } from "@/utils/keywords";
 import { MainStackParamList, Category } from "@/types";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
@@ -305,6 +305,9 @@ export default function AITranslateScreen() {
   const { isHintShown, markHintShown } = useOnboarding();
   const [hintVisible, setHintVisible] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState<number>(3);
+  const [trialStarted, setTrialStarted] = useState(false);
+  const [dailyCount, setDailyCount] = useState(0);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
   const [hasAccess, setHasAccess] = useState(true);
 
   const inputRef = useRef<TextInput>(null);
@@ -319,6 +322,9 @@ export default function AITranslateScreen() {
     const status = await getAITrialStatus(isPremium);
     setHasAccess(status.hasAccess);
     setTrialDaysLeft(status.daysLeft === Infinity ? 99 : status.daysLeft);
+    setTrialStarted(status.trialStarted);
+    setDailyCount(status.dailyCount);
+    setDailyLimitReached(status.dailyLimitReached);
   };
 
   const handleTranslate = useCallback(async () => {
@@ -335,6 +341,14 @@ export default function AITranslateScreen() {
       );
       setTranslatedText(result);
 
+      // Update local daily count display (server already incremented server-side)
+      const newCount = await incrementLocalDailyCount();
+      setDailyCount(newCount);
+      if (newCount >= TRIAL_DAILY_LIMIT) {
+        setDailyLimitReached(true);
+        setHasAccess(false);
+      }
+
       // Add to session history (max 5, newest first)
       setHistory((prev) => {
         const newItem: HistoryItem = {
@@ -348,7 +362,13 @@ export default function AITranslateScreen() {
       console.error("[AI Translate] error:", err);
       if (err instanceof Error && err.message === "trial_expired") {
         setHasAccess(false);
+        setTrialDaysLeft(0);
+        setTrialStarted(true);
         navigation.navigate("Paywall");
+      } else if (err instanceof Error && err.message === "daily_limit_reached") {
+        setDailyLimitReached(true);
+        setHasAccess(false);
+        setDailyCount(TRIAL_DAILY_LIMIT);
       } else {
         Alert.alert(t("common.error"), t("ai_translator.translate_error"));
       }
@@ -476,18 +496,37 @@ export default function AITranslateScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Trial banner */}
-          {!isPremium && trialDaysLeft <= 3 && trialDaysLeft > 0 && (
-            <View style={[styles.trialBanner, { backgroundColor: colors.warning + "18", borderColor: colors.warning + "40" }]}>
-              <Ionicons name="time-outline" size={14} color={colors.warning} />
-              <Text style={[styles.trialBannerText, { color: colors.warning }]}>
+          {/* Trial info bar — shown when trial is active */}
+          {!isPremium && trialStarted && trialDaysLeft > 0 && (
+            <View style={[styles.trialInfoBar, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.trialInfoCount, { color: colors.text }]}>
+                  {t("ai_translator.daily_count", { count: dailyCount, limit: TRIAL_DAILY_LIMIT })}
+                </Text>
+              </View>
+              <Text style={[styles.trialInfoDays, { color: trialDaysLeft <= 1 ? colors.error : colors.textTertiary }]}>
                 {t("ai_translator.trial_days_left", { count: trialDaysLeft })}
               </Text>
             </View>
           )}
 
+          {/* Daily limit banner */}
+          {!isPremium && dailyLimitReached && trialDaysLeft > 0 && (
+            <View style={[styles.dailyLimitBanner, { backgroundColor: colors.warning + "18", borderColor: colors.warning + "40" }]}>
+              <Ionicons name="time-outline" size={18} color={colors.warning} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.paywallTitle, { color: colors.warning }]}>
+                  {t("ai_translator.daily_limit_title")}
+                </Text>
+                <Text style={[styles.paywallBody, { color: colors.textSecondary }]}>
+                  {t("ai_translator.daily_limit_body", { days: trialDaysLeft })}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Paywall banner (trial expired) */}
-          {!hasAccess && (
+          {!isPremium && trialStarted && trialDaysLeft === 0 && (
             <View style={[styles.paywallBanner, { backgroundColor: colors.premiumAccent + "15", borderColor: colors.premiumAccent + "40" }]}>
               <Ionicons name="lock-closed" size={18} color={colors.premiumAccent} />
               <View style={{ flex: 1 }}>
@@ -732,18 +771,29 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingBottom: 40,
   },
-  trialBanner: {
+  trialInfoBar: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingVertical: 9,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  trialBannerText: {
+  trialInfoCount: {
     fontSize: 13,
     fontWeight: "600",
+  },
+  trialInfoDays: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  dailyLimitBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
   },
   paywallBanner: {
     flexDirection: "row",

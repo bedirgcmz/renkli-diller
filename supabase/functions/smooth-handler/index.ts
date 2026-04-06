@@ -38,6 +38,7 @@ Rules:
 6. Return ONLY the translated sentence. No explanations, no alternatives, no extra text.`;
 
 const TRIAL_DURATION_DAYS = 3;
+const DAILY_LIMIT = 15;
 
 function countMarkers(text: string): number {
   return (text.match(/\*\*[^*]+\*\*/g) ?? []).length;
@@ -122,7 +123,7 @@ serve(async (req) => {
 
   const { data: profile } = await adminClient
     .from("profiles")
-    .select("is_premium, ai_trial_started_at")
+    .select("is_premium, ai_trial_started_at, ai_daily_count, ai_daily_date")
     .eq("id", user.id)
     .single();
 
@@ -152,6 +153,29 @@ serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // ── Daily limit check ────────────────────────────────────────────────────
+    const todayDate = now.toISOString().split("T")[0]; // YYYY-MM-DD (UTC)
+    const aiDailyDate = profile?.ai_daily_date as string | null;
+    const aiDailyCount = (profile?.ai_daily_count as number) ?? 0;
+
+    let newDailyCount: number;
+    if (aiDailyDate !== todayDate) {
+      // New day — reset to 1 (this request counts as the first use)
+      newDailyCount = 1;
+    } else if (aiDailyCount >= DAILY_LIMIT) {
+      return new Response(
+        JSON.stringify({ error: "daily_limit_reached" }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    } else {
+      newDailyCount = aiDailyCount + 1;
+    }
+
+    await adminClient
+      .from("profiles")
+      .update({ ai_daily_count: newDailyCount, ai_daily_date: todayDate })
+      .eq("id", user.id);
   }
 
   // ── 3. Translate ─────────────────────────────────────────────────────────────
