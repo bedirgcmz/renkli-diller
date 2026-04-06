@@ -60,18 +60,10 @@ export default function EditSentenceScreen() {
   }, []);
   const [saving, setSaving] = useState(false);
 
-  if (!sentence) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.centered}>
-          <Text style={{ color: colors.textSecondary }}>{t("add_sentence.not_found")}</Text>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.primary }}>{t("common.back")}</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // Auto-navigate back if the sentence was deleted while this screen was open
+  useEffect(() => {
+    if (!sentence) navigation.goBack();
+  }, [sentence]);
 
   const isUserSentence = !sentence.is_preset;
 

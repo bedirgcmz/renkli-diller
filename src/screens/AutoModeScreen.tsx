@@ -261,10 +261,12 @@ export default function AutoModeScreen() {
     >
       {/* Header */}
       <View style={styles.topBar}>
-        <FilterButton
-          activeCount={activeTagFilters.length}
-          onPress={() => setFilterModalVisible(true)}
-        />
+        <View style={{ opacity: isPlaying ? 0.4 : 1 }} pointerEvents={isPlaying ? "none" : "auto"}>
+          <FilterButton
+            activeCount={activeTagFilters.length}
+            onPress={() => setFilterModalVisible(true)}
+          />
+        </View>
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
         <TouchableOpacity
           onPress={() => {

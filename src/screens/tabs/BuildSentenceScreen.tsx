@@ -229,6 +229,7 @@ export default function BuildSentenceScreen() {
 
   // Daily limit
   const [dailyCount, setDailyCount] = useState(0);
+  const [dailyCountLoaded, setDailyCountLoaded] = useState(false);
   const dailyLimitReached = !isPremium && dailyCount >= FREE_BUILD_SENTENCE_DAILY_LIMIT;
 
   // Learning list — stored in state so updating it triggers a re-render and
@@ -245,7 +246,7 @@ export default function BuildSentenceScreen() {
   useEffect(() => {
     const loadTodayCount = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setDailyCountLoaded(true); return; }
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
       const { count } = await supabase
@@ -255,6 +256,7 @@ export default function BuildSentenceScreen() {
         .eq("quiz_type", "build_sentence")
         .gte("answered_at", todayStart.toISOString());
       setDailyCount(count ?? 0);
+      setDailyCountLoaded(true);
     };
     loadTodayCount();
   }, []);
@@ -382,7 +384,7 @@ export default function BuildSentenceScreen() {
   }, []);
 
   // ── Loading ──────────────────────────────────────────────────────────────
-  if (!initialized) {
+  if (!initialized || !dailyCountLoaded) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
         <Header
