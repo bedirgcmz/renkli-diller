@@ -311,6 +311,7 @@ export default function LearnScreen() {
   const { progressMap, tagMap, loadProgress, addToLearning } = useProgressStore();
   const { isHintShown, markHintShown } = useOnboarding();
   const [hintLearnedVisible, setHintLearnedVisible] = useState(false);
+  const [hintRemoveVisible, setHintRemoveVisible] = useState(false);
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -588,6 +589,10 @@ export default function LearnScreen() {
     await useSentenceStore.getState().removeFromLearningList(currentSentence.id);
     if (!currentSentence.is_preset) await loadSentences();
     setIsProcessing(false);
+    if (!isHintShown("removeLearning")) {
+      markHintShown("removeLearning");
+      setHintRemoveVisible(true);
+    }
   };
 
   // ── Listening actions ────────────────────────────────────────────────────────
@@ -946,6 +951,12 @@ export default function LearnScreen() {
         title={t("hints.learned_title")}
         body={t("hints.learned_body")}
         onClose={() => setHintLearnedVisible(false)}
+      />
+      <HintBottomSheet
+        visible={hintRemoveVisible}
+        title={t("hints.remove_learning_title")}
+        body={t("hints.remove_learning_body")}
+        onClose={() => setHintRemoveVisible(false)}
       />
     </View>
   );
