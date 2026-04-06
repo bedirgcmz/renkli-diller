@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  Image,
   type DimensionValue,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -78,6 +79,13 @@ function ListenCard({
 }) {
   return (
     <View style={[listenStyles.card, { backgroundColor: colors.cardBackground }]}>
+      {sentence.visual_image_url && (
+        <Image
+          source={{ uri: sentence.visual_image_url }}
+          style={listenStyles.visualImage}
+          resizeMode="contain"
+        />
+      )}
       {/* ── Icon row: eye toggle + replay + favorite — horizontal, left-aligned ── */}
       <View style={listenStyles.iconRow}>
         <TouchableOpacity
@@ -106,7 +114,11 @@ function ListenCard({
           <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
         </TouchableOpacity>
         <View style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}>
-          <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset ?? false} size={18} />
+          <FavoriteButton
+            sentenceId={sentence.id}
+            isPreset={sentence.is_preset ?? false}
+            size={18}
+          />
         </View>
       </View>
 
@@ -190,11 +202,20 @@ const listenStyles = StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: 20,
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
+  },
+  visualImage: {
+    position: "absolute",
+    top: -16,
+    right: -5,
+    width: 105,
+    height: 105,
+    opacity: 0.58,
   },
   targetRow: {
     flexDirection: "row",
@@ -285,12 +306,7 @@ export default function LearnScreen() {
     loadSentences,
     loadPresetSentences,
   } = useSentenceStore();
-  const {
-    progressMap,
-    tagMap,
-    loadProgress,
-    addToLearning,
-  } = useProgressStore();
+  const { progressMap, tagMap, loadProgress, addToLearning } = useProgressStore();
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -332,21 +348,32 @@ export default function LearnScreen() {
   }, [targetLanguage, uiLanguage]);
 
   const learningList: Sentence[] = [
-    ...userSentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
+    ...userSentences.filter(
+      (s) =>
+        s.status === "learning" &&
+        (s.target_lang ?? targetLanguage) === targetLanguage &&
+        (s.source_lang ?? uiLanguage) === uiLanguage,
+    ),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 
   const learnedList: Sentence[] = [
-    ...userSentences.filter((s) => s.status === "learned" && (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
+    ...userSentences.filter(
+      (s) =>
+        s.status === "learned" &&
+        (s.target_lang ?? targetLanguage) === targetLanguage &&
+        (s.source_lang ?? uiLanguage) === uiLanguage,
+    ),
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 
-  const filteredLearningList: Sentence[] = activeTagFilters.length === 0
-    ? learningList
-    : learningList.filter((s) => {
-        const tag = s.is_preset ? tagMap[s.id] : s.tag;
-        return tag != null && activeTagFilters.includes(tag);
-      });
+  const filteredLearningList: Sentence[] =
+    activeTagFilters.length === 0
+      ? learningList
+      : learningList.filter((s) => {
+          const tag = s.is_preset ? tagMap[s.id] : s.tag;
+          return tag != null && activeTagFilters.includes(tag);
+        });
 
   const total = filteredLearningList.length;
   const listenTotal = filteredLearningList.length;
@@ -428,7 +455,11 @@ export default function LearnScreen() {
   // Remove animation: show undo overlay → shrink + fly down → next card
   const animateRemove = useCallback(
     (callback: () => void) => {
-      Animated.timing(removeOverlayOpacity, { toValue: 1, duration: 100, useNativeDriver: true }).start(() => {
+      Animated.timing(removeOverlayOpacity, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }).start(() => {
         Animated.parallel([
           Animated.timing(cardOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
           Animated.timing(cardTranslateY, { toValue: 120, duration: 220, useNativeDriver: true }),
@@ -679,7 +710,10 @@ export default function LearnScreen() {
 
         {/* AI Translator card */}
         <TouchableOpacity
-          style={[aiCardStyles.card, { backgroundColor: colors.cardBackground, borderColor: colors.primary + "30" }]}
+          style={[
+            aiCardStyles.card,
+            { backgroundColor: colors.cardBackground, borderColor: colors.primary + "30" },
+          ]}
           onPress={() => navigation.navigate("AITranslator")}
           activeOpacity={0.8}
         >
@@ -764,7 +798,6 @@ export default function LearnScreen() {
           </TouchableOpacity>
         </View>
 
-
         {/* Progress bar — only on learning tab */}
         {activeTab === "learning" && initialized && total > 0 && (
           <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
@@ -801,7 +834,11 @@ export default function LearnScreen() {
                     styles.cardWrapper,
                     {
                       opacity: cardOpacity,
-                      transform: [{ translateX: cardTranslateX }, { translateY: cardTranslateY }, { scale: cardScale }],
+                      transform: [
+                        { translateX: cardTranslateX },
+                        { translateY: cardTranslateY },
+                        { scale: cardScale },
+                      ],
                     },
                   ]}
                   shouldRasterizeIOS
@@ -902,7 +939,15 @@ export default function LearnScreen() {
 
 // ─── Alt bileşenler ────────────────────────────────────────────────────────────
 
-function EmptyState({ tab, colors, t }: { tab: TabKey; colors: ThemeColors; t: (k: string) => string }) {
+function EmptyState({
+  tab,
+  colors,
+  t,
+}: {
+  tab: TabKey;
+  colors: ThemeColors;
+  t: (k: string) => string;
+}) {
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>{tab === "listening" ? "🎧" : "📚"}</Text>

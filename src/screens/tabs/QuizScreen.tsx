@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
+  Image,
   useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,7 +27,13 @@ import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/util
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
-import { HomeStackParamList, MainStackParamList, PillSegment, Sentence, SentenceTag } from "@/types";
+import {
+  HomeStackParamList,
+  MainStackParamList,
+  PillSegment,
+  Sentence,
+  SentenceTag,
+} from "@/types";
 import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import { speak, stopSpeaking } from "@/services/tts";
 import { useAchievementStore } from "@/store/useAchievementStore";
@@ -43,9 +50,9 @@ interface MCQuestion {
 interface FBQuestion {
   type: "fill_blank";
   sentence: Sentence;
-  contextText: string;           // source text (stripped) — shown as context
+  contextText: string; // source text (stripped) — shown as context
   targetSegments: PillSegment[]; // parsed target_text for rendering with blanks
-  keywords: string[];            // expected keyword answers (in order)
+  keywords: string[]; // expected keyword answers (in order)
 }
 
 type Question = MCQuestion | FBQuestion;
@@ -86,7 +93,12 @@ function generateFBQuestion(sentence: Sentence): FBQuestion | null {
   };
 }
 
-function buildSession(sentences: Sentence[], mode: QuizMode, count: number, distractors?: Sentence[]): Question[] {
+function buildSession(
+  sentences: Sentence[],
+  mode: QuizMode,
+  count: number,
+  distractors?: Sentence[],
+): Question[] {
   const shuffled = [...sentences].sort(() => Math.random() - 0.5);
   const questions: Question[] = [];
 
@@ -107,10 +119,13 @@ export default function QuizScreen() {
   const { colors } = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const navigation = useNavigation<CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList>,
-    NativeStackNavigationProp<MainStackParamList>
-  >>();
+  const navigation =
+    useNavigation<
+      CompositeNavigationProp<
+        NativeStackNavigationProp<HomeStackParamList>,
+        NativeStackNavigationProp<MainStackParamList>
+      >
+    >();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, tagMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
@@ -209,7 +224,11 @@ export default function QuizScreen() {
   }, [currentIdx, mode, questions, ttsEnabled, quizMuted, initialized, isFocused]);
 
   const allSentences: Sentence[] = [
-    ...sentences.filter((s) => (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
+    ...sentences.filter(
+      (s) =>
+        (s.target_lang ?? targetLanguage) === targetLanguage &&
+        (s.source_lang ?? uiLanguage) === uiLanguage,
+    ),
     ...presetSentences.filter((s) => progressMap[s.id] !== undefined),
   ];
 
@@ -217,12 +236,13 @@ export default function QuizScreen() {
     (s) => s.status === "learning" || progressMap[s.id] === "learning",
   );
 
-  const filteredLearningSentences = activeTagFilters.length === 0
-    ? learningSentences
-    : learningSentences.filter((s) => {
-        const tag = s.is_preset ? tagMap[s.id] : s.tag;
-        return tag != null && activeTagFilters.includes(tag);
-      });
+  const filteredLearningSentences =
+    activeTagFilters.length === 0
+      ? learningSentences
+      : learningSentences.filter((s) => {
+          const tag = s.is_preset ? tagMap[s.id] : s.tag;
+          return tag != null && activeTagFilters.includes(tag);
+        });
 
   const sessionSize = isPremium ? 20 : FREE_QUIZ_DAILY_LIMIT;
   const dailyLimitReached = !isPremium && dailyCount >= FREE_QUIZ_DAILY_LIMIT;
@@ -286,8 +306,8 @@ export default function QuizScreen() {
   const handleFBSubmit = () => {
     if (showResult || dailyLimitReached) return;
     const q = currentQ as FBQuestion;
-    const correct = q.keywords.every((kw, idx) =>
-      normalize(keywordInputs[idx] ?? "") === normalize(kw),
+    const correct = q.keywords.every(
+      (kw, idx) => normalize(keywordInputs[idx] ?? "") === normalize(kw),
     );
     commitAnswer(correct);
   };
@@ -322,7 +342,10 @@ export default function QuizScreen() {
   // ── Loading ──────────────────────────────────────────────────────────────
   if (!initialized) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -332,7 +355,10 @@ export default function QuizScreen() {
 
   if (learningSentences.length < 2) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
         </View>
@@ -350,9 +376,7 @@ export default function QuizScreen() {
         >
           <View style={[styles.emptyCard, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.emptyIcon}>📚</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {t("quiz.empty_title")}
-            </Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t("quiz.empty_title")}</Text>
             <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
               {t("quiz.empty_hint")}
             </Text>
@@ -430,7 +454,10 @@ export default function QuizScreen() {
   // No keyword sentences for fill_blank
   if (mode === "fill_blank" && initialized && questions.length === 0 && !sessionComplete) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
         {renderHeader()}
         <ScrollView
           contentContainerStyle={styles.emptyScroll}
@@ -460,7 +487,10 @@ export default function QuizScreen() {
 
   // ── Main Render ───────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={["top"]}
+    >
       {renderHeader()}
 
       {/* Retry phase banner */}
@@ -627,8 +657,8 @@ export default function QuizScreen() {
                   <KeywordText
                     text={currentQ.sentence.target_text}
                     baseColor={colors.text}
-                    fontSize={18}
-                    lineHeight={27}
+                    fontSize={16}
+                    lineHeight={22}
                     colorSeed={String(currentQ.sentence.id)}
                   />
                 </View>
@@ -711,27 +741,25 @@ export default function QuizScreen() {
                                   color: textColor,
                                 },
                               ]}
-                            value={keywordInputs[kwIdx] ?? ""}
-                            onChangeText={(val) => {
-                              const next = [...keywordInputs];
-                              next[kwIdx] = val;
-                              setKeywordInputs(next);
-                            }}
-                            editable={!showResult && !dailyLimitReached}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            spellCheck={false}
-                            returnKeyType={
-                              kwIdx < fbQ.keywords.length - 1 ? "next" : "done"
-                            }
-                            onSubmitEditing={() => {
-                              if (kwIdx < fbQ.keywords.length - 1) {
-                                kwInputRefs.current[kwIdx + 1]?.focus();
-                              } else {
-                                handleFBSubmit();
-                              }
-                            }}
-                          />
+                              value={keywordInputs[kwIdx] ?? ""}
+                              onChangeText={(val) => {
+                                const next = [...keywordInputs];
+                                next[kwIdx] = val;
+                                setKeywordInputs(next);
+                              }}
+                              editable={!showResult && !dailyLimitReached}
+                              autoCapitalize="none"
+                              autoCorrect={false}
+                              spellCheck={false}
+                              returnKeyType={kwIdx < fbQ.keywords.length - 1 ? "next" : "done"}
+                              onSubmitEditing={() => {
+                                if (kwIdx < fbQ.keywords.length - 1) {
+                                  kwInputRefs.current[kwIdx + 1]?.focus();
+                                } else {
+                                  handleFBSubmit();
+                                }
+                              }}
+                            />
                           </View>
                         </View>,
                       ];
@@ -743,7 +771,10 @@ export default function QuizScreen() {
                     <View
                       style={[
                         styles.fbCorrectBox,
-                        { backgroundColor: colors.success + "18", borderColor: colors.success + "40" },
+                        {
+                          backgroundColor: colors.success + "18",
+                          borderColor: colors.success + "40",
+                        },
                       ]}
                     >
                       <Text style={[styles.fbCorrectLabel, { color: colors.success }]}>
@@ -816,9 +847,7 @@ export default function QuizScreen() {
                       { backgroundColor: isCorrect ? "#2ECC7118" : "#E53E3E18" },
                     ]}
                   >
-                    <Text
-                      style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}
-                    >
+                    <Text style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}>
                       {isCorrect ? `🎉 ${t("quiz.correct")}` : `✗ ${t("quiz.incorrect")}`}
                     </Text>
                   </View>
@@ -843,9 +872,7 @@ export default function QuizScreen() {
                         styles.submitBtn,
                         {
                           backgroundColor: colors.primary,
-                          opacity: fbQ.keywords.some((_, i) =>
-                            (keywordInputs[i] ?? "").trim(),
-                          )
+                          opacity: fbQ.keywords.some((_, i) => (keywordInputs[i] ?? "").trim())
                             ? 1
                             : 0.45,
                         },
@@ -872,6 +899,19 @@ export default function QuizScreen() {
               </View>
             )}
 
+            {/* ── Visual image ─────────────────────────────────── */}
+            {currentQ.sentence.visual_image_url && (
+              <View style={styles.visualImageWrapper}>
+                <View style={styles.visualImageClip}>
+                  <Image
+                    source={{ uri: currentQ.sentence.visual_image_url }}
+                    style={styles.visualImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </View>
+            )}
+
             {/* ── MC: result banner + Next button ──────────────── */}
             {mcQ && showResult && (
               <>
@@ -881,9 +921,7 @@ export default function QuizScreen() {
                     { backgroundColor: isCorrect ? "#2ECC7118" : "#E53E3E18" },
                   ]}
                 >
-                  <Text
-                    style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}
-                  >
+                  <Text style={[styles.resultText, { color: isCorrect ? "#2ECC71" : "#E53E3E" }]}>
                     {isCorrect
                       ? `🎉 ${t("quiz.correct")}`
                       : `✗ ${t("quiz.incorrect")} ${t("quiz.correct_answer_is")} "${mcQ.correctAnswer}"`}
@@ -965,7 +1003,8 @@ const styles = StyleSheet.create({
   upgradeBannerBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   questionCard: {
     borderRadius: 16,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -980,7 +1019,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   questionNum: { fontSize: 12 },
-  questionPrompt: { marginBottom: 12 },
+  questionPrompt: { marginBottom: 6 },
   directionBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -1073,15 +1112,34 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
+  // ── Visual image ────────────────────────────────────────────────────────
+  visualImageWrapper: {
+    alignItems: "center",
+    marginTop: -20,
+    marginBottom: -25,
+  },
+  visualImageClip: {
+    width: 170,
+    height: 170,
+    overflow: "hidden",
+  },
+  visualImage: {
+    position: "absolute",
+    top: -16,
+    left: -16,
+    right: -16,
+    bottom: -16,
+  },
+
   // ── MC options ──────────────────────────────────────────────────────────
-  optionsContainer: { gap: 10, marginBottom: 12 },
+  optionsContainer: { gap: 10, marginBottom: 4 },
   optionBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 1.5,
     borderRadius: 12,
-    padding: 14,
+    padding: 10,
   },
   optionText: { fontSize: 15, flex: 1 },
 
@@ -1145,7 +1203,12 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   doneScoreBlock: { alignItems: "center", gap: 4 },
-  doneScoreLabel: { fontSize: 11, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 },
+  doneScoreLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   doneScoreNum: { fontSize: 22, fontWeight: "700" },
   doneScoreDivider: { width: 1, height: 40 },
 
