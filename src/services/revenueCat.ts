@@ -61,11 +61,38 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
   return Purchases.getCustomerInfo();
 }
 
-export async function isPremiumActive(): Promise<boolean> {
-  if (isExpoGo) return false;
+export type PremiumCheckResult = { active: boolean; verified: boolean };
+
+/**
+ * Returns { active, verified }.
+ * verified=false means RC was unavailable (Expo Go, not configured, or threw) —
+ * callers should fall back to the Supabase value in that case.
+ * verified=true means RC answered authoritatively (active may be true or false).
+ */
+export async function isPremiumActive(): Promise<PremiumCheckResult> {
+  if (isExpoGo) return { active: false, verified: false };
   const info = await getCustomerInfo();
-  if (!info) return false;
-  return info.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
+  if (!info) return { active: false, verified: false };
+  const active = info.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
+  return { active, verified: true };
+}
+
+/**
+ * Subscribes to real-time CustomerInfo updates from RevenueCat.
+ * Returns a cleanup function — call it on sign-out or store teardown.
+ */
+export function setupCustomerInfoListener(
+  cb: (active: boolean) => void
+): () => void {
+  if (isExpoGo) return () => {};
+  const listener = (info: CustomerInfo) => {
+    const active = info.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
+    cb(active);
+  };
+  Purchases.addCustomerInfoUpdateListener(listener);
+  return () => {
+    Purchases.removeCustomerInfoUpdateListener(listener);
+  };
 }
 
 export async function getOfferings(): Promise<PurchasesOffering | null> {

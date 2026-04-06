@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { MainStackParamList } from "@/types";
 
 interface Props {
@@ -20,7 +20,7 @@ interface Props {
  * Tapping the overlay navigates to the Paywall (or calls `onUpgradePress`).
  */
 export default function PremiumGate({ children, onUpgradePress }: Props) {
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();

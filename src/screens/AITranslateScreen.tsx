@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { GradientView } from "@/components/GradientView";
 import { translateWithAI, initAITrial, getAITrialStatus } from "@/services/gemini";
@@ -293,7 +293,7 @@ export default function AITranslateScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { categories, addSentence, loadCategories } = useSentenceStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [inputText, setInputText] = useState("");
   const [translatedText, setTranslatedText] = useState("");

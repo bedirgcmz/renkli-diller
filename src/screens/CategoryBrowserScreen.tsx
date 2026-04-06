@@ -16,7 +16,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Category, MainStackParamList } from "@/types";
@@ -31,7 +31,7 @@ export default function CategoryBrowserScreen() {
   const { categories, presetSentences, loading, loadCategories, loadPresetSentences, addToLearningList, removeFromLearningList } = useSentenceStore();
   const { progressMap } = useProgressStore();
   const { uiLanguage } = useSettingsStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [initialized, setInitialized] = useState(false);

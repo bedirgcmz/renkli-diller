@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { FREE_USER_SENTENCE_LIMIT, TAG_OPTIONS } from "@/utils/constants";
 import { MainStackParamList, SentenceTag } from "@/types";
@@ -32,7 +32,7 @@ export default function AddSentenceScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const { sentences, categories, addSentence, loadCategories } = useSentenceStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [sourceText, setSourceText] = useState("");
   const [targetText, setTargetText] = useState("");

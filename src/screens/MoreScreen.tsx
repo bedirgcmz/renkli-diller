@@ -14,7 +14,6 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
-import { usePremium } from "@/hooks/usePremium";
 import { MainStackParamList } from "@/types";
 import PDFExportModal from "@/components/PDFExportModal";
 
@@ -33,7 +32,7 @@ export default function MoreScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const { signOut } = useAuthStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
 
   const handleSignOut = () => {

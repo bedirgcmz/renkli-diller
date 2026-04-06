@@ -22,7 +22,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
 import ActivityChart from "@/components/ActivityChart";
 import LeaderboardModal from "@/components/LeaderboardModal";
 import { countTodayLearned } from "@/utils/progressHelpers";
@@ -40,7 +39,7 @@ export default function ProfileScreen() {
   const { sentences, loadSentences } = useSentenceStore();
   const { stats, progressMap, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const navigation = useNavigation();
   const [avatarKey, setAvatarKey] = useState(0);
   const [avatarLoadError, setAvatarLoadError] = useState(false);

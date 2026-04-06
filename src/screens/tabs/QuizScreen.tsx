@@ -22,7 +22,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -131,7 +131,7 @@ export default function QuizScreen() {
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, tagMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const isFocused = useIsFocused();
 
   const [mode, setMode] = useState<QuizMode>("multiple_choice");

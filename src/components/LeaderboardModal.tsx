@@ -13,7 +13,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
-import { usePremium } from "@/hooks/usePremium";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useLeaderboardStore, LeaderboardEntry } from "@/store/useLeaderboardStore";
 
@@ -189,8 +188,8 @@ function BlurredRows({
 export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { isPremium } = usePremium();
   const { user } = useAuthStore();
+  const isPremium = user?.is_premium ?? false;
   const { entries, myEntry, loading, loadLeaderboard } = useLeaderboardStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("learned");

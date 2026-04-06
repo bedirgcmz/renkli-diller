@@ -13,7 +13,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { LearnedCard } from "@/components/LearnedCard";
 import { MainStackParamList } from "@/types";
 
@@ -30,7 +30,7 @@ export default function FavoriteSentencesScreen() {
     loadFavorites,
     toggleFavorite,
   } = useSentenceStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   useEffect(() => {
     loadSentences();

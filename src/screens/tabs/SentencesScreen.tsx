@@ -22,7 +22,7 @@ import type { ThemeColors } from "@/providers/ThemeProvider";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { QuickTagButton } from "@/components/QuickTagButton";
@@ -601,7 +601,7 @@ export default function SentencesScreen() {
   const { colors, isDark } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const {
     sentences,
     presetSentences,

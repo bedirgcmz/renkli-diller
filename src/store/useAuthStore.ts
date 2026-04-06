@@ -3,7 +3,12 @@ import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { logInUser, logOutUser, isPremiumActive } from "@/services/revenueCat";
+import {
+  logInUser,
+  logOutUser,
+  isPremiumActive,
+  setupCustomerInfoListener,
+} from "@/services/revenueCat";
 import * as AppleAuthentication from "expo-apple-authentication";
 
 interface User {
@@ -21,8 +26,10 @@ interface AuthState {
   session: any;
   loading: boolean;
   initialized: boolean;
+  isPremiumVerified: boolean;
 
   // Actions
+  setPremiumStatus: (active: boolean) => void;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (
     email: string,
@@ -54,11 +61,26 @@ interface AuthState {
 // multiple `initialize` calls (e.g. hot-reload or fast-refresh cycles).
 let authSubscription: { unsubscribe: () => void } | null = null;
 
+// Module-level RC listener cleanup — ensures only one listener is active at a time.
+let rcListenerRemover: (() => void) | null = null;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
   loading: false,
   initialized: false,
+  isPremiumVerified: false,
+
+  setPremiumStatus: (active: boolean) => {
+    const { user } = get();
+    if (!user) return;
+    const wasNotPremium = !user.is_premium;
+    set({ user: { ...user, is_premium: active }, isPremiumVerified: true });
+    // Sync upgrade to Supabase via SECURITY DEFINER RPC (only on upgrade, no revoke RPC exists)
+    if (active && wasNotPremium) {
+      void (async () => { await supabase.rpc("set_premium"); })().catch(() => {});
+    }
+  },
 
   signIn: async (email: string, password: string) => {
     set({ loading: true });
@@ -83,14 +105,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         // RevenueCat login + premium check
         await logInUser(data.user.id).catch(console.error);
-        const rcPremium = await isPremiumActive().catch(() => false);
+        const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+          () => ({ active: false, verified: false })
+        );
 
         const user: User = {
           id: data.user.id,
           email: data.user.email!,
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: profile?.is_premium || rcPremium,
+          // RC is authoritative when verified; fall back to Supabase when RC unavailable
+          is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -99,7 +124,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user,
           session: data.session,
           loading: false,
+          isPremiumVerified: rcVerified,
         });
+
+        // Start real-time RC listener (clears any previous one first)
+        if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
+        rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
 
         // Store session in AsyncStorage
         await AsyncStorage.setItem("supabase_session", JSON.stringify(data.session));
@@ -186,19 +216,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .eq("id", data.user.id)
           .single();
         await logInUser(data.user.id).catch(console.error);
-        const rcPremium = await isPremiumActive().catch(() => false);
+        const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+          () => ({ active: false, verified: false })
+        );
 
         const user: User = {
           id: data.user.id,
           email: data.user.email || credential.email || "",
           display_name: displayName || profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: profile?.is_premium || rcPremium,
+          is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
 
-        set({ user, session: data.session, loading: false });
+        set({ user, session: data.session, loading: false, isPremiumVerified: rcVerified });
+
+        // Start real-time RC listener (clears any previous one first)
+        if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
+        rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
         await AsyncStorage.setItem("supabase_session", JSON.stringify(data.session));
       }
 
@@ -296,6 +332,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     set({ loading: true });
     try {
+      // Remove RC listener before signing out
+      if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
       await supabase.auth.signOut();
       await AsyncStorage.multiRemove(["supabase_session", "user_settings"]);
       await logOutUser().catch(console.error);
@@ -303,6 +341,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         user: null,
         session: null,
         loading: false,
+        isPremiumVerified: false,
       });
     } catch (error) {
       set({ loading: false });
@@ -329,9 +368,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       // Edge function deleted the user — clean up locally
+      if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
       await AsyncStorage.multiRemove(["supabase_session", "user_settings"]);
       await logOutUser().catch(console.error);
-      set({ user: null, session: null, loading: false });
+      set({ user: null, session: null, loading: false, isPremiumVerified: false });
       return { success: true };
     } catch (error: any) {
       set({ loading: false });
@@ -510,14 +550,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           // RevenueCat login + premium check
           await logInUser(user.id).catch(console.error);
-          const rcPremium = await isPremiumActive().catch(() => false);
+          const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+            () => ({ active: false, verified: false })
+          );
 
           const userData: User = {
             id: user.id,
             email: user.email!,
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
-            is_premium: profile?.is_premium || rcPremium,
+            is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
             leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
           };
@@ -526,7 +568,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             user: userData,
             session,
             initialized: true,
+            isPremiumVerified: rcVerified,
           });
+
+          // Start real-time RC listener (clears any previous one first)
+          if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
+          rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
           return;
         }
       }
@@ -569,19 +616,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
               await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
 
-              if (profile) {
-                set((state) => ({
-                  user: state.user
-                    ? {
-                        ...state.user,
-                        display_name: profile.display_name || "",
-                        avatar_url: profile.avatar_url || "",
-                        is_premium: profile.is_premium || false,
-                        leaderboard_visible: profile.leaderboard_visible ?? true,
-                      }
-                    : state.user,
-                }));
-              }
+              // RC login + premium check (handles Google login path)
+              await logInUser(session.user.id).catch(console.error);
+              const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+                () => ({ active: false, verified: false })
+              );
+
+              set((state) => ({
+                user: state.user
+                  ? {
+                      ...state.user,
+                      display_name: profile?.display_name || "",
+                      avatar_url: profile?.avatar_url || "",
+                      is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+                      leaderboard_visible: profile?.leaderboard_visible ?? true,
+                    }
+                  : state.user,
+                isPremiumVerified: rcVerified,
+              }));
+
+              // Start real-time RC listener (clears any previous one first)
+              if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
+              rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
             } catch (e) {
               console.error("[onAuthStateChange] deferred async error:", e);
             }
@@ -605,11 +661,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       authSubscription.unsubscribe();
       authSubscription = null;
     }
+    if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
     set({
       user: null,
       session: null,
       loading: false,
       initialized: false,
+      isPremiumVerified: false,
     });
   },
 }));

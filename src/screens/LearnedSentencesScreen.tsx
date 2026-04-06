@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { LearnedCard } from "@/components/LearnedCard";
 import { MainStackParamList } from "@/types";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
@@ -26,7 +26,7 @@ export default function LearnedSentencesScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, addToLearning, loadProgress } = useProgressStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const { isHintShown, markHintShown } = useOnboarding();
   const [hintVisible, setHintVisible] = useState(false);
 

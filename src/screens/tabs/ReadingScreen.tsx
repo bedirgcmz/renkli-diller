@@ -21,7 +21,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useReadingStore } from "@/store/useReadingStore";
-import { usePremium } from "@/hooks/usePremium";
 import { KEYWORD_TEXT_COLORS, LANG_CODE } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
 import {
@@ -784,7 +783,7 @@ export default function ReadingScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const navigation =
     useNavigation<
       CompositeNavigationProp<

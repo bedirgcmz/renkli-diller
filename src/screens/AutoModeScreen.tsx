@@ -10,7 +10,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import {
@@ -38,7 +38,7 @@ export default function AutoModeScreen() {
   const { uiLanguage, targetLanguage, autoModeSpeed } = useSettingsStore();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, tagMap, loadProgress, recordStudySession } = useProgressStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [speed, setSpeed] = useState<Speed>((autoModeSpeed as Speed) ?? 1);
   const [isPlaying, setIsPlaying] = useState(false);

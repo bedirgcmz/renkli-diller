@@ -32,7 +32,7 @@ import { VisualBadge } from "@/components/VisualBadge";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, FREE_BUILD_SENTENCE_DAILY_LIMIT } from "@/utils/constants";
 import * as Haptics from "expo-haptics";
 import { supabase } from "@/lib/supabase";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useAchievementStore } from "@/store/useAchievementStore";
 
 type Nav = CompositeNavigationProp<
@@ -211,7 +211,7 @@ export default function BuildSentenceScreen() {
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { targetLanguage, uiLanguage } = useSettingsStore();
-  const { isPremium } = usePremium();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);

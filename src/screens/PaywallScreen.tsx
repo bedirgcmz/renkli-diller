@@ -26,7 +26,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
-import { usePremium } from "@/hooks/usePremium";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   getOfferings,
   purchasePackage,
@@ -56,7 +56,7 @@ export default function PaywallScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { refresh } = usePremium();
+  const setPremiumStatus = useAuthStore((s) => s.setPremiumStatus);
   const { height: windowHeight } = useWindowDimensions();
 
   const isLargeScreen = windowHeight >= 700;
@@ -108,7 +108,7 @@ export default function PaywallScreen() {
       if (result.userCancelled) {
         // Kullanıcı vazgeçti, sessizce kapat
       } else if (result.success) {
-        await refresh();
+        setPremiumStatus(true);
         Alert.alert(
           t("premium.success_title"),
           t("premium.success_body"),
@@ -127,7 +127,7 @@ export default function PaywallScreen() {
     try {
       const result = await restorePurchases();
       if (result.isPremium) {
-        await refresh();
+        setPremiumStatus(true);
         Alert.alert(
           t("premium.restored_title"),
           t("premium.restored_body"),
