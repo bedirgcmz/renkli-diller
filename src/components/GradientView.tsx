@@ -19,7 +19,7 @@ export function GradientView({ colors, style, start, end, children }: Props) {
   if (LinearGradient) {
     return (
       <LinearGradient
-        colors={colors}
+        colors={colors as [string, string, ...string[]]}
         start={start ?? { x: 0, y: 0 }}
         end={end ?? { x: 1, y: 0 }}
         style={style}

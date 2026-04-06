@@ -269,7 +269,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await WebBrowser.openAuthSessionAsync(data.url, "parlio://auth/callback");
 
       console.log("AUTH RESULT:", result);
-      console.log("CALLBACK URL:", result?.url);
       console.log("AUTH RESULT TYPE:", result.type);
 
       if (result.type !== "success") {
@@ -278,6 +277,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Parse tokens from the callback URL (fragment or query string)
       const callbackUrl = result.url;
+      console.log("CALLBACK URL:", callbackUrl);
       const tokenString = callbackUrl.includes("#")
         ? callbackUrl.split("#")[1]
         : callbackUrl.split("?")[1];
