@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 // Providers
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { I18nProvider } from "@/providers/I18nProvider";
+import { OnboardingProvider } from "@/providers/OnboardingProvider";
 
 // Navigation
 import AppNavigator from "@/navigation/AppNavigator";
@@ -81,9 +82,11 @@ export default function App() {
         <SafeAreaProvider>
           <I18nProvider>
             <ThemeProvider>
-              <AppNavigator />
-              <AchievementToast />
-              <StatusBar style="auto" />
+              <OnboardingProvider>
+                <AppNavigator />
+                <AchievementToast />
+                <StatusBar style="auto" />
+              </OnboardingProvider>
             </ThemeProvider>
           </I18nProvider>
         </SafeAreaProvider>
