@@ -105,6 +105,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   loadSettings: async () => {
+    if (get().initialized) return;
     set({ loading: true });
     try {
       // Try to load from AsyncStorage first

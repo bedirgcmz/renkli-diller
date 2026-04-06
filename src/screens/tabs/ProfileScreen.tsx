@@ -148,12 +148,15 @@ export default function ProfileScreen() {
   const doUpload = async (uri: string, base64?: string) => {
     setAvatarUploading(true);
     setAvatarLoadError(false);
-    const res = await uploadAvatar(uri, base64);
-    setAvatarUploading(false);
-    if (res.success) {
-      setAvatarKey((k) => k + 1);
-    } else {
-      Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
+    try {
+      const res = await uploadAvatar(uri, base64);
+      if (res.success) {
+        setAvatarKey((k) => k + 1);
+      } else {
+        Alert.alert(t("common.error"), res.error ?? t("profile.photo_upload_error"));
+      }
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
