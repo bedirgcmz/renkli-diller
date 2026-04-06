@@ -6,6 +6,7 @@ interface AchievementState {
   unlockedIds: string[];
   unlockedDates: Record<string, string>;
   pendingToast: string | null;
+  isLoaded: boolean;
 
   loadAchievements: () => Promise<void>;
   unlockAchievement: (id: string) => Promise<void>;
@@ -24,6 +25,7 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
   unlockedIds: [],
   unlockedDates: {},
   pendingToast: null,
+  isLoaded: false,
 
   loadAchievements: async () => {
     try {
@@ -46,6 +48,8 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
       }
     } catch {
       if (__DEV__) console.error("loadAchievements failed");
+    } finally {
+      set({ isLoaded: true });
     }
   },
 
@@ -84,6 +88,7 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
   clearToast: () => set({ pendingToast: null }),
 
   checkProgressAchievements: async (stats) => {
+    if (!get().isLoaded) return;
     const { unlockedIds, unlockAchievement } = get();
 
     for (const achievement of ACHIEVEMENTS) {

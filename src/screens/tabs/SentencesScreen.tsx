@@ -666,7 +666,8 @@ export default function SentencesScreen() {
         (s) =>
           !searchText ||
           s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
-          s.target_text.toLowerCase().includes(searchText.toLowerCase()),
+          s.target_text.toLowerCase().includes(searchText.toLowerCase()) ||
+          s.keywords.some((k) => k.toLowerCase().includes(searchText.toLowerCase())),
       );
   }, [sourceList, statusFilter, categoryFilter, difficultyFilter, activeTab, searchText]);
 
@@ -689,6 +690,7 @@ export default function SentencesScreen() {
           difficulty: s.difficulty,
           source_text: s.source_text,
           target_text: s.target_text,
+          keywords: s.keywords,
         }))
         .filter((s) => statusFilter === "all" || s.effectiveStatus === statusFilter)
         .filter((s) => categoryFilter === "all" || s.category_id === categoryFilter)
@@ -697,7 +699,8 @@ export default function SentencesScreen() {
           (s) =>
             !searchText ||
             s.source_text.toLowerCase().includes(searchText.toLowerCase()) ||
-            s.target_text.toLowerCase().includes(searchText.toLowerCase()),
+            s.target_text.toLowerCase().includes(searchText.toLowerCase()) ||
+            s.keywords.some((k) => k.toLowerCase().includes(searchText.toLowerCase())),
         ).length;
 
     return {
