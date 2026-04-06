@@ -28,6 +28,8 @@ import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
+import { useOnboarding } from "@/providers/OnboardingProvider";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
 import { Sentence, SentenceTag, HomeStackParamList, MainStackParamList } from "@/types";
 import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
@@ -307,6 +309,8 @@ export default function LearnScreen() {
     loadPresetSentences,
   } = useSentenceStore();
   const { progressMap, tagMap, loadProgress, addToLearning } = useProgressStore();
+  const { isHintShown, markHintShown } = useOnboarding();
+  const [hintLearnedVisible, setHintLearnedVisible] = useState(false);
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -571,6 +575,10 @@ export default function LearnScreen() {
     await useSentenceStore.getState().markAsLearned(currentSentence.id);
     if (!currentSentence.is_preset) await loadSentences();
     setIsProcessing(false);
+    if (!isHintShown("learned")) {
+      markHintShown("learned");
+      setHintLearnedVisible(true);
+    }
   };
 
   const handleRemoveFromList = async () => {
@@ -933,6 +941,12 @@ export default function LearnScreen() {
             </>
           ))}
       </SafeAreaView>
+      <HintBottomSheet
+        visible={hintLearnedVisible}
+        title={t("hints.learned_title")}
+        body={t("hints.learned_body")}
+        onClose={() => setHintLearnedVisible(false)}
+      />
     </View>
   );
 }

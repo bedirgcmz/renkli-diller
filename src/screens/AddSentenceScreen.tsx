@@ -22,6 +22,8 @@ import { usePremium } from "@/hooks/usePremium";
 import { KeywordText } from "@/components/KeywordText";
 import { FREE_USER_SENTENCE_LIMIT, TAG_OPTIONS } from "@/utils/constants";
 import { MainStackParamList, SentenceTag } from "@/types";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
+import { useOnboarding } from "@/providers/OnboardingProvider";
 
 
 export default function AddSentenceScreen() {
@@ -46,6 +48,8 @@ export default function AddSentenceScreen() {
   }, []);
   const [guideOpen, setGuideOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { isHintShown, markHintShown } = useOnboarding();
+  const [hintVisible, setHintVisible] = useState(false);
 
   const userSentenceCount = sentences.length;
 
@@ -80,7 +84,12 @@ export default function AddSentenceScreen() {
     setSaving(false);
 
     if (result.success) {
-      navigation.goBack();
+      if (!isHintShown("addSentence")) {
+        markHintShown("addSentence");
+        setHintVisible(true);
+      } else {
+        navigation.goBack();
+      }
     } else {
       Alert.alert(t("common.error"), result.error ?? t("add_sentence.save_failed"));
     }
@@ -306,6 +315,15 @@ export default function AddSentenceScreen() {
           <View style={{ height: 20 }} />
         </ScrollView>
       </KeyboardAvoidingView>
+      <HintBottomSheet
+        visible={hintVisible}
+        title={t("hints.add_sentence_title")}
+        body={t("hints.add_sentence_body")}
+        onClose={() => {
+          setHintVisible(false);
+          navigation.goBack();
+        }}
+      />
     </SafeAreaView>
   );
 }

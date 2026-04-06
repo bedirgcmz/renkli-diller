@@ -27,6 +27,8 @@ import { GradientView } from "@/components/GradientView";
 import { translateWithAI, initAITrial, getAITrialStatus } from "@/services/gemini";
 import { parseKeywords } from "@/utils/keywords";
 import { MainStackParamList, Category } from "@/types";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
+import { useOnboarding } from "@/providers/OnboardingProvider";
 
 interface HistoryItem {
   id: string;
@@ -300,6 +302,8 @@ export default function AITranslateScreen() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { isHintShown, markHintShown } = useOnboarding();
+  const [hintVisible, setHintVisible] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState<number>(3);
   const [hasAccess, setHasAccess] = useState(true);
 
@@ -409,7 +413,12 @@ export default function AITranslateScreen() {
 
       if (result.success) {
         setSaveModalVisible(false);
-        Alert.alert("✓", t("ai_translator.save_success"));
+        if (!isHintShown("aiTranslate")) {
+          markHintShown("aiTranslate");
+          setHintVisible(true);
+        } else {
+          Alert.alert("✓", t("ai_translator.save_success"));
+        }
       } else {
         Alert.alert(t("common.error"), t("ai_translator.save_error"));
       }
@@ -663,6 +672,12 @@ export default function AITranslateScreen() {
         saving={saving}
         t={t}
         colors={colors}
+      />
+      <HintBottomSheet
+        visible={hintVisible}
+        title={t("hints.ai_translate_title")}
+        body={t("hints.ai_translate_body")}
+        onClose={() => setHintVisible(false)}
       />
     </SafeAreaView>
   );

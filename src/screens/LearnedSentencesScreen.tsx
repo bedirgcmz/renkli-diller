@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,8 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { usePremium } from "@/hooks/usePremium";
 import { LearnedCard } from "@/components/LearnedCard";
 import { MainStackParamList } from "@/types";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
+import { useOnboarding } from "@/providers/OnboardingProvider";
 
 export default function LearnedSentencesScreen() {
   const { t } = useTranslation();
@@ -25,6 +27,8 @@ export default function LearnedSentencesScreen() {
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, addToLearning, loadProgress } = useProgressStore();
   const { isPremium } = usePremium();
+  const { isHintShown, markHintShown } = useOnboarding();
+  const [hintVisible, setHintVisible] = useState(false);
 
   useEffect(() => {
     loadSentences();
@@ -87,6 +91,10 @@ export default function LearnedSentencesScreen() {
                   loadSentences();
                 }
                 loadProgress();
+                if (!isHintShown("removeLearning")) {
+                  markHintShown("removeLearning");
+                  setHintVisible(true);
+                }
               }}
               colors={colors}
               t={t}
@@ -95,6 +103,12 @@ export default function LearnedSentencesScreen() {
         )}
         <View style={{ height: 24 }} />
       </ScrollView>
+      <HintBottomSheet
+        visible={hintVisible}
+        title={t("hints.remove_learning_title")}
+        body={t("hints.remove_learning_body")}
+        onClose={() => setHintVisible(false)}
+      />
     </SafeAreaView>
   );
 }

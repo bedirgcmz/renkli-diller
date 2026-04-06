@@ -21,6 +21,8 @@ import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Category, MainStackParamList } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
+import { useOnboarding } from "@/providers/OnboardingProvider";
 
 export default function CategoryBrowserScreen() {
   const { t } = useTranslation();
@@ -33,6 +35,8 @@ export default function CategoryBrowserScreen() {
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const { isHintShown, markHintShown } = useOnboarding();
+  const [hintVisible, setHintVisible] = useState(false);
 
   useEffect(() => {
     loadCategories().finally(() => setInitialized(true));
@@ -113,7 +117,13 @@ export default function CategoryBrowserScreen() {
                     ) : (
                       <TouchableOpacity
                         style={[styles.addBtn, { backgroundColor: colors.primary }]}
-                        onPress={() => addToLearningList(item.id)}
+                        onPress={async () => {
+                          await addToLearningList(item.id);
+                          if (!isHintShown("addToLearning")) {
+                            markHintShown("addToLearning");
+                            setHintVisible(true);
+                          }
+                        }}
                         activeOpacity={0.85}
                       >
                         <Ionicons name="add" size={14} color="#fff" />
@@ -214,6 +224,12 @@ export default function CategoryBrowserScreen() {
             </TouchableOpacity>
           );
         }}
+      />
+      <HintBottomSheet
+        visible={hintVisible}
+        title={t("hints.add_to_learning_title")}
+        body={t("hints.add_to_learning_body")}
+        onClose={() => setHintVisible(false)}
       />
     </SafeAreaView>
   );

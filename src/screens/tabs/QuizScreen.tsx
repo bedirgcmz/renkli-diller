@@ -37,6 +37,8 @@ import {
 import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import { speak, stopSpeaking } from "@/services/tts";
 import { useAchievementStore } from "@/store/useAchievementStore";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
+import { useOnboarding } from "@/providers/OnboardingProvider";
 
 type QuizMode = "multiple_choice" | "fill_blank";
 
@@ -147,6 +149,8 @@ export default function QuizScreen() {
   const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
   const [isRetryPhase, setIsRetryPhase] = useState(false);
   const [mainScore, setMainScore] = useState({ correct: 0, total: 0 });
+  const { isHintShown, markHintShown } = useOnboarding();
+  const [hintQuizVisible, setHintQuizVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [quizMuted, setQuizMuted] = useState(false);
   const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
@@ -159,6 +163,14 @@ export default function QuizScreen() {
       useAchievementStore.getState().unlockAchievement("perfect_quiz");
     }
   }, [sessionComplete]);
+
+  // First quiz completion hint
+  useEffect(() => {
+    if (sessionComplete && !isRetryPhase && !isHintShown("quizDone")) {
+      markHintShown("quizDone");
+      setHintQuizVisible(true);
+    }
+  }, [sessionComplete, isRetryPhase]);
   const kwInputRefs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -939,6 +951,12 @@ export default function QuizScreen() {
           </>
         ) : null}
       </ScrollView>
+      <HintBottomSheet
+        visible={hintQuizVisible}
+        title={t("hints.quiz_done_title")}
+        body={t("hints.quiz_done_body")}
+        onClose={() => setHintQuizVisible(false)}
+      />
     </SafeAreaView>
   );
 }
