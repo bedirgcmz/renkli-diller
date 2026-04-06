@@ -28,6 +28,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { HomeStackParamList, MainStackParamList, Sentence } from "@/types";
 import { buildWordChips, WordChip } from "@/utils/buildSentence";
 import { stripMarkers } from "@/utils/keywords";
+import { VisualBadge } from "@/components/VisualBadge";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR, FREE_BUILD_SENTENCE_DAILY_LIMIT } from "@/utils/constants";
 import * as Haptics from "expo-haptics";
 import { supabase } from "@/lib/supabase";
@@ -39,8 +40,6 @@ type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList>
 >;
 
-// Rotated per sentence index for variety
-const SENTENCE_ICONS = ["🦜", "🐸", "🐨", "🦊", "🐼", "🦁", "🐬", "🦋", "🐙", "🐧"];
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
@@ -110,12 +109,10 @@ const headerStyles = StyleSheet.create({
 
 function SourceCard({
   sentence,
-  icon,
   label,
   colors,
 }: {
   sentence: Sentence;
-  icon: string;
   label: string;
   colors: ReturnType<typeof useTheme>["colors"];
 }) {
@@ -124,7 +121,15 @@ function SourceCard({
     <View style={[sourceStyles.card, { backgroundColor: colors.cardBackground, shadowColor: colors.text }]}>
       <Text style={[sourceStyles.label, { color: colors.textTertiary }]}>{label}</Text>
       <View style={sourceStyles.row}>
-        <Text style={sourceStyles.icon}>{icon}</Text>
+        <VisualBadge
+          imageUrl={sentence.visual_image_url}
+          size={48}
+          borderRadius={8}
+          backgroundColor={colors.backgroundSecondary}
+          borderColor={colors.border}
+          placeholderColor={colors.textTertiary}
+          imageOverflow={{ top: 10, bottom: 10, horizontal: 10 }}
+        />
         <Text style={[sourceStyles.text, { color: colors.text }]}>{sourceText}</Text>
       </View>
     </View>
@@ -153,10 +158,6 @@ const sourceStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
-  },
-  icon: {
-    fontSize: 26,
-    lineHeight: 32,
   },
   text: {
     flex: 1,
@@ -276,7 +277,6 @@ export default function BuildSentenceScreen() {
 
   const total = learningSentences.length;
   const currentSentence = learningSentences[currentIndex] ?? null;
-  const sentenceIcon = SENTENCE_ICONS[currentIndex % SENTENCE_ICONS.length];
 
   // Rebuild word chips whenever the current sentence changes
   useEffect(() => {
@@ -516,7 +516,6 @@ export default function BuildSentenceScreen() {
         {/* Source sentence card */}
         <SourceCard
           sentence={currentSentence}
-          icon={sentenceIcon}
           label={t("build_sentence.source_label")}
           colors={colors}
         />

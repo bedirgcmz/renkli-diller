@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,7 +31,6 @@ const SPEEDS: Speed[] = [0.5, 1, 1.5, 2];
 // Actual TTS rates — 1x label = 0.85 real rate, 0.5x label = 0.4 real rate
 const SPEED_RATE: Record<Speed, number> = { 0.5: 0.4, 1: 0.85, 1.5: 1.3, 2: 1.7 };
 
-
 export default function AutoModeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -62,7 +61,9 @@ export default function AutoModeScreen() {
 
   // Reset session when tag filter changes
   useEffect(() => {
-    try { Speech.stop(); } catch {}
+    try {
+      Speech.stop();
+    } catch {}
     setIsPlaying(false);
     setPhase("idle");
     setCurrentIndex(0);
@@ -71,7 +72,9 @@ export default function AutoModeScreen() {
 
   useEffect(() => {
     setInitialized(false);
-    try { Speech.stop(); } catch {}
+    try {
+      Speech.stop();
+    } catch {}
     setIsPlaying(false);
     setPhase("idle");
     setCurrentIndex(0);
@@ -82,18 +85,26 @@ export default function AutoModeScreen() {
 
   // Tüm öğreniliyor cümleler: user sentences + preset sentences (progressMap)
   const allLearning = [
-    ...sentences.filter((s) => s.status === "learning" && (s.target_lang ?? targetLanguage) === targetLanguage && (s.source_lang ?? uiLanguage) === uiLanguage),
+    ...sentences.filter(
+      (s) =>
+        s.status === "learning" &&
+        (s.target_lang ?? targetLanguage) === targetLanguage &&
+        (s.source_lang ?? uiLanguage) === uiLanguage,
+    ),
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 
-  const filteredLearning = activeTagFilters.length === 0
-    ? allLearning
-    : allLearning.filter((s) => {
-        const tag = s.is_preset ? tagMap[s.id] : s.tag;
-        return tag != null && activeTagFilters.includes(tag);
-      });
+  const filteredLearning =
+    activeTagFilters.length === 0
+      ? allLearning
+      : allLearning.filter((s) => {
+          const tag = s.is_preset ? tagMap[s.id] : s.tag;
+          return tag != null && activeTagFilters.includes(tag);
+        });
 
-  const sessionSentences = isPremium ? filteredLearning : filteredLearning.slice(0, FREE_AUTO_MODE_LIMIT);
+  const sessionSentences = isPremium
+    ? filteredLearning
+    : filteredLearning.slice(0, FREE_AUTO_MODE_LIMIT);
 
   const sentence = sessionSentences[currentIndex];
   const total = sessionSentences.length;
@@ -193,7 +204,12 @@ export default function AutoModeScreen() {
     setPhase("source");
     // Record activity so auto mode sessions count toward streak
     if (sentence) {
-      recordStudySession({ user_id: "", sentence_id: sentence.id, duration_minutes: 0, completed: false });
+      recordStudySession({
+        user_id: "",
+        sentence_id: sentence.id,
+        duration_minutes: 0,
+        completed: false,
+      });
     }
   };
 
@@ -252,7 +268,9 @@ export default function AutoModeScreen() {
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
         <TouchableOpacity
           onPress={() => {
-            try { Speech.stop(); } catch {}
+            try {
+              Speech.stop();
+            } catch {}
             navigation.goBack();
           }}
           hitSlop={{ top: 16, right: 16, bottom: 16, left: 16 }}
@@ -293,9 +311,13 @@ export default function AutoModeScreen() {
         <Text style={[styles.phaseLabel, { color: colors.primary }]}>{phaseLabel}</Text>
       </View>
 
-
       {/* Info note */}
-      <View style={[styles.infoBox, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+      <View
+        style={[
+          styles.infoBox,
+          { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
+        ]}
+      >
         <TouchableOpacity
           style={styles.infoHeader}
           onPress={() => setInfoOpen((o) => !o)}
@@ -303,9 +325,15 @@ export default function AutoModeScreen() {
         >
           <View style={styles.infoHeaderLeft}>
             <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
-            <Text style={[styles.infoTitle, { color: colors.primary }]}>{t("auto_mode.info_title")}</Text>
+            <Text style={[styles.infoTitle, { color: colors.primary }]}>
+              {t("auto_mode.info_title")}
+            </Text>
           </View>
-          <Ionicons name={infoOpen ? "chevron-up" : "chevron-down"} size={14} color={colors.primary} />
+          <Ionicons
+            name={infoOpen ? "chevron-up" : "chevron-down"}
+            size={14}
+            color={colors.primary}
+          />
         </TouchableOpacity>
         {infoOpen && (
           <Text style={[styles.infoBody, { color: colors.textSecondary }]}>
@@ -316,7 +344,12 @@ export default function AutoModeScreen() {
 
       {/* Free session limit banner */}
       {!isPremium && allLearning.length > FREE_AUTO_MODE_LIMIT && (
-        <View style={[styles.limitBanner, { backgroundColor: colors.warning + "22", borderColor: colors.warning }]}>
+        <View
+          style={[
+            styles.limitBanner,
+            { backgroundColor: colors.warning + "22", borderColor: colors.warning },
+          ]}
+        >
           <Text style={[styles.limitBannerText, { color: colors.warning }]}>
             {t("auto_mode.session_limit")} ({FREE_AUTO_MODE_LIMIT}/{allLearning.length})
           </Text>
@@ -393,13 +426,28 @@ export default function AutoModeScreen() {
               ) : (
                 <View style={[styles.hiddenTarget, { backgroundColor: colors.backgroundTertiary }]}>
                   {phase === "waiting" ? (
-                    <Text style={[styles.hiddenTargetText, { color: colors.textTertiary }]}>···</Text>
+                    <Text style={[styles.hiddenTargetText, { color: colors.textTertiary }]}>
+                      ···
+                    </Text>
                   ) : (
                     <Ionicons name="eye-off-outline" size={22} color={colors.textTertiary} />
                   )}
                 </View>
               )}
             </View>
+
+            {/* Visual image */}
+            {sentence.visual_image_url && (
+              <View style={styles.visualImageWrapper}>
+                <View style={styles.visualImageClip}>
+                  <Image
+                    source={{ uri: sentence.visual_image_url }}
+                    style={styles.visualImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </View>
+            )}
           </View>
         ) : null}
       </View>
@@ -634,4 +682,21 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   limitBannerBtnText: { color: "#fff", fontSize: 11, fontWeight: "700" },
+  visualImageWrapper: {
+    alignItems: "center",
+    marginTop: 2,
+    marginBottom: -26,
+  },
+  visualImageClip: {
+    width: 160,
+    height: 160,
+    overflow: "hidden",
+  },
+  visualImage: {
+    position: "absolute",
+    top: -20,
+    left: -20,
+    right: -20,
+    bottom: -20,
+  },
 });
