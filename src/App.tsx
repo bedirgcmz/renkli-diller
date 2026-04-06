@@ -23,7 +23,11 @@ import { useAchievementStore } from "@/store/useAchievementStore";
 
 // Module-level dedup guard — prevents double setSession when both
 // openAuthSessionAsync and Linking fire for the same callback URL.
+// Combines URL match + time window: same URL within 3s is a duplicate,
+// but the same URL after 3s (e.g. re-login) is allowed through.
 let lastHandledAuthUrl: string | null = null;
+let lastHandledAuthTime = 0;
+const AUTH_DEDUP_WINDOW_MS = 3000;
 
 export default function App() {
   const loadAchievements = useAchievementStore((s) => s.loadAchievements);
@@ -38,9 +42,12 @@ export default function App() {
     const handleAuthCallback = async (url: string) => {
       if (!url.includes("auth/callback") && !url.includes("auth/reset-password")) return;
 
-      // Dedup: skip if this exact URL was already handled
-      if (lastHandledAuthUrl === url) return;
+      // Dedup: skip if same URL arrived within the dedup window (cold-start double-fire).
+      // Allows the same URL after the window expires (e.g. re-login with same provider).
+      const now = Date.now();
+      if (lastHandledAuthUrl === url && now - lastHandledAuthTime < AUTH_DEDUP_WINDOW_MS) return;
       lastHandledAuthUrl = url;
+      lastHandledAuthTime = now;
 
       console.log("HANDLE AUTH URL:", url);
 

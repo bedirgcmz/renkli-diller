@@ -138,7 +138,7 @@ export default function CategoryBrowserScreen() {
             ListEmptyComponent={
               <View style={styles.centered}>
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                  {t("common.loading")}
+                  {t("learn.no_sentences")}
                 </Text>
               </View>
             }

@@ -268,7 +268,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
       if (day === expected) {
         streak++;
         const d = new Date(expected);
-        d.setDate(d.getDate() - 1);
+        d.setUTCDate(d.getUTCDate() - 1);
         expected = d.toISOString().split("T")[0];
       } else {
         break;
