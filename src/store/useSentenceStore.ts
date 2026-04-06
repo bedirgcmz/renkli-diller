@@ -184,6 +184,28 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       }
 
       const rows = (data || []) as unknown as DbRow[];
+
+      // Fetch all generated visuals — table is small, avoids .in() URL length issues
+      const visualMap: Record<string, string> = {};
+      const { data: visuals, error: visualsError } = await supabase
+        .from("sentence_visuals")
+        .select("sentence_id, image_path")
+        .eq("image_generation_status", "generated")
+        .not("image_path", "is", null);
+
+      console.log("[sentence_visuals] fetched:", visuals?.length, "error:", visualsError?.message);
+
+      if (visuals) {
+        for (const v of visuals as { sentence_id: number; image_path: string }[]) {
+          const { data: urlData } = supabase.storage
+            .from("sentence-images")
+            .getPublicUrl(v.image_path);
+          if (urlData?.publicUrl) {
+            visualMap[String(v.sentence_id)] = urlData.publicUrl;
+          }
+        }
+      }
+
       const mapped: Sentence[] = rows.map((row) => ({
         id: String(row.id),
         source_text: getLangText(row, uiLanguage),
@@ -194,6 +216,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         status: "new" as SentenceStatus,
         is_preset: true,
         difficulty: (row.difficulty as SentenceDifficulty) ?? undefined,
+        visual_image_url: visualMap[String(row.id)],
       }));
 
       set({ presetSentences: mapped, loading: false });

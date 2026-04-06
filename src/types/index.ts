@@ -49,6 +49,7 @@ export interface Sentence {
   tag?: SentenceTag | null;
   source_lang?: SupportedLanguage;
   target_lang?: SupportedLanguage;
+  visual_image_url?: string;
   created_at?: string;
   updated_at?: string;
 }

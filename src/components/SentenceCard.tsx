@@ -10,6 +10,7 @@ import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { QuickTagButton } from "@/components/QuickTagButton";
+import { VisualBadge } from "@/components/VisualBadge";
 import { Sentence, SupportedLanguage } from "@/types";
 
 // State-aware top accent colors (subtle, not a bar)
@@ -139,7 +140,17 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
         />
 
         {/* Top-right: QuickTagButton + FavoriteButton */}
-        <View style={{ position: "absolute", top: 4, right: 4, zIndex: 1, flexDirection: "row", alignItems: "center", gap: 4 }}>
+        <View
+          style={{
+            position: "absolute",
+            top: 4,
+            right: 4,
+            zIndex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
           <QuickTagButton
             sentenceId={sentence.id}
             isPreset={sentence.is_preset ?? false}
@@ -152,19 +163,30 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           />
         </View>
 
-        {/* ✅ v2: 1px subtle accent line (not 3px bar) — state awareness without gimmick */}
-        <View />
-
         <View style={styles.body}>
-          {/* Source — semi-bold */}
-          <KeywordText
-            text={sentence.source_text}
-            baseColor={colors.text}
-            fontSize={18}
-            lineHeight={27}
-            fontWeight="600"
-            colorSeed={String(sentence.id)}
-          />
+          {/* Source row: badge + text */}
+          <View style={styles.sourceRow}>
+            <VisualBadge
+              imageUrl={sentence.visual_image_url}
+              size={72}
+              borderRadius={10}
+              backgroundColor={isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)"}
+              borderColor={dividerColor}
+              placeholderColor={isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.18)"}
+              imageOverflow={{ top: 22, bottom: 22, horizontal: 30 }}
+            />
+
+            <View style={styles.sourceText}>
+              <KeywordText
+                text={sentence.source_text}
+                baseColor={colors.text}
+                fontSize={18}
+                lineHeight={27}
+                fontWeight="600"
+                colorSeed={String(sentence.id)}
+              />
+            </View>
+          </View>
 
           {/* Target + TTS */}
           {showTarget && (
@@ -197,22 +219,6 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
               </Pressable>
             </View>
           )}
-
-          {/* Category chip */}
-          {sentence.category_name ? (
-            <View
-              style={[
-                styles.categoryChip,
-                {
-                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                },
-              ]}
-            >
-              <Text style={[styles.categoryText, { color: colors.textTertiary }]}>
-                {sentence.category_name}
-              </Text>
-            </View>
-          ) : null}
 
           {/* Action buttons */}
           <View
@@ -329,7 +335,15 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     overflow: "hidden",
   },
-  // ✅ v2: 1px accent instead of 3px gradient bar
+  sourceRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  sourceText: {
+    flex: 1,
+    paddingTop: 2,
+  },
   body: {
     padding: 18,
     paddingBottom: 14,
