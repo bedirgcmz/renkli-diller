@@ -11,6 +11,7 @@ import {
   RefreshControl,
   Image,
   useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -121,6 +122,8 @@ export default function QuizScreen() {
   const { colors } = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const { height: screenHeight } = useWindowDimensions();
+  const isSmallScreen = screenHeight < 700;
   const navigation =
     useNavigation<
       CompositeNavigationProp<
@@ -372,7 +375,7 @@ export default function QuizScreen() {
         edges={["top"]}
       >
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
+          <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("quiz.title")}</Text>
         </View>
         <ScrollView
           contentContainerStyle={styles.emptyScroll}
@@ -410,7 +413,7 @@ export default function QuizScreen() {
   const renderHeader = () => (
     <>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>{t("quiz.title")}</Text>
+        <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("quiz.title")}</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
             <Text style={[styles.scoreText, { color: colors.primary }]}>
@@ -522,7 +525,7 @@ export default function QuizScreen() {
 
       {/* Progress bar */}
       {questions.length > 0 && (
-        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+        <View style={[styles.progressTrack, isSmallScreen && { marginBottom: 8 }, { backgroundColor: colors.border }]}>
           <View
             style={[
               styles.progressFill,
@@ -536,7 +539,7 @@ export default function QuizScreen() {
       )}
 
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, isSmallScreen && { paddingBottom: 20 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         refreshControl={
@@ -571,7 +574,7 @@ export default function QuizScreen() {
 
         {/* Session complete */}
         {sessionComplete ? (
-          <View style={[styles.doneCard, { backgroundColor: colors.cardBackground }]}>
+          <View style={[styles.doneCard, isSmallScreen && { padding: 20, marginTop: 10 }, { backgroundColor: colors.cardBackground }]}>
             <Text style={styles.doneIcon}>🎉</Text>
             {isRetryPhase ? (
               <>
@@ -617,7 +620,7 @@ export default function QuizScreen() {
         ) : currentQ ? (
           <>
             {/* ── Question card ─────────────────────────────────── */}
-            <View style={[styles.questionCard, { backgroundColor: colors.cardBackground }]}>
+            <View style={[styles.questionCard, isSmallScreen && { paddingVertical: 8 }, { backgroundColor: colors.cardBackground }]}>
               <View style={styles.questionCardHeader}>
                 <Text style={[styles.questionNum, { color: colors.textTertiary }]}>
                   {currentIdx + 1}/{questions.length}
@@ -914,7 +917,7 @@ export default function QuizScreen() {
             {/* ── Visual image ─────────────────────────────────── */}
             {currentQ.sentence.visual_image_url && (
               <View style={styles.visualImageWrapper}>
-                <View style={styles.visualImageClip}>
+                <View style={[styles.visualImageClip, isSmallScreen && { width: 120, height: 120 }]}>
                   <Image
                     source={{ uri: currentQ.sentence.visual_image_url }}
                     style={styles.visualImage}

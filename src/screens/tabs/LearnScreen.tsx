@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Animated,
   Image,
+  useWindowDimensions,
   type DimensionValue,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -291,6 +292,8 @@ const listenStyles = StyleSheet.create({
 export default function LearnScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const { height: screenHeight } = useWindowDimensions();
+  const isSmallScreen = screenHeight < 700;
   const isFocused = useIsFocused();
   const navigation =
     useNavigation<
@@ -621,10 +624,11 @@ export default function LearnScreen() {
     prevDisabled: boolean,
     nextDisabled: boolean,
   ) => (
-    <View style={styles.navRow}>
+    <View style={[styles.navRow, isSmallScreen && styles.navRowSmall]}>
       <TouchableOpacity
         style={[
           styles.navBtn,
+          isSmallScreen && { paddingVertical: 9 },
           {
             backgroundColor: colors.cardBackground,
             borderWidth: 1,
@@ -642,7 +646,7 @@ export default function LearnScreen() {
         activeOpacity={0.7}
       >
         <Text
-          style={[styles.navBtnText, { color: prevDisabled ? colors.textTertiary : colors.text }]}
+          style={[styles.navBtnText, isSmallScreen && { fontSize: 13 }, { color: prevDisabled ? colors.textTertiary : colors.text }]}
         >
           ‹ {t("learn.prev")}
         </Text>
@@ -650,6 +654,7 @@ export default function LearnScreen() {
       <TouchableOpacity
         style={[
           styles.navBtn,
+          isSmallScreen && { paddingVertical: 9 },
           {
             backgroundColor: colors.cardBackground,
             borderWidth: 1,
@@ -667,7 +672,7 @@ export default function LearnScreen() {
         activeOpacity={0.7}
       >
         <Text
-          style={[styles.navBtnText, { color: nextDisabled ? colors.textTertiary : colors.text }]}
+          style={[styles.navBtnText, isSmallScreen && { fontSize: 13 }, { color: nextDisabled ? colors.textTertiary : colors.text }]}
         >
           {t("learn.next")} ›
         </Text>
@@ -681,8 +686,8 @@ export default function LearnScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t("learn.title")}</Text>
+        <View style={[styles.header, isSmallScreen && { paddingBottom: 8, paddingTop: 4 }]}>
+          <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("learn.title")}</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             {activeTab === "learning" && total > 0 && (
               <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
@@ -725,6 +730,7 @@ export default function LearnScreen() {
         <TouchableOpacity
           style={[
             aiCardStyles.card,
+            isSmallScreen && { paddingVertical: 8, paddingHorizontal: 12 },
             { backgroundColor: colors.cardBackground, borderColor: colors.primary + "30" },
           ]}
           onPress={() => navigation.navigate("AITranslator")}
@@ -745,7 +751,7 @@ export default function LearnScreen() {
         </TouchableOpacity>
 
         {/* Segment control */}
-        <View style={[styles.segmentContainer, { backgroundColor: colors.surfaceSecondary }]}>
+        <View style={[styles.segmentContainer, isSmallScreen && { marginBottom: 10 }, { backgroundColor: colors.surfaceSecondary }]}>
           {/* Learning tab */}
           <TouchableOpacity
             style={[styles.segmentTab, activeTab === "learning" && styles.segmentTabActiveWrapper]}
@@ -811,8 +817,8 @@ export default function LearnScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Progress bar — only on learning tab */}
-        {activeTab === "learning" && initialized && total > 0 && (
+        {/* Progress bar — only on learning tab, hidden on small screens */}
+        {activeTab === "learning" && initialized && total > 0 && !isSmallScreen && (
           <View style={[styles.progressRow, { backgroundColor: colors.cardBackground }]}>
             <View style={[styles.progressTrack, { backgroundColor: colors.backgroundTertiary }]}>
               <GradientView
@@ -1144,6 +1150,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     gap: 12,
+  },
+  navRowSmall: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
   navBtn: {
     flex: 1,

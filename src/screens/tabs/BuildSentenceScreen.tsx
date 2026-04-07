@@ -9,6 +9,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  useWindowDimensions,
 } from "react-native";
 
 // Enable LayoutAnimation on Android
@@ -207,6 +208,8 @@ export default function BuildSentenceScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const isFocused = useIsFocused();
+  const { height: screenHeight } = useWindowDimensions();
+  const isSmallScreen = screenHeight < 700;
 
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
@@ -433,11 +436,11 @@ export default function BuildSentenceScreen() {
           colors={colors}
         />
         <View style={styles.center}>
-          <Text style={styles.completeEmoji}>⏳</Text>
-          <Text style={[styles.completeTitle, { color: colors.text }]}>
+          <Text style={[styles.completeEmoji, isSmallScreen && { fontSize: 40, marginBottom: 4 }]}>⏳</Text>
+          <Text style={[styles.completeTitle, isSmallScreen && { fontSize: 18, marginBottom: 4 }, { color: colors.text }]}>
             {t("build_sentence.limit_title")}
           </Text>
-          <Text style={[styles.limitDesc, { color: colors.textSecondary }]}>
+          <Text style={[styles.limitDesc, isSmallScreen && { paddingHorizontal: 20, marginBottom: 16 }, { color: colors.textSecondary }]}>
             {t("build_sentence.limit_desc")}
           </Text>
           <TouchableOpacity
@@ -465,14 +468,14 @@ export default function BuildSentenceScreen() {
           colors={colors}
         />
         <View style={styles.center}>
-          <Text style={styles.completeEmoji}>🏆</Text>
-          <Text style={[styles.completeTitle, { color: colors.text }]}>
+          <Text style={[styles.completeEmoji, isSmallScreen && { fontSize: 40, marginBottom: 4 }]}>🏆</Text>
+          <Text style={[styles.completeTitle, isSmallScreen && { fontSize: 18, marginBottom: 4 }, { color: colors.text }]}>
             {t("build_sentence.session_complete")}
           </Text>
-          <Text style={[styles.completeScore, { color: colors.textSecondary }]}>
+          <Text style={[styles.completeScore, isSmallScreen && { fontSize: 14 }, { color: colors.textSecondary }]}>
             {t("build_sentence.session_score", { correct: score.correct, total: score.total })}
           </Text>
-          <Text style={[styles.completeAccuracy, { color: colors.primary }]}>
+          <Text style={[styles.completeAccuracy, isSmallScreen && { fontSize: 32, marginBottom: 16 }, { color: colors.primary }]}>
             {accuracy}%
           </Text>
           <TouchableOpacity
@@ -526,6 +529,7 @@ export default function BuildSentenceScreen() {
         <View
           style={[
             styles.dropZone,
+            isSmallScreen && { marginTop: 10, minHeight: 72 },
             {
               backgroundColor: colors.surface ?? colors.backgroundSecondary,
               borderColor: dropZoneBorderColor,
@@ -641,11 +645,12 @@ export default function BuildSentenceScreen() {
       </ScrollView>
 
       {/* ── Bottom action button ── */}
-      <View style={[styles.bottomBar, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
+      <View style={[styles.bottomBar, isSmallScreen && { paddingVertical: 8 }, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
         {phase === "arranging" ? (
           <TouchableOpacity
             style={[
               styles.primaryBtn,
+              isSmallScreen && { height: 44 },
               { backgroundColor: canValidate ? colors.primary : colors.border },
             ]}
             onPress={handleValidate}
@@ -660,6 +665,7 @@ export default function BuildSentenceScreen() {
           <TouchableOpacity
             style={[
               styles.primaryBtn,
+              isSmallScreen && { height: 44 },
               {
                 backgroundColor:
                   phase === "correct" ? QUIZ_CORRECT_COLOR : QUIZ_WRONG_COLOR,

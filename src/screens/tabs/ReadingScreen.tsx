@@ -9,6 +9,7 @@ import {
   Pressable,
   ActivityIndicator,
   Share,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -781,6 +782,8 @@ const hStyles = StyleSheet.create({
 export default function ReadingScreen() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
+  const { height: screenHeight } = useWindowDimensions();
+  const isSmallScreen = screenHeight < 700;
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
@@ -973,7 +976,7 @@ export default function ReadingScreen() {
     >
       {/* ── Header ─────────────────────────────────────────────────── */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>{t("reading.title")}</Text>
+        <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("reading.title")}</Text>
         <View style={styles.headerActions}>
           {/* Share */}
           <TouchableOpacity
@@ -1163,13 +1166,14 @@ export default function ReadingScreen() {
           )}
         </View>
 
-        <View style={{ height: 120 }} />
+        <View style={{ height: isSmallScreen ? 80 : 120 }} />
       </ScrollView>
 
       {/* ── Footer actions ─────────────────────────────────────────── */}
       <View
         style={[
           styles.footer,
+          isSmallScreen && { paddingBottom: 12, paddingTop: 8 },
           {
             backgroundColor: colors.background,
             borderTopColor: colors.divider,
@@ -1293,7 +1297,7 @@ export default function ReadingScreen() {
           // ── Default: Tamamladım + Geçmişim row ──
           <View style={styles.defaultActionRow}>
             <TouchableOpacity
-              style={[styles.completeBtn, { backgroundColor: colors.primary, flex: 1 }]}
+              style={[styles.completeBtn, isSmallScreen && { paddingVertical: 10 }, { backgroundColor: colors.primary, flex: 1 }]}
               onPress={handleComplete}
               activeOpacity={0.85}
             >
@@ -1301,7 +1305,7 @@ export default function ReadingScreen() {
               <Text style={styles.completeBtnText}>{t("reading.complete_btn")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.historyBtn, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}
+              style={[styles.historyBtn, isSmallScreen && { paddingVertical: 10 }, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}
               onPress={() => setHistoryVisible(true)}
               activeOpacity={0.75}
             >
