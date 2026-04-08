@@ -1,5 +1,5 @@
 export type BgTrackId = "bg1" | "bg2" | "bg3" | "bg4" | "bg5";
-export type SfxKey = "correct" | "wrong" | "lifeLost" | "missed" | "levelUp" | "finish";
+export type SfxKey = "correct" | "wrong" | "lifeLost" | "missed" | "levelUp" | "finish" | "countdown";
 
 export interface BgTrack {
   id: BgTrackId;
@@ -22,6 +22,7 @@ export const SFX_SOURCES: Record<SfxKey, number> = {
   wrong:    require("../../assets/sounds/sfx_wrong.mp3"),
   lifeLost: require("../../assets/sounds/sfx_life_lost.mp3"),
   missed:   require("../../assets/sounds/sfx_missed.mp3"),
-  levelUp:  require("../../assets/sounds/level_up.mp3"),
-  finish:   require("../../assets/sounds/game_finish.mp3"),
+  levelUp:   require("../../assets/sounds/level_up.mp3"),
+  finish:    require("../../assets/sounds/game_finish.mp3"),
+  countdown: require("../../assets/sounds/sfx-countdown.mp3"),
 };

@@ -710,7 +710,10 @@
       "personal_best": "Best Score",
       "cumulative": "Total Points",
       "games_played": "Played",
-      "last_10_sec": "Last 10 seconds!"
+      "last_10_sec": "Last 10 seconds!",
+      "daily_limit_title": "Daily Limit Reached",
+      "daily_limit_body": "You've played your 3 free games today. Upgrade to Premium for unlimited games every day!",
+      "daily_limit_later": "Maybe Later"
     },
     "result": {
       "title_speed": "Speed Round Over!",

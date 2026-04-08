@@ -710,7 +710,10 @@
       "personal_best": "Melhor pontuação",
       "cumulative": "Pontos totais",
       "games_played": "Jogados",
-      "last_10_sec": "Últimos 10 segundos!"
+      "last_10_sec": "Últimos 10 segundos!",
+      "daily_limit_title": "Limite Diário Atingido",
+      "daily_limit_body": "Você jogou suas 3 partidas gratuitas de hoje. Faça upgrade para Premium para jogar ilimitado!",
+      "daily_limit_later": "Talvez Depois"
     },
     "result": {
       "title_speed": "Speed Round concluído!",

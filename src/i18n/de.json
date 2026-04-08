@@ -710,7 +710,10 @@
       "personal_best": "Bestes Ergebnis",
       "cumulative": "Gesamtpunkte",
       "games_played": "Gespielt",
-      "last_10_sec": "Letzte 10 Sekunden!"
+      "last_10_sec": "Letzte 10 Sekunden!",
+      "daily_limit_title": "Tageslimit Erreicht",
+      "daily_limit_body": "Du hast heute deine 3 kostenlosen Spiele gespielt. Upgrade auf Premium für unbegrenzte Spiele!",
+      "daily_limit_later": "Vielleicht Später"
     },
     "result": {
       "title_speed": "Speed Round vorbei!",

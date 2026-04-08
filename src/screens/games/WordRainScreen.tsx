@@ -22,6 +22,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAudioSettingsStore } from "@/store/useAudioSettingsStore";
 import { useGameAudio } from "@/audio/useGameAudio";
 import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
+import GameDailyLimitModal from "@/components/GameDailyLimitModal";
 import {
   GamePhase,
   GameVocabularyItem,
@@ -82,6 +83,7 @@ export default function WordRainScreen() {
   const isSmallScreen = screenHeight < 700;
 
   const { user } = useAuthStore();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const { targetLanguage, uiLanguage } = useSettingsStore();
   const { tutorialSeen, markTutorialSeen, submitScore } = useGameStore();
 
@@ -158,6 +160,8 @@ export default function WordRainScreen() {
   const [submitResult, setSubmitResult] = useState<GameSubmitResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   // ---- Timers ----
   const transitionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -249,6 +253,7 @@ export default function WordRainScreen() {
   function startCountdown() {
     setCountdown(3);
     setPhase("countdown");
+    playSfx("countdown");
 
     countdownRef.current = setInterval(() => {
       setCountdown((prev) => {
@@ -471,6 +476,10 @@ export default function WordRainScreen() {
     } else {
       const storeError = useGameStore.getState().error;
       setSubmitError(storeError ?? "network");
+      if (storeError === "daily_limit_reached") {
+        setLimitReached(true);
+        setShowLimitModal(true);
+      }
     }
   }
 
@@ -503,8 +512,13 @@ export default function WordRainScreen() {
   }
 
   function handlePlayAgain() {
+    if (limitReached && !isPremium) {
+      setShowLimitModal(true);
+      return;
+    }
     setSubmitResult(null);
     setSubmitError(null);
+    setLimitReached(false);
     loadPool();
   }
 
@@ -733,6 +747,7 @@ export default function WordRainScreen() {
     const leagueChanged = submitResult?.leagueChanged ?? false;
 
     return (
+      <>
       <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
         <View style={styles.resultContainer}>
           <Text style={[styles.resultTitle, { color: colors.text }]}>
@@ -787,9 +802,11 @@ export default function WordRainScreen() {
               {t("games.common.score_submitting")}
             </Text>
           )}
-          {submitError && (
+          {submitError && submitError !== "duplicate_session" && (
             <Text style={[styles.submitStatus, { color: colors.error }]}>
-              {t("games.common.score_failed")}
+              {submitError === "daily_limit_reached"
+                ? t("games.hub.daily_limit_reached")
+                : t("games.common.score_failed")}
             </Text>
           )}
 
@@ -812,6 +829,11 @@ export default function WordRainScreen() {
           </View>
         </View>
       </SafeAreaView>
+      <GameDailyLimitModal
+        visible={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+      />
+      </>
     );
   }
 

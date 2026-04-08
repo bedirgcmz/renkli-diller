@@ -710,7 +710,10 @@
       "personal_best": "En Yüksek",
       "cumulative": "Toplam Puan",
       "games_played": "Oynanan",
-      "last_10_sec": "Son 10 saniye!"
+      "last_10_sec": "Son 10 saniye!",
+      "daily_limit_title": "Günlük Limit Doldu",
+      "daily_limit_body": "Bugün için 3 ücretsiz oyun hakkınızı kullandınız. Sınırsız oynamak için Premium'a geçin!",
+      "daily_limit_later": "Belki Sonra"
     },
     "result": {
       "title_speed": "Speed Round Bitti!",

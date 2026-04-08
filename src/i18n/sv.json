@@ -710,7 +710,10 @@
       "personal_best": "Bästa poäng",
       "cumulative": "Totala poäng",
       "games_played": "Spelat",
-      "last_10_sec": "Sista 10 sekunderna!"
+      "last_10_sec": "Sista 10 sekunderna!",
+      "daily_limit_title": "Dagsgräns Nådd",
+      "daily_limit_body": "Du har spelat dina 3 gratis spel idag. Uppgradera till Premium för obegränsat spelande!",
+      "daily_limit_later": "Kanske Senare"
     },
     "result": {
       "title_speed": "Speed Round över!",
