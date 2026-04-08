@@ -327,7 +327,7 @@ export default function SpeedRoundScreen() {
   function endGame() {
     stopTimer();
     setPhase("result");
-    submitGameScore();
+    setTimeout(() => submitGameScore(), 0);
   }
 
   async function submitGameScore() {
