@@ -646,6 +646,7 @@
       "daily_limit_reached": "Limite quotidienne atteinte",
       "leaderboard_empty": "Pas encore de scores — sois le premier !",
       "leaderboard_title": "Cette semaine",
+      "points_label": "pts",
       "my_rank": "#{{rank}} cette semaine",
       "no_rank": "Pas encore de classement",
       "see_all": "Voir le classement complet",

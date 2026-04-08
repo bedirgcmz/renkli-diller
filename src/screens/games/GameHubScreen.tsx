@@ -151,7 +151,7 @@ export default function GameHubScreen() {
                 {t(`games.league.${league}`)}
               </Text>
               <Text style={[styles.leagueScore, { color: colors.textSecondary }]}>
-                {cumulative.toLocaleString()} puan
+                {cumulative.toLocaleString()} {t("games.hub.points_label")}
               </Text>
             </View>
             {myRank && (

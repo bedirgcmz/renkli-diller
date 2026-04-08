@@ -82,6 +82,10 @@ export async function buildGamePool(params: {
 
       for (const sentence of userSentences) {
         const keywords: string[] = sentence.keywords ?? [];
+        // Only include keywords from sentences with ≤2 keywords.
+        // Sentences with many keywords are already well-known; keep the pool
+        // mostly global so players face fresh vocabulary every session.
+        if (keywords.length > 2) continue;
         for (const kw of keywords) {
           if (!kw || kw.trim().length < 2) continue;
           const normalized = kw.trim().toLowerCase();

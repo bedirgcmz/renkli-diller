@@ -73,7 +73,7 @@ function getComboMultiplier(combo: number): number {
 type AnswerState = "idle" | "correct" | "wrong" | "missed";
 
 export default function WordRainScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -213,7 +213,7 @@ export default function WordRainScreen() {
         userId: user!.id,
         filter,
         gameType: "word_rain",
-        sourceLang: uiLanguage,
+        sourceLang: i18n.language,
         targetLang: targetLanguage,
       });
 
@@ -505,7 +505,7 @@ export default function WordRainScreen() {
   function handlePlayAgain() {
     setSubmitResult(null);
     setSubmitError(null);
-    startCountdown();
+    loadPool();
   }
 
   // ----------------------------------------------------------------
@@ -547,15 +547,15 @@ export default function WordRainScreen() {
     return (
       <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
         <View style={styles.tutorialContainer}>
-          <Text style={styles.tutorialEmoji}>🌧</Text>
-          <Text style={[styles.tutorialTitle, { color: colors.text }]}>
+          <Text style={[styles.tutorialEmoji, isSmallScreen && { fontSize: 36, marginBottom: 10 }]}>🌧</Text>
+          <Text style={[styles.tutorialTitle, { color: colors.text }, isSmallScreen && { fontSize: 18 }]}>
             {t("games.word_rain.tutorial_title")}
           </Text>
-          <Text style={[styles.tutorialBody, { color: colors.textSecondary }]}>
+          <Text style={[styles.tutorialBody, { color: colors.textSecondary }, isSmallScreen && { fontSize: 13 }]}>
             {t("games.word_rain.tutorial_body")}
           </Text>
           <View style={styles.tutorialPatternRow}>
-            {["3 can", "hız artar", "çeviriyi yakala"].map((item) => (
+            {t("games.word_rain.pattern").split(" • ").map((item) => (
               <View key={item} style={[styles.patternTag, { backgroundColor: colors.cardBackground }]}>
                 <Text style={[styles.patternTagText, { color: colors.text }]}>{item}</Text>
               </View>
@@ -599,8 +599,8 @@ export default function WordRainScreen() {
             </Text>
           ) : (
             <>
-              <Text style={styles.readyEmoji}>🌧</Text>
-              <Text style={[styles.readyTitle, { color: colors.text }]}>
+              <Text style={[styles.readyEmoji, isSmallScreen && { fontSize: 36, marginBottom: 8 }]}>🌧</Text>
+              <Text style={[styles.readyTitle, { color: colors.text }, isSmallScreen && { fontSize: 20, marginBottom: 4 }]}>
                 {t("games.common.countdown_ready")}
               </Text>
               <Text style={[styles.readyPattern, { color: colors.textSecondary }]}>
@@ -700,7 +700,7 @@ export default function WordRainScreen() {
             {t("games.common.paused_title")}
           </Text>
           <Text style={[styles.pausedStats, { color: colors.textSecondary }]}>
-            {correct} doğru • {wrong} yanlış • {missed} kaçan
+            {correct} {t("games.result.correct")} • {wrong} {t("games.result.wrong")} • {missed} {t("games.result.missed")}
           </Text>
           {/* Lives */}
           <View style={styles.livesRow}>
@@ -845,7 +845,7 @@ export default function WordRainScreen() {
             <Text style={[styles.comboLabel, { color: "#F59E0B" }]}>{comboLabel}</Text>
           ) : (
             <Text style={[styles.scoreLevelText, { color: colors.textSecondary, fontSize: 11 }]}>
-              Lvl {level}
+              {t("games.word_rain.level", { n: level })}
             </Text>
           )}
           <View style={styles.audioIcons}>
@@ -1042,7 +1042,7 @@ const styles = StyleSheet.create({
   pausedStats:        { fontSize: 14, marginTop: 8 },
 
   // Game header
-  gameHeader:         { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 10 },
+  gameHeader:         { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 8 },
   livesRow:           { flexDirection: "row", gap: 4, alignItems: "center" },
   lifeIcon:           { fontSize: 20 },
   scoreLevel:         { alignItems: "flex-end" },
@@ -1062,9 +1062,9 @@ const styles = StyleSheet.create({
   wordText:           { fontSize: 26, fontWeight: "800", textAlign: "center" },
 
   // Answer buttons (2×2)
-  optionsGrid:        { paddingHorizontal: 12, paddingBottom: 16, paddingTop: 8, gap: 8 },
-  optionsRow:         { flexDirection: "row", gap: 8 },
-  optionBtn:          { flex: 1, paddingVertical: 14, paddingHorizontal: 10, borderRadius: 14, borderWidth: 1.5, alignItems: "center", justifyContent: "center", minHeight: 52 },
+  optionsGrid:        { paddingHorizontal: 10, paddingBottom: 10, paddingTop: 6, gap: 6 },
+  optionsRow:         { flexDirection: "row", gap: 6 },
+  optionBtn:          { flex: 1, paddingVertical: 12, paddingHorizontal: 8, borderRadius: 14, borderWidth: 1.5, alignItems: "center", justifyContent: "center", minHeight: 48 },
   optionText:         { fontSize: 15, fontWeight: "500", textAlign: "center" },
 
   // Result

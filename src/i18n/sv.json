@@ -646,6 +646,7 @@
       "daily_limit_reached": "Daglig gräns nådd",
       "leaderboard_empty": "Inga poäng än — bli den första!",
       "leaderboard_title": "Den här veckan",
+      "points_label": "poäng",
       "my_rank": "#{{rank}} den här veckan",
       "no_rank": "Ingen ranking ännu",
       "see_all": "Visa hela listan",

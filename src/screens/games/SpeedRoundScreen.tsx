@@ -57,7 +57,7 @@ const COMBO_X3 = 6;
 type AnswerState = "idle" | "correct" | "wrong";
 
 export default function SpeedRoundScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -180,7 +180,7 @@ export default function SpeedRoundScreen() {
         userId: user!.id,
         filter,
         gameType: "speed_round",
-        sourceLang: uiLanguage,
+        sourceLang: i18n.language,
         targetLang: targetLanguage,
       });
 
@@ -428,7 +428,7 @@ export default function SpeedRoundScreen() {
   function handlePlayAgain() {
     setSubmitResult(null);
     setSubmitError(null);
-    startCountdown();
+    loadPool();
   }
 
   // ----------------------------------------------------------------
@@ -477,15 +477,15 @@ export default function SpeedRoundScreen() {
     return (
       <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
         <View style={styles.tutorialContainer}>
-          <Text style={styles.tutorialEmoji}>⚡</Text>
-          <Text style={[styles.tutorialTitle, { color: colors.text }]}>
+          <Text style={[styles.tutorialEmoji, isSmallScreen && { fontSize: 36, marginBottom: 10 }]}>⚡</Text>
+          <Text style={[styles.tutorialTitle, { color: colors.text }, isSmallScreen && { fontSize: 18 }]}>
             {t("games.speed_round.tutorial_title")}
           </Text>
-          <Text style={[styles.tutorialBody, { color: colors.textSecondary }]}>
+          <Text style={[styles.tutorialBody, { color: colors.textSecondary }, isSmallScreen && { fontSize: 13 }]}>
             {t("games.speed_round.tutorial_body")}
           </Text>
           <View style={styles.tutorialPatternRow}>
-            {["60 sn", "4 seçenek", "combo"].map((item) => (
+            {t("games.speed_round.pattern").split(" • ").map((item) => (
               <View key={item} style={[styles.patternTag, { backgroundColor: colors.cardBackground }]}>
                 <Text style={[styles.patternTagText, { color: colors.text }]}>{item}</Text>
               </View>
@@ -526,8 +526,8 @@ export default function SpeedRoundScreen() {
             </>
           ) : (
             <>
-              <Text style={styles.readyEmoji}>⚡</Text>
-              <Text style={[styles.readyTitle, { color: colors.text }]}>
+              <Text style={[styles.readyEmoji, isSmallScreen && { fontSize: 36, marginBottom: 8 }]}>⚡</Text>
+              <Text style={[styles.readyTitle, { color: colors.text }, isSmallScreen && { fontSize: 20, marginBottom: 4 }]}>
                 {t("games.common.countdown_ready")}
               </Text>
               <Text style={[styles.readyPattern, { color: colors.textSecondary }]}>
@@ -626,7 +626,7 @@ export default function SpeedRoundScreen() {
             {t("games.common.paused_title")}
           </Text>
           <Text style={[styles.pausedStats, { color: colors.textSecondary }]}>
-            {correct} doğru • {wrong} yanlış
+            {correct} {t("games.result.correct")} • {wrong} {t("games.result.wrong")}
           </Text>
           <TouchableOpacity
             style={[styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 24 }]}
@@ -947,12 +947,12 @@ const styles = StyleSheet.create({
 
   // Question
   questionContainer:  { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 },
-  questionLabel:      { fontSize: 12, fontWeight: "600", letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 },
+  questionLabel:      { fontSize: 11, fontWeight: "600", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 },
   questionWord:       { fontSize: 32, fontWeight: "800", textAlign: "center" },
 
   // Options
-  optionsContainer:   { paddingHorizontal: 16, gap: 10, paddingBottom: 12 },
-  optionBtn:          { paddingVertical: 15, paddingHorizontal: 16, borderRadius: 14, borderWidth: 1.5, alignItems: "center" },
+  optionsContainer:   { paddingHorizontal: 12, gap: 8, paddingBottom: 10 },
+  optionBtn:          { paddingVertical: 14, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5, alignItems: "center" },
   optionText:         { fontSize: 16, fontWeight: "500", textAlign: "center" },
 
   // Score row
