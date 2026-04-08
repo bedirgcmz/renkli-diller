@@ -121,6 +121,9 @@ export type HomeStackParamList = {
   Quiz: undefined;
   Reading: undefined;
   BuildSentence: undefined;
+  GameHub: undefined;
+  SpeedRound: { filter: import("./game").GameFilter };
+  WordRain: { filter: import("./game").GameFilter };
 };
 
 export type MainStackParamList = {

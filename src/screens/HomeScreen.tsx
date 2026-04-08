@@ -127,6 +127,15 @@ export default function HomeScreen() {
       coachDescKey: "coach_marks.explore_desc",
       onPress: (nav) => nav.navigate("CategoryBrowser"),
     },
+    {
+      icon: "game-controller-outline",
+      iconColor: "#EC4899",
+      titleKey: "games.hub.title",
+      descKey: "games.hub.subtitle",
+      coachTitleKey: "games.hub.title",
+      coachDescKey: "games.hub.subtitle",
+      onPress: (nav) => nav.navigate("GameHub"),
+    },
   ];
 
   // Tab bar step layouts — calculated from screen geometry (4 equal tabs)
