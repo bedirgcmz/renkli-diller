@@ -18,6 +18,9 @@ import { useTheme } from "@/hooks/useTheme";
 import { useGameStore } from "@/store/useGameStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { useAudioSettingsStore } from "@/store/useAudioSettingsStore";
+import { useGameAudio } from "@/audio/useGameAudio";
+import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
 import {
   GamePhase,
   GameVocabularyItem,
@@ -66,8 +69,27 @@ export default function SpeedRoundScreen() {
   const { targetLanguage, uiLanguage } = useSettingsStore();
   const { tutorialSeen, markTutorialSeen, submitScore } = useGameStore();
 
+  const {
+    bgMusicEnabled,
+    sfxEnabled,
+    gameBgTrack,
+    setBgMusicEnabled,
+    setSfxEnabled,
+    setGameBgTrack,
+    load: loadAudioSettings,
+  } = useAudioSettingsStore();
+
+  const [musicPickerVisible, setMusicPickerVisible] = useState(false);
+
   // ---- Phase state machine ----
   const [phase, setPhase] = useState<GamePhase>("loading");
+
+  const { startBgMusic, stopBgMusic, playSfx } = useGameAudio({
+    bgMusicEnabled,
+    sfxEnabled,
+    bgTrackId: gameBgTrack["speed_round"] ?? "bg1",
+    gameActive: phase === "playing",
+  });
   const [poolError, setPoolError] = useState<"empty" | "network" | null>(null);
 
   // ---- Pool ----
@@ -140,8 +162,12 @@ export default function SpeedRoundScreen() {
   }, [phase]);
 
   // ----------------------------------------------------------------
-  // Load pool on mount
+  // Load pool + audio settings on mount
   // ----------------------------------------------------------------
+  useEffect(() => {
+    loadAudioSettings();
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     loadPool();
@@ -224,6 +250,7 @@ export default function SpeedRoundScreen() {
     comboToastedLevels.current = new Set();
     sessionIdRef.current = generateUUID();
     startTimer();
+    startBgMusic();
   }
 
   // ----------------------------------------------------------------
@@ -279,10 +306,14 @@ export default function SpeedRoundScreen() {
         if (newCombo === COMBO_X2 && !comboToastedLevels.current.has(COMBO_X2)) {
           comboToastedLevels.current.add(COMBO_X2);
           showComboToast(t("games.speed_round.combo_x2"));
+          playSfx("levelUp");
         } else if (newCombo === COMBO_X3 && !comboToastedLevels.current.has(COMBO_X3)) {
           comboToastedLevels.current.add(COMBO_X3);
           showComboToast(t("games.speed_round.combo_x3"));
+          playSfx("levelUp");
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } else {
+          playSfx("correct");
         }
 
         transitionRef.current = setTimeout(nextQuestion, CORRECT_DELAY_MS);
@@ -291,6 +322,7 @@ export default function SpeedRoundScreen() {
         setAnswerState("wrong");
         setCombo(0);
         setWrong((w) => w + 1);
+        playSfx("wrong");
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
         transitionRef.current = setTimeout(nextQuestion, WRONG_DELAY_MS);
@@ -326,6 +358,8 @@ export default function SpeedRoundScreen() {
   // ----------------------------------------------------------------
   function endGame() {
     stopTimer();
+    stopBgMusic();
+    playSfx("finish");
     setPhase("result");
     setTimeout(() => submitGameScore(), 0);
   }
@@ -522,9 +556,49 @@ export default function SpeedRoundScreen() {
                 <Ionicons name="play" size={18} color="#fff" style={{ marginRight: 6 }} />
                 <Text style={styles.primaryBtnText}>{t("games.common.start_game")}</Text>
               </TouchableOpacity>
+
+              {/* Audio quick controls */}
+              <View style={styles.readyAudioRow}>
+                <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setBgMusicEnabled(!bgMusicEnabled)}>
+                  <Ionicons
+                    name={bgMusicEnabled ? "musical-notes" : "musical-notes-outline"}
+                    size={18}
+                    color={bgMusicEnabled ? colors.primary : colors.textTertiary}
+                  />
+                  <Text style={[styles.readyAudioLabel, { color: bgMusicEnabled ? colors.text : colors.textTertiary }]}>
+                    {t("games.audio.bg_music")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setSfxEnabled(!sfxEnabled)}>
+                  <Ionicons
+                    name={sfxEnabled ? "volume-high" : "volume-mute"}
+                    size={18}
+                    color={sfxEnabled ? colors.primary : colors.textTertiary}
+                  />
+                  <Text style={[styles.readyAudioLabel, { color: sfxEnabled ? colors.text : colors.textTertiary }]}>
+                    {t("games.audio.sfx")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setMusicPickerVisible(true)}>
+                  <Ionicons name="list-outline" size={16} color={colors.primary} />
+                  <Text style={[styles.readyAudioLabel, { color: colors.primary }]}>
+                    {t("games.audio.pick_music")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </>
           )}
         </View>
+
+        <BGMusicPickerModal
+          visible={musicPickerVisible}
+          initialTrackId={gameBgTrack["speed_round"] ?? "bg1"}
+          onConfirm={(trackId) => {
+            setGameBgTrack("speed_round", trackId);
+            setMusicPickerVisible(false);
+          }}
+          onCancel={() => setMusicPickerVisible(false)}
+        />
       </SafeAreaView>
     );
   }
@@ -676,13 +750,29 @@ export default function SpeedRoundScreen() {
           <Text style={[styles.timerText, { color: timerColor }]}>{timeLeft}s</Text>
         </View>
 
-        {/* Combo */}
-        {comboLabel ? (
-          <View style={[styles.comboBadge, { backgroundColor: "#F59E0B20" }]}>
+        {/* Audio toggles (right slot) */}
+        <View style={styles.audioIcons}>
+          <TouchableOpacity onPress={() => setBgMusicEnabled(!bgMusicEnabled)} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <Ionicons
+              name={bgMusicEnabled ? "musical-notes" : "musical-notes-outline"}
+              size={18}
+              color={bgMusicEnabled ? colors.primary : colors.textTertiary}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setSfxEnabled(!sfxEnabled)} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+            <Ionicons
+              name={sfxEnabled ? "volume-high" : "volume-mute"}
+              size={18}
+              color={sfxEnabled ? colors.primary : colors.textTertiary}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Combo badge (absolute overlay) */}
+        {comboLabel && (
+          <View style={[styles.comboBadgeOverlay, { backgroundColor: "#F59E0B20" }]}>
             <Text style={[styles.comboText, { color: "#F59E0B" }]}>{comboLabel}</Text>
           </View>
-        ) : (
-          <View style={{ width: 60 }} />
         )}
       </View>
 
@@ -842,7 +932,12 @@ const styles = StyleSheet.create({
   timerContainer:     { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 16 },
   timerText:          { fontSize: 16, fontWeight: "700" },
   comboBadge:         { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  comboBadgeOverlay:  { position: "absolute", alignSelf: "center", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   comboText:          { fontSize: 13, fontWeight: "700" },
+  audioIcons:         { flexDirection: "row", alignItems: "center", gap: 10 },
+  readyAudioRow:      { flexDirection: "row", gap: 8, marginTop: 16 },
+  readyAudioBtn:      { flex: 1, alignItems: "center", gap: 4 },
+  readyAudioLabel:    { fontSize: 11, fontWeight: "500", textAlign: "center" },
 
   progressTrack:      { height: 3, marginHorizontal: 16, borderRadius: 2, overflow: "hidden", marginBottom: 4 },
   progressFill:       { height: "100%", borderRadius: 2 },

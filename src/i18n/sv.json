@@ -722,6 +722,14 @@
       "wrong": "Fel",
       "missed": "Missade",
       "league_progress": "Liga-framsteg"
+    },
+    "audio": {
+      "bg_music": "Spelmusik",
+      "sfx": "Ljudeffekter",
+      "pick_music": "Välj musik",
+      "music_title": "Välj musik",
+      "music_subtitle": "Välj spåret som spelas under spelet",
+      "preview_hint": "▶ Förhandsvisar..."
     }
   }
 }

@@ -19,6 +19,9 @@ import { useTheme } from "@/hooks/useTheme";
 import { useGameStore } from "@/store/useGameStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { useAudioSettingsStore } from "@/store/useAudioSettingsStore";
+import { useGameAudio } from "@/audio/useGameAudio";
+import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
 import {
   GamePhase,
   GameVocabularyItem,
@@ -82,8 +85,27 @@ export default function WordRainScreen() {
   const { targetLanguage, uiLanguage } = useSettingsStore();
   const { tutorialSeen, markTutorialSeen, submitScore } = useGameStore();
 
+  const {
+    bgMusicEnabled,
+    sfxEnabled,
+    gameBgTrack,
+    setBgMusicEnabled,
+    setSfxEnabled,
+    setGameBgTrack,
+    load: loadAudioSettings,
+  } = useAudioSettingsStore();
+
+  const [musicPickerVisible, setMusicPickerVisible] = useState(false);
+
   // ---- Phase ----
   const [phase, setPhase] = useState<GamePhase>("loading");
+
+  const { startBgMusic, stopBgMusic, playSfx } = useGameAudio({
+    bgMusicEnabled,
+    sfxEnabled,
+    bgTrackId: gameBgTrack["word_rain"] ?? "bg2",
+    gameActive: phase === "playing",
+  });
   const [poolError, setPoolError] = useState<"empty" | "network" | null>(null);
 
   // ---- Pool ----
@@ -173,8 +195,12 @@ export default function WordRainScreen() {
   }, [phase]);
 
   // ----------------------------------------------------------------
-  // Load pool
+  // Load pool + audio settings
   // ----------------------------------------------------------------
+  useEffect(() => {
+    loadAudioSettings();
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     loadPool();
@@ -268,6 +294,7 @@ export default function WordRainScreen() {
     poolIndexRef.current    = 0;
 
     setPhase("playing");
+    startBgMusic();
     // Let "playing" render before spawning first word
     setTimeout(() => spawnNextWord(), 150);
   }
@@ -323,6 +350,7 @@ export default function WordRainScreen() {
     setMissed(missedRef.current);
     comboRef.current = 0;
     setCombo(0);
+    playSfx("missed");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     livesRef.current -= 1;
@@ -369,8 +397,10 @@ export default function WordRainScreen() {
         if (newLevel > levelRef.current) {
           levelRef.current = newLevel;
           setLevel(newLevel);
+          playSfx("levelUp");
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } else {
+          playSfx("correct");
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
 
@@ -381,10 +411,12 @@ export default function WordRainScreen() {
         setCombo(0);
         wrongRef.current += 1;
         setWrong(wrongRef.current);
+        playSfx("wrong");
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
         livesRef.current -= 1;
         setLives(livesRef.current);
+        if (livesRef.current > 0) playSfx("lifeLost");
 
         if (livesRef.current <= 0) {
           transitionRef.current = setTimeout(() => endGame(), WRONG_DELAY_MS);
@@ -401,6 +433,8 @@ export default function WordRainScreen() {
   // ----------------------------------------------------------------
   function endGame() {
     fallAnimRef.current?.stop();
+    stopBgMusic();
+    playSfx("finish");
     setPhase("result");
     setTimeout(() => submitGameScore(), 0);
   }
@@ -594,9 +628,49 @@ export default function WordRainScreen() {
                 <Ionicons name="play" size={18} color="#fff" style={{ marginRight: 6 }} />
                 <Text style={styles.primaryBtnText}>{t("games.common.start_game")}</Text>
               </TouchableOpacity>
+
+              {/* Audio quick controls */}
+              <View style={styles.readyAudioRow}>
+                <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setBgMusicEnabled(!bgMusicEnabled)}>
+                  <Ionicons
+                    name={bgMusicEnabled ? "musical-notes" : "musical-notes-outline"}
+                    size={18}
+                    color={bgMusicEnabled ? "#4DA3FF" : colors.textTertiary}
+                  />
+                  <Text style={[styles.readyAudioLabel, { color: bgMusicEnabled ? colors.text : colors.textTertiary }]}>
+                    {t("games.audio.bg_music")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setSfxEnabled(!sfxEnabled)}>
+                  <Ionicons
+                    name={sfxEnabled ? "volume-high" : "volume-mute"}
+                    size={18}
+                    color={sfxEnabled ? "#4DA3FF" : colors.textTertiary}
+                  />
+                  <Text style={[styles.readyAudioLabel, { color: sfxEnabled ? colors.text : colors.textTertiary }]}>
+                    {t("games.audio.sfx")}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setMusicPickerVisible(true)}>
+                  <Ionicons name="list-outline" size={16} color="#4DA3FF" />
+                  <Text style={[styles.readyAudioLabel, { color: "#4DA3FF" }]}>
+                    {t("games.audio.pick_music")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </>
           )}
         </View>
+
+        <BGMusicPickerModal
+          visible={musicPickerVisible}
+          initialTrackId={gameBgTrack["word_rain"] ?? "bg2"}
+          onConfirm={(trackId) => {
+            setGameBgTrack("word_rain", trackId);
+            setMusicPickerVisible(false);
+          }}
+          onCancel={() => setMusicPickerVisible(false)}
+        />
       </SafeAreaView>
     );
   }
@@ -762,7 +836,7 @@ export default function WordRainScreen() {
           ))}
         </View>
 
-        {/* Score + Level */}
+        {/* Score + Level + Audio toggles */}
         <View style={styles.scoreLevel}>
           <Text style={[styles.scoreLevelText, { color: colors.text }]}>
             {scoreRef.current}
@@ -774,6 +848,22 @@ export default function WordRainScreen() {
               Lvl {level}
             </Text>
           )}
+          <View style={styles.audioIcons}>
+            <TouchableOpacity onPress={() => setBgMusicEnabled(!bgMusicEnabled)} hitSlop={{ top: 8, bottom: 8, left: 5, right: 5 }}>
+              <Ionicons
+                name={bgMusicEnabled ? "musical-notes" : "musical-notes-outline"}
+                size={16}
+                color={bgMusicEnabled ? "#4DA3FF" : colors.textTertiary}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSfxEnabled(!sfxEnabled)} hitSlop={{ top: 8, bottom: 8, left: 5, right: 5 }}>
+              <Ionicons
+                name={sfxEnabled ? "volume-high" : "volume-mute"}
+                size={16}
+                color={sfxEnabled ? "#4DA3FF" : colors.textTertiary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -958,6 +1048,10 @@ const styles = StyleSheet.create({
   scoreLevel:         { alignItems: "flex-end" },
   scoreLevelText:     { fontSize: 15, fontWeight: "700" },
   comboLabel:         { fontSize: 12, fontWeight: "700" },
+  audioIcons:         { flexDirection: "row", gap: 8, marginTop: 2 },
+  readyAudioRow:      { flexDirection: "row", gap: 8, marginTop: 16 },
+  readyAudioBtn:      { flex: 1, alignItems: "center", gap: 4 },
+  readyAudioLabel:    { fontSize: 11, fontWeight: "500", textAlign: "center" },
 
   // Playfield
   playfield:          { flex: 1, overflow: "hidden", position: "relative" },

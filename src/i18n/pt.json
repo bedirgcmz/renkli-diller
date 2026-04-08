@@ -722,6 +722,14 @@
       "wrong": "Erradas",
       "missed": "Perdidas",
       "league_progress": "Progresso da liga"
+    },
+    "audio": {
+      "bg_music": "Música do jogo",
+      "sfx": "Efeitos sonoros",
+      "pick_music": "Escolher música",
+      "music_title": "Escolher música",
+      "music_subtitle": "Escolha a faixa que toca durante o jogo",
+      "preview_hint": "▶ Pré-visualizando..."
     }
   }
 }

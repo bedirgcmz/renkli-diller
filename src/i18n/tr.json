@@ -722,6 +722,14 @@
       "wrong": "Yanlış",
       "missed": "Kaçan",
       "league_progress": "Lig İlerlemesi"
+    },
+    "audio": {
+      "bg_music": "Oyun Müziği",
+      "sfx": "Ses Efektleri",
+      "pick_music": "Müzik Seç",
+      "music_title": "Müzik Seç",
+      "music_subtitle": "Oyun sırasında çalacak parçayı seç",
+      "preview_hint": "▶ Önizleme çalıyor..."
     }
   }
 }

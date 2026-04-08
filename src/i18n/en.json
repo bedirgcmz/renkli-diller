@@ -722,6 +722,14 @@
       "wrong": "Wrong",
       "missed": "Missed",
       "league_progress": "League Progress"
+    },
+    "audio": {
+      "bg_music": "Game Music",
+      "sfx": "Sound Effects",
+      "pick_music": "Pick Music",
+      "music_title": "Pick Music",
+      "music_subtitle": "Choose the track that plays during the game",
+      "preview_hint": "▶ Previewing..."
     }
   }
 }

@@ -17,6 +17,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useGameStore } from "@/store/useGameStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { useAudioSettingsStore } from "@/store/useAudioSettingsStore";
+import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
 import {
   GameFilter,
   GameLeaderboardEntry,
@@ -69,13 +71,28 @@ export default function GameHubScreen() {
     days: number; league: string;
   } | null>(null);
 
+  const {
+    bgMusicEnabled,
+    sfxEnabled,
+    gameBgTrack,
+    setBgMusicEnabled,
+    setSfxEnabled,
+    setGameBgTrack,
+    load: loadAudioSettings,
+  } = useAudioSettingsStore();
+
+  const [musicPickerGameId, setMusicPickerGameId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!user) return;
     loadUserStats();
     loadLeaderboard("speed_round", "weekly");
-
     checkInactivityDemotion();
   }, [user]);
+
+  useEffect(() => {
+    loadAudioSettings();
+  }, []);
 
   // Inactivity warning (not yet demoted but close)
   useEffect(() => {
@@ -236,11 +253,13 @@ export default function GameHubScreen() {
           bestScore={userStats?.bestSpeedRound ?? 0}
           colors={colors}
           isSmallScreen={isSmallScreen}
+          bgMusicEnabled={bgMusicEnabled}
+          sfxEnabled={sfxEnabled}
+          onToggleBgMusic={() => setBgMusicEnabled(!bgMusicEnabled)}
+          onToggleSfx={() => setSfxEnabled(!sfxEnabled)}
+          onPickMusic={() => setMusicPickerGameId("speed_round")}
           onPlay={() => navigation.navigate("SpeedRound", { filter: selectedFilter })}
-          onHowToPlay={() => {
-            // Tutorial shown inside SpeedRoundScreen on first launch
-            navigation.navigate("SpeedRound", { filter: selectedFilter });
-          }}
+          onHowToPlay={() => navigation.navigate("SpeedRound", { filter: selectedFilter })}
         />
 
         <GameCard
@@ -252,6 +271,11 @@ export default function GameHubScreen() {
           bestScore={userStats?.bestWordRain ?? 0}
           colors={colors}
           isSmallScreen={isSmallScreen}
+          bgMusicEnabled={bgMusicEnabled}
+          sfxEnabled={sfxEnabled}
+          onToggleBgMusic={() => setBgMusicEnabled(!bgMusicEnabled)}
+          onToggleSfx={() => setSfxEnabled(!sfxEnabled)}
+          onPickMusic={() => setMusicPickerGameId("word_rain")}
           onPlay={() => navigation.navigate("WordRain", { filter: selectedFilter })}
           onHowToPlay={() => navigation.navigate("WordRain", { filter: selectedFilter })}
           comingSoon={false}
@@ -294,6 +318,16 @@ export default function GameHubScreen() {
 
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      <BGMusicPickerModal
+        visible={musicPickerGameId !== null}
+        initialTrackId={gameBgTrack[musicPickerGameId ?? "speed_round"] ?? "bg1"}
+        onConfirm={(trackId) => {
+          if (musicPickerGameId) setGameBgTrack(musicPickerGameId, trackId);
+          setMusicPickerGameId(null);
+        }}
+        onCancel={() => setMusicPickerGameId(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -308,6 +342,11 @@ function GameCard({
   bestScore,
   colors,
   isSmallScreen,
+  bgMusicEnabled,
+  sfxEnabled,
+  onToggleBgMusic,
+  onToggleSfx,
+  onPickMusic,
   onPlay,
   onHowToPlay,
   comingSoon = false,
@@ -320,6 +359,11 @@ function GameCard({
   bestScore: number;
   colors: any;
   isSmallScreen: boolean;
+  bgMusicEnabled: boolean;
+  sfxEnabled: boolean;
+  onToggleBgMusic: () => void;
+  onToggleSfx: () => void;
+  onPickMusic: () => void;
   onPlay: () => void;
   onHowToPlay: () => void;
   comingSoon?: boolean;
@@ -352,6 +396,38 @@ function GameCard({
           </Text>
         </View>
       )}
+
+      {/* Audio controls row */}
+      <View style={[styles.audioRow, { borderTopColor: colors.border }]}>
+        <TouchableOpacity style={styles.audioToggle} onPress={onToggleBgMusic}>
+          <Ionicons
+            name={bgMusicEnabled ? "musical-notes" : "musical-notes-outline"}
+            size={18}
+            color={bgMusicEnabled ? iconColor : colors.textTertiary}
+          />
+          <Text style={[styles.audioToggleText, { color: bgMusicEnabled ? colors.text : colors.textTertiary }]}>
+            {t("games.audio.bg_music")}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.audioToggle} onPress={onToggleSfx}>
+          <Ionicons
+            name={sfxEnabled ? "volume-high" : "volume-mute"}
+            size={18}
+            color={sfxEnabled ? iconColor : colors.textTertiary}
+          />
+          <Text style={[styles.audioToggleText, { color: sfxEnabled ? colors.text : colors.textTertiary }]}>
+            {t("games.audio.sfx")}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.audioToggle} onPress={onPickMusic}>
+          <Ionicons name="list-outline" size={16} color={colors.primary} />
+          <Text style={[styles.audioToggleText, { color: colors.primary }]}>
+            {t("games.audio.pick_music")}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.gameCardActions}>
         <TouchableOpacity
@@ -453,6 +529,9 @@ const styles = StyleSheet.create({
   gameDesc:         { fontSize: 13, lineHeight: 18, marginBottom: 10 },
   bestScoreRow:     { flexDirection: "row", alignItems: "center", gap: 5, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, marginBottom: 10 },
   bestScoreText:    { fontSize: 12 },
+  audioRow:         { flexDirection: "row", gap: 4, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, marginBottom: 10 },
+  audioToggle:      { flex: 1, alignItems: "center", gap: 4 },
+  audioToggleText:  { fontSize: 10, fontWeight: "500", textAlign: "center" },
   gameCardActions:  { flexDirection: "row", gap: 10 },
   howToBtn:         { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, paddingVertical: 9, borderRadius: 10, borderWidth: 1 },
   howToText:        { fontSize: 13 },
