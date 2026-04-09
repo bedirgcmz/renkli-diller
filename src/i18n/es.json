@@ -524,7 +524,8 @@
     "result_label": "Traducción",
     "tap_to_restore": "Toca para restaurar",
     "tips_title": "Consejos de traducción",
-    "tips_body": "• Cierra las estrellas antes de la puntuación: escribe **palabra**?, no **palabra?**\n• Las estrellas marcan la palabra o frase a aprender — mantenlo enfocado\n• Usa oraciones naturales para mejores resultados"
+    "tips_body": "• Cierra las estrellas antes de la puntuación: escribe **palabra**?, no **palabra?**\n• Las estrellas marcan la palabra o frase a aprender — mantenlo enfocado\n• Usa oraciones naturales para mejores resultados",
+    "ai_disclaimer": "Las traducciones de IA pueden no ser perfectas. Para asuntos importantes, recomendamos consultar a un experto."
   },
   "tags": {
     "label": "Etiqueta",

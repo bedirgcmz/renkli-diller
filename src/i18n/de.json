@@ -524,7 +524,8 @@
     "result_label": "Übersetzung",
     "tap_to_restore": "Zum Wiederherstellen tippen",
     "tips_title": "Übersetzungstipps",
-    "tips_body": "• Sterne vor dem Satzzeichen schließen: **Wort**? schreiben, nicht **Wort?**\n• Sterne markieren das zu lernende Wort — halte es fokussiert\n• Natürliche Sätze liefern die besten Ergebnisse"
+    "tips_body": "• Sterne vor dem Satzzeichen schließen: **Wort**? schreiben, nicht **Wort?**\n• Sterne markieren das zu lernende Wort — halte es fokussiert\n• Natürliche Sätze liefern die besten Ergebnisse",
+    "ai_disclaimer": "KI-Übersetzungen sind möglicherweise nicht perfekt. Bei wichtigen Angelegenheiten empfehlen wir, einen Experten zu konsultieren."
   },
   "tags": {
     "label": "Tag",

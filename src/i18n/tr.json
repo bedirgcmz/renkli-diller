@@ -524,7 +524,8 @@
     "result_label": "Çeviri",
     "tap_to_restore": "Geri yüklemek için dokun",
     "tips_title": "Çeviri İpuçları",
-    "tips_body": "• Yıldızı noktalama işaretinden önce kapat: **kimsin**? yaz, **kimsin?** değil\n• Yıldızlar öğrenmek istediğin kelimeyi işaretler — odaklı tut\n• En iyi sonuç için doğal cümleler yaz"
+    "tips_body": "• Yıldızı noktalama işaretinden önce kapat: **kimsin**? yaz, **kimsin?** değil\n• Yıldızlar öğrenmek istediğin kelimeyi işaretler — odaklı tut\n• En iyi sonuç için doğal cümleler yaz",
+    "ai_disclaimer": "Yapay zeka çevirileri mükemmel olmayabilir. Önemli durumlarda bir uzmana danışmanızı öneririz."
   },
   "tags": {
     "label": "Etiket",

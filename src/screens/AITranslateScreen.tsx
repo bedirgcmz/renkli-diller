@@ -654,6 +654,13 @@ export default function AITranslateScreen() {
                 <Ionicons name="add-circle-outline" size={18} color="#fff" />
                 <Text style={styles.addToListText}>{t("ai_translator.add_to_list")}</Text>
               </TouchableOpacity>
+
+              <View style={styles.disclaimerRow}>
+                <Ionicons name="information-circle-outline" size={13} color={colors.textTertiary} />
+                <Text style={[styles.disclaimerText, { color: colors.textTertiary }]}>
+                  {t("ai_translator.ai_disclaimer")}
+                </Text>
+              </View>
             </View>
           )}
 
@@ -915,6 +922,19 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 15,
     fontWeight: "700",
+  },
+  disclaimerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 5,
+    paddingHorizontal: 4,
+    paddingTop: 10,
+    paddingBottom: 2,
+  },
+  disclaimerText: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 16,
   },
   historyCard: {
     borderRadius: 14,

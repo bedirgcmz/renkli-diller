@@ -524,7 +524,8 @@
     "result_label": "Translation",
     "tap_to_restore": "Tap to restore",
     "tips_title": "Translation Tips",
-    "tips_body": "• Close the stars before punctuation: write **word**? not **word?**\n• Stars highlight the word or phrase to learn — keep it focused\n• Write natural sentences for the best results"
+    "tips_body": "• Close the stars before punctuation: write **word**? not **word?**\n• Stars highlight the word or phrase to learn — keep it focused\n• Write natural sentences for the best results",
+    "ai_disclaimer": "AI translations may not be perfect. For important matters, we recommend consulting an expert."
   },
   "tags": {
     "label": "Tag",

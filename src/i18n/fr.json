@@ -524,7 +524,8 @@
     "result_label": "Traduction",
     "tap_to_restore": "Appuyer pour restaurer",
     "tips_title": "Conseils de traduction",
-    "tips_body": "• Ferme les étoiles avant la ponctuation : écris **mot**?, pas **mot?**\n• Les étoiles marquent le mot ou l'expression à apprendre — reste précis\n• Écris des phrases naturelles pour de meilleurs résultats"
+    "tips_body": "• Ferme les étoiles avant la ponctuation : écris **mot**?, pas **mot?**\n• Les étoiles marquent le mot ou l'expression à apprendre — reste précis\n• Écris des phrases naturelles pour de meilleurs résultats",
+    "ai_disclaimer": "Les traductions IA peuvent ne pas être parfaites. Pour les questions importantes, nous recommandons de consulter un expert."
   },
   "tags": {
     "label": "Étiquette",

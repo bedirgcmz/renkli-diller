@@ -57,7 +57,7 @@ function kwColor(posIdx: number, keywords: ReadingTextKeyword[], isDark: boolean
   const kw = keywords.find((k) => k.position_index === posIdx);
   if (!kw) return isDark ? "#fff" : "#333";
   const palette = isDark ? KEYWORD_TEXT_COLORS.dark : KEYWORD_TEXT_COLORS.light;
-  return palette[kw.color_index % palette.length];
+  return palette[kw.position_index % palette.length];
 }
 
 function getField<T>(obj: any, key: string): T | null {
@@ -79,7 +79,23 @@ function ReadingBody({
   baseColor: string;
   fontSize?: number;
 }) {
-  const paragraphs = body.split(/\n\n+/);
+  // Parse full body at once so positionIndex is global across all paragraphs
+  const allSegments = parseBody(body);
+
+  // Split segments into paragraphs by \n\n in plain-text segments
+  const paragraphs: Segment[][] = [[]];
+  for (const seg of allSegments) {
+    if (!seg.isKeyword) {
+      const parts = seg.text.split(/\n\n+/);
+      paragraphs[paragraphs.length - 1].push({ isKeyword: false, text: parts[0] });
+      for (let i = 1; i < parts.length; i++) {
+        paragraphs.push([{ isKeyword: false, text: parts[i] }]);
+      }
+    } else {
+      paragraphs[paragraphs.length - 1].push(seg);
+    }
+  }
+
   return (
     <View>
       {paragraphs.map((para, pIdx) => (
@@ -92,7 +108,7 @@ function ReadingBody({
             marginTop: pIdx > 0 ? 14 : 0,
           }}
         >
-          {parseBody(para).map((seg, sIdx) => {
+          {para.map((seg, sIdx) => {
             if (!seg.isKeyword) return <Text key={sIdx}>{seg.text}</Text>;
             const color = kwColor(seg.positionIndex, keywords, isDark);
             return (
@@ -159,7 +175,7 @@ function KeywordPreviewModal({
           {/* Keyword rows */}
           {keywords.map((kw) => {
             const palette = isDark ? KEYWORD_TEXT_COLORS.dark : KEYWORD_TEXT_COLORS.light;
-            const color = palette[kw.color_index % palette.length];
+            const color = palette[kw.position_index % palette.length];
             const sourceWord = getField<string>(kw, `keyword_${uiLanguage}`) ?? "—";
             const targetWord = getField<string>(kw, `keyword_${targetLanguage}`) ?? "—";
             return (

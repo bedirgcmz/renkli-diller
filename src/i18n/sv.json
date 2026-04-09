@@ -524,7 +524,8 @@
     "result_label": "Översättning",
     "tap_to_restore": "Tryck för att återställa",
     "tips_title": "Översättningstips",
-    "tips_body": "• Stäng stjärnorna före skiljetecknet: skriv **ord**?, inte **ord?**\n• Stjärnorna markerar ordet eller uttrycket du vill lära dig — håll det fokuserat\n• Skriv naturliga meningar för bästa resultat"
+    "tips_body": "• Stäng stjärnorna före skiljetecknet: skriv **ord**?, inte **ord?**\n• Stjärnorna markerar ordet eller uttrycket du vill lära dig — håll det fokuserat\n• Skriv naturliga meningar för bästa resultat",
+    "ai_disclaimer": "AI-översättningar kanske inte är perfekta. För viktiga ärenden rekommenderar vi att konsultera en expert."
   },
   "tags": {
     "label": "Tagg",
