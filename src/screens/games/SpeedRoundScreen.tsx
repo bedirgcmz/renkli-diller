@@ -62,14 +62,14 @@ export default function SpeedRoundScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
-  const { filter } = route.params;
+  const { filter, forceTutorial } = route.params;
   const { height: screenHeight } = useWindowDimensions();
   const isSmallScreen = screenHeight < 700;
 
   const { user } = useAuthStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const { targetLanguage, uiLanguage } = useSettingsStore();
-  const { tutorialSeen, markTutorialSeen, submitScore } = useGameStore();
+  const { tutorialSeen, markTutorialSeen, submitScore, dailyLimitReached, setDailyLimitReached } = useGameStore();
 
   const {
     bgMusicEnabled,
@@ -118,7 +118,7 @@ export default function SpeedRoundScreen() {
   const [submitResult, setSubmitResult] = useState<GameSubmitResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [limitReached, setLimitReached] = useState(false);
+  const limitReached = dailyLimitReached.speed_round;
   const [showLimitModal, setShowLimitModal] = useState(false);
 
   // ---- Refs for timer cleanup ----
@@ -199,7 +199,7 @@ export default function SpeedRoundScreen() {
       setPoolSize(meta.usable);
 
       // Show tutorial or ready screen
-      if (!tutorialSeen.speed_round) {
+      if (forceTutorial || !tutorialSeen.speed_round) {
         setPhase("tutorial");
       } else {
         setPhase("ready");
@@ -221,6 +221,10 @@ export default function SpeedRoundScreen() {
   // Ready → countdown → playing
   // ----------------------------------------------------------------
   function startCountdown() {
+    if (dailyLimitReached.speed_round && !isPremium) {
+      setShowLimitModal(true);
+      return;
+    }
     setCountdown(3);
     setPhase("countdown");
     playSfx("countdown");
@@ -400,7 +404,7 @@ export default function SpeedRoundScreen() {
       const storeError = useGameStore.getState().error;
       setSubmitError(storeError ?? "network");
       if (storeError === "daily_limit_reached") {
-        setLimitReached(true);
+        setDailyLimitReached("speed_round", true);
         setShowLimitModal(true);
       }
     }
@@ -441,7 +445,7 @@ export default function SpeedRoundScreen() {
     }
     setSubmitResult(null);
     setSubmitError(null);
-    setLimitReached(false);
+    setDailyLimitReached("speed_round", false);
     loadPool();
   }
 
@@ -519,7 +523,7 @@ export default function SpeedRoundScreen() {
   // ---- Ready ----
   if (phase === "ready" || phase === "loading") {
     const isLoading = phase === "loading";
-    return (
+    return (<>
       <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top"]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -614,6 +618,11 @@ export default function SpeedRoundScreen() {
           onCancel={() => setMusicPickerVisible(false)}
         />
       </SafeAreaView>
+      <GameDailyLimitModal
+        visible={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+      />
+    </>
     );
   }
 

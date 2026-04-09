@@ -122,8 +122,8 @@ export type HomeStackParamList = {
   Reading: undefined;
   BuildSentence: undefined;
   GameHub: undefined;
-  SpeedRound: { filter: import("./game").GameFilter };
-  WordRain: { filter: import("./game").GameFilter };
+  SpeedRound: { filter: import("./game").GameFilter; forceTutorial?: boolean };
+  WordRain: { filter: import("./game").GameFilter; forceTutorial?: boolean };
 };
 
 export type MainStackParamList = {

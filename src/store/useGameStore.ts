@@ -25,6 +25,7 @@ interface GameStoreState {
     word_rain:   { weekly: number | null; alltime: number | null };
   };
   tutorialSeen: { speed_round: boolean; word_rain: boolean };
+  dailyLimitReached: { speed_round: boolean; word_rain: boolean };
   pendingScore: { stats: RawSessionStats } | null;  // offline retry queue
   loading: boolean;
   submitLoading: boolean;
@@ -37,6 +38,7 @@ interface GameStoreState {
   loadLeaderboard: (gameType: GameType, period: "weekly" | "alltime") => Promise<void>;
   checkInactivityDemotion: () => Promise<{ demoted: boolean; oldLeague?: string; newLeague?: string } | null>;
   markTutorialSeen: (gameType: GameType) => void;
+  setDailyLimitReached: (gameType: GameType, value: boolean) => void;
   clearError: () => void;
 }
 
@@ -54,6 +56,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     word_rain:   { weekly: null, alltime: null },
   },
   tutorialSeen: { speed_round: false, word_rain: false },
+  dailyLimitReached: { speed_round: false, word_rain: false },
   pendingScore: null,
   loading: false,
   submitLoading: false,
@@ -267,6 +270,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   markTutorialSeen: (gameType: GameType) => {
     set((state) => ({
       tutorialSeen: { ...state.tutorialSeen, [gameType]: true },
+    }));
+  },
+
+  // ---- Set daily limit reached flag ----
+  setDailyLimitReached: (gameType: GameType, value: boolean) => {
+    set((state) => ({
+      dailyLimitReached: { ...state.dailyLimitReached, [gameType]: value },
     }));
   },
 

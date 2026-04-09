@@ -259,7 +259,7 @@ export default function GameHubScreen() {
           onToggleSfx={() => setSfxEnabled(!sfxEnabled)}
           onPickMusic={() => setMusicPickerGameId("speed_round")}
           onPlay={() => navigation.navigate("SpeedRound", { filter: selectedFilter })}
-          onHowToPlay={() => navigation.navigate("SpeedRound", { filter: selectedFilter })}
+          onHowToPlay={() => navigation.navigate("SpeedRound", { filter: selectedFilter, forceTutorial: true })}
         />
 
         <GameCard
@@ -277,7 +277,7 @@ export default function GameHubScreen() {
           onToggleSfx={() => setSfxEnabled(!sfxEnabled)}
           onPickMusic={() => setMusicPickerGameId("word_rain")}
           onPlay={() => navigation.navigate("WordRain", { filter: selectedFilter })}
-          onHowToPlay={() => navigation.navigate("WordRain", { filter: selectedFilter })}
+          onHowToPlay={() => navigation.navigate("WordRain", { filter: selectedFilter, forceTutorial: true })}
           comingSoon={false}
         />
 
