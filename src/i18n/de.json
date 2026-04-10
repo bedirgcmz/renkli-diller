@@ -736,5 +736,57 @@
       "music_subtitle": "Wähle den Track, der während des Spiels läuft",
       "preview_hint": "▶ Vorschau läuft..."
     }
+  },
+  "dialog": {
+    "tab_title": "Dialog",
+    "home_card_title": "Dialog",
+    "home_card_subtitle": "Echte Gespräche üben",
+    "setup": {
+      "title": "Dialog-Training",
+      "subtitle": "Kategorie und Schwierigkeitsgrad wählen",
+      "pick_category": "Kategorie wählen",
+      "pick_difficulty": "Schwierigkeitsgrad wählen",
+      "difficulty_easy": "Einfach",
+      "difficulty_medium": "Mittel",
+      "difficulty_hard": "Schwer",
+      "difficulty_easy_desc": "Kurze, alltägliche Ausdrücke",
+      "difficulty_medium_desc": "Natürlicher, kontextbezogen",
+      "difficulty_hard_desc": "Nuancen und Tonunterschiede",
+      "start_button": "Starten",
+      "no_scenarios": "Für diese Kategorie und diesen Schwierigkeitsgrad gibt es noch keine Dialoge."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Wähle die passende Antwort",
+      "correct_feedback": "Richtig!",
+      "wrong_feedback": "Nicht ganz, versuch es nochmal",
+      "next_turn": "Weiter",
+      "finish": "Beenden"
+    },
+    "complete": {
+      "title": "Dialog abgeschlossen!",
+      "score_label": "Punkte",
+      "first_try_label": "Beim ersten Versuch richtig",
+      "accuracy_label": "Genauigkeit",
+      "wrong_attempts_label": "Falsche Versuche",
+      "play_again": "Nochmal spielen",
+      "back_home": "Zurück zur Startseite"
+    },
+    "limit": {
+      "daily_free_title": "Tageslimit erreicht",
+      "daily_free_body": "Kostenlose Nutzer können 1 Dialog pro Tag machen. Komm morgen wieder!",
+      "total_free_title": "Alle Dialoge aufgebraucht",
+      "total_free_body": "Du hast 7 Dialoge abgeschlossen. Hol dir Premium für unbegrenztes Üben!",
+      "daily_premium_title": "Heutige 3 Dialoge erledigt",
+      "daily_premium_body": "Tolle Arbeit! Morgen warten wieder 3 neue Dialoge auf dich.",
+      "go_premium": "Premium holen",
+      "maybe_later": "Vielleicht später",
+      "come_back_tomorrow": "Bis morgen"
+    },
+    "error": {
+      "load_failed": "Dialoge konnten nicht geladen werden. Bitte erneut versuchen.",
+      "session_failed": "Sitzung konnte nicht gestartet werden. Bitte erneut versuchen."
+    }
   }
 }

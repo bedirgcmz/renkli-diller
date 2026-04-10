@@ -736,5 +736,57 @@
       "music_subtitle": "Elige la pista que suena durante el juego",
       "preview_hint": "▶ Reproduciendo vista previa..."
     }
+  },
+  "dialog": {
+    "tab_title": "Diálogo",
+    "home_card_title": "Diálogo",
+    "home_card_subtitle": "Practica conversaciones reales",
+    "setup": {
+      "title": "Práctica de diálogo",
+      "subtitle": "Elige una categoría y dificultad",
+      "pick_category": "Elegir categoría",
+      "pick_difficulty": "Elegir dificultad",
+      "difficulty_easy": "Fácil",
+      "difficulty_medium": "Medio",
+      "difficulty_hard": "Difícil",
+      "difficulty_easy_desc": "Frases cortas y cotidianas",
+      "difficulty_medium_desc": "Más natural, basado en contexto",
+      "difficulty_hard_desc": "Matices y diferencias de tono",
+      "start_button": "Empezar",
+      "no_scenarios": "Aún no hay diálogos para esta categoría y dificultad."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Elige la mejor respuesta",
+      "correct_feedback": "¡Correcto!",
+      "wrong_feedback": "No es del todo correcto, inténtalo de nuevo",
+      "next_turn": "Continuar",
+      "finish": "Terminar"
+    },
+    "complete": {
+      "title": "¡Diálogo completado!",
+      "score_label": "Puntuación",
+      "first_try_label": "Correcto al primer intento",
+      "accuracy_label": "Precisión",
+      "wrong_attempts_label": "Intentos incorrectos",
+      "play_again": "Jugar de nuevo",
+      "back_home": "Volver al inicio"
+    },
+    "limit": {
+      "daily_free_title": "Límite diario alcanzado",
+      "daily_free_body": "Los usuarios gratuitos pueden hacer 1 diálogo al día. ¡Vuelve mañana!",
+      "total_free_title": "Diálogos agotados",
+      "total_free_body": "Has completado 7 diálogos. ¡Hazte Premium para práctica ilimitada!",
+      "daily_premium_title": "Tus 3 diálogos de hoy completados",
+      "daily_premium_body": "¡Buen trabajo! Mañana te esperan 3 nuevos diálogos.",
+      "go_premium": "Ir a Premium",
+      "maybe_later": "Quizás más tarde",
+      "come_back_tomorrow": "Hasta mañana"
+    },
+    "error": {
+      "load_failed": "No se pudieron cargar los diálogos. Inténtalo de nuevo.",
+      "session_failed": "No se pudo iniciar la sesión. Inténtalo de nuevo."
+    }
   }
 }

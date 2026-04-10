@@ -736,5 +736,57 @@
       "music_subtitle": "Choose the track that plays during the game",
       "preview_hint": "▶ Previewing..."
     }
+  },
+  "dialog": {
+    "tab_title": "Dialog",
+    "home_card_title": "Dialog",
+    "home_card_subtitle": "Practice real conversations",
+    "setup": {
+      "title": "Dialog Practice",
+      "subtitle": "Choose a category and difficulty",
+      "pick_category": "Choose Category",
+      "pick_difficulty": "Choose Difficulty",
+      "difficulty_easy": "Easy",
+      "difficulty_medium": "Medium",
+      "difficulty_hard": "Hard",
+      "difficulty_easy_desc": "Short, everyday phrases",
+      "difficulty_medium_desc": "More natural, context-based",
+      "difficulty_hard_desc": "Nuance and tone differences",
+      "start_button": "Start",
+      "no_scenarios": "No dialogs available for this category and difficulty yet."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Choose the best reply",
+      "correct_feedback": "Correct!",
+      "wrong_feedback": "Not quite, try again",
+      "next_turn": "Continue",
+      "finish": "Finish"
+    },
+    "complete": {
+      "title": "Dialog Complete!",
+      "score_label": "Score",
+      "first_try_label": "Correct on First Try",
+      "accuracy_label": "Accuracy",
+      "wrong_attempts_label": "Wrong Attempts",
+      "play_again": "Play Again",
+      "back_home": "Back to Home"
+    },
+    "limit": {
+      "daily_free_title": "Daily Limit Reached",
+      "daily_free_body": "Free users can do 1 dialog per day. Come back tomorrow!",
+      "total_free_title": "All Dialogs Used",
+      "total_free_body": "You've completed 7 dialogs. Go Premium for unlimited practice!",
+      "daily_premium_title": "Today's 3 Dialogs Done",
+      "daily_premium_body": "Great work! 3 new dialogs will be waiting for you tomorrow.",
+      "go_premium": "Go Premium",
+      "maybe_later": "Maybe Later",
+      "come_back_tomorrow": "See You Tomorrow"
+    },
+    "error": {
+      "load_failed": "Could not load dialogs. Please try again.",
+      "session_failed": "Could not start session. Please try again."
+    }
   }
 }

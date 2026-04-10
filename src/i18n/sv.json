@@ -736,5 +736,57 @@
       "music_subtitle": "Välj spåret som spelas under spelet",
       "preview_hint": "▶ Förhandsvisar..."
     }
+  },
+  "dialog": {
+    "tab_title": "Dialog",
+    "home_card_title": "Dialog",
+    "home_card_subtitle": "Träna verkliga samtal",
+    "setup": {
+      "title": "Dialogträning",
+      "subtitle": "Välj kategori och svårighetsgrad",
+      "pick_category": "Välj kategori",
+      "pick_difficulty": "Välj svårighetsgrad",
+      "difficulty_easy": "Lätt",
+      "difficulty_medium": "Medel",
+      "difficulty_hard": "Svår",
+      "difficulty_easy_desc": "Korta, vardagliga fraser",
+      "difficulty_medium_desc": "Mer naturligt, kontextbaserat",
+      "difficulty_hard_desc": "Nyanser och tonsskillnader",
+      "start_button": "Starta",
+      "no_scenarios": "Inga dialoger tillgängliga för denna kategori och svårighetsgrad ännu."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Välj bästa svaret",
+      "correct_feedback": "Rätt!",
+      "wrong_feedback": "Inte riktigt, försök igen",
+      "next_turn": "Fortsätt",
+      "finish": "Avsluta"
+    },
+    "complete": {
+      "title": "Dialog klar!",
+      "score_label": "Poäng",
+      "first_try_label": "Rätt på första försöket",
+      "accuracy_label": "Noggrannhet",
+      "wrong_attempts_label": "Felaktiga försök",
+      "play_again": "Spela igen",
+      "back_home": "Tillbaka till start"
+    },
+    "limit": {
+      "daily_free_title": "Daglig gräns nådd",
+      "daily_free_body": "Gratisanvändare kan göra 1 dialog per dag. Kom tillbaka imorgon!",
+      "total_free_title": "Alla dialoger använda",
+      "total_free_body": "Du har slutfört 7 dialoger. Skaffa Premium för obegränsad träning!",
+      "daily_premium_title": "Dagens 3 dialoger klara",
+      "daily_premium_body": "Bra jobbat! 3 nya dialoger väntar på dig imorgon.",
+      "go_premium": "Skaffa Premium",
+      "maybe_later": "Kanske senare",
+      "come_back_tomorrow": "Vi ses imorgon"
+    },
+    "error": {
+      "load_failed": "Kunde inte ladda dialoger. Försök igen.",
+      "session_failed": "Kunde inte starta session. Försök igen."
+    }
   }
 }
