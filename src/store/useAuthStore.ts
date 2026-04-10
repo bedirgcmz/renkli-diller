@@ -21,6 +21,14 @@ interface User {
   created_at: string;
 }
 
+/** Returns true if the manual override is active (set and not expired). */
+function isOverrideActive(profile: { premium_override?: boolean; premium_override_expires_at?: string | null } | null | undefined): boolean {
+  if (!profile?.premium_override) return false;
+  const exp = profile.premium_override_expires_at;
+  if (!exp) return true; // permanent
+  return new Date(exp) > new Date();
+}
+
 interface AuthState {
   user: User | null;
   session: any;
@@ -115,9 +123,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email!,
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          premium_override: profile?.premium_override ?? false,
-          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
-          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
+          premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -226,9 +234,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email || credential.email || "",
           display_name: displayName || profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          premium_override: profile?.premium_override ?? false,
-          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
-          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
+          premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -561,9 +569,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: user.email!,
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
-            premium_override: profile?.premium_override ?? false,
-          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
-          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
+            premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
             leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
           };
@@ -632,9 +640,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                       ...state.user,
                       display_name: profile?.display_name || "",
                       avatar_url: profile?.avatar_url || "",
-                      premium_override: profile?.premium_override ?? false,
-          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
-          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
+                      premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
                       leaderboard_visible: profile?.leaderboard_visible ?? true,
                     }
                   : state.user,
