@@ -6,7 +6,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   logInUser,
   logOutUser,
-  isPremiumActive,
   setupCustomerInfoListener,
 } from "@/services/revenueCat";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -103,9 +102,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .eq("id", data.user.id)
           .single();
 
-        // RevenueCat login + premium check
-        await logInUser(data.user.id).catch(console.error);
-        const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+        // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
+        const { active: rcActive, verified: rcVerified } = await logInUser(data.user.id).catch(
           () => ({ active: false, verified: false })
         );
 
@@ -114,9 +112,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email!,
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          // RC is authoritative when verified; fall back to Supabase when RC unavailable
-          // RC is authoritative when verified AND active; Supabase acts as override
-          // (e.g. manually granted premium for testing/support)
           is_premium: rcActive || (profile?.is_premium ?? false),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
@@ -217,8 +212,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .select("*")
           .eq("id", data.user.id)
           .single();
-        await logInUser(data.user.id).catch(console.error);
-        const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+        const { active: rcActive, verified: rcVerified } = await logInUser(data.user.id).catch(
           () => ({ active: false, verified: false })
         );
 
@@ -550,9 +544,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .eq("id", user.id)
             .single();
 
-          // RevenueCat login + premium check
-          await logInUser(user.id).catch(console.error);
-          const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+          // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
+          const { active: rcActive, verified: rcVerified } = await logInUser(user.id).catch(
             () => ({ active: false, verified: false })
           );
 
@@ -618,9 +611,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
               await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
 
-              // RC login + premium check (handles Google login path)
-              await logInUser(session.user.id).catch(console.error);
-              const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+              // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
+              const { active: rcActive, verified: rcVerified } = await logInUser(session.user.id).catch(
                 () => ({ active: false, verified: false })
               );
 
