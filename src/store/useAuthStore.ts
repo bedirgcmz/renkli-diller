@@ -16,6 +16,7 @@ interface User {
   display_name?: string;
   avatar_url?: string;
   is_premium: boolean;
+  premium_override: boolean;
   leaderboard_visible: boolean;
   created_at: string;
 }
@@ -74,7 +75,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user } = get();
     if (!user) return;
     const wasNotPremium = !user.is_premium;
-    set({ user: { ...user, is_premium: active }, isPremiumVerified: true });
+    // Respect manual override — RC saying false must not revoke an explicit override grant
+    const effectivePremium = active || user.premium_override;
+    set({ user: { ...user, is_premium: effectivePremium }, isPremiumVerified: true });
     // Sync upgrade to Supabase via SECURITY DEFINER RPC (only on upgrade, no revoke RPC exists)
     if (active && wasNotPremium) {
       void (async () => { await supabase.rpc("set_premium"); })().catch(() => {});
@@ -112,6 +115,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email!,
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
+          premium_override: profile?.premium_override ?? false,
           // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
           is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
@@ -222,6 +226,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email || credential.email || "",
           display_name: displayName || profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
+          premium_override: profile?.premium_override ?? false,
           // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
           is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
@@ -556,7 +561,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: user.email!,
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
-            // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
+            premium_override: profile?.premium_override ?? false,
+          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
           is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
             leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
@@ -598,6 +604,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             display_name: "",
             avatar_url: "",
             is_premium: false,
+            premium_override: false,
             leaderboard_visible: true,
             created_at: session.user.created_at,
           };
@@ -625,7 +632,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                       ...state.user,
                       display_name: profile?.display_name || "",
                       avatar_url: profile?.avatar_url || "",
-                      // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
+                      premium_override: profile?.premium_override ?? false,
+          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
           is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
                       leaderboard_visible: profile?.leaderboard_visible ?? true,
                     }
