@@ -270,6 +270,190 @@ export interface CompletedReadingEntry {
   text: ReadingText;
 }
 
+// Dialog types
+export type DialogDifficulty = 1 | 2 | 3; // 1=easy, 2=medium, 3=hard
+
+export type DialogQaStatus =
+  | "draft"
+  | "review_pending"
+  | "approved"
+  | "rejected"
+  | "needs_revision";
+
+export type DialogSessionStatus = "in_progress" | "completed" | "abandoned";
+
+export type DialogProgressStatus =
+  | "not_started"
+  | "in_progress"
+  | "completed"
+  | "assigned";
+
+export interface DialogCategory {
+  id: string;
+  slug: string;
+  title_tr: string;
+  title_en: string;
+  title_sv: string;
+  title_de: string;
+  title_es: string;
+  title_fr: string;
+  title_pt: string;
+  description_tr: string | null;
+  description_en: string | null;
+  description_sv: string | null;
+  description_de: string | null;
+  description_es: string | null;
+  description_fr: string | null;
+  description_pt: string | null;
+  icon: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DialogScenario {
+  id: string;
+  category_id: string;
+  slug: string;
+  difficulty: DialogDifficulty;
+  is_premium: boolean;
+  is_active: boolean;
+  order_index: number;
+  estimated_seconds: number | null;
+  turn_count: number;
+  character_name: string;
+  character_role: string;
+  qa_status: DialogQaStatus;
+  content_version: number;
+  title_tr: string;
+  title_en: string;
+  title_sv: string;
+  title_de: string;
+  title_es: string;
+  title_fr: string;
+  title_pt: string;
+  summary_tr: string | null;
+  summary_en: string | null;
+  summary_sv: string | null;
+  summary_de: string | null;
+  summary_es: string | null;
+  summary_fr: string | null;
+  summary_pt: string | null;
+  user_goal_tr: string | null;
+  user_goal_en: string | null;
+  user_goal_sv: string | null;
+  user_goal_de: string | null;
+  user_goal_es: string | null;
+  user_goal_fr: string | null;
+  user_goal_pt: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DialogTurn {
+  id: string;
+  scenario_id: string;
+  turn_index: number;
+  speaker_type: "character" | "system";
+  prompt_type: string | null;
+  grammar_focus: string | null;
+  vocabulary_focus: string | null;
+  message_tr: string;
+  message_en: string;
+  message_sv: string;
+  message_de: string;
+  message_es: string;
+  message_fr: string;
+  message_pt: string;
+  hint_tr: string | null;
+  hint_en: string | null;
+  hint_sv: string | null;
+  hint_de: string | null;
+  hint_es: string | null;
+  hint_fr: string | null;
+  hint_pt: string | null;
+  created_at: string;
+  updated_at: string;
+  options?: DialogTurnOption[];
+}
+
+export interface DialogTurnOption {
+  id: string;
+  turn_id: string;
+  option_index: number;
+  is_correct: boolean;
+  distractor_type: string | null;
+  rationale_tr: string | null;
+  rationale_en: string | null;
+  rationale_sv: string | null;
+  rationale_de: string | null;
+  rationale_es: string | null;
+  rationale_fr: string | null;
+  rationale_pt: string | null;
+  text_tr: string;
+  text_en: string;
+  text_sv: string;
+  text_de: string;
+  text_es: string;
+  text_fr: string;
+  text_pt: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserDialogProgress {
+  id: string;
+  user_id: string;
+  scenario_id: string;
+  status: DialogProgressStatus;
+  shown_at: string | null;
+  completed_at: string | null;
+  total_sessions: number;
+  total_completed_sessions: number;
+  best_score: number | null;
+  last_score: number | null;
+  total_correct_answers: number;
+  total_wrong_answers: number;
+  best_first_try_accuracy: number | null;
+  last_played_at: string | null;
+  created_at: string;
+}
+
+export interface UserDialogSession {
+  id: string;
+  user_id: string;
+  scenario_id: string;
+  status: DialogSessionStatus;
+  started_at: string;
+  completed_at: string | null;
+  total_turns: number;
+  answered_turns: number;
+  correct_on_first_try_count: number;
+  wrong_attempt_count: number;
+  final_score: number | null;
+  duration_seconds: number | null;
+  content_version: number | null;
+  created_at: string;
+}
+
+export interface UserDialogTurnAttempt {
+  id: string;
+  session_id: string;
+  user_id: string;
+  scenario_id: string;
+  turn_id: string;
+  selected_option_id: string;
+  is_correct: boolean;
+  attempt_order: number;
+  answered_at: string;
+}
+
+// Dialog limit constants
+export const DIALOG_LIMIT_FREE_DAILY = 1;
+export const DIALOG_LIMIT_FREE_TOTAL = 7;
+export const DIALOG_LIMIT_PREMIUM_DAILY = 3;
+
 // Legacy types (for backward compatibility)
 export type SentenceState = SentenceStatus;
 
