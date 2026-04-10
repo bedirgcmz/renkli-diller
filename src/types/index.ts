@@ -124,6 +124,9 @@ export type HomeStackParamList = {
   GameHub: undefined;
   SpeedRound: { filter: import("./game").GameFilter; forceTutorial?: boolean };
   WordRain: { filter: import("./game").GameFilter; forceTutorial?: boolean };
+  DialogSetup: undefined;
+  DialogPlay: undefined;
+  DialogComplete: undefined;
 };
 
 export type MainStackParamList = {

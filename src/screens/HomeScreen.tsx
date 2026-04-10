@@ -136,6 +136,15 @@ export default function HomeScreen() {
       coachDescKey: "games.hub.subtitle",
       onPress: (nav) => nav.navigate("GameHub"),
     },
+    {
+      icon: "chatbubbles-outline",
+      iconColor: "#06B6D4",
+      titleKey: "dialog.home_card_title",
+      descKey: "dialog.home_card_subtitle",
+      coachTitleKey: "dialog.home_card_title",
+      coachDescKey: "dialog.home_card_subtitle",
+      onPress: (nav) => nav.navigate("DialogSetup"),
+    },
   ];
 
   // Tab bar step layouts — calculated from screen geometry (4 equal tabs)
