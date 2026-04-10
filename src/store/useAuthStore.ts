@@ -112,7 +112,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email!,
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: rcActive || (profile?.is_premium ?? false),
+          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
+          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -221,7 +222,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email || credential.email || "",
           display_name: displayName || profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: rcActive || (profile?.is_premium ?? false),
+          // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
+          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -554,7 +556,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: user.email!,
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
-            is_premium: rcActive || (profile?.is_premium ?? false),
+            // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
+          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
             leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
           };
@@ -622,7 +625,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                       ...state.user,
                       display_name: profile?.display_name || "",
                       avatar_url: profile?.avatar_url || "",
-                      is_premium: rcActive || (profile?.is_premium ?? false),
+                      // RC active → premium. Manual override → premium. RC unverified (offline/Expo Go) → trust cached Supabase value.
+          is_premium: rcActive || (profile?.premium_override ?? false) || (!rcVerified && (profile?.is_premium ?? false)),
                       leaderboard_visible: profile?.leaderboard_visible ?? true,
                     }
                   : state.user,

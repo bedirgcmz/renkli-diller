@@ -44,19 +44,26 @@ export async function initRevenueCat(userId?: string): Promise<void> {
 }
 
 /**
- * Logs the user into RevenueCat and returns their premium status.
- * Uses the CustomerInfo returned directly by logIn() — avoids a second
- * getCustomerInfo() call which could hit stale cache.
+ * Ensures RevenueCat is configured with the given userId, then logs in.
+ * Returns the premium status from the CustomerInfo returned by logIn() directly
+ * — avoids a second getCustomerInfo() call that could return stale cache.
  *
- * NOTE (second-phase): App.tsx still calls initRevenueCat() without a userId
- * on startup, creating an anonymous customer. This logIn() call triggers an
- * anonymous→identified transfer in RC. Dashboard transfer events are a visible
- * symptom of this pattern. Production fix would be to defer initRevenueCat()
- * until a userId is known, but that requires larger refactor of the auth flow.
+ * Identity lifecycle:
+ *   - If RC not yet configured: configure with userId immediately (no anonymous phase).
+ *   - If RC already configured (e.g. after logOut which reverts to anonymous):
+ *     logIn() transfers the anonymous context to the identified user.
+ *   - App.tsx no longer calls initRevenueCat() — RC is first configured here,
+ *     only once a real userId is known, eliminating anonymous customer creation.
  */
 export async function logInUser(userId: string): Promise<PremiumCheckResult> {
   if (isExpoGo) return { active: false, verified: false };
-  if (!(await Purchases.isConfigured())) return { active: false, verified: false };
+
+  if (!(await Purchases.isConfigured())) {
+    const apiKey = Platform.OS === "ios" ? API_KEYS.ios : API_KEYS.android;
+    if (__DEV__) await Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey });
+  }
+
   const { customerInfo } = await Purchases.logIn(userId);
   const active = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
   return { active, verified: true };
