@@ -115,7 +115,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
           // RC is authoritative when verified; fall back to Supabase when RC unavailable
-          is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+          // RC is authoritative when verified AND active; Supabase acts as override
+          // (e.g. manually granted premium for testing/support)
+          is_premium: rcActive || (profile?.is_premium ?? false),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -225,7 +227,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email || credential.email || "",
           display_name: displayName || profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+          is_premium: rcActive || (profile?.is_premium ?? false),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -559,7 +561,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: user.email!,
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
-            is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+            is_premium: rcActive || (profile?.is_premium ?? false),
             leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
           };
@@ -628,7 +630,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                       ...state.user,
                       display_name: profile?.display_name || "",
                       avatar_url: profile?.avatar_url || "",
-                      is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+                      is_premium: rcActive || (profile?.is_premium ?? false),
                       leaderboard_visible: profile?.leaderboard_visible ?? true,
                     }
                   : state.user,
