@@ -171,6 +171,7 @@
     "export_pdf": "Download PDF",
     "sign_out": "Sign Out",
     "confirm_signout": "Are you sure you want to sign out?",
+    "signing_out": "Signing out...",
     "learning": "Learning",
     "learned_sentences": "Learned Sentences",
     "favorite_sentences": "Favorite Sentences",

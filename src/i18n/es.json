@@ -171,6 +171,7 @@
     "export_pdf": "Descargar PDF",
     "sign_out": "Cerrar sesión",
     "confirm_signout": "¿Seguro que quieres cerrar sesión?",
+    "signing_out": "Cerrando sesión...",
     "learning": "Aprendiendo",
     "learned_sentences": "Frases Aprendidas",
     "favorite_sentences": "Frases Favoritas",

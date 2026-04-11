@@ -171,6 +171,7 @@
     "export_pdf": "Ladda ner PDF",
     "sign_out": "Logga ut",
     "confirm_signout": "Är du säker på att du vill logga ut?",
+    "signing_out": "Loggar ut...",
     "learning": "Lärande",
     "learned_sentences": "Inlärda Meningar",
     "favorite_sentences": "Favoritmeningar",

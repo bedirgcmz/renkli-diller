@@ -171,6 +171,7 @@
     "export_pdf": "Télécharger PDF",
     "sign_out": "Se déconnecter",
     "confirm_signout": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "signing_out": "Déconnexion...",
     "learning": "En cours",
     "learned_sentences": "Phrases Apprises",
     "favorite_sentences": "Phrases Favorites",

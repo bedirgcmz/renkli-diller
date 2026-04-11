@@ -61,7 +61,7 @@ export async function logInUser(userId: string): Promise<PremiumCheckResult> {
   if (!(await Purchases.isConfigured())) {
     const apiKey = Platform.OS === "ios" ? API_KEYS.ios : API_KEYS.android;
     if (__DEV__) await Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-    Purchases.configure({ apiKey });
+    Purchases.configure({ apiKey, appUserID: userId });
   }
 
   const { customerInfo } = await Purchases.logIn(userId);

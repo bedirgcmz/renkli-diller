@@ -6,6 +6,8 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,6 +36,7 @@ export default function MoreScreen() {
   const { signOut } = useAuthStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert(
@@ -41,7 +44,15 @@ export default function MoreScreen() {
       t("profile.confirm_signout"),
       [
         { text: t("common.cancel"), style: "cancel" },
-        { text: t("common.yes"), style: "destructive", onPress: () => signOut() },
+        {
+          text: t("common.yes"),
+          style: "destructive",
+          onPress: async () => {
+            setSigningOut(true);
+            await signOut().catch(console.error);
+            setSigningOut(false);
+          },
+        },
       ],
     );
   };
@@ -176,6 +187,13 @@ export default function MoreScreen() {
       </ScrollView>
 
       <PDFExportModal visible={pdfModalVisible} onClose={() => setPdfModalVisible(false)} />
+
+      <Modal visible={signingOut} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.overlayText}>{t("profile.signing_out")}</Text>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -236,5 +254,17 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontWeight: "600",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  overlayText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "500",
   },
 });
