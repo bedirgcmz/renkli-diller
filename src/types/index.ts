@@ -143,6 +143,7 @@ export type MainStackParamList = {
   FavoriteSentences: undefined;
   Achievements: undefined;
   AITranslator: undefined;
+  LearnedDialogs: undefined;
 };
 
 export type AuthStackParamList = {

@@ -72,6 +72,11 @@ export default function MoreScreen() {
           onPress: () => navigation.navigate("LearnedSentences"),
         },
         {
+          icon: "chatbubbles-outline",
+          label: t("dialog.learned_dialogs.title"),
+          onPress: () => navigation.navigate("LearnedDialogs"),
+        },
+        {
           icon: "heart-outline",
           label: t("profile.favorite_sentences"),
           onPress: () => navigation.navigate("FavoriteSentences"),
