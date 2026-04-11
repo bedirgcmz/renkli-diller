@@ -63,6 +63,7 @@ interface DialogState {
   advanceToNextTurn: () => void;
   completeSession: (userId: string) => Promise<void>;
   abandonSession: (userId: string) => Promise<void>;
+  markAsLearned: (userId: string, scenarioId: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -176,10 +177,28 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         return false;
       }
 
-      // Pick randomly from available scenarios
-      const scenario = scenarios[
-        Math.floor(Math.random() * scenarios.length)
-      ] as DialogScenario;
+      // Smart scenario selection:
+      // Priority 1 — never played (no progress row)
+      // Priority 2 — played but not learned
+      // Priority 3 — learned (all others exhausted)
+      const scenarioIds = scenarios.map((s: any) => s.id);
+      const { data: progressRows } = await supabase
+        .from("user_dialog_progress")
+        .select("scenario_id, is_learned")
+        .eq("user_id", userId)
+        .in("scenario_id", scenarioIds);
+
+      const playedIds = new Set((progressRows ?? []).map((p: any) => p.scenario_id));
+      const learnedIds = new Set(
+        (progressRows ?? []).filter((p: any) => p.is_learned).map((p: any) => p.scenario_id)
+      );
+
+      const fresh = scenarios.filter((s: any) => !playedIds.has(s.id));
+      const unlearned = scenarios.filter((s: any) => playedIds.has(s.id) && !learnedIds.has(s.id));
+      const learned = scenarios.filter((s: any) => learnedIds.has(s.id));
+
+      const pool = fresh.length > 0 ? fresh : unlearned.length > 0 ? unlearned : learned;
+      const scenario = pool[Math.floor(Math.random() * pool.length)] as DialogScenario;
 
       // Fetch turns + options
       const { data: turnsData, error: turnsError } = await supabase
@@ -392,6 +411,36 @@ export const useDialogStore = create<DialogState>((set, get) => ({
       selectedOptionId: null,
       isCorrect: null,
     });
+  },
+
+  markAsLearned: async (userId, scenarioId) => {
+    const now = new Date().toISOString();
+    const { data: existing } = await supabase
+      .from("user_dialog_progress")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("scenario_id", scenarioId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from("user_dialog_progress")
+        .update({ is_learned: true, learned_at: now })
+        .eq("id", existing.id);
+    } else {
+      // Edge case: user marks learned without completing (shouldn't happen, but safe)
+      await supabase.from("user_dialog_progress").insert({
+        user_id: userId,
+        scenario_id: scenarioId,
+        is_learned: true,
+        learned_at: now,
+        status: "completed",
+        total_sessions: 0,
+        total_completed_sessions: 0,
+        total_correct_answers: 0,
+        total_wrong_answers: 0,
+      });
+    }
   },
 
   reset: () => {

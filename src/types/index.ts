@@ -420,6 +420,8 @@ export interface UserDialogProgress {
   total_wrong_answers: number;
   best_first_try_accuracy: number | null;
   last_played_at: string | null;
+  is_learned: boolean;
+  learned_at: string | null;
   created_at: string;
 }
 
