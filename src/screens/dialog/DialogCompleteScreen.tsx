@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +22,7 @@ type Nav = NativeStackNavigationProp<HomeStackParamList>;
 const ACCENT  = "#06B6D4";
 const GOLD    = "#F59E0B";
 const PURPLE  = "#8B5CF6";
+const GREEN   = "#10B981";
 
 export default function DialogCompleteScreen() {
   const { t } = useTranslation();
@@ -27,6 +30,9 @@ export default function DialogCompleteScreen() {
   const navigation = useNavigation<Nav>();
   const { user } = useAuthStore();
   const isPremium = user?.is_premium ?? false;
+
+  const [learnedModalVisible, setLearnedModalVisible] = useState(false);
+  const [markingLearned, setMarkingLearned] = useState(false);
 
   const {
     turns,
@@ -36,6 +42,7 @@ export default function DialogCompleteScreen() {
     selectedCategory,
     selectedDifficulty,
     startSession,
+    markAsLearned,
   } = useDialogStore();
 
   const totalTurns      = turns.length;
@@ -53,12 +60,24 @@ export default function DialogCompleteScreen() {
     if (ok) {
       navigation.replace("DialogPlay");
     } else {
-      // Limit hit or no scenarios — go back to setup
       navigation.navigate("DialogSetup");
     }
   };
 
   const handleBackHome = () => {
+    navigation.navigate("HomeMain");
+  };
+
+  const handleMarkLearned = async () => {
+    if (!user || !activeScenario) return;
+    setMarkingLearned(true);
+    await markAsLearned(user.id, activeScenario.id).catch(console.error);
+    setMarkingLearned(false);
+    setLearnedModalVisible(true);
+  };
+
+  const handleLearnedConfirm = () => {
+    setLearnedModalVisible(false);
     navigation.navigate("HomeMain");
   };
 
@@ -122,6 +141,24 @@ export default function DialogCompleteScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.learnedBtn, { backgroundColor: GREEN + "15", borderColor: GREEN }]}
+          onPress={handleMarkLearned}
+          activeOpacity={0.8}
+          disabled={markingLearned}
+        >
+          {markingLearned ? (
+            <ActivityIndicator size="small" color={GREEN} />
+          ) : (
+            <>
+              <Ionicons name="school-outline" size={18} color={GREEN} />
+              <Text style={[styles.learnedBtnText, { color: GREEN }]}>
+                {t("dialog.complete.mark_learned")}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.secondaryBtn, { borderColor: colors.border }]}
           onPress={handleBackHome}
           activeOpacity={0.75}
@@ -132,6 +169,30 @@ export default function DialogCompleteScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Learned info modal */}
+      <Modal visible={learnedModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: colors.cardBackground }]}>
+            <Text style={styles.modalEmoji}>🎓</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {t("dialog.complete.learned_modal_title")}
+            </Text>
+            <Text style={[styles.modalBody, { color: colors.textSecondary }]}>
+              {t("dialog.complete.learned_modal_body")}
+            </Text>
+            <TouchableOpacity
+              style={[styles.modalBtn, { backgroundColor: PURPLE }]}
+              onPress={handleLearnedConfirm}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.modalBtnText}>
+                {t("dialog.complete.learned_modal_confirm")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -181,6 +242,16 @@ const styles = StyleSheet.create({
   buttons:        { paddingHorizontal: 24, paddingBottom: 24, gap: 12 },
   primaryBtn:     { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 16 },
   primaryBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  learnedBtn:     { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 16, borderWidth: 1.5, minHeight: 52 },
+  learnedBtnText: { fontSize: 15, fontWeight: "600" },
   secondaryBtn:   { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 16, borderWidth: 1.5 },
   secondaryBtnText: { fontSize: 16, fontWeight: "600" },
+
+  modalOverlay:   { flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center", alignItems: "center", paddingHorizontal: 28 },
+  modalCard:      { width: "100%", borderRadius: 24, padding: 28, alignItems: "center", gap: 14 },
+  modalEmoji:     { fontSize: 48 },
+  modalTitle:     { fontSize: 20, fontWeight: "800", textAlign: "center" },
+  modalBody:      { fontSize: 14, lineHeight: 22, textAlign: "center" },
+  modalBtn:       { width: "100%", paddingVertical: 14, borderRadius: 14, alignItems: "center", marginTop: 4 },
+  modalBtnText:   { color: "#fff", fontSize: 15, fontWeight: "700" },
 });
