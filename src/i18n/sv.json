@@ -772,7 +772,11 @@
       "accuracy_label": "Noggrannhet",
       "wrong_attempts_label": "Felaktiga försök",
       "play_again": "Spela igen",
-      "back_home": "Tillbaka till start"
+      "back_home": "Tillbaka till start",
+      "mark_learned": "Jag har behärskat denna dialog",
+      "learned_modal_title": "Bra framsteg! 🎓",
+      "learned_modal_body": "Du har markerat den här dialogen som behärskad. Den visas inte längre i din vanliga rotation.\n\nNär du är klar med de andra kan den komma tillbaka. Du kan alltid spela om den från Mer → Mina lärda dialoger.",
+      "learned_modal_confirm": "Förstått, gå hem"
     },
     "limit": {
       "daily_free_title": "Daglig gräns nådd",
@@ -788,6 +792,17 @@
     "error": {
       "load_failed": "Kunde inte ladda dialoger. Försök igen.",
       "session_failed": "Kunde inte starta session. Försök igen."
+    },
+    "learned_dialogs": {
+      "title": "Mina lärda dialoger",
+      "empty_title": "Inga lärda dialoger än",
+      "empty_subtitle": "Efter att du slutfört en dialog, tryck på 'Jag har behärskat denna dialog' för att markera den.",
+      "replay": "Spela igen",
+      "played_count": "Spelad {{count}} gånger",
+      "best_accuracy": "Bäst: {{accuracy}}%",
+      "difficulty_1": "Lätt",
+      "difficulty_2": "Medel",
+      "difficulty_3": "Svår"
     }
   }
 }

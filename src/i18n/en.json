@@ -772,7 +772,11 @@
       "accuracy_label": "Accuracy",
       "wrong_attempts_label": "Wrong Attempts",
       "play_again": "Play Again",
-      "back_home": "Back to Home"
+      "back_home": "Back to Home",
+      "mark_learned": "I've Mastered This Dialog",
+      "learned_modal_title": "Great Progress! 🎓",
+      "learned_modal_body": "You've marked this dialog as mastered. It won't appear in your regular rotation.\n\nOnce you finish the others, it may come back. You can always replay it from More → My Learned Dialogs.",
+      "learned_modal_confirm": "Got It, Go Home"
     },
     "limit": {
       "daily_free_title": "Daily Limit Reached",
@@ -788,6 +792,17 @@
     "error": {
       "load_failed": "Could not load dialogs. Please try again.",
       "session_failed": "Could not start session. Please try again."
+    },
+    "learned_dialogs": {
+      "title": "My Learned Dialogs",
+      "empty_title": "No learned dialogs yet",
+      "empty_subtitle": "After completing a dialog, tap 'I've Mastered This Dialog' to mark it.",
+      "replay": "Play Again",
+      "played_count": "Played {{count}} times",
+      "best_accuracy": "Best: {{accuracy}}%",
+      "difficulty_1": "Easy",
+      "difficulty_2": "Medium",
+      "difficulty_3": "Hard"
     }
   }
 }

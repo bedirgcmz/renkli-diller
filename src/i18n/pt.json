@@ -772,7 +772,11 @@
       "accuracy_label": "Precisão",
       "wrong_attempts_label": "Tentativas erradas",
       "play_again": "Jogar novamente",
-      "back_home": "Voltar ao início"
+      "back_home": "Voltar ao início",
+      "mark_learned": "Dominei este diálogo",
+      "learned_modal_title": "Ótimo progresso! 🎓",
+      "learned_modal_body": "Você marcou este diálogo como dominado. Ele não aparecerá mais na sua rotação habitual.\n\nQuando terminar os outros, ele pode voltar. Você pode repeti-lo a qualquer momento em Mais → Meus diálogos aprendidos.",
+      "learned_modal_confirm": "Entendi, ir para o início"
     },
     "limit": {
       "daily_free_title": "Limite diário atingido",
@@ -788,6 +792,17 @@
     "error": {
       "load_failed": "Não foi possível carregar os diálogos. Tente novamente.",
       "session_failed": "Não foi possível iniciar a sessão. Tente novamente."
+    },
+    "learned_dialogs": {
+      "title": "Meus diálogos aprendidos",
+      "empty_title": "Nenhum diálogo aprendido ainda",
+      "empty_subtitle": "Após concluir um diálogo, toque em 'Dominei este diálogo' para marcá-lo.",
+      "replay": "Jogar novamente",
+      "played_count": "Jogado {{count}} vezes",
+      "best_accuracy": "Melhor: {{accuracy}}%",
+      "difficulty_1": "Fácil",
+      "difficulty_2": "Médio",
+      "difficulty_3": "Difícil"
     }
   }
 }

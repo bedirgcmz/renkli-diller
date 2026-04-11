@@ -772,7 +772,11 @@
       "accuracy_label": "Doğruluk",
       "wrong_attempts_label": "Yanlış Deneme",
       "play_again": "Tekrar Oyna",
-      "back_home": "Ana Sayfaya Dön"
+      "back_home": "Ana Sayfaya Dön",
+      "mark_learned": "Bu Dialogu Öğrendim",
+      "learned_modal_title": "Harika İlerleme! 🎓",
+      "learned_modal_body": "Bu diyalogu öğrenildi olarak işaretledin. Normal rotasyonda önüne getirilmeyecek.\n\nDiğer diyalogları bitirince tekrar önüne çıkabilir. İstediğin zaman Daha → Öğrendiğim Dialoglar'dan tekrar oynayabilirsin.",
+      "learned_modal_confirm": "Anladım, Ana Sayfaya Dön"
     },
     "limit": {
       "daily_free_title": "Bugünkü Hakkın Bitti",
@@ -788,6 +792,17 @@
     "error": {
       "load_failed": "Diyaloglar yüklenemedi. Tekrar dene.",
       "session_failed": "Oturum başlatılamadı. Tekrar dene."
+    },
+    "learned_dialogs": {
+      "title": "Öğrendiğim Dialoglar",
+      "empty_title": "Henüz öğrenilen dialog yok",
+      "empty_subtitle": "Bir diyalogu tamamladıktan sonra 'Bu Dialogu Öğrendim' diyerek işaretleyebilirsin.",
+      "replay": "Tekrar Oyna",
+      "played_count": "{{count}} kez oynandı",
+      "best_accuracy": "En iyi: %{{accuracy}}",
+      "difficulty_1": "Kolay",
+      "difficulty_2": "Orta",
+      "difficulty_3": "Zor"
     }
   }
 }

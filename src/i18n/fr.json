@@ -772,7 +772,11 @@
       "accuracy_label": "Précision",
       "wrong_attempts_label": "Tentatives incorrectes",
       "play_again": "Rejouer",
-      "back_home": "Retour à l'accueil"
+      "back_home": "Retour à l'accueil",
+      "mark_learned": "J'ai maîtrisé ce dialogue",
+      "learned_modal_title": "Beau progrès ! 🎓",
+      "learned_modal_body": "Tu as marqué ce dialogue comme maîtrisé. Il n'apparaîtra plus dans ta rotation habituelle.\n\nUne fois les autres terminés, il peut revenir. Tu peux toujours le rejouer depuis Plus → Mes dialogues appris.",
+      "learned_modal_confirm": "Compris, retour à l'accueil"
     },
     "limit": {
       "daily_free_title": "Limite quotidienne atteinte",
@@ -788,6 +792,17 @@
     "error": {
       "load_failed": "Impossible de charger les dialogues. Réessaie.",
       "session_failed": "Impossible de démarrer la session. Réessaie."
+    },
+    "learned_dialogs": {
+      "title": "Mes dialogues appris",
+      "empty_title": "Aucun dialogue appris pour l'instant",
+      "empty_subtitle": "Après avoir terminé un dialogue, appuie sur 'J'ai maîtrisé ce dialogue' pour le marquer.",
+      "replay": "Rejouer",
+      "played_count": "Joué {{count}} fois",
+      "best_accuracy": "Meilleur : {{accuracy}}%",
+      "difficulty_1": "Facile",
+      "difficulty_2": "Moyen",
+      "difficulty_3": "Difficile"
     }
   }
 }

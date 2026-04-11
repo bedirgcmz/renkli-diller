@@ -772,7 +772,11 @@
       "accuracy_label": "Genauigkeit",
       "wrong_attempts_label": "Falsche Versuche",
       "play_again": "Nochmal spielen",
-      "back_home": "Zurück zur Startseite"
+      "back_home": "Zurück zur Startseite",
+      "mark_learned": "Diesen Dialog gemeistert",
+      "learned_modal_title": "Toller Fortschritt! 🎓",
+      "learned_modal_body": "Du hast diesen Dialog als gemeistert markiert. Er erscheint nicht mehr in deiner regulären Rotation.\n\nSobald du die anderen abgeschlossen hast, kann er zurückkehren. Du kannst ihn jederzeit unter Mehr → Meine gelernten Dialoge wiederholen.",
+      "learned_modal_confirm": "Verstanden, zur Startseite"
     },
     "limit": {
       "daily_free_title": "Tageslimit erreicht",
@@ -788,6 +792,17 @@
     "error": {
       "load_failed": "Dialoge konnten nicht geladen werden. Bitte erneut versuchen.",
       "session_failed": "Sitzung konnte nicht gestartet werden. Bitte erneut versuchen."
+    },
+    "learned_dialogs": {
+      "title": "Meine gelernten Dialoge",
+      "empty_title": "Noch keine gelernten Dialoge",
+      "empty_subtitle": "Tippe nach einem abgeschlossenen Dialog auf 'Diesen Dialog gemeistert', um ihn zu markieren.",
+      "replay": "Nochmal spielen",
+      "played_count": "{{count}} Mal gespielt",
+      "best_accuracy": "Beste: {{accuracy}}%",
+      "difficulty_1": "Leicht",
+      "difficulty_2": "Mittel",
+      "difficulty_3": "Schwer"
     }
   }
 }
