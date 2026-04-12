@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const KEYS = {
   COACH_DONE: "@parlio/onboarding_coach_marks_done",
@@ -28,6 +29,10 @@ const HINT_KEY_MAP: Record<HintKey, string> = {
   aiTranslate: KEYS.HINT_AI_TRANSLATE,
 };
 
+function getScopedKey(baseKey: string, userId: string | null): string {
+  return userId ? `${baseKey}:${userId}` : `${baseKey}:guest`;
+}
+
 interface OnboardingContextType {
   isCoachMarksDone: boolean;
   isReady: boolean;
@@ -45,37 +50,55 @@ const OnboardingContext = createContext<OnboardingContextType>({
 });
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  const userId = useAuthStore((s) => s.user?.id ?? null);
   const [isReady, setIsReady] = useState(false);
   const [isCoachMarksDone, setIsCoachMarksDone] = useState(true);
   const [shownHints, setShownHints] = useState<Set<HintKey>>(new Set());
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
+      setIsReady(false);
       try {
-        const storageKeys = [KEYS.COACH_DONE, ...Object.values(HINT_KEY_MAP)];
+        const storageKeys = [
+          getScopedKey(KEYS.COACH_DONE, userId),
+          ...Object.values(HINT_KEY_MAP).map((key) => getScopedKey(key, userId)),
+        ];
         const entries = await AsyncStorage.multiGet(storageKeys);
         const map = Object.fromEntries(entries.map(([k, v]) => [k, v ?? ""]));
 
-        setIsCoachMarksDone(map[KEYS.COACH_DONE] === "true");
+        if (cancelled) return;
+
+        setIsCoachMarksDone(map[getScopedKey(KEYS.COACH_DONE, userId)] === "true");
 
         const shown = new Set<HintKey>();
         for (const [hintKey, storageKey] of Object.entries(HINT_KEY_MAP) as [
           HintKey,
           string,
         ][]) {
-          if (map[storageKey] === "true") shown.add(hintKey);
+          if (map[getScopedKey(storageKey, userId)] === "true") shown.add(hintKey);
         }
         setShownHints(shown);
-      } catch {}
-      setIsReady(true);
+      } catch {
+        if (cancelled) return;
+        setIsCoachMarksDone(false);
+        setShownHints(new Set());
+      }
+
+      if (!cancelled) {
+        setIsReady(true);
+      }
     };
     load();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const markCoachMarksDone = useCallback(() => {
     setIsCoachMarksDone(true);
-    AsyncStorage.setItem(KEYS.COACH_DONE, "true").catch(() => {});
-  }, []);
+    AsyncStorage.setItem(getScopedKey(KEYS.COACH_DONE, userId), "true").catch(() => {});
+  }, [userId]);
 
   const isHintShown = useCallback(
     (key: HintKey) => shownHints.has(key),
@@ -84,8 +107,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
   const markHintShown = useCallback((key: HintKey) => {
     setShownHints((prev) => new Set([...prev, key]));
-    AsyncStorage.setItem(HINT_KEY_MAP[key], "true").catch(() => {});
-  }, []);
+    AsyncStorage.setItem(getScopedKey(HINT_KEY_MAP[key], userId), "true").catch(() => {});
+  }, [userId]);
 
   return (
     <OnboardingContext.Provider
