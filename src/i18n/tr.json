@@ -648,6 +648,7 @@
       "daily_limit_reached": "Günlük limit doldu",
       "leaderboard_empty": "Henüz skor yok — ilk oynayan sen ol!",
       "leaderboard_title": "Bu Hafta",
+      "leaderboard_alltime": "Tüm Zamanlar",
       "points_label": "puan",
       "my_rank": "#{{rank}} bu hafta",
       "no_rank": "Henüz sıralaman yok",

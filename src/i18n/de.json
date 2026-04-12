@@ -648,6 +648,7 @@
       "daily_limit_reached": "Tageslimit erreicht",
       "leaderboard_empty": "Noch keine Punkte — sei der Erste!",
       "leaderboard_title": "Diese Woche",
+      "leaderboard_alltime": "Gesamt",
       "points_label": "Pkt",
       "my_rank": "#{{rank}} diese Woche",
       "no_rank": "Noch kein Rang",

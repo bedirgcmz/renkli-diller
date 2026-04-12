@@ -7,6 +7,8 @@ import {
   ScrollView,
   ActivityIndicator,
   useWindowDimensions,
+  Modal,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -67,6 +69,7 @@ export default function GameHubScreen() {
   } = useGameStore();
 
   const [selectedFilter, setSelectedFilter] = useState<GameFilter>("global");
+  const [leaderboardModalVisible, setLeaderboardModalVisible] = useState(false);
   const [demotionWarning, setDemotionWarning] = useState<{
     days: number; league: string;
   } | null>(null);
@@ -117,6 +120,12 @@ export default function GameHubScreen() {
   const speedRoundLeaderboard = leaderboard.speed_round.weekly;
   const topEntries = speedRoundLeaderboard?.entries.slice(0, 3) ?? [];
   const myRank = speedRoundLeaderboard?.myRank ?? null;
+
+  const openLeaderboardModal = () => {
+    setLeaderboardModalVisible(true);
+    void loadLeaderboard("speed_round", "weekly");
+    void loadLeaderboard("speed_round", "alltime");
+  };
 
   return (
     <SafeAreaView
@@ -308,7 +317,7 @@ export default function GameHubScreen() {
 
           <TouchableOpacity
             style={[styles.seeAllBtn, { borderTopColor: colors.border }]}
-            onPress={() => loadLeaderboard("speed_round", "weekly")}
+            onPress={openLeaderboardModal}
           >
             <Text style={[styles.seeAllText, { color: colors.primary }]}>
               {t("games.hub.see_all")}
@@ -327,6 +336,15 @@ export default function GameHubScreen() {
           setMusicPickerGameId(null);
         }}
         onCancel={() => setMusicPickerGameId(null)}
+      />
+
+      <FullLeaderboardModal
+        visible={leaderboardModalVisible}
+        onClose={() => setLeaderboardModalVisible(false)}
+        loading={loading}
+        weekly={leaderboard.speed_round.weekly}
+        alltime={leaderboard.speed_round.alltime}
+        currentUserId={user?.id ?? null}
       />
     </SafeAreaView>
   );
@@ -491,6 +509,124 @@ function LeaderboardRow({
   );
 }
 
+function FullLeaderboardModal({
+  visible,
+  onClose,
+  loading,
+  weekly,
+  alltime,
+  currentUserId,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  loading: boolean;
+  weekly: { myRank: number | null; entries: GameLeaderboardEntry[] } | null;
+  alltime: { myRank: number | null; entries: GameLeaderboardEntry[] } | null;
+  currentUserId: string | null;
+}) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const [period, setPeriod] = useState<"weekly" | "alltime">("weekly");
+
+  useEffect(() => {
+    if (visible) {
+      setPeriod("weekly");
+    }
+  }, [visible]);
+
+  const leaderboard = period === "weekly" ? weekly : alltime;
+  const entries = leaderboard?.entries ?? [];
+  const myRank = leaderboard?.myRank ?? null;
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.modalBackdrop} onPress={onClose}>
+        <Pressable style={[styles.modalSheet, { backgroundColor: colors.cardBackground }]}>
+          <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+
+          <View style={styles.modalHeader}>
+            <View>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {t("games.hub.see_all")}
+              </Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+                {myRank
+                  ? t("games.hub.my_rank", { rank: myRank })
+                  : t("games.hub.no_rank")}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.periodTabs, { backgroundColor: colors.backgroundSecondary }]}>
+            {([
+              { key: "weekly", label: t("games.hub.leaderboard_title") },
+              { key: "alltime", label: t("games.hub.leaderboard_alltime") },
+            ] as const).map((tab) => {
+              const active = period === tab.key;
+              return (
+                <TouchableOpacity
+                  key={tab.key}
+                  style={[
+                    styles.periodTab,
+                    active && [styles.periodTabActive, { backgroundColor: colors.surface }],
+                  ]}
+                  onPress={() => setPeriod(tab.key)}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.periodTabText,
+                      { color: active ? colors.text : colors.textSecondary },
+                    ]}
+                  >
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <ScrollView
+            style={styles.modalList}
+            contentContainerStyle={styles.modalListContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {loading && entries.length === 0 ? (
+              <ActivityIndicator color={colors.primary} style={{ paddingVertical: 32 }} />
+            ) : entries.length === 0 ? (
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                {t("games.hub.leaderboard_empty")}
+              </Text>
+            ) : (
+              entries.map((entry) => (
+                <LeaderboardRow
+                  key={`${period}_${entry.userId}`}
+                  entry={entry}
+                  colors={colors}
+                  isMe={entry.userId === currentUserId}
+                />
+              ))
+            )}
+          </ScrollView>
+
+          <TouchableOpacity
+            style={[styles.modalCloseBtn, { borderColor: colors.border }]}
+            onPress={onClose}
+            activeOpacity={0.85}
+          >
+            <Text style={[styles.modalCloseBtnText, { color: colors.text }]}>
+              {t("common.close")}
+            </Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
   container:        { flex: 1 },
   header:           { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12 },
@@ -546,4 +682,19 @@ const styles = StyleSheet.create({
   seeAllBtn:        { paddingVertical: 12, alignItems: "center", borderTopWidth: StyleSheet.hairlineWidth },
   seeAllText:       { fontSize: 13, fontWeight: "600" },
   emptyText:        { textAlign: "center", padding: 16, fontSize: 13 },
+
+  modalBackdrop:    { flex: 1, backgroundColor: "#00000066", justifyContent: "flex-end" },
+  modalSheet:       { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 20, maxHeight: "82%" },
+  modalHandle:      { width: 42, height: 4, borderRadius: 999, alignSelf: "center", marginBottom: 14 },
+  modalHeader:      { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
+  modalTitle:       { fontSize: 20, fontWeight: "700" },
+  modalSubtitle:    { fontSize: 12, marginTop: 4 },
+  periodTabs:       { flexDirection: "row", borderRadius: 14, padding: 4, marginBottom: 12 },
+  periodTab:        { flex: 1, alignItems: "center", justifyContent: "center", borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12 },
+  periodTabActive:  {},
+  periodTabText:    { fontSize: 13, fontWeight: "600" },
+  modalList:        { flexGrow: 0 },
+  modalListContent: { paddingBottom: 12 },
+  modalCloseBtn:    { height: 46, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center", marginTop: 8 },
+  modalCloseBtnText:{ fontSize: 14, fontWeight: "600" },
 });
