@@ -24,7 +24,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { GradientView } from "@/components/GradientView";
-import { translateWithAI, initAITrial, getAITrialStatus, incrementLocalDailyCount, TRIAL_DAILY_LIMIT } from "@/services/gemini";
+import { translateWithAI, initAITrial, getAITrialStatus, TRIAL_DAILY_LIMIT } from "@/services/gemini";
 import { parseKeywords } from "@/utils/keywords";
 import { MainStackParamList, Category } from "@/types";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
@@ -288,14 +288,7 @@ export default function AITranslateScreen() {
         targetLanguage
       );
       setTranslatedText(result);
-
-      // Update local daily count display (server already incremented server-side)
-      const newCount = await incrementLocalDailyCount();
-      setDailyCount(newCount);
-      if (newCount >= TRIAL_DAILY_LIMIT) {
-        setDailyLimitReached(true);
-        setHasAccess(false);
-      }
+      await initTrialAndCheck();
 
       // Add to session history (max 5, newest first)
       setHistory((prev) => {

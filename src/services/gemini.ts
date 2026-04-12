@@ -17,6 +17,12 @@ export interface TranslateResult {
   translatedText: string;
 }
 
+interface AITrialProfileState {
+  startDate: Date | null;
+  dailyCount: number;
+  dailyDate: string | null;
+}
+
 async function getAITrialStorageKey(baseKey: string): Promise<string> {
   try {
     const {
@@ -44,6 +50,61 @@ async function getScopedValue(baseKey: string): Promise<string | null> {
 async function setScopedValue(baseKey: string, value: string): Promise<void> {
   const scopedKey = await getAITrialStorageKey(baseKey);
   await AsyncStorage.setItem(scopedKey, value);
+}
+
+async function syncAITrialCache(params: {
+  startDate?: string | null;
+  dailyCount?: number;
+  dailyDate?: string | null;
+}): Promise<void> {
+  try {
+    if (params.startDate !== undefined && params.startDate !== null) {
+      await setScopedValue(AI_TRIAL_START_KEY, params.startDate);
+    }
+    if (params.dailyCount !== undefined) {
+      await setScopedValue(AI_TRIAL_DAILY_COUNT_KEY, String(params.dailyCount));
+    }
+    if (params.dailyDate !== undefined && params.dailyDate !== null) {
+      await setScopedValue(AI_TRIAL_DAILY_DATE_KEY, params.dailyDate);
+    }
+  } catch {
+    // ignore storage errors
+  }
+}
+
+async function getAITrialProfileState(): Promise<AITrialProfileState | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("ai_trial_started_at, ai_daily_count, ai_daily_date")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile) return null;
+
+    const startDate = (profile.ai_trial_started_at as string | null) ?? null;
+    const dailyCount = (profile.ai_daily_count as number | null) ?? 0;
+    const dailyDate = (profile.ai_daily_date as string | null) ?? null;
+
+    await syncAITrialCache({
+      startDate,
+      dailyCount,
+      dailyDate,
+    });
+
+    return {
+      startDate: startDate ? new Date(startDate) : null,
+      dailyCount,
+      dailyDate,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function clearAITrialCache(): Promise<void> {
@@ -101,33 +162,17 @@ export async function translateWithAI(
 // in profiles on first use. AsyncStorage is a local cache for fast UI rendering.
 
 export async function getAITrialStartDate(): Promise<Date | null> {
+  const profileState = await getAITrialProfileState();
+  if (profileState) {
+    return profileState.startDate;
+  }
+
   // 1. Try local cache first
   try {
     const stored = await getScopedValue(AI_TRIAL_START_KEY);
     if (stored) return new Date(stored);
   } catch {
     // ignore storage errors
-  }
-
-  // 2. Cache miss — fetch from DB (covers reinstall / cleared storage)
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("ai_trial_started_at")
-      .eq("id", user.id)
-      .single();
-
-    const dbDate = profile?.ai_trial_started_at as string | null;
-    if (dbDate) {
-      // Populate cache for next time
-      await setScopedValue(AI_TRIAL_START_KEY, dbDate).catch(() => {});
-      return new Date(dbDate);
-    }
-  } catch {
-    // ignore network errors
   }
 
   return null;
@@ -181,7 +226,9 @@ export async function getAITrialStatus(isPremium: boolean): Promise<{
     return { hasAccess: true, daysLeft: Infinity, trialStarted: true, dailyCount: 0, dailyLimitReached: false };
   }
 
-  const startDate = await getAITrialStartDate();
+  const profileState = await getAITrialProfileState();
+  const today = new Date().toISOString().split("T")[0];
+  const startDate = profileState?.startDate ?? await getAITrialStartDate();
   if (!startDate) {
     // Trial not started yet — will start on first translation
     return { hasAccess: true, daysLeft: TRIAL_DURATION_DAYS, trialStarted: false, dailyCount: 0, dailyLimitReached: false };
@@ -196,7 +243,9 @@ export async function getAITrialStatus(isPremium: boolean): Promise<{
     return { hasAccess: false, daysLeft: 0, trialStarted: true, dailyCount: 0, dailyLimitReached: false };
   }
 
-  const { count: dailyCount } = await getDailyCount();
+  const dailyCount = profileState
+    ? (profileState.dailyDate === today ? profileState.dailyCount : 0)
+    : (await getDailyCount()).count;
   const dailyLimitReached = dailyCount >= TRIAL_DAILY_LIMIT;
 
   return {
