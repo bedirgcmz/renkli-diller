@@ -40,6 +40,7 @@ interface GameStoreState {
   markTutorialSeen: (gameType: GameType) => void;
   setDailyLimitReached: (gameType: GameType, value: boolean) => void;
   clearError: () => void;
+  clear: () => void;
 }
 
 // Cache duration: 3 minutes for leaderboard
@@ -281,4 +282,23 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  clear: () =>
+    set({
+      userStats: null,
+      leaderboard: {
+        speed_round: { weekly: null, alltime: null },
+        word_rain: { weekly: null, alltime: null },
+      },
+      leaderboardFetchedAt: {
+        speed_round: { weekly: null, alltime: null },
+        word_rain: { weekly: null, alltime: null },
+      },
+      tutorialSeen: { speed_round: false, word_rain: false },
+      dailyLimitReached: { speed_round: false, word_rain: false },
+      pendingScore: null,
+      loading: false,
+      submitLoading: false,
+      error: null,
+    }),
 }));

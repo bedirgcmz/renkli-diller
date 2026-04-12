@@ -54,7 +54,7 @@ interface DialogState {
   setSelectedCategory: (category: DialogCategory | null) => void;
   setSelectedDifficulty: (difficulty: DialogDifficultyFilter | null) => void;
   fetchLimitStatus: (userId: string, isPremium: boolean) => Promise<void>;
-  startSession: (userId: string, isPremium: boolean) => Promise<boolean>;
+  startSession: (userId: string, isPremium: boolean, scenarioId?: string) => Promise<boolean>;
   selectOption: (
     userId: string,
     optionId: string,
@@ -155,50 +155,69 @@ export const useDialogStore = create<DialogState>((set, get) => ({
     }
   },
 
-  startSession: async (userId, isPremium) => {
+  startSession: async (userId, isPremium, scenarioId) => {
     const { selectedCategory, selectedDifficulty } = get();
-    if (!selectedCategory || !selectedDifficulty) return false;
+    if (!scenarioId && (!selectedCategory || !selectedDifficulty)) return false;
 
     set({ loading: true, error: null });
     try {
-      // Pick a random approved scenario for this category + difficulty
-      const { data: scenarios, error: scenarioError } = await supabase
-        .from("dialog_scenarios")
-        .select("*")
-        .eq("category_id", selectedCategory.id)
-        .eq("difficulty", selectedDifficulty)
-        .eq("is_active", true)
-        .eq("qa_status", "approved")
-        .order("order_index");
+      let scenario: DialogScenario | null = null;
 
-      if (scenarioError) throw scenarioError;
-      if (!scenarios || scenarios.length === 0) {
-        set({ error: "no_scenarios", loading: false });
-        return false;
+      if (scenarioId) {
+        const { data: scenarioData, error: scenarioError } = await supabase
+          .from("dialog_scenarios")
+          .select("*")
+          .eq("id", scenarioId)
+          .eq("is_active", true)
+          .eq("qa_status", "approved")
+          .single();
+
+        if (scenarioError) throw scenarioError;
+        if (!scenarioData) {
+          set({ error: "no_scenarios", loading: false });
+          return false;
+        }
+        scenario = scenarioData as DialogScenario;
+      } else {
+        // Pick a random approved scenario for this category + difficulty
+        const { data: scenarios, error: scenarioError } = await supabase
+          .from("dialog_scenarios")
+          .select("*")
+          .eq("category_id", selectedCategory!.id)
+          .eq("difficulty", selectedDifficulty!)
+          .eq("is_active", true)
+          .eq("qa_status", "approved")
+          .order("order_index");
+
+        if (scenarioError) throw scenarioError;
+        if (!scenarios || scenarios.length === 0) {
+          set({ error: "no_scenarios", loading: false });
+          return false;
+        }
+
+        // Smart scenario selection:
+        // Priority 1 — never played (no progress row)
+        // Priority 2 — played but not learned
+        // Priority 3 — learned (all others exhausted)
+        const scenarioIds = scenarios.map((s: any) => s.id);
+        const { data: progressRows } = await supabase
+          .from("user_dialog_progress")
+          .select("scenario_id, is_learned")
+          .eq("user_id", userId)
+          .in("scenario_id", scenarioIds);
+
+        const playedIds = new Set((progressRows ?? []).map((p: any) => p.scenario_id));
+        const learnedIds = new Set(
+          (progressRows ?? []).filter((p: any) => p.is_learned).map((p: any) => p.scenario_id)
+        );
+
+        const fresh = scenarios.filter((s: any) => !playedIds.has(s.id));
+        const unlearned = scenarios.filter((s: any) => playedIds.has(s.id) && !learnedIds.has(s.id));
+        const learned = scenarios.filter((s: any) => learnedIds.has(s.id));
+
+        const pool = fresh.length > 0 ? fresh : unlearned.length > 0 ? unlearned : learned;
+        scenario = pool[Math.floor(Math.random() * pool.length)] as DialogScenario;
       }
-
-      // Smart scenario selection:
-      // Priority 1 — never played (no progress row)
-      // Priority 2 — played but not learned
-      // Priority 3 — learned (all others exhausted)
-      const scenarioIds = scenarios.map((s: any) => s.id);
-      const { data: progressRows } = await supabase
-        .from("user_dialog_progress")
-        .select("scenario_id, is_learned")
-        .eq("user_id", userId)
-        .in("scenario_id", scenarioIds);
-
-      const playedIds = new Set((progressRows ?? []).map((p: any) => p.scenario_id));
-      const learnedIds = new Set(
-        (progressRows ?? []).filter((p: any) => p.is_learned).map((p: any) => p.scenario_id)
-      );
-
-      const fresh = scenarios.filter((s: any) => !playedIds.has(s.id));
-      const unlearned = scenarios.filter((s: any) => playedIds.has(s.id) && !learnedIds.has(s.id));
-      const learned = scenarios.filter((s: any) => learnedIds.has(s.id));
-
-      const pool = fresh.length > 0 ? fresh : unlearned.length > 0 ? unlearned : learned;
-      const scenario = pool[Math.floor(Math.random() * pool.length)] as DialogScenario;
 
       // Fetch turns + options
       const { data: turnsData, error: turnsError } = await supabase
@@ -217,6 +236,11 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         ),
       })) as DialogTurn[];
 
+      if (turns.length === 0 || turns.some((turn) => (turn.options ?? []).length === 0)) {
+        set({ error: "invalid_scenario", loading: false });
+        return false;
+      }
+
       // Create session row
       const { data: sessionData, error: sessionError } = await supabase
         .from("user_dialog_sessions")
@@ -224,7 +248,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
           user_id: userId,
           scenario_id: scenario.id,
           status: "in_progress",
-          total_turns: scenario.turn_count,
+          total_turns: scenario.turn_count ?? turns.length,
           content_version: scenario.content_version,
         })
         .select()

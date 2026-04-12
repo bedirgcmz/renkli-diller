@@ -65,6 +65,10 @@ export default function EditSentenceScreen() {
     if (!sentence) navigation.goBack();
   }, [sentence]);
 
+  if (!sentence) {
+    return null;
+  }
+
   const isUserSentence = !sentence.is_preset;
 
   const handleSave = async () => {

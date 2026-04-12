@@ -754,7 +754,8 @@
       "difficulty_medium_desc": "Daha doğal, bağlama dayalı",
       "difficulty_hard_desc": "Nüans ve ton farkı",
       "start_button": "Başlat",
-      "no_scenarios": "Bu kategori ve zorlukta henüz diyalog yok."
+      "no_scenarios": "Bu kategori ve zorlukta henüz diyalog yok.",
+      "start_failed": "Bu diyalog şu anda başlatılamadı. Lütfen başka birini deneyin."
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

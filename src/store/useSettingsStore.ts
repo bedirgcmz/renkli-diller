@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SupportedLanguage } from "@/types";
+import { syncDailyReminderSchedule } from "@/services/notifications";
 
 interface Settings {
   uiLanguage: SupportedLanguage;
@@ -19,6 +20,7 @@ interface Settings {
 interface SettingsState extends Settings {
   loading: boolean;
   initialized: boolean;
+  loadedForUserId: string | null;
 
   // Actions
   setUILanguage: (lang: SupportedLanguage) => Promise<void>;
@@ -31,9 +33,10 @@ interface SettingsState extends Settings {
   setShowTranslations: (show: boolean) => Promise<void>;
   setTTSEnabled: (enabled: boolean) => Promise<void>;
   setTTSVoice: (voice: string) => Promise<void>;
-  loadSettings: () => Promise<void>;
+  loadSettings: (force?: boolean) => Promise<void>;
   saveSettings: (settings: Partial<Settings>) => Promise<void>;
   resetToDefaults: () => Promise<void>;
+  clear: () => void;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -41,7 +44,7 @@ const DEFAULT_SETTINGS: Settings = {
   targetLanguage: "en",
   theme: "light",
   dailyGoal: 10,
-  notifications: true,
+  notifications: false,
   reminderTime: "19:00",
   autoModeSpeed: 1.0,
   showTranslations: true,
@@ -49,10 +52,55 @@ const DEFAULT_SETTINGS: Settings = {
   ttsVoice: "default",
 };
 
+const LEGACY_STORAGE_KEY = "user_settings";
+
+function getSettingsStorageKey(userId: string | null): string {
+  return userId ? `user_settings:${userId}` : "user_settings:guest";
+}
+
+function toPersistedSettings(settings: Settings): Settings {
+  return {
+    uiLanguage: settings.uiLanguage,
+    targetLanguage: settings.targetLanguage,
+    theme: settings.theme,
+    dailyGoal: settings.dailyGoal,
+    notifications: settings.notifications,
+    reminderTime: settings.reminderTime,
+    autoModeSpeed: settings.autoModeSpeed,
+    showTranslations: settings.showTranslations,
+    ttsEnabled: settings.ttsEnabled,
+    ttsVoice: settings.ttsVoice,
+  };
+}
+
+async function reconcileNotificationState(settings: Settings): Promise<Settings> {
+  const syncOk = await syncDailyReminderSchedule({
+    enabled: settings.notifications,
+    reminderTime: settings.reminderTime,
+  });
+
+  if (!settings.notifications || syncOk) {
+    return settings;
+  }
+
+  return {
+    ...settings,
+    notifications: false,
+  };
+}
+
+async function getCurrentUserId(): Promise<string | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.id ?? null;
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...DEFAULT_SETTINGS,
   loading: false,
   initialized: false,
+  loadedForUserId: null,
 
   setUILanguage: async (lang) => {
     set({ uiLanguage: lang });
@@ -104,27 +152,48 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await get().saveSettings({ ttsVoice: voice });
   },
 
-  loadSettings: async () => {
-    if (get().initialized) return;
+  loadSettings: async (force = false) => {
     set({ loading: true });
     try {
+      const userId = await getCurrentUserId();
+      const storageKey = getSettingsStorageKey(userId);
+      if (!force && get().initialized && get().loadedForUserId === userId) {
+        set({ loading: false });
+        return;
+      }
+
       // Try to load from AsyncStorage first
-      const stored = await AsyncStorage.getItem("user_settings");
+      let stored = await AsyncStorage.getItem(storageKey);
+      if (!stored) {
+        const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
+        if (legacy) {
+          stored = legacy;
+          await AsyncStorage.setItem(storageKey, legacy).catch(() => {});
+          await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
+        }
+      }
       if (stored) {
-        const settings = JSON.parse(stored);
-        set({ ...settings, loading: false, initialized: true });
+        const settings = JSON.parse(stored) as Settings;
+        const resolvedSettings = await reconcileNotificationState({
+          ...DEFAULT_SETTINGS,
+          ...settings,
+        });
+        set({
+          ...resolvedSettings,
+          loading: false,
+          initialized: true,
+          loadedForUserId: userId,
+        });
+        await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
         return;
       }
 
       // If no stored settings, try to load from Supabase
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
+      if (userId) {
         const { data: settings } = await supabase
           .from("user_settings")
           .select("*")
-          .eq("user_id", user.id)
+          .eq("user_id", userId)
           .single();
 
         if (settings) {
@@ -140,46 +209,66 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             ttsEnabled: settings.tts_enabled ?? DEFAULT_SETTINGS.ttsEnabled,
             ttsVoice: settings.tts_voice ?? DEFAULT_SETTINGS.ttsVoice,
           };
-          set({ ...mapped, loading: false, initialized: true });
-          await AsyncStorage.setItem("user_settings", JSON.stringify(mapped));
+          const resolvedSettings = await reconcileNotificationState(mapped);
+          set({ ...resolvedSettings, loading: false, initialized: true, loadedForUserId: userId });
+          await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           return;
         }
       }
 
       // Use defaults
-      set({ ...DEFAULT_SETTINGS, loading: false, initialized: true });
-      await AsyncStorage.setItem("user_settings", JSON.stringify(DEFAULT_SETTINGS));
+      const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
+      set({ ...resolvedDefaults, loading: false, initialized: true, loadedForUserId: userId });
+      await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedDefaults)));
     } catch (error) {
       if (__DEV__) console.error("Error loading settings:", error);
-      set({ ...DEFAULT_SETTINGS, loading: false, initialized: true });
+      set({ ...DEFAULT_SETTINGS, loading: false, initialized: true, loadedForUserId: null });
     }
   },
 
   saveSettings: async (updates) => {
     const currentSettings = get();
-    const newSettings = { ...currentSettings, ...updates };
+    const requestedSettings: Settings = {
+      uiLanguage: updates.uiLanguage ?? currentSettings.uiLanguage,
+      targetLanguage: updates.targetLanguage ?? currentSettings.targetLanguage,
+      theme: updates.theme ?? currentSettings.theme,
+      dailyGoal: updates.dailyGoal ?? currentSettings.dailyGoal,
+      notifications: updates.notifications ?? currentSettings.notifications,
+      reminderTime: updates.reminderTime ?? currentSettings.reminderTime,
+      autoModeSpeed: updates.autoModeSpeed ?? currentSettings.autoModeSpeed,
+      showTranslations: updates.showTranslations ?? currentSettings.showTranslations,
+      ttsEnabled: updates.ttsEnabled ?? currentSettings.ttsEnabled,
+      ttsVoice: updates.ttsVoice ?? currentSettings.ttsVoice,
+    };
 
     try {
+      const userId = await getCurrentUserId();
+      const storageKey = getSettingsStorageKey(userId);
+      const resolvedSettings = await reconcileNotificationState(requestedSettings);
+
+      set({
+        ...resolvedSettings,
+        loadedForUserId: userId,
+      });
+
       // Save to AsyncStorage
-      await AsyncStorage.setItem("user_settings", JSON.stringify(newSettings));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+      await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
 
       // Save to Supabase if user is logged in
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
+      if (userId) {
         const { error } = await supabase.from("user_settings").upsert({
-          user_id: user.id,
-          ui_language: newSettings.uiLanguage,
-          target_language: newSettings.targetLanguage,
-          theme: newSettings.theme,
-          daily_goal: newSettings.dailyGoal,
-          notifications: newSettings.notifications,
-          reminder_time: newSettings.reminderTime,
-          auto_mode_speed: newSettings.autoModeSpeed,
-          show_translations: newSettings.showTranslations,
-          tts_enabled: newSettings.ttsEnabled,
-          tts_voice: newSettings.ttsVoice,
+          user_id: userId,
+          ui_language: requestedSettings.uiLanguage,
+          target_language: requestedSettings.targetLanguage,
+          theme: requestedSettings.theme,
+          daily_goal: requestedSettings.dailyGoal,
+          notifications: requestedSettings.notifications,
+          reminder_time: requestedSettings.reminderTime,
+          auto_mode_speed: requestedSettings.autoModeSpeed,
+          show_translations: requestedSettings.showTranslations,
+          tts_enabled: requestedSettings.ttsEnabled,
+          tts_voice: requestedSettings.ttsVoice,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
 
@@ -193,7 +282,20 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   resetToDefaults: async () => {
-    set({ ...DEFAULT_SETTINGS });
+    set((state) => ({
+      ...DEFAULT_SETTINGS,
+      loading: false,
+      initialized: true,
+      loadedForUserId: state.loadedForUserId,
+    }));
     await get().saveSettings(DEFAULT_SETTINGS);
   },
+
+  clear: () =>
+    set({
+      ...DEFAULT_SETTINGS,
+      loading: false,
+      initialized: false,
+      loadedForUserId: null,
+    }),
 }));

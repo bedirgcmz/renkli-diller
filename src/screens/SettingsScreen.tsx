@@ -28,10 +28,7 @@ import { useI18n } from "@/providers/I18nProvider";
 import { MainStackParamList, SupportedLanguage } from "@/types";
 import { TimePicker, LangPicker } from "@/components/SettingsPicker";
 import {
-  requestNotificationPermissions,
-  scheduleDailyReminder,
-  cancelDailyReminder,
-  parseReminderTime,
+  syncDailyReminderSchedule,
 } from "@/services/notifications";
 
 const DAILY_GOAL_OPTIONS = [5, 10, 20, 30];
@@ -104,16 +101,20 @@ export default function SettingsScreen() {
 
   const handleNotificationsToggle = async (enabled: boolean) => {
     if (enabled) {
-      const granted = await requestNotificationPermissions();
-      if (!granted) {
+      const scheduled = await syncDailyReminderSchedule({
+        enabled: true,
+        reminderTime,
+        title: t("settings.notif_title"),
+        body: t("settings.notif_body"),
+        requestPermissions: true,
+      });
+      if (!scheduled) {
         Alert.alert(t("settings.notifications"), t("settings.notif_permission_denied"));
         return;
       }
-      const { hour, minute } = parseReminderTime(reminderTime);
-      await scheduleDailyReminder(hour, minute, t("settings.notif_title"), t("settings.notif_body"));
       setNotifications(true);
     } else {
-      await cancelDailyReminder();
+      await syncDailyReminderSchedule({ enabled: false, reminderTime });
       setNotifications(false);
     }
   };
@@ -121,8 +122,12 @@ export default function SettingsScreen() {
   const handleReminderTimeChange = async (time: string) => {
     await setReminderTime(time);
     if (notifications) {
-      const { hour, minute } = parseReminderTime(time);
-      await scheduleDailyReminder(hour, minute, t("settings.notif_title"), t("settings.notif_body"));
+      await syncDailyReminderSchedule({
+        enabled: true,
+        reminderTime: time,
+        title: t("settings.notif_title"),
+        body: t("settings.notif_body"),
+      });
     }
   };
 

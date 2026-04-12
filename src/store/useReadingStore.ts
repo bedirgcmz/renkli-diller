@@ -22,6 +22,7 @@ interface ReadingState {
   getTodayCount: () => number;
   getLearnedCount: () => number;
   getReadingStreak: () => number;
+  clear: () => void;
 }
 
 export const useReadingStore = create<ReadingState>((set, get) => ({
@@ -276,4 +277,13 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
     }
     return streak;
   },
+
+  clear: () =>
+    set({
+      currentText: null,
+      keywords: [],
+      progress: [],
+      loading: false,
+      error: null,
+    }),
 }));

@@ -9,6 +9,14 @@ import {
   setupCustomerInfoListener,
 } from "@/services/revenueCat";
 import * as AppleAuthentication from "expo-apple-authentication";
+import { clearAITrialCache } from "@/services/gemini";
+import { useAchievementStore } from "./useAchievementStore";
+import { useGameStore } from "./useGameStore";
+import { useLeaderboardStore } from "./useLeaderboardStore";
+import { useProgressStore } from "./useProgressStore";
+import { useReadingStore } from "./useReadingStore";
+import { useSentenceStore } from "./useSentenceStore";
+import { useSettingsStore } from "./useSettingsStore";
 
 interface User {
   id: string;
@@ -35,6 +43,7 @@ interface AuthState {
   loading: boolean;
   initialized: boolean;
   isPremiumVerified: boolean;
+  passwordRecoveryActive: boolean;
 
   // Actions
   setPremiumStatus: (active: boolean) => void;
@@ -61,6 +70,8 @@ interface AuthState {
     currentPassword: string,
     newPassword: string,
   ) => Promise<{ success: boolean; wrongPassword?: boolean; error?: string }>;
+  activatePasswordRecovery: () => void;
+  clearPasswordRecovery: () => void;
   initialize: () => Promise<void>;
   clear: () => void;
 }
@@ -72,12 +83,23 @@ let authSubscription: { unsubscribe: () => void } | null = null;
 // Module-level RC listener cleanup — ensures only one listener is active at a time.
 let rcListenerRemover: (() => void) | null = null;
 
+function clearClientStores() {
+  useSentenceStore.getState().clear();
+  useProgressStore.getState().clear();
+  useLeaderboardStore.getState().clear();
+  useAchievementStore.getState().clear();
+  useReadingStore.getState().clear();
+  useGameStore.getState().clear();
+  useSettingsStore.getState().clear();
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
   loading: false,
   initialized: false,
   isPremiumVerified: false,
+  passwordRecoveryActive: false,
 
   setPremiumStatus: (active: boolean) => {
     const { user } = get();
@@ -346,13 +368,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Remove RC listener before signing out
       if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
       await supabase.auth.signOut();
-      await AsyncStorage.multiRemove(["supabase_session", "user_settings"]);
+      await AsyncStorage.multiRemove(["supabase_session", "user_settings", "user_settings:guest"]);
+      await clearAITrialCache();
       await logOutUser().catch(console.error);
+      clearClientStores();
       set({
         user: null,
         session: null,
         loading: false,
         isPremiumVerified: false,
+        passwordRecoveryActive: false,
       });
     } catch (error) {
       set({ loading: false });
@@ -380,9 +405,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Edge function deleted the user — clean up locally
       if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
-      await AsyncStorage.multiRemove(["supabase_session", "user_settings"]);
+      await AsyncStorage.multiRemove(["supabase_session", "user_settings", "user_settings:guest"]);
+      await clearAITrialCache();
       await logOutUser().catch(console.error);
-      set({ user: null, session: null, loading: false, isPremiumVerified: false });
+      clearClientStores();
+      set({
+        user: null,
+        session: null,
+        loading: false,
+        isPremiumVerified: false,
+        passwordRecoveryActive: false,
+      });
       return { success: true };
     } catch (error: any) {
       set({ loading: false });
@@ -511,6 +544,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) return { success: false, error: error.message };
+      set({ passwordRecoveryActive: false });
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message ?? "Update failed" };
@@ -535,6 +569,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: false, error: error.message ?? "Update failed" };
     }
   },
+
+  activatePasswordRecovery: () => set({ passwordRecoveryActive: true }),
+
+  clearPasswordRecovery: () => set({ passwordRecoveryActive: false }),
 
   initialize: async () => {
     try {
@@ -657,8 +695,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
           })();
         } else if (event === "SIGNED_OUT") {
-          set({ user: null, session: null });
+          clearClientStores();
+          set({
+            user: null,
+            session: null,
+            isPremiumVerified: false,
+            passwordRecoveryActive: false,
+          });
           void AsyncStorage.removeItem("supabase_session");
+          void clearAITrialCache();
         }
       });
       authSubscription = subscription;
@@ -682,6 +727,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       loading: false,
       initialized: false,
       isPremiumVerified: false,
+      passwordRecoveryActive: false,
     });
   },
 }));

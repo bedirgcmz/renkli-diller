@@ -754,7 +754,8 @@
       "difficulty_medium_desc": "Mer naturligt, kontextbaserat",
       "difficulty_hard_desc": "Nyanser och tonsskillnader",
       "start_button": "Starta",
-      "no_scenarios": "Inga dialoger tillgängliga för denna kategori och svårighetsgrad ännu."
+      "no_scenarios": "Inga dialoger tillgängliga för denna kategori och svårighetsgrad ännu.",
+      "start_failed": "Den här dialogen kunde inte startas just nu. Prova en annan."
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

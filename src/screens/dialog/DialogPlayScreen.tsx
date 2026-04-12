@@ -78,6 +78,7 @@ export default function DialogPlayScreen() {
     advanceToNextTurn,
     completeSession,
     abandonSession,
+    error,
   } = useDialogStore();
 
   // Local state: accumulating chat history
@@ -147,6 +148,25 @@ export default function DialogPlayScreen() {
   };
 
   if (!activeScenario || !currentTurn) {
+    if (error || turns.length === 0) {
+      return (
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+          <View style={styles.errorState}>
+            <Text style={[styles.errorTitle, { color: colors.text }]}>{t("common.error")}</Text>
+            <Text style={[styles.errorBody, { color: colors.textSecondary }]}>
+              {t("dialog.setup.start_failed")}
+            </Text>
+            <TouchableOpacity
+              style={[styles.errorButton, { backgroundColor: ACCENT }]}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.errorButtonText}>{t("common.back")}</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      );
+    }
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
         <ActivityIndicator color={ACCENT} style={{ flex: 1 }} />
@@ -363,6 +383,11 @@ function UserSentBubble({ text }: { text: string }) {
 
 const styles = StyleSheet.create({
   container:           { flex: 1 },
+  errorState:          { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 28 },
+  errorTitle:          { fontSize: 20, fontWeight: "700", marginBottom: 8 },
+  errorBody:           { fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 20 },
+  errorButton:         { minWidth: 140, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", paddingHorizontal: 18 },
+  errorButtonText:     { color: "#fff", fontSize: 14, fontWeight: "700" },
 
   // Header
   header:              { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, gap: 8 },

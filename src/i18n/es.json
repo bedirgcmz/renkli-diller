@@ -754,7 +754,8 @@
       "difficulty_medium_desc": "Más natural, basado en contexto",
       "difficulty_hard_desc": "Matices y diferencias de tono",
       "start_button": "Empezar",
-      "no_scenarios": "Aún no hay diálogos para esta categoría y dificultad."
+      "no_scenarios": "Aún no hay diálogos para esta categoría y dificultad.",
+      "start_failed": "No se pudo iniciar este diálogo ahora mismo. Prueba con otro."
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

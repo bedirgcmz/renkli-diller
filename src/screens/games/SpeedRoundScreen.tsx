@@ -58,7 +58,7 @@ const COMBO_X3 = 6;
 type AnswerState = "idle" | "correct" | "wrong";
 
 export default function SpeedRoundScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -184,7 +184,7 @@ export default function SpeedRoundScreen() {
         userId: user!.id,
         filter,
         gameType: "speed_round",
-        sourceLang: i18n.language,
+        sourceLang: uiLanguage,
         targetLang: targetLanguage,
       });
 

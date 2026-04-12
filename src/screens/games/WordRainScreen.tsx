@@ -74,7 +74,7 @@ function getComboMultiplier(combo: number): number {
 type AnswerState = "idle" | "correct" | "wrong" | "missed";
 
 export default function WordRainScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -217,7 +217,7 @@ export default function WordRainScreen() {
         userId: user!.id,
         filter,
         gameType: "word_rain",
-        sourceLang: i18n.language,
+        sourceLang: uiLanguage,
         targetLang: targetLanguage,
       });
 

@@ -241,10 +241,10 @@ export default function BuildSentenceScreen() {
 
   useEffect(() => {
     setInitialized(false);
-    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+    Promise.all([loadSentences(), loadPresetSentences(undefined, isPremium), loadProgress()]).finally(() =>
       setInitialized(true)
     );
-  }, [targetLanguage, uiLanguage]);
+  }, [targetLanguage, uiLanguage, isPremium]);
 
   useEffect(() => {
     const loadTodayCount = async () => {

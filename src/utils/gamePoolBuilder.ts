@@ -7,6 +7,7 @@ import {
   PoolBuildMeta,
   WORD_RAIN_MAX_CHARS,
 } from "@/types/game";
+import { stripMarkers } from "@/utils/keywords";
 
 // ----------------------------------------------------------------
 // Fisher-Yates shuffle (fair, deterministic)
@@ -73,38 +74,35 @@ export async function buildGamePool(params: {
 
     const { data: userSentences } = await supabase
       .from("user_sentences")
-      .select("id, keywords, source_lang, target_lang, status")
+      .select("id, source_text, target_text, source_lang, target_lang, state")
       .eq("user_id", userId)
-      .in("status", statusFilter);
+      .eq("source_lang", sourceLang)
+      .eq("target_lang", targetLang)
+      .in("state", statusFilter);
 
     if (userSentences) {
       const seen = new Set<string>();
 
       for (const sentence of userSentences) {
-        const keywords: string[] = sentence.keywords ?? [];
-        // Only include keywords from sentences with ≤2 keywords.
-        // Sentences with many keywords are already well-known; keep the pool
-        // mostly global so players face fresh vocabulary every session.
-        if (keywords.length > 2) continue;
-        for (const kw of keywords) {
-          if (!kw || kw.trim().length < 2) continue;
-          const normalized = kw.trim().toLowerCase();
-          if (seen.has(normalized)) continue;
-          seen.add(normalized);
+        const sourceText = stripMarkers(sentence.source_text ?? "").trim();
+        const targetText = stripMarkers(sentence.target_text ?? "").trim();
+        if (!sourceText || !targetText) continue;
 
-          const bucket = getLengthBucket(kw);
-          const item: GameVocabularyItem = {
-            id: `user_${sentence.id}_${normalized}`,
-            sourceText: kw,   // keyword IS the target-lang text for user sentences
-            targetText: kw,   // we'll treat keyword as the "word to display"
-            difficulty: 2,
-            lengthBucket: bucket,
-            origin: "user",
-          };
+        const normalized = `${sourceText.toLowerCase()}__${targetText.toLowerCase()}`;
+        if (seen.has(normalized)) continue;
+        seen.add(normalized);
 
-          if (isEligible(item, gameType)) {
-            userItems.push(item);
-          }
+        const item: GameVocabularyItem = {
+          id: `user_${sentence.id}`,
+          sourceText,
+          targetText,
+          difficulty: 2,
+          lengthBucket: getLengthBucket(targetText),
+          origin: "user",
+        };
+
+        if (isEligible(item, gameType)) {
+          userItems.push(item);
         }
       }
     }

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -88,6 +89,14 @@ export default function DialogSetupScreen() {
 
     if (ok) {
       navigation.navigate("DialogPlay");
+      return;
+    }
+
+    const latestError = useDialogStore.getState().error;
+    if (latestError === "no_scenarios") {
+      Alert.alert(t("common.error"), t("dialog.setup.no_scenarios"));
+    } else if (latestError === "invalid_scenario") {
+      Alert.alert(t("common.error"), t("dialog.setup.start_failed"));
     }
   };
 

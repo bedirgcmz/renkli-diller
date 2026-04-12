@@ -12,6 +12,7 @@ interface AchievementState {
   unlockAchievement: (id: string) => Promise<void>;
   isUnlocked: (id: string) => boolean;
   clearToast: () => void;
+  clear: () => void;
   checkProgressAchievements: (stats: {
     totalSentencesLearned: number;
     currentStreak: number;
@@ -28,11 +29,15 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
   isLoaded: false,
 
   loadAchievements: async () => {
+    set({ isLoaded: false, pendingToast: null });
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        set({ unlockedIds: [], unlockedDates: {}, isLoaded: true });
+        return;
+      }
 
       const { data } = await supabase
         .from("user_settings")
@@ -86,6 +91,8 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
   isUnlocked: (id: string) => get().unlockedIds.includes(id),
 
   clearToast: () => set({ pendingToast: null }),
+
+  clear: () => set({ unlockedIds: [], unlockedDates: {}, pendingToast: null, isLoaded: false }),
 
   checkProgressAchievements: async (stats) => {
     if (!get().isLoaded) return;

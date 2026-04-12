@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,7 +47,7 @@ export default function LearnedDialogsScreen() {
   const { user } = useAuthStore();
   const isPremium = user?.is_premium ?? false;
 
-  const { setSelectedCategory, setSelectedDifficulty, startSession, categories, fetchCategories } = useDialogStore();
+  const { startSession, categories, fetchCategories } = useDialogStore();
 
   const [entries, setEntries] = useState<LearnedEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,38 +113,26 @@ export default function LearnedDialogsScreen() {
     if (!user) return;
     setReplayingId(entry.scenarioId);
 
-    // Find matching category object and set store state
-    const cat = categories.find((c) => {
-      // We need category_id — re-query for it
-      return true; // handled below
-    });
-
-    // Re-fetch scenario to get category_id
-    const { data: sc } = await supabase
-      .from("dialog_scenarios")
-      .select("*, dialog_categories(*)")
-      .eq("id", entry.scenarioId)
-      .single();
-
-    if (!sc) { setReplayingId(null); return; }
-
-    const categoryObj = sc.dialog_categories;
-    setSelectedCategory(categoryObj);
-    setSelectedDifficulty(entry.difficulty as 1 | 2 | 3);
-
-    // Force include learned scenarios: temporarily override pool by setting
-    // startSession will pick from learned pool as fallback
-    const ok = await startSession(user.id, isPremium);
+    const ok = await startSession(user.id, isPremium, entry.scenarioId);
     setReplayingId(null);
 
     if (ok) {
-      // Navigate into dialog flow
-      navigation.navigate("Tabs"); // close modal first
-      // Small delay to let modal dismiss
-      setTimeout(() => {
-        // @ts-ignore — HomeStack navigate from MainStack
-        navigation.navigate("DialogPlay");
-      }, 100);
+      (navigation as any).navigate("Tabs", {
+        screen: "Home",
+        params: {
+          screen: "DialogPlay",
+        },
+      });
+      return;
+    }
+
+    const latestError = useDialogStore.getState().error;
+    if (latestError === "no_scenarios") {
+      Alert.alert(t("common.error"), t("dialog.setup.no_scenarios"));
+    } else if (latestError === "invalid_scenario") {
+      Alert.alert(t("common.error"), t("dialog.setup.start_failed"));
+    } else if (latestError) {
+      Alert.alert(t("common.error"), t("dialog.setup.start_failed"));
     }
   };
 

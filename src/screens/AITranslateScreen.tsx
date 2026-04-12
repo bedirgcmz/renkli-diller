@@ -42,7 +42,7 @@ interface SaveModalProps {
   targetText: string;
   categories: Category[];
   uiLanguage: string;
-  onSave: (categoryId: number | undefined, newCategoryName: string, keywords: string[]) => void;
+  onSave: (categoryId: number | undefined, keywords: string[]) => void;
   onClose: () => void;
   saving: boolean;
   t: (k: string, opts?: Record<string, string | number>) => string;
@@ -64,8 +64,6 @@ function SaveModal({
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(
     categories[0]?.id
   );
-  const [showNewCategory, setShowNewCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
 
   // Pre-fill keywords from **...** markers in target text (max 3)
   const autoKeywords = parseKeywords(targetText)
@@ -79,8 +77,6 @@ function SaveModal({
   useEffect(() => {
     if (visible) {
       setSelectedCategoryId(categories[0]?.id);
-      setShowNewCategory(false);
-      setNewCategoryName("");
       const kws = parseKeywords(targetText)
         .filter((s) => s.isPill)
         .slice(0, 3)
@@ -95,10 +91,8 @@ function SaveModal({
   };
 
   const handleSave = () => {
-    const finalCategoryId = showNewCategory ? undefined : selectedCategoryId;
-    const finalNewCatName = showNewCategory ? newCategoryName.trim() : "";
     const finalKeywords = keywords.filter((k) => k.trim() !== "");
-    onSave(finalCategoryId, finalNewCatName, finalKeywords);
+    onSave(selectedCategoryId, finalKeywords);
   };
 
   return (
@@ -151,7 +145,7 @@ function SaveModal({
                 contentContainerStyle={styles.categoryScrollContent}
               >
                 {categories.map((cat) => {
-                  const isSelected = !showNewCategory && selectedCategoryId === cat.id;
+                  const isSelected = selectedCategoryId === cat.id;
                   return (
                     <TouchableOpacity
                       key={cat.id}
@@ -162,10 +156,7 @@ function SaveModal({
                           borderColor: isSelected ? colors.primary : colors.border,
                         },
                       ]}
-                      onPress={() => {
-                        setSelectedCategoryId(cat.id);
-                        setShowNewCategory(false);
-                      }}
+                      onPress={() => setSelectedCategoryId(cat.id)}
                       activeOpacity={0.75}
                     >
                       <Text
@@ -179,50 +170,7 @@ function SaveModal({
                     </TouchableOpacity>
                   );
                 })}
-                <TouchableOpacity
-                  style={[
-                    styles.categoryPill,
-                    {
-                      backgroundColor: showNewCategory ? colors.primary : colors.backgroundSecondary,
-                      borderColor: showNewCategory ? colors.primary : colors.border,
-                    },
-                  ]}
-                  onPress={() => setShowNewCategory(true)}
-                  activeOpacity={0.75}
-                >
-                  <Ionicons
-                    name="add"
-                    size={14}
-                    color={showNewCategory ? "#fff" : colors.textSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.categoryPillText,
-                      { color: showNewCategory ? "#fff" : colors.textSecondary },
-                    ]}
-                  >
-                    {t("ai_translator.new_category_label")}
-                  </Text>
-                </TouchableOpacity>
               </ScrollView>
-
-              {showNewCategory && (
-                <TextInput
-                  style={[
-                    styles.newCategoryInput,
-                    {
-                      backgroundColor: colors.backgroundSecondary,
-                      borderColor: colors.border,
-                      color: colors.text,
-                    },
-                  ]}
-                  placeholder={t("ai_translator.new_category_placeholder")}
-                  placeholderTextColor={colors.textTertiary}
-                  value={newCategoryName}
-                  onChangeText={setNewCategoryName}
-                  autoFocus
-                />
-              )}
 
               {/* Keywords */}
               <View style={styles.keywordsHeader}>
@@ -315,7 +263,7 @@ export default function AITranslateScreen() {
   useEffect(() => {
     if (categories.length === 0) loadCategories();
     initTrialAndCheck();
-  }, []);
+  }, [categories.length, loadCategories, isPremium]);
 
   const initTrialAndCheck = async () => {
     await initAITrial();
@@ -387,45 +335,14 @@ export default function AITranslateScreen() {
     setHistoryOpen(false);
   };
 
-  const handleSave = async (
-    categoryId: number | undefined,
-    newCategoryName: string,
-    keywords: string[]
-  ) => {
+  const handleSave = async (categoryId: number | undefined, keywords: string[]) => {
     setSaving(true);
     try {
-      let finalCategoryId = categoryId;
-
-      // Create new category if user typed one
-      if (newCategoryName) {
-        const { supabase } = await import("@/lib/supabase");
-        const { data: newCat } = await supabase
-          .from("categories")
-          .insert({
-            name_tr: newCategoryName,
-            name_en: newCategoryName,
-            name_sv: newCategoryName,
-            name_de: newCategoryName,
-            name_es: newCategoryName,
-            name_fr: newCategoryName,
-            name_pt: newCategoryName,
-            icon: "folder-outline",
-            sort_order: 999,
-            is_free: true,
-          })
-          .select()
-          .single();
-        if (newCat) {
-          finalCategoryId = (newCat as { id: number }).id;
-          await loadCategories();
-        }
-      }
-
       const result = await addSentence({
         source_text: inputText.trim(),
         target_text: translatedText,
         keywords,
-        category_id: finalCategoryId,
+        category_id: categoryId,
         source_lang: uiLanguage,
         target_lang: targetLanguage,
         is_ai_generated: true,

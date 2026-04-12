@@ -78,10 +78,10 @@ export default function AutoModeScreen() {
     setIsPlaying(false);
     setPhase("idle");
     setCurrentIndex(0);
-    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+    Promise.all([loadSentences(), loadPresetSentences(undefined, isPremium), loadProgress()]).finally(() =>
       setInitialized(true),
     );
-  }, [targetLanguage, uiLanguage]);
+  }, [targetLanguage, uiLanguage, isPremium]);
 
   // Tüm öğreniliyor cümleler: user sentences + preset sentences (progressMap)
   const allLearning = [
@@ -177,6 +177,12 @@ export default function AutoModeScreen() {
           setShowTarget(false);
           setPhase("source");
         } else {
+          void recordStudySession({
+            user_id: "",
+            sentence_id: sentence.id,
+            duration_minutes: 0,
+            completed: true,
+          });
           setPhase("done");
           setIsPlaying(false);
         }
@@ -187,7 +193,7 @@ export default function AutoModeScreen() {
         timerRef.current = null;
       };
     }
-  }, [phase, isPlaying, sentence, currentIndex, total, uiLanguage, targetLanguage]);
+  }, [phase, isPlaying, sentence, currentIndex, total, uiLanguage, targetLanguage, recordStudySession]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -202,15 +208,6 @@ export default function AutoModeScreen() {
     setIsPlaying(true);
     setShowTarget(false);
     setPhase("source");
-    // Record activity so auto mode sessions count toward streak
-    if (sentence) {
-      recordStudySession({
-        user_id: "",
-        sentence_id: sentence.id,
-        duration_minutes: 0,
-        completed: false,
-      });
-    }
   };
 
   const handlePause = () => {

@@ -754,7 +754,8 @@
       "difficulty_medium_desc": "Natürlicher, kontextbezogen",
       "difficulty_hard_desc": "Nuancen und Tonunterschiede",
       "start_button": "Starten",
-      "no_scenarios": "Für diese Kategorie und diesen Schwierigkeitsgrad gibt es noch keine Dialoge."
+      "no_scenarios": "Für diese Kategorie und diesen Schwierigkeitsgrad gibt es noch keine Dialoge.",
+      "start_failed": "Dieser Dialog konnte gerade nicht gestartet werden. Bitte versuche einen anderen."
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

@@ -4,12 +4,55 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const AI_TRIAL_START_KEY = "@ai_trial_start";
 const AI_TRIAL_DAILY_COUNT_KEY = "@ai_trial_daily_count";
 const AI_TRIAL_DAILY_DATE_KEY = "@ai_trial_daily_date";
+const LEGACY_KEYS = [
+  AI_TRIAL_START_KEY,
+  AI_TRIAL_DAILY_COUNT_KEY,
+  AI_TRIAL_DAILY_DATE_KEY,
+] as const;
 
 export const TRIAL_DURATION_DAYS = 3;
 export const TRIAL_DAILY_LIMIT = 15;
 
 export interface TranslateResult {
   translatedText: string;
+}
+
+async function getAITrialStorageKey(baseKey: string): Promise<string> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user ? `${baseKey}:${user.id}` : `${baseKey}:guest`;
+  } catch {
+    return `${baseKey}:guest`;
+  }
+}
+
+async function getScopedValue(baseKey: string): Promise<string | null> {
+  const scopedKey = await getAITrialStorageKey(baseKey);
+  const scopedValue = await AsyncStorage.getItem(scopedKey);
+  if (scopedValue !== null) return scopedValue;
+
+  const legacyValue = await AsyncStorage.getItem(baseKey);
+  if (legacyValue !== null) {
+    await AsyncStorage.setItem(scopedKey, legacyValue).catch(() => {});
+    await AsyncStorage.removeItem(baseKey).catch(() => {});
+  }
+  return legacyValue;
+}
+
+async function setScopedValue(baseKey: string, value: string): Promise<void> {
+  const scopedKey = await getAITrialStorageKey(baseKey);
+  await AsyncStorage.setItem(scopedKey, value);
+}
+
+export async function clearAITrialCache(): Promise<void> {
+  try {
+    const scopedKeys = await Promise.all(LEGACY_KEYS.map((key) => getAITrialStorageKey(key)));
+    await AsyncStorage.multiRemove([...LEGACY_KEYS, ...scopedKeys]);
+  } catch {
+    // ignore storage errors
+  }
 }
 
 export async function translateWithAI(
@@ -60,7 +103,7 @@ export async function translateWithAI(
 export async function getAITrialStartDate(): Promise<Date | null> {
   // 1. Try local cache first
   try {
-    const stored = await AsyncStorage.getItem(AI_TRIAL_START_KEY);
+    const stored = await getScopedValue(AI_TRIAL_START_KEY);
     if (stored) return new Date(stored);
   } catch {
     // ignore storage errors
@@ -80,7 +123,7 @@ export async function getAITrialStartDate(): Promise<Date | null> {
     const dbDate = profile?.ai_trial_started_at as string | null;
     if (dbDate) {
       // Populate cache for next time
-      await AsyncStorage.setItem(AI_TRIAL_START_KEY, dbDate).catch(() => {});
+      await setScopedValue(AI_TRIAL_START_KEY, dbDate).catch(() => {});
       return new Date(dbDate);
     }
   } catch {
@@ -101,11 +144,11 @@ export async function initAITrial(): Promise<Date | null> {
 export async function getDailyCount(): Promise<{ count: number; date: string }> {
   const today = new Date().toISOString().split("T")[0];
   try {
-    const storedDate = await AsyncStorage.getItem(AI_TRIAL_DAILY_DATE_KEY);
+    const storedDate = await getScopedValue(AI_TRIAL_DAILY_DATE_KEY);
     if (storedDate !== today) {
       return { count: 0, date: today };
     }
-    const stored = await AsyncStorage.getItem(AI_TRIAL_DAILY_COUNT_KEY);
+    const stored = await getScopedValue(AI_TRIAL_DAILY_COUNT_KEY);
     return { count: stored ? parseInt(stored, 10) : 0, date: today };
   } catch {
     return { count: 0, date: today };
@@ -117,8 +160,8 @@ export async function incrementLocalDailyCount(): Promise<number> {
   const { count } = await getDailyCount();
   const newCount = count + 1;
   try {
-    await AsyncStorage.setItem(AI_TRIAL_DAILY_COUNT_KEY, String(newCount));
-    await AsyncStorage.setItem(AI_TRIAL_DAILY_DATE_KEY, today);
+    await setScopedValue(AI_TRIAL_DAILY_COUNT_KEY, String(newCount));
+    await setScopedValue(AI_TRIAL_DAILY_DATE_KEY, today);
   } catch {
     // ignore storage errors
   }

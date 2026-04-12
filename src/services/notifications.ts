@@ -24,6 +24,8 @@ try {
 }
 
 const DAILY_REMINDER_ID = "parlio_daily_reminder";
+const DEFAULT_REMINDER_TITLE = "Parlio";
+const DEFAULT_REMINDER_BODY = "Time for your daily language practice.";
 
 export async function requestNotificationPermissions(): Promise<boolean> {
   if (!N) return false;
@@ -82,4 +84,38 @@ export function parseReminderTime(timeStr: string): { hour: number; minute: numb
   const h = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
   return { hour: Number.isNaN(h) ? 19 : h, minute: Number.isNaN(m) ? 0 : m };
+}
+
+export async function syncDailyReminderSchedule(params: {
+  enabled: boolean;
+  reminderTime: string;
+  title?: string;
+  body?: string;
+  requestPermissions?: boolean;
+}): Promise<boolean> {
+  if (!params.enabled) {
+    await cancelDailyReminder();
+    return true;
+  }
+
+  let granted = false;
+  if (params.requestPermissions) {
+    granted = await requestNotificationPermissions();
+  } else if (N) {
+    try {
+      const perms = await N.getPermissionsAsync();
+      granted = perms.status === "granted";
+    } catch {
+      granted = false;
+    }
+  }
+  if (!granted) return false;
+
+  const { hour, minute } = parseReminderTime(params.reminderTime);
+  return scheduleDailyReminder(
+    hour,
+    minute,
+    params.title ?? DEFAULT_REMINDER_TITLE,
+    params.body ?? DEFAULT_REMINDER_BODY,
+  );
 }

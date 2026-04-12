@@ -19,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 // Achievements
 import { AchievementToast } from "@/components/AchievementToast";
 import { useAchievementStore } from "@/store/useAchievementStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Module-level dedup guard — prevents double setSession when both
 // openAuthSessionAsync and Linking fire for the same callback URL.
@@ -30,10 +31,18 @@ const AUTH_DEDUP_WINDOW_MS = 3000;
 
 export default function App() {
   const loadAchievements = useAchievementStore((s) => s.loadAchievements);
+  const clearAchievements = useAchievementStore((s) => s.clear);
+  const activatePasswordRecovery = useAuthStore((s) => s.activatePasswordRecovery);
+  const clearPasswordRecovery = useAuthStore((s) => s.clearPasswordRecovery);
+  const userId = useAuthStore((s) => s.user?.id ?? null);
 
   useEffect(() => {
+    if (!userId) {
+      clearAchievements();
+      return;
+    }
     loadAchievements().catch((e) => console.error("[App] loadAchievements error:", e));
-  }, []);
+  }, [userId, loadAchievements, clearAchievements]);
 
   // Shared handler for both cold-start and warm-start auth deep links.
   useEffect(() => {
@@ -50,7 +59,12 @@ export default function App() {
       console.log("HANDLE AUTH URL:", url);
 
       const tokenString = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
-      if (!tokenString) return;
+      if (!tokenString) {
+        if (url.includes("auth/reset-password")) {
+          clearPasswordRecovery();
+        }
+        return;
+      }
 
       const params = Object.fromEntries(
         tokenString.split("&").map((pair) => pair.split("=").map(decodeURIComponent))
@@ -62,7 +76,21 @@ export default function App() {
       console.log("TOKENS FOUND:", { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
 
       if (accessToken && refreshToken) {
-        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (url.includes("auth/reset-password")) {
+          if (!error && data.session) {
+            activatePasswordRecovery();
+          } else {
+            clearPasswordRecovery();
+            console.error("[App] password recovery session error:", error?.message ?? "missing_session");
+          }
+        }
+      } else if (url.includes("auth/reset-password")) {
+        clearPasswordRecovery();
       }
     };
 

@@ -35,6 +35,7 @@ import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
 import { Sentence, SentenceTag, HomeStackParamList, MainStackParamList } from "@/types";
 import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import * as Haptics from "expo-haptics";
+import { useAuthStore } from "@/store/useAuthStore";
 
 type TabKey = "learning" | "listening";
 
@@ -305,6 +306,7 @@ export default function LearnScreen() {
   const route = useRoute<RouteProp<HomeStackParamList, "Learn">>();
   const initialTab: TabKey = route.params?.initialTab === "listening" ? "listening" : "learning";
   const { uiLanguage, targetLanguage } = useSettingsStore();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const {
     sentences: userSentences,
     presetSentences,
@@ -342,7 +344,7 @@ export default function LearnScreen() {
     setInitialized(false);
     const init = async () => {
       try {
-        await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
+        await Promise.all([loadSentences(), loadPresetSentences(undefined, isPremium), loadProgress()]);
       } catch {
       } finally {
         if (mounted) setInitialized(true);
@@ -353,7 +355,7 @@ export default function LearnScreen() {
       mounted = false;
       stopSpeaking();
     };
-  }, [targetLanguage, uiLanguage]);
+  }, [targetLanguage, uiLanguage, isPremium]);
 
   const learningList: Sentence[] = [
     ...userSentences.filter(

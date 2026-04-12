@@ -204,14 +204,14 @@ export default function QuizScreen() {
 
   useEffect(() => {
     setInitialized(false);
-    Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]).finally(() =>
+    Promise.all([loadSentences(), loadPresetSentences(undefined, isPremium), loadProgress()]).finally(() =>
       setInitialized(true),
     );
-  }, [targetLanguage, uiLanguage]);
+  }, [targetLanguage, uiLanguage, isPremium]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadSentences(), loadPresetSentences(), loadProgress()]);
+    await Promise.all([loadSentences(), loadPresetSentences(undefined, isPremium), loadProgress()]);
     setRefreshing(false);
   };
 
@@ -493,6 +493,39 @@ export default function QuizScreen() {
             </Text>
             <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
               {t("quiz.no_keywords")}
+            </Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  if (mode === "multiple_choice" && initialized && questions.length === 0 && !sessionComplete) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
+        {renderHeader()}
+        <ScrollView
+          contentContainerStyle={styles.emptyScroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
+        >
+          <View style={[styles.emptyCard, { backgroundColor: colors.cardBackground }]}>
+            <Text style={styles.emptyIcon}>🎯</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {t("quiz.empty_title")}
+            </Text>
+            <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
+              {t("quiz.empty_hint")}
             </Text>
           </View>
         </ScrollView>

@@ -9,20 +9,22 @@ import { View, ActivityIndicator } from "react-native";
 import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
 import WelcomeScreen from "@/screens/onboarding/WelcomeScreen";
+import CompleteResetPasswordScreen from "@/screens/auth/CompleteResetPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  const { user, initialized, initialize } = useAuthStore();
+  const { user, initialized, initialize, passwordRecoveryActive } = useAuthStore();
   const { loadSettings } = useSettingsStore();
 
   useEffect(() => {
-    const initApp = async () => {
-      await initialize();
-      await loadSettings();
-    };
-    initApp().catch((e) => console.error("[AppNavigator] init failed:", e));
-  }, [initialize, loadSettings]);
+    initialize().catch((e) => console.error("[AppNavigator] init failed:", e));
+  }, [initialize]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    loadSettings(true).catch((e) => console.error("[AppNavigator] settings load failed:", e));
+  }, [initialized, user?.id, loadSettings]);
 
   // Show loading while initializing
   if (!initialized) {
@@ -36,7 +38,9 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
+        {passwordRecoveryActive ? (
+          <Stack.Screen name="PasswordRecovery" component={CompleteResetPasswordScreen} />
+        ) : user ? (
           // User is authenticated - show main app
           <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
