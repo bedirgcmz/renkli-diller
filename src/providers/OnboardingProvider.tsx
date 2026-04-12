@@ -59,6 +59,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     let cancelled = false;
     const load = async () => {
       setIsReady(false);
+      setIsCoachMarksDone(true);
+      setShownHints(new Set());
+
       try {
         const storageKeys = [
           getScopedKey(KEYS.COACH_DONE, userId),
