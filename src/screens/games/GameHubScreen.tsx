@@ -62,7 +62,7 @@ export default function GameHubScreen() {
   const {
     userStats,
     leaderboard,
-    loading,
+    leaderboardLoading,
     loadUserStats,
     loadLeaderboard,
     checkInactivityDemotion,
@@ -118,6 +118,8 @@ export default function GameHubScreen() {
     : 100;
 
   const speedRoundLeaderboard = leaderboard.speed_round.weekly;
+  const weeklyLeaderboardLoading = leaderboardLoading.speed_round.weekly;
+  const alltimeLeaderboardLoading = leaderboardLoading.speed_round.alltime;
   const topEntries = speedRoundLeaderboard?.entries.slice(0, 3) ?? [];
   const myRank = speedRoundLeaderboard?.myRank ?? null;
 
@@ -298,7 +300,7 @@ export default function GameHubScreen() {
         </View>
 
         <View style={[styles.leaderboardCard, { backgroundColor: colors.cardBackground }]}>
-          {loading ? (
+          {weeklyLeaderboardLoading ? (
             <ActivityIndicator color={colors.primary} style={{ padding: 16 }} />
           ) : topEntries.length === 0 ? (
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
@@ -341,7 +343,8 @@ export default function GameHubScreen() {
       <FullLeaderboardModal
         visible={leaderboardModalVisible}
         onClose={() => setLeaderboardModalVisible(false)}
-        loading={loading}
+        weeklyLoading={weeklyLeaderboardLoading}
+        alltimeLoading={alltimeLeaderboardLoading}
         weekly={leaderboard.speed_round.weekly}
         alltime={leaderboard.speed_round.alltime}
         currentUserId={user?.id ?? null}
@@ -512,14 +515,16 @@ function LeaderboardRow({
 function FullLeaderboardModal({
   visible,
   onClose,
-  loading,
+  weeklyLoading,
+  alltimeLoading,
   weekly,
   alltime,
   currentUserId,
 }: {
   visible: boolean;
   onClose: () => void;
-  loading: boolean;
+  weeklyLoading: boolean;
+  alltimeLoading: boolean;
   weekly: { myRank: number | null; entries: GameLeaderboardEntry[] } | null;
   alltime: { myRank: number | null; entries: GameLeaderboardEntry[] } | null;
   currentUserId: string | null;
@@ -535,6 +540,7 @@ function FullLeaderboardModal({
   }, [visible]);
 
   const leaderboard = period === "weekly" ? weekly : alltime;
+  const isLoading = period === "weekly" ? weeklyLoading : alltimeLoading;
   const entries = leaderboard?.entries ?? [];
   const myRank = leaderboard?.myRank ?? null;
 
@@ -594,7 +600,7 @@ function FullLeaderboardModal({
             contentContainerStyle={styles.modalListContent}
             showsVerticalScrollIndicator={false}
           >
-            {loading && entries.length === 0 ? (
+            {isLoading && entries.length === 0 ? (
               <ActivityIndicator color={colors.primary} style={{ paddingVertical: 32 }} />
             ) : entries.length === 0 ? (
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>

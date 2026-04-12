@@ -20,6 +20,10 @@ interface GameStoreState {
     speed_round: { weekly: GameLeaderboard | null; alltime: GameLeaderboard | null };
     word_rain:   { weekly: GameLeaderboard | null; alltime: GameLeaderboard | null };
   };
+  leaderboardLoading: {
+    speed_round: { weekly: boolean; alltime: boolean };
+    word_rain:   { weekly: boolean; alltime: boolean };
+  };
   leaderboardFetchedAt: {
     speed_round: { weekly: number | null; alltime: number | null };
     word_rain:   { weekly: number | null; alltime: number | null };
@@ -46,11 +50,19 @@ interface GameStoreState {
 // Cache duration: 3 minutes for leaderboard
 const LEADERBOARD_CACHE_MS = 3 * 60 * 1000;
 
+function hasActiveLeaderboardLoads(loadingState: GameStoreState["leaderboardLoading"]): boolean {
+  return Object.values(loadingState).some((periods) => periods.weekly || periods.alltime);
+}
+
 export const useGameStore = create<GameStoreState>((set, get) => ({
   userStats: null,
   leaderboard: {
     speed_round: { weekly: null, alltime: null },
     word_rain:   { weekly: null, alltime: null },
+  },
+  leaderboardLoading: {
+    speed_round: { weekly: false, alltime: false },
+    word_rain:   { weekly: false, alltime: false },
   },
   leaderboardFetchedAt: {
     speed_round: { weekly: null, alltime: null },
@@ -206,7 +218,21 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     const fetchedAt = leaderboardFetchedAt[gameType][period];
     if (fetchedAt && Date.now() - fetchedAt < LEADERBOARD_CACHE_MS) return;
 
-    set({ loading: true });
+    set((state) => {
+      const leaderboardLoading = {
+        ...state.leaderboardLoading,
+        [gameType]: {
+          ...state.leaderboardLoading[gameType],
+          [period]: true,
+        },
+      };
+
+      return {
+        error: null,
+        loading: hasActiveLeaderboardLoads(leaderboardLoading),
+        leaderboardLoading,
+      };
+    });
 
     try {
       const { data, error } = await supabase.rpc("get_game_leaderboard", {
@@ -216,7 +242,21 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       });
 
       if (error || !data) {
-        set({ loading: false, error: error?.message ?? "load_failed" });
+        set((state) => {
+          const leaderboardLoading = {
+            ...state.leaderboardLoading,
+            [gameType]: {
+              ...state.leaderboardLoading[gameType],
+              [period]: false,
+            },
+          };
+
+          return {
+            error: error?.message ?? "load_failed",
+            loading: hasActiveLeaderboardLoads(leaderboardLoading),
+            leaderboardLoading,
+          };
+        });
         return;
       }
 
@@ -235,12 +275,25 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       };
 
       set((state) => ({
-        loading: false,
+        loading: hasActiveLeaderboardLoads({
+          ...state.leaderboardLoading,
+          [gameType]: {
+            ...state.leaderboardLoading[gameType],
+            [period]: false,
+          },
+        }),
         leaderboard: {
           ...state.leaderboard,
           [gameType]: {
             ...state.leaderboard[gameType],
             [period]: leaderboard,
+          },
+        },
+        leaderboardLoading: {
+          ...state.leaderboardLoading,
+          [gameType]: {
+            ...state.leaderboardLoading[gameType],
+            [period]: false,
           },
         },
         leaderboardFetchedAt: {
@@ -252,7 +305,21 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         },
       }));
     } catch {
-      set({ loading: false, error: "network" });
+      set((state) => {
+        const leaderboardLoading = {
+          ...state.leaderboardLoading,
+          [gameType]: {
+            ...state.leaderboardLoading[gameType],
+            [period]: false,
+          },
+        };
+
+        return {
+          error: "network",
+          loading: hasActiveLeaderboardLoads(leaderboardLoading),
+          leaderboardLoading,
+        };
+      });
     }
   },
 
@@ -302,6 +369,10 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       leaderboard: {
         speed_round: { weekly: null, alltime: null },
         word_rain: { weekly: null, alltime: null },
+      },
+      leaderboardLoading: {
+        speed_round: { weekly: false, alltime: false },
+        word_rain: { weekly: false, alltime: false },
       },
       leaderboardFetchedAt: {
         speed_round: { weekly: null, alltime: null },
