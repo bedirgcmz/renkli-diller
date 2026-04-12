@@ -52,7 +52,8 @@ create table if not exists public.dialog_categories (
   icon text,
   sort_order integer not null default 0,
   is_active boolean not null default true,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 -- ------------------------------------------------------------
@@ -107,7 +108,8 @@ create table if not exists public.dialog_scenarios (
   user_goal_fr text,
   user_goal_pt text,
 
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 -- ------------------------------------------------------------
@@ -143,6 +145,7 @@ create table if not exists public.dialog_turns (
   hint_pt text,
 
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
 
   unique (scenario_id, turn_index)
 );
@@ -176,6 +179,7 @@ create table if not exists public.dialog_turn_options (
   text_pt text not null,
 
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
 
   unique (turn_id, option_index)
 );

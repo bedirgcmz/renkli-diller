@@ -14,6 +14,7 @@ import LearnedSentencesScreen from "@/screens/LearnedSentencesScreen";
 import FavoriteSentencesScreen from "@/screens/FavoriteSentencesScreen";
 import AchievementsScreen from "@/screens/AchievementsScreen";
 import AITranslateScreen from "@/screens/AITranslateScreen";
+import LearnedDialogsScreen from "@/screens/dialog/LearnedDialogsScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -79,6 +80,11 @@ export default function MainNavigator() {
       <Stack.Screen
         name="AITranslator"
         component={AITranslateScreen}
+        options={{ presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="LearnedDialogs"
+        component={LearnedDialogsScreen}
         options={{ presentation: "modal" }}
       />
     </Stack.Navigator>

@@ -171,6 +171,7 @@
     "export_pdf": "Télécharger PDF",
     "sign_out": "Se déconnecter",
     "confirm_signout": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "signing_out": "Déconnexion...",
     "learning": "En cours",
     "learned_sentences": "Phrases Apprises",
     "favorite_sentences": "Phrases Favorites",
@@ -735,6 +736,74 @@
       "music_title": "Choisir la musique",
       "music_subtitle": "Choisis la piste qui joue pendant la partie",
       "preview_hint": "▶ Aperçu en cours..."
+    }
+  },
+  "dialog": {
+    "tab_title": "Dialogue",
+    "home_card_title": "Dialogue",
+    "home_card_subtitle": "Entraîne-toi avec de vraies conversations",
+    "setup": {
+      "title": "Entraînement au dialogue",
+      "subtitle": "Choisis une catégorie et une difficulté",
+      "pick_category": "Choisir une catégorie",
+      "pick_difficulty": "Choisir la difficulté",
+      "difficulty_easy": "Facile",
+      "difficulty_medium": "Moyen",
+      "difficulty_hard": "Difficile",
+      "difficulty_easy_desc": "Phrases courtes du quotidien",
+      "difficulty_medium_desc": "Plus naturel, basé sur le contexte",
+      "difficulty_hard_desc": "Nuances et différences de ton",
+      "start_button": "Commencer",
+      "no_scenarios": "Aucun dialogue disponible pour cette catégorie et cette difficulté pour l'instant."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Choisis la meilleure réponse",
+      "correct_feedback": "Correct !",
+      "wrong_feedback": "Pas tout à fait, réessaie",
+      "next_turn": "Continuer",
+      "finish": "Terminer"
+    },
+    "complete": {
+      "title": "Dialogue terminé !",
+      "score_label": "Score",
+      "first_try_label": "Correct du premier coup",
+      "accuracy_label": "Précision",
+      "wrong_attempts_label": "Tentatives incorrectes",
+      "play_again": "Rejouer",
+      "back_home": "Retour à l'accueil",
+      "mark_learned": "J'ai maîtrisé ce dialogue",
+      "learned_modal_title": "Beau progrès ! 🎓",
+      "learned_modal_body": "Tu as marqué ce dialogue comme maîtrisé. Il n'apparaîtra plus dans ta rotation habituelle.\n\nUne fois les autres terminés, il peut revenir.",
+      "learned_modal_link": "Voir mes dialogues appris",
+      "learned_modal_confirm": "Compris, retour à l'accueil"
+    },
+    "limit": {
+      "daily_free_title": "Limite quotidienne atteinte",
+      "daily_free_body": "Les utilisateurs gratuits peuvent faire 1 dialogue par jour. Reviens demain !",
+      "total_free_title": "Tous les dialogues utilisés",
+      "total_free_body": "Tu as terminé 7 dialogues. Passe à Premium pour pratiquer sans limite !",
+      "daily_premium_title": "Tes 3 dialogues du jour sont faits",
+      "daily_premium_body": "Bon travail ! 3 nouveaux dialogues t'attendent demain.",
+      "go_premium": "Passer à Premium",
+      "maybe_later": "Peut-être plus tard",
+      "come_back_tomorrow": "À demain"
+    },
+    "error": {
+      "load_failed": "Impossible de charger les dialogues. Réessaie.",
+      "session_failed": "Impossible de démarrer la session. Réessaie."
+    },
+    "learned_dialogs": {
+      "title": "Mes dialogues appris",
+      "empty_title": "Aucun dialogue appris pour l'instant",
+      "empty_subtitle": "Après avoir terminé un dialogue, appuie sur 'J'ai maîtrisé ce dialogue' pour le marquer.",
+      "replay": "Rejouer",
+      "played_count": "Joué {{count}} fois",
+      "best_accuracy": "Meilleur : {{accuracy}}%",
+      "difficulty_1": "Facile",
+      "difficulty_2": "Moyen",
+      "difficulty_3": "Difficile"
     }
   }
 }

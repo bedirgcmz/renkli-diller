@@ -171,6 +171,7 @@
     "export_pdf": "Download PDF",
     "sign_out": "Sign Out",
     "confirm_signout": "Are you sure you want to sign out?",
+    "signing_out": "Signing out...",
     "learning": "Learning",
     "learned_sentences": "Learned Sentences",
     "favorite_sentences": "Favorite Sentences",
@@ -735,6 +736,74 @@
       "music_title": "Pick Music",
       "music_subtitle": "Choose the track that plays during the game",
       "preview_hint": "▶ Previewing..."
+    }
+  },
+  "dialog": {
+    "tab_title": "Dialog",
+    "home_card_title": "Dialog",
+    "home_card_subtitle": "Practice real conversations",
+    "setup": {
+      "title": "Dialog Practice",
+      "subtitle": "Choose a category and difficulty",
+      "pick_category": "Choose Category",
+      "pick_difficulty": "Choose Difficulty",
+      "difficulty_easy": "Easy",
+      "difficulty_medium": "Medium",
+      "difficulty_hard": "Hard",
+      "difficulty_easy_desc": "Short, everyday phrases",
+      "difficulty_medium_desc": "More natural, context-based",
+      "difficulty_hard_desc": "Nuance and tone differences",
+      "start_button": "Start",
+      "no_scenarios": "No dialogs available for this category and difficulty yet."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Choose the best reply",
+      "correct_feedback": "Correct!",
+      "wrong_feedback": "Not quite, try again",
+      "next_turn": "Continue",
+      "finish": "Finish"
+    },
+    "complete": {
+      "title": "Dialog Complete!",
+      "score_label": "Score",
+      "first_try_label": "Correct on First Try",
+      "accuracy_label": "Accuracy",
+      "wrong_attempts_label": "Wrong Attempts",
+      "play_again": "Play Again",
+      "back_home": "Back to Home",
+      "mark_learned": "I've Mastered This Dialog",
+      "learned_modal_title": "Great Progress! 🎓",
+      "learned_modal_body": "You've marked this dialog as mastered. It won't appear in your regular rotation.\n\nOnce you finish the others, it may come back.",
+      "learned_modal_link": "Go to My Learned Dialogs",
+      "learned_modal_confirm": "Got It, Go Home"
+    },
+    "limit": {
+      "daily_free_title": "Daily Limit Reached",
+      "daily_free_body": "Free users can do 1 dialog per day. Come back tomorrow!",
+      "total_free_title": "All Dialogs Used",
+      "total_free_body": "You've completed 7 dialogs. Go Premium for unlimited practice!",
+      "daily_premium_title": "Today's 3 Dialogs Done",
+      "daily_premium_body": "Great work! 3 new dialogs will be waiting for you tomorrow.",
+      "go_premium": "Go Premium",
+      "maybe_later": "Maybe Later",
+      "come_back_tomorrow": "See You Tomorrow"
+    },
+    "error": {
+      "load_failed": "Could not load dialogs. Please try again.",
+      "session_failed": "Could not start session. Please try again."
+    },
+    "learned_dialogs": {
+      "title": "My Learned Dialogs",
+      "empty_title": "No learned dialogs yet",
+      "empty_subtitle": "After completing a dialog, tap 'I've Mastered This Dialog' to mark it.",
+      "replay": "Play Again",
+      "played_count": "Played {{count}} times",
+      "best_accuracy": "Best: {{accuracy}}%",
+      "difficulty_1": "Easy",
+      "difficulty_2": "Medium",
+      "difficulty_3": "Hard"
     }
   }
 }

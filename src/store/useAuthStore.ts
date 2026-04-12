@@ -6,7 +6,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   logInUser,
   logOutUser,
-  isPremiumActive,
   setupCustomerInfoListener,
 } from "@/services/revenueCat";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -17,8 +16,17 @@ interface User {
   display_name?: string;
   avatar_url?: string;
   is_premium: boolean;
+  premium_override: boolean;
   leaderboard_visible: boolean;
   created_at: string;
+}
+
+/** Returns true if the manual override is active (set and not expired). */
+function isOverrideActive(profile: { premium_override?: boolean; premium_override_expires_at?: string | null } | null | undefined): boolean {
+  if (!profile?.premium_override) return false;
+  const exp = profile.premium_override_expires_at;
+  if (!exp) return true; // permanent
+  return new Date(exp) > new Date();
 }
 
 interface AuthState {
@@ -75,7 +83,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user } = get();
     if (!user) return;
     const wasNotPremium = !user.is_premium;
-    set({ user: { ...user, is_premium: active }, isPremiumVerified: true });
+    // Respect manual override — RC saying false must not revoke an explicit override grant
+    const effectivePremium = active || user.premium_override;
+    set({ user: { ...user, is_premium: effectivePremium }, isPremiumVerified: true });
     // Sync upgrade to Supabase via SECURITY DEFINER RPC (only on upgrade, no revoke RPC exists)
     if (active && wasNotPremium) {
       void (async () => { await supabase.rpc("set_premium"); })().catch(() => {});
@@ -103,9 +113,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .eq("id", data.user.id)
           .single();
 
-        // RevenueCat login + premium check
-        await logInUser(data.user.id).catch(console.error);
-        const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+        // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
+        const { active: rcActive, verified: rcVerified } = await logInUser(data.user.id).catch(
           () => ({ active: false, verified: false })
         );
 
@@ -114,8 +123,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email!,
           display_name: profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          // RC is authoritative when verified; fall back to Supabase when RC unavailable
-          is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+          premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -215,8 +225,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .select("*")
           .eq("id", data.user.id)
           .single();
-        await logInUser(data.user.id).catch(console.error);
-        const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+        const { active: rcActive, verified: rcVerified } = await logInUser(data.user.id).catch(
           () => ({ active: false, verified: false })
         );
 
@@ -225,7 +234,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           email: data.user.email || credential.email || "",
           display_name: displayName || profile?.display_name || "",
           avatar_url: profile?.avatar_url || "",
-          is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+          premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
           leaderboard_visible: profile?.leaderboard_visible ?? true,
           created_at: data.user.created_at,
         };
@@ -548,9 +559,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .eq("id", user.id)
             .single();
 
-          // RevenueCat login + premium check
-          await logInUser(user.id).catch(console.error);
-          const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+          // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
+          const { active: rcActive, verified: rcVerified } = await logInUser(user.id).catch(
             () => ({ active: false, verified: false })
           );
 
@@ -559,7 +569,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: user.email!,
             display_name: profile?.display_name || "",
             avatar_url: profile?.avatar_url || "",
-            is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+            premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
             leaderboard_visible: profile?.leaderboard_visible ?? true,
             created_at: user.created_at,
           };
@@ -600,6 +612,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             display_name: "",
             avatar_url: "",
             is_premium: false,
+            premium_override: false,
             leaderboard_visible: true,
             created_at: session.user.created_at,
           };
@@ -616,9 +629,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
               await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
 
-              // RC login + premium check (handles Google login path)
-              await logInUser(session.user.id).catch(console.error);
-              const { active: rcActive, verified: rcVerified } = await isPremiumActive().catch(
+              // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
+              const { active: rcActive, verified: rcVerified } = await logInUser(session.user.id).catch(
                 () => ({ active: false, verified: false })
               );
 
@@ -628,7 +640,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                       ...state.user,
                       display_name: profile?.display_name || "",
                       avatar_url: profile?.avatar_url || "",
-                      is_premium: rcVerified ? rcActive : (profile?.is_premium ?? false),
+                      premium_override: isOverrideActive(profile),
+          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
+          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
                       leaderboard_visible: profile?.leaderboard_visible ?? true,
                     }
                   : state.user,

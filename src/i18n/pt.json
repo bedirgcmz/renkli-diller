@@ -171,6 +171,7 @@
     "export_pdf": "Baixar PDF",
     "sign_out": "Sair",
     "confirm_signout": "Tem certeza que deseja sair?",
+    "signing_out": "Saindo...",
     "learning": "Aprendendo",
     "learned_sentences": "Frases Aprendidas",
     "favorite_sentences": "Frases Favoritas",
@@ -735,6 +736,74 @@
       "music_title": "Escolher música",
       "music_subtitle": "Escolha a faixa que toca durante o jogo",
       "preview_hint": "▶ Pré-visualizando..."
+    }
+  },
+  "dialog": {
+    "tab_title": "Diálogo",
+    "home_card_title": "Diálogo",
+    "home_card_subtitle": "Pratique conversas reais",
+    "setup": {
+      "title": "Prática de diálogo",
+      "subtitle": "Escolha uma categoria e dificuldade",
+      "pick_category": "Escolher categoria",
+      "pick_difficulty": "Escolher dificuldade",
+      "difficulty_easy": "Fácil",
+      "difficulty_medium": "Médio",
+      "difficulty_hard": "Difícil",
+      "difficulty_easy_desc": "Frases curtas do dia a dia",
+      "difficulty_medium_desc": "Mais natural, baseado em contexto",
+      "difficulty_hard_desc": "Nuances e diferenças de tom",
+      "start_button": "Começar",
+      "no_scenarios": "Ainda não há diálogos disponíveis para esta categoria e dificuldade."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Escolha a melhor resposta",
+      "correct_feedback": "Correto!",
+      "wrong_feedback": "Não é bem isso, tente novamente",
+      "next_turn": "Continuar",
+      "finish": "Terminar"
+    },
+    "complete": {
+      "title": "Diálogo concluído!",
+      "score_label": "Pontuação",
+      "first_try_label": "Correto na primeira tentativa",
+      "accuracy_label": "Precisão",
+      "wrong_attempts_label": "Tentativas erradas",
+      "play_again": "Jogar novamente",
+      "back_home": "Voltar ao início",
+      "mark_learned": "Dominei este diálogo",
+      "learned_modal_title": "Ótimo progresso! 🎓",
+      "learned_modal_body": "Você marcou este diálogo como dominado. Ele não aparecerá mais na sua rotação habitual.\n\nQuando terminar os outros, ele pode voltar.",
+      "learned_modal_link": "Ver meus diálogos aprendidos",
+      "learned_modal_confirm": "Entendi, ir para o início"
+    },
+    "limit": {
+      "daily_free_title": "Limite diário atingido",
+      "daily_free_body": "Usuários gratuitos podem fazer 1 diálogo por dia. Volte amanhã!",
+      "total_free_title": "Todos os diálogos usados",
+      "total_free_body": "Você completou 7 diálogos. Vá para Premium para praticar sem limites!",
+      "daily_premium_title": "Seus 3 diálogos de hoje concluídos",
+      "daily_premium_body": "Ótimo trabalho! 3 novos diálogos vão te esperar amanhã.",
+      "go_premium": "Ir para Premium",
+      "maybe_later": "Talvez mais tarde",
+      "come_back_tomorrow": "Até amanhã"
+    },
+    "error": {
+      "load_failed": "Não foi possível carregar os diálogos. Tente novamente.",
+      "session_failed": "Não foi possível iniciar a sessão. Tente novamente."
+    },
+    "learned_dialogs": {
+      "title": "Meus diálogos aprendidos",
+      "empty_title": "Nenhum diálogo aprendido ainda",
+      "empty_subtitle": "Após concluir um diálogo, toque em 'Dominei este diálogo' para marcá-lo.",
+      "replay": "Jogar novamente",
+      "played_count": "Jogado {{count}} vezes",
+      "best_accuracy": "Melhor: {{accuracy}}%",
+      "difficulty_1": "Fácil",
+      "difficulty_2": "Médio",
+      "difficulty_3": "Difícil"
     }
   }
 }

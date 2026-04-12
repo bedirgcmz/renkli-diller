@@ -14,7 +14,6 @@ import AppNavigator from "@/navigation/AppNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Services
-import { initRevenueCat } from "@/services/revenueCat";
 import { supabase } from "@/lib/supabase";
 
 // Achievements
@@ -33,7 +32,6 @@ export default function App() {
   const loadAchievements = useAchievementStore((s) => s.loadAchievements);
 
   useEffect(() => {
-    initRevenueCat().catch(() => {});
     loadAchievements().catch((e) => console.error("[App] loadAchievements error:", e));
   }, []);
 

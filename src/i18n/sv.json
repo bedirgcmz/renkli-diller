@@ -171,6 +171,7 @@
     "export_pdf": "Ladda ner PDF",
     "sign_out": "Logga ut",
     "confirm_signout": "Är du säker på att du vill logga ut?",
+    "signing_out": "Loggar ut...",
     "learning": "Lärande",
     "learned_sentences": "Inlärda Meningar",
     "favorite_sentences": "Favoritmeningar",
@@ -735,6 +736,74 @@
       "music_title": "Välj musik",
       "music_subtitle": "Välj spåret som spelas under spelet",
       "preview_hint": "▶ Förhandsvisar..."
+    }
+  },
+  "dialog": {
+    "tab_title": "Dialog",
+    "home_card_title": "Dialog",
+    "home_card_subtitle": "Träna verkliga samtal",
+    "setup": {
+      "title": "Dialogträning",
+      "subtitle": "Välj kategori och svårighetsgrad",
+      "pick_category": "Välj kategori",
+      "pick_difficulty": "Välj svårighetsgrad",
+      "difficulty_easy": "Lätt",
+      "difficulty_medium": "Medel",
+      "difficulty_hard": "Svår",
+      "difficulty_easy_desc": "Korta, vardagliga fraser",
+      "difficulty_medium_desc": "Mer naturligt, kontextbaserat",
+      "difficulty_hard_desc": "Nyanser och tonsskillnader",
+      "start_button": "Starta",
+      "no_scenarios": "Inga dialoger tillgängliga för denna kategori och svårighetsgrad ännu."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "Välj bästa svaret",
+      "correct_feedback": "Rätt!",
+      "wrong_feedback": "Inte riktigt, försök igen",
+      "next_turn": "Fortsätt",
+      "finish": "Avsluta"
+    },
+    "complete": {
+      "title": "Dialog klar!",
+      "score_label": "Poäng",
+      "first_try_label": "Rätt på första försöket",
+      "accuracy_label": "Noggrannhet",
+      "wrong_attempts_label": "Felaktiga försök",
+      "play_again": "Spela igen",
+      "back_home": "Tillbaka till start",
+      "mark_learned": "Jag har behärskat denna dialog",
+      "learned_modal_title": "Bra framsteg! 🎓",
+      "learned_modal_body": "Du har markerat den här dialogen som behärskad. Den visas inte längre i din vanliga rotation.\n\nNär du är klar med de andra kan den komma tillbaka.",
+      "learned_modal_link": "Gå till mina lärda dialoger",
+      "learned_modal_confirm": "Förstått, gå hem"
+    },
+    "limit": {
+      "daily_free_title": "Daglig gräns nådd",
+      "daily_free_body": "Gratisanvändare kan göra 1 dialog per dag. Kom tillbaka imorgon!",
+      "total_free_title": "Alla dialoger använda",
+      "total_free_body": "Du har slutfört 7 dialoger. Skaffa Premium för obegränsad träning!",
+      "daily_premium_title": "Dagens 3 dialoger klara",
+      "daily_premium_body": "Bra jobbat! 3 nya dialoger väntar på dig imorgon.",
+      "go_premium": "Skaffa Premium",
+      "maybe_later": "Kanske senare",
+      "come_back_tomorrow": "Vi ses imorgon"
+    },
+    "error": {
+      "load_failed": "Kunde inte ladda dialoger. Försök igen.",
+      "session_failed": "Kunde inte starta session. Försök igen."
+    },
+    "learned_dialogs": {
+      "title": "Mina lärda dialoger",
+      "empty_title": "Inga lärda dialoger än",
+      "empty_subtitle": "Efter att du slutfört en dialog, tryck på 'Jag har behärskat denna dialog' för att markera den.",
+      "replay": "Spela igen",
+      "played_count": "Spelad {{count}} gånger",
+      "best_accuracy": "Bäst: {{accuracy}}%",
+      "difficulty_1": "Lätt",
+      "difficulty_2": "Medel",
+      "difficulty_3": "Svår"
     }
   }
 }

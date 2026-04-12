@@ -171,6 +171,7 @@
     "export_pdf": "PDF İndir",
     "sign_out": "Çıkış Yap",
     "confirm_signout": "Çıkış yapmak istediğinize emin misiniz?",
+    "signing_out": "Çıkış yapılıyor...",
     "learning": "Öğreniyor",
     "learned_sentences": "Öğrenilen Cümleler",
     "favorite_sentences": "Favori Cümleler",
@@ -735,6 +736,74 @@
       "music_title": "Müzik Seç",
       "music_subtitle": "Oyun sırasında çalacak parçayı seç",
       "preview_hint": "▶ Önizleme çalıyor..."
+    }
+  },
+  "dialog": {
+    "tab_title": "Diyalog",
+    "home_card_title": "Diyalog",
+    "home_card_subtitle": "Gerçek konuşmaları pratik yap",
+    "setup": {
+      "title": "Diyalog Pratiği",
+      "subtitle": "Kategori ve zorluk seç",
+      "pick_category": "Kategori Seç",
+      "pick_difficulty": "Zorluk Seç",
+      "difficulty_easy": "Kolay",
+      "difficulty_medium": "Orta",
+      "difficulty_hard": "Zor",
+      "difficulty_easy_desc": "Kısa, günlük ifadeler",
+      "difficulty_medium_desc": "Daha doğal, bağlama dayalı",
+      "difficulty_hard_desc": "Nüans ve ton farkı",
+      "start_button": "Başlat",
+      "no_scenarios": "Bu kategori ve zorlukta henüz diyalog yok."
+    },
+    "play": {
+      "turn_progress": "{{current}} / {{total}}",
+      "character_label": "{{name}}",
+      "choose_reply": "En uygun yanıtı seç",
+      "correct_feedback": "Doğru!",
+      "wrong_feedback": "Yanlış, tekrar dene",
+      "next_turn": "Devam",
+      "finish": "Bitir"
+    },
+    "complete": {
+      "title": "Diyalog Tamamlandı!",
+      "score_label": "Skor",
+      "first_try_label": "İlk Denemede Doğru",
+      "accuracy_label": "Doğruluk",
+      "wrong_attempts_label": "Yanlış Deneme",
+      "play_again": "Tekrar Oyna",
+      "back_home": "Ana Sayfaya Dön",
+      "mark_learned": "Bu Dialogu Öğrendim",
+      "learned_modal_title": "Harika İlerleme! 🎓",
+      "learned_modal_body": "Bu diyalogu öğrenildi olarak işaretledin. Normal rotasyonda önüne getirilmeyecek.\n\nDiğer diyalogları bitirince tekrar önüne çıkabilir.",
+      "learned_modal_link": "Öğrendiğim Dialoglar'a git",
+      "learned_modal_confirm": "Anladım, Ana Sayfaya Dön"
+    },
+    "limit": {
+      "daily_free_title": "Bugünkü Hakkın Bitti",
+      "daily_free_body": "Ücretsiz kullanıcılar günde 1 diyalog yapabilir. Yarın tekrar gel!",
+      "total_free_title": "Tüm Hakların Bitti",
+      "total_free_body": "7 diyalogu tamamladın. Sınırsız pratik için Premium'a geç!",
+      "daily_premium_title": "Bugünkü 3 Diyaloğunu Tamamladın",
+      "daily_premium_body": "Harika iş! Yarın 3 yeni diyalog seni bekliyor.",
+      "go_premium": "Premium'a Geç",
+      "maybe_later": "Belki Sonra",
+      "come_back_tomorrow": "Yarın Görüşürüz"
+    },
+    "error": {
+      "load_failed": "Diyaloglar yüklenemedi. Tekrar dene.",
+      "session_failed": "Oturum başlatılamadı. Tekrar dene."
+    },
+    "learned_dialogs": {
+      "title": "Öğrendiğim Dialoglar",
+      "empty_title": "Henüz öğrenilen dialog yok",
+      "empty_subtitle": "Bir diyalogu tamamladıktan sonra 'Bu Dialogu Öğrendim' diyerek işaretleyebilirsin.",
+      "replay": "Tekrar Oyna",
+      "played_count": "{{count}} kez oynandı",
+      "best_accuracy": "En iyi: %{{accuracy}}",
+      "difficulty_1": "Kolay",
+      "difficulty_2": "Orta",
+      "difficulty_3": "Zor"
     }
   }
 }

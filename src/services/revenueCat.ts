@@ -43,10 +43,30 @@ export async function initRevenueCat(userId?: string): Promise<void> {
   }
 }
 
-export async function logInUser(userId: string): Promise<void> {
-  if (isExpoGo) return;
-  if (!(await Purchases.isConfigured())) return;
-  await Purchases.logIn(userId);
+/**
+ * Ensures RevenueCat is configured with the given userId, then logs in.
+ * Returns the premium status from the CustomerInfo returned by logIn() directly
+ * — avoids a second getCustomerInfo() call that could return stale cache.
+ *
+ * Identity lifecycle:
+ *   - If RC not yet configured: configure with userId immediately (no anonymous phase).
+ *   - If RC already configured (e.g. after logOut which reverts to anonymous):
+ *     logIn() transfers the anonymous context to the identified user.
+ *   - App.tsx no longer calls initRevenueCat() — RC is first configured here,
+ *     only once a real userId is known, eliminating anonymous customer creation.
+ */
+export async function logInUser(userId: string): Promise<PremiumCheckResult> {
+  if (isExpoGo) return { active: false, verified: false };
+
+  if (!(await Purchases.isConfigured())) {
+    const apiKey = Platform.OS === "ios" ? API_KEYS.ios : API_KEYS.android;
+    if (__DEV__) await Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey, appUserID: userId });
+  }
+
+  const { customerInfo } = await Purchases.logIn(userId);
+  const active = customerInfo.entitlements.active[ENTITLEMENT_PREMIUM] !== undefined;
+  return { active, verified: true };
 }
 
 export async function logOutUser(): Promise<void> {
