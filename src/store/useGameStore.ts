@@ -26,7 +26,7 @@ interface GameStoreState {
   };
   tutorialSeen: { speed_round: boolean; word_rain: boolean };
   dailyLimitReached: { speed_round: boolean; word_rain: boolean };
-  pendingScore: { stats: RawSessionStats } | null;  // offline retry queue
+  pendingScores: RawSessionStats[];
   loading: boolean;
   submitLoading: boolean;
   error: string | null;
@@ -58,7 +58,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
   tutorialSeen: { speed_round: false, word_rain: false },
   dailyLimitReached: { speed_round: false, word_rain: false },
-  pendingScore: null,
+  pendingScores: [],
   loading: false,
   submitLoading: false,
   error: null,
@@ -128,7 +128,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
       if (error) {
         // Network or server error → queue for retry
-        set({ submitLoading: false, pendingScore: { stats }, error: "network" });
+        set((state) => ({
+          submitLoading: false,
+          error: "network",
+          pendingScores: state.pendingScores.some((queued) => queued.sessionId === stats.sessionId)
+            ? state.pendingScores
+            : [...state.pendingScores, stats],
+        }));
         return null;
       }
 
@@ -153,7 +159,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       // Update local stats
       set((state) => ({
         submitLoading: false,
-        pendingScore: null,
+        pendingScores: state.pendingScores.filter((queued) => queued.sessionId !== stats.sessionId),
         userStats: state.userStats
           ? {
               ...state.userStats,
@@ -175,16 +181,23 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
       return result;
     } catch {
-      set({ submitLoading: false, pendingScore: { stats }, error: "network" });
+      set((state) => ({
+        submitLoading: false,
+        error: "network",
+        pendingScores: state.pendingScores.some((queued) => queued.sessionId === stats.sessionId)
+          ? state.pendingScores
+          : [...state.pendingScores, stats],
+      }));
       return null;
     }
   },
 
   // ---- Retry a pending (offline) score ----
   retryPendingScore: async () => {
-    const { pendingScore, submitScore } = get();
-    if (!pendingScore) return;
-    await submitScore(pendingScore.stats);
+    const { pendingScores, submitScore } = get();
+    const nextPending = pendingScores[0];
+    if (!nextPending) return;
+    await submitScore(nextPending);
   },
 
   // ---- Load leaderboard (with cache) ----
@@ -296,7 +309,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       },
       tutorialSeen: { speed_round: false, word_rain: false },
       dailyLimitReached: { speed_round: false, word_rain: false },
-      pendingScore: null,
+      pendingScores: [],
       loading: false,
       submitLoading: false,
       error: null,
