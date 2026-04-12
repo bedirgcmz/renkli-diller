@@ -50,3 +50,4 @@ supabase/.temp/
 # Local app documentation (Claude Code reference)
 APP_DOCS.md
 RELEASE_FLOW_AUDIT.md
+HIGH_PRIORITY_FIXES.md
