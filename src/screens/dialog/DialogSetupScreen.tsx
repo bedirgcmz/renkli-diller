@@ -19,7 +19,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useDialogStore, DialogDifficultyFilter } from "@/store/useDialogStore";
-import { DialogCategory, HomeStackParamList, DIALOG_LIMIT_FREE_TOTAL } from "@/types";
+import { DialogCategory, HomeStackParamList, MainStackParamList, DIALOG_LIMIT_FREE_TOTAL } from "@/types";
 import { SupportedLanguage } from "@/types";
 
 type Nav = NativeStackNavigationProp<HomeStackParamList>;
@@ -101,6 +101,10 @@ export default function DialogSetupScreen() {
   };
 
   const canStart = !!selectedCategory && !!selectedDifficulty && !starting;
+  const handleGoPremium = () => {
+    setLimitModalVisible(false);
+    navigation.getParent<NativeStackNavigationProp<MainStackParamList>>()?.navigate("Paywall");
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
@@ -245,11 +249,7 @@ export default function DialogSetupScreen() {
         totalCompleted={limitStatus?.totalCompleted ?? 0}
         t={t}
         colors={colors}
-        onGoPremium={() => {
-          setLimitModalVisible(false);
-          // @ts-ignore — Paywall is on MainStack
-          navigation.navigate("Paywall");
-        }}
+        onGoPremium={handleGoPremium}
       />
     </SafeAreaView>
   );
