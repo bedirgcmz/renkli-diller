@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
+  Alert,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
@@ -111,13 +112,23 @@ export default function DialogPlayScreen() {
 
     if (!option.is_correct) {
       // Wrong → red flash, stay on same turn
-      await selectOption(user.id, option.id, option);
+      const saved = await selectOption(user.id, option.id, option);
+      if (!saved) {
+        setPendingOptionId(null);
+        Alert.alert(t("common.error"), t("common.save_failed"));
+      }
       return;
     }
 
     // Correct ─ lock interactions
     setIsProcessing(true);
-    await selectOption(user.id, option.id, option);
+    const saved = await selectOption(user.id, option.id, option);
+    if (!saved) {
+      setPendingOptionId(null);
+      setIsProcessing(false);
+      Alert.alert(t("common.error"), t("common.save_failed"));
+      return;
+    }
 
     // Freeze a small moment so the green highlight is visible
     await new Promise((r) => setTimeout(r, AUTO_ADVANCE_DELAY_MS));

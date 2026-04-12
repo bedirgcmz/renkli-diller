@@ -59,7 +59,7 @@ interface DialogState {
     userId: string,
     optionId: string,
     option: DialogTurnOption
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   advanceToNextTurn: () => void;
   completeSession: (userId: string) => Promise<void>;
   abandonSession: (userId: string) => Promise<void>;
@@ -279,15 +279,15 @@ export const useDialogStore = create<DialogState>((set, get) => ({
   selectOption: async (userId, optionId, option) => {
     const { activeSession, turns, currentTurnIndex, currentTurnAttempts } =
       get();
-    if (!activeSession) return;
+    if (!activeSession) return false;
 
     const currentTurn = turns[currentTurnIndex];
-    if (!currentTurn) return;
+    if (!currentTurn) return false;
 
     const attemptOrder = currentTurnAttempts + 1;
 
     // Record attempt in DB
-    await supabase.from("user_dialog_turn_attempts").insert({
+    const { error } = await supabase.from("user_dialog_turn_attempts").insert({
       session_id: activeSession.id,
       user_id: userId,
       scenario_id: activeSession.scenario_id,
@@ -297,9 +297,15 @@ export const useDialogStore = create<DialogState>((set, get) => ({
       attempt_order: attemptOrder,
     });
 
+    if (error) {
+      set({ error: error.message });
+      return false;
+    }
+
     if (option.is_correct) {
       const isFirstTry = attemptOrder === 1;
       set((state) => ({
+        error: null,
         selectedOptionId: optionId,
         isCorrect: true,
         currentTurnAttempts: attemptOrder,
@@ -309,12 +315,15 @@ export const useDialogStore = create<DialogState>((set, get) => ({
       }));
     } else {
       set((state) => ({
+        error: null,
         selectedOptionId: optionId,
         isCorrect: false,
         currentTurnAttempts: attemptOrder,
         sessionWrongAttempts: state.sessionWrongAttempts + 1,
       }));
     }
+
+    return true;
   },
 
   advanceToNextTurn: () => {
