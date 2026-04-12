@@ -83,6 +83,10 @@ let authSubscription: { unsubscribe: () => void } | null = null;
 // Module-level RC listener cleanup — ensures only one listener is active at a time.
 let rcListenerRemover: (() => void) | null = null;
 
+const AVATAR_BUCKET = "user_profile_img";
+const AVATAR_FILE_PREFIX = "avatar.";
+const AVATAR_FALLBACK_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "heic", "heif"];
+
 function clearClientStores() {
   useSentenceStore.getState().clear();
   useProgressStore.getState().clear();
@@ -91,6 +95,48 @@ function clearClientStores() {
   useReadingStore.getState().clear();
   useGameStore.getState().clear();
   useSettingsStore.getState().clear();
+}
+
+function extractAvatarStoragePath(avatarUrl: string | undefined, userId: string): string | null {
+  if (!avatarUrl) return null;
+
+  try {
+    const url = new URL(avatarUrl);
+    const marker = `/object/public/${AVATAR_BUCKET}/`;
+    const markerIndex = url.pathname.indexOf(marker);
+
+    if (markerIndex === -1) return null;
+
+    const storagePath = decodeURIComponent(url.pathname.slice(markerIndex + marker.length));
+    return storagePath.startsWith(`${userId}/`) ? storagePath : null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveAvatarPaths(userId: string, avatarUrl?: string): Promise<string[]> {
+  const avatarPaths = new Set<string>();
+
+  const currentAvatarPath = extractAvatarStoragePath(avatarUrl, userId);
+  if (currentAvatarPath) {
+    avatarPaths.add(currentAvatarPath);
+  }
+
+  const { data: files, error } = await supabase.storage.from(AVATAR_BUCKET).list(userId, {
+    limit: 20,
+  });
+
+  if (!error) {
+    files
+      ?.filter((file) => file.name.startsWith(AVATAR_FILE_PREFIX))
+      .forEach((file) => avatarPaths.add(`${userId}/${file.name}`));
+  }
+
+  if (avatarPaths.size > 0) {
+    return Array.from(avatarPaths);
+  }
+
+  return AVATAR_FALLBACK_EXTENSIONS.map((ext) => `${userId}/avatar.${ext}`);
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -498,12 +544,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       const { error: uploadError } = await supabase.storage
-        .from("user_profile_img")
+        .from(AVATAR_BUCKET)
         .upload(filePath, uploadData, { contentType, upsert: true });
 
       if (uploadError) return { success: false, error: uploadError.message };
 
-      const { data } = supabase.storage.from("user_profile_img").getPublicUrl(filePath);
+      const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
 
       const result = await get().updateProfile({ avatar_url: publicUrl });
@@ -520,8 +566,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user } = get();
     if (!user) return { success: false, error: "No user logged in" };
     try {
-      const filePath = `${user.id}/avatar.jpg`;
-      await supabase.storage.from("user_profile_img").remove([filePath]);
+      const avatarPaths = await resolveAvatarPaths(user.id, user.avatar_url);
+
+      if (avatarPaths.length > 0) {
+        const { error: removeError } = await supabase.storage
+          .from(AVATAR_BUCKET)
+          .remove(avatarPaths);
+
+        if (removeError) {
+          return { success: false, error: removeError.message };
+        }
+      }
+
       const result = await get().updateProfile({ avatar_url: "" });
       if (!result.success) return result;
       return { success: true };
