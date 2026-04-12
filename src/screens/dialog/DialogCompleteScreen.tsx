@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useDialogStore } from "@/store/useDialogStore";
-import { HomeStackParamList } from "@/types";
+import { HomeStackParamList, MainStackParamList } from "@/types";
 
 type Nav = NativeStackNavigationProp<HomeStackParamList>;
 
@@ -79,6 +79,13 @@ export default function DialogCompleteScreen() {
   const handleLearnedConfirm = () => {
     setLearnedModalVisible(false);
     navigation.navigate("HomeMain");
+  };
+
+  const handleGoToLearnedDialogs = () => {
+    setLearnedModalVisible(false);
+    setTimeout(() => {
+      navigation.getParent<NativeStackNavigationProp<MainStackParamList>>()?.navigate("LearnedDialogs");
+    }, 300);
   };
 
   return (
@@ -181,6 +188,11 @@ export default function DialogCompleteScreen() {
             <Text style={[styles.modalBody, { color: colors.textSecondary }]}>
               {t("dialog.complete.learned_modal_body")}
             </Text>
+            <TouchableOpacity onPress={handleGoToLearnedDialogs} activeOpacity={0.7}>
+              <Text style={styles.modalLink}>
+                {t("dialog.complete.learned_modal_link")}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.modalBtn, { backgroundColor: PURPLE }]}
               onPress={handleLearnedConfirm}
@@ -252,6 +264,7 @@ const styles = StyleSheet.create({
   modalEmoji:     { fontSize: 48 },
   modalTitle:     { fontSize: 20, fontWeight: "800", textAlign: "center" },
   modalBody:      { fontSize: 14, lineHeight: 22, textAlign: "center" },
+  modalLink:      { fontSize: 14, fontWeight: "700", color: PURPLE, textDecorationLine: "underline", textAlign: "center" },
   modalBtn:       { width: "100%", paddingVertical: 14, borderRadius: 14, alignItems: "center", marginTop: 4 },
   modalBtnText:   { color: "#fff", fontSize: 15, fontWeight: "700" },
 });

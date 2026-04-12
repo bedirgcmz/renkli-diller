@@ -775,7 +775,8 @@
       "back_home": "Voltar ao início",
       "mark_learned": "Dominei este diálogo",
       "learned_modal_title": "Ótimo progresso! 🎓",
-      "learned_modal_body": "Você marcou este diálogo como dominado. Ele não aparecerá mais na sua rotação habitual.\n\nQuando terminar os outros, ele pode voltar. Você pode repeti-lo a qualquer momento em Mais → Meus diálogos aprendidos.",
+      "learned_modal_body": "Você marcou este diálogo como dominado. Ele não aparecerá mais na sua rotação habitual.\n\nQuando terminar os outros, ele pode voltar.",
+      "learned_modal_link": "Ver meus diálogos aprendidos",
       "learned_modal_confirm": "Entendi, ir para o início"
     },
     "limit": {

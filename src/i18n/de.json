@@ -775,7 +775,8 @@
       "back_home": "Zurück zur Startseite",
       "mark_learned": "Diesen Dialog gemeistert",
       "learned_modal_title": "Toller Fortschritt! 🎓",
-      "learned_modal_body": "Du hast diesen Dialog als gemeistert markiert. Er erscheint nicht mehr in deiner regulären Rotation.\n\nSobald du die anderen abgeschlossen hast, kann er zurückkehren. Du kannst ihn jederzeit unter Mehr → Meine gelernten Dialoge wiederholen.",
+      "learned_modal_body": "Du hast diesen Dialog als gemeistert markiert. Er erscheint nicht mehr in deiner regulären Rotation.\n\nSobald du die anderen abgeschlossen hast, kann er zurückkehren.",
+      "learned_modal_link": "Zu meinen gelernten Dialogen",
       "learned_modal_confirm": "Verstanden, zur Startseite"
     },
     "limit": {

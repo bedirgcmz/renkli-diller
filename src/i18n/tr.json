@@ -775,7 +775,8 @@
       "back_home": "Ana Sayfaya Dön",
       "mark_learned": "Bu Dialogu Öğrendim",
       "learned_modal_title": "Harika İlerleme! 🎓",
-      "learned_modal_body": "Bu diyalogu öğrenildi olarak işaretledin. Normal rotasyonda önüne getirilmeyecek.\n\nDiğer diyalogları bitirince tekrar önüne çıkabilir. İstediğin zaman Daha → Öğrendiğim Dialoglar'dan tekrar oynayabilirsin.",
+      "learned_modal_body": "Bu diyalogu öğrenildi olarak işaretledin. Normal rotasyonda önüne getirilmeyecek.\n\nDiğer diyalogları bitirince tekrar önüne çıkabilir.",
+      "learned_modal_link": "Öğrendiğim Dialoglar'a git",
       "learned_modal_confirm": "Anladım, Ana Sayfaya Dön"
     },
     "limit": {

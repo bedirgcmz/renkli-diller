@@ -775,7 +775,8 @@
       "back_home": "Retour à l'accueil",
       "mark_learned": "J'ai maîtrisé ce dialogue",
       "learned_modal_title": "Beau progrès ! 🎓",
-      "learned_modal_body": "Tu as marqué ce dialogue comme maîtrisé. Il n'apparaîtra plus dans ta rotation habituelle.\n\nUne fois les autres terminés, il peut revenir. Tu peux toujours le rejouer depuis Plus → Mes dialogues appris.",
+      "learned_modal_body": "Tu as marqué ce dialogue comme maîtrisé. Il n'apparaîtra plus dans ta rotation habituelle.\n\nUne fois les autres terminés, il peut revenir.",
+      "learned_modal_link": "Voir mes dialogues appris",
       "learned_modal_confirm": "Compris, retour à l'accueil"
     },
     "limit": {

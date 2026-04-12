@@ -775,7 +775,8 @@
       "back_home": "Tillbaka till start",
       "mark_learned": "Jag har behärskat denna dialog",
       "learned_modal_title": "Bra framsteg! 🎓",
-      "learned_modal_body": "Du har markerat den här dialogen som behärskad. Den visas inte längre i din vanliga rotation.\n\nNär du är klar med de andra kan den komma tillbaka. Du kan alltid spela om den från Mer → Mina lärda dialoger.",
+      "learned_modal_body": "Du har markerat den här dialogen som behärskad. Den visas inte längre i din vanliga rotation.\n\nNär du är klar med de andra kan den komma tillbaka.",
+      "learned_modal_link": "Gå till mina lärda dialoger",
       "learned_modal_confirm": "Förstått, gå hem"
     },
     "limit": {

@@ -775,7 +775,8 @@
       "back_home": "Back to Home",
       "mark_learned": "I've Mastered This Dialog",
       "learned_modal_title": "Great Progress! 🎓",
-      "learned_modal_body": "You've marked this dialog as mastered. It won't appear in your regular rotation.\n\nOnce you finish the others, it may come back. You can always replay it from More → My Learned Dialogs.",
+      "learned_modal_body": "You've marked this dialog as mastered. It won't appear in your regular rotation.\n\nOnce you finish the others, it may come back.",
+      "learned_modal_link": "Go to My Learned Dialogs",
       "learned_modal_confirm": "Got It, Go Home"
     },
     "limit": {
