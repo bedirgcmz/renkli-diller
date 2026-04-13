@@ -122,7 +122,7 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
         <View style={[styles.inputGroup, { borderColor: colors.border }]}>
           <TextInput
             style={[styles.input, { color: colors.text }]}
-            placeholder={t("onboarding.sign_up")}
+            placeholder={t("onboarding.full_name")}
             placeholderTextColor={colors.textSecondary}
             value={fullName}
             onChangeText={setFullName}
