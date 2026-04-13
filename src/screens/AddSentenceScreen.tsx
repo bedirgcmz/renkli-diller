@@ -46,6 +46,18 @@ export default function AddSentenceScreen() {
   useEffect(() => {
     if (categories.length === 0) loadCategories();
   }, []);
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+
+    const hasSelectedCategory = categoryId !== undefined
+      && categories.some((category) => category.id === categoryId);
+
+    if (!hasSelectedCategory) {
+      setCategoryId(categories[0].id);
+    }
+  }, [categories, categoryId]);
+
   const [guideOpen, setGuideOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const { isHintShown, markHintShown } = useOnboarding();
