@@ -14,20 +14,12 @@ import AppNavigator from "@/navigation/AppNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Services
-import { supabase } from "@/lib/supabase";
+import { establishSessionFromCallbackUrl, isAuthCallbackUrl } from "@/lib/authCallback";
 
 // Achievements
 import { AchievementToast } from "@/components/AchievementToast";
 import { useAchievementStore } from "@/store/useAchievementStore";
 import { useAuthStore } from "@/store/useAuthStore";
-
-// Module-level dedup guard — prevents double setSession when both
-// openAuthSessionAsync and Linking fire for the same callback URL.
-// Combines URL match + time window: same URL within 3s is a duplicate,
-// but the same URL after 3s (e.g. re-login) is allowed through.
-let lastHandledAuthUrl: string | null = null;
-let lastHandledAuthTime = 0;
-const AUTH_DEDUP_WINDOW_MS = 3000;
 
 export default function App() {
   const loadAchievements = useAchievementStore((s) => s.loadAchievements);
@@ -47,50 +39,25 @@ export default function App() {
   // Shared handler for both cold-start and warm-start auth deep links.
   useEffect(() => {
     const handleAuthCallback = async (url: string) => {
-      if (!url.includes("auth/callback") && !url.includes("auth/reset-password")) return;
-
-      // Dedup: skip if same URL arrived within the dedup window (cold-start double-fire).
-      // Allows the same URL after the window expires (e.g. re-login with same provider).
-      const now = Date.now();
-      if (lastHandledAuthUrl === url && now - lastHandledAuthTime < AUTH_DEDUP_WINDOW_MS) return;
-      lastHandledAuthUrl = url;
-      lastHandledAuthTime = now;
+      if (!isAuthCallbackUrl(url)) return;
 
       console.log("HANDLE AUTH URL:", url);
 
-      const tokenString = url.includes("#") ? url.split("#")[1] : url.split("?")[1];
-      if (!tokenString) {
-        if (url.includes("auth/reset-password")) {
+      const result = await establishSessionFromCallbackUrl(url);
+
+      if (url.includes("auth/reset-password")) {
+        if (result.session) {
+          activatePasswordRecovery();
+        } else {
           clearPasswordRecovery();
-        }
-        return;
-      }
-
-      const params = Object.fromEntries(
-        tokenString.split("&").map((pair) => pair.split("=").map(decodeURIComponent))
-      );
-
-      const accessToken = params["access_token"];
-      const refreshToken = params["refresh_token"];
-
-      console.log("TOKENS FOUND:", { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
-
-      if (accessToken && refreshToken) {
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        if (url.includes("auth/reset-password")) {
-          if (!error && data.session) {
-            activatePasswordRecovery();
-          } else {
-            clearPasswordRecovery();
-            console.error("[App] password recovery session error:", error?.message ?? "missing_session");
+          if (result.error) {
+            console.error("[App] password recovery session error:", result.error);
           }
         }
-      } else if (url.includes("auth/reset-password")) {
-        clearPasswordRecovery();
+      } else if (result.error && !result.duplicate) {
+        console.error("[App] auth callback session error:", result.error);
+      } else if (!result.session && !result.duplicate) {
+        console.error("[App] auth callback missing session");
       }
     };
 

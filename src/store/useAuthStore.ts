@@ -10,6 +10,7 @@ import {
 } from "@/services/revenueCat";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { clearAITrialCache } from "@/services/gemini";
+import { establishSessionFromCallbackUrl } from "@/lib/authCallback";
 import { useAchievementStore } from "./useAchievementStore";
 import { useGameStore } from "./useGameStore";
 import { useLeaderboardStore } from "./useLeaderboardStore";
@@ -354,48 +355,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { success: false };
       }
 
-      // Parse tokens from the callback URL (fragment or query string)
-      const callbackUrl = result.url;
-      console.log("CALLBACK URL:", callbackUrl);
-      const tokenString = callbackUrl.includes("#")
-        ? callbackUrl.split("#")[1]
-        : callbackUrl.split("?")[1];
+      console.log("CALLBACK URL:", result.url);
 
-      if (!tokenString) {
-        return { success: false, error: "No tokens in callback URL" };
-      }
+      const callbackResult = await establishSessionFromCallbackUrl(result.url);
 
-      const params = Object.fromEntries(
-        tokenString.split("&").map((pair) => pair.split("=").map(decodeURIComponent)),
-      );
-
-      const accessToken = params["access_token"];
-      const refreshToken = params["refresh_token"];
-
-      console.log("PARSED TOKENS:", {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
+      console.log("GOOGLE CALLBACK RESULT:", {
+        duplicate: callbackResult.duplicate,
+        hasSession: !!callbackResult.session,
+        error: callbackResult.error ?? null,
       });
 
-      if (!accessToken || !refreshToken) {
-        return { success: false, error: "Missing tokens in callback" };
+      if (!callbackResult.session) {
+        return {
+          success: false,
+          error: callbackResult.error || "Could not establish session",
+        };
       }
-
-      console.log("BEFORE setSession");
-
-      // Fire-and-forget: setSession hangs on React Native + AsyncStorage (deadlock
-      // between Supabase's internal storage write and onAuthStateChange handler's
-      // AsyncStorage.setItem). onAuthStateChange SIGNED_IN handles user state.
-      supabase.auth
-        .setSession({ access_token: accessToken, refresh_token: refreshToken })
-        .then(({ data: sessionData, error: sessionError }) => {
-          console.log("AFTER setSession", {
-            hasSession: !!sessionData?.session,
-            hasUser: !!sessionData?.user,
-            sessionError: sessionError?.message ?? null,
-          });
-        })
-        .catch((e) => console.log("setSession rejected:", e));
 
       console.log("SIGN IN WITH GOOGLE SUCCESS PATH");
       return { success: true };
