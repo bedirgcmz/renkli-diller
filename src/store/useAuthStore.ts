@@ -569,7 +569,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { error } = await supabase.auth.updateUser({ email: newEmail });
       if (error) return { success: false, error: error.message };
 
-      set({ user: { ...user, email: newEmail } });
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message ?? "Update failed" };
@@ -730,6 +729,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               console.error("[onAuthStateChange] deferred async error:", e);
             }
           })();
+        } else if ((event === "USER_UPDATED" || event === "TOKEN_REFRESHED") && session?.user) {
+          set((state) => ({
+            session,
+            user: state.user
+              ? {
+                  ...state.user,
+                  email: session.user.email ?? state.user.email,
+                  created_at: session.user.created_at ?? state.user.created_at,
+                }
+              : state.user,
+          }));
+
+          void AsyncStorage.setItem("supabase_session", JSON.stringify(session));
         } else if (event === "SIGNED_OUT") {
           clearClientStores();
           set({
