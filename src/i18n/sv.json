@@ -279,6 +279,8 @@
     "restore_btn": "Återställ köp",
     "legal": "Prenumerationer förnyas automatiskt vid slutet av varje period. Avbryt när som helst via App Store eller Google Play.",
     "offline_note": "Kunde inte ladda priser. Kontrollera din internetanslutning.",
+    "not_configured_note": "Priser är inte tillgängliga just nu. Uppdatera appen eller försök igen senare.",
+    "no_packages_note": "Priser är tillfälligt otillgängliga. Försök igen senare.",
     "success_title": "Premium Aktivt!",
     "success_body": "Du har nu tillgång till alla premiumfunktioner.",
     "success_btn": "Toppen!",

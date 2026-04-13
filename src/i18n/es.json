@@ -279,6 +279,8 @@
     "restore_btn": "Restaurar compra",
     "legal": "Las suscripciones se renuevan automáticamente al final de cada período. Cancela cuando quieras desde App Store o Google Play.",
     "offline_note": "No se pudo cargar el precio. Verifica tu conexión a internet.",
+    "not_configured_note": "Los precios no están disponibles en este momento. Actualiza la app o vuelve a intentarlo más tarde.",
+    "no_packages_note": "Los precios están temporalmente no disponibles. Vuelve a intentarlo más tarde.",
     "success_title": "¡Premium Activo!",
     "success_body": "Ahora tienes acceso a todas las funciones premium.",
     "success_btn": "¡Genial!",

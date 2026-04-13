@@ -67,6 +67,9 @@ export default function PaywallScreen() {
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [offeringsMessageKey, setOfferingsMessageKey] = useState<
+    "premium.offline_note" | "premium.not_configured_note" | "premium.no_packages_note"
+  >("premium.offline_note");
 
   useEffect(() => {
     loadOfferings();
@@ -75,16 +78,23 @@ export default function PaywallScreen() {
   async function loadOfferings() {
     setLoading(true);
     try {
-      const current = await getOfferings();
-      if (!current) {
+      const result = await getOfferings();
+      if (!result.current) {
+        setOfferingsMessageKey(
+          result.reason === "not_configured" || result.reason === "expo_go"
+            ? "premium.not_configured_note"
+            : result.reason === "no_current_offering"
+              ? "premium.no_packages_note"
+              : "premium.offline_note"
+        );
         setLoading(false);
         return;
       }
       const opts: PackageOption[] = [];
 
       // Paketleri belirli sırayla göster
-      const monthly = current.monthly;
-      const annual = current.annual;
+      const monthly = result.current.monthly;
+      const annual = result.current.annual;
 
       if (monthly) opts.push({ pkg: monthly, label: t("premium.pkg_monthly") });
       if (annual) opts.push({ pkg: annual, label: t("premium.pkg_annual"), badge: t("premium.badge_popular") });
@@ -230,7 +240,7 @@ export default function PaywallScreen() {
           </View>
         ) : (
           <View style={s.offlineNote}>
-            <Text style={s.offlineNoteTxt}>{t("premium.offline_note")}</Text>
+            <Text style={s.offlineNoteTxt}>{t(offeringsMessageKey)}</Text>
           </View>
         )}
 

@@ -279,6 +279,8 @@
     "restore_btn": "Kauf wiederherstellen",
     "legal": "Abonnements verlängern sich automatisch am Ende jedes Zeitraums. Jederzeit über den App Store oder Google Play kündigen.",
     "offline_note": "Preise konnten nicht geladen werden. Bitte Internetverbindung prüfen.",
+    "not_configured_note": "Preise sind im Moment nicht verfügbar. Bitte aktualisieren Sie die App oder versuchen Sie es später erneut.",
+    "no_packages_note": "Preise sind vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
     "success_title": "Premium Aktiv!",
     "success_body": "Du hast jetzt Zugriff auf alle Premium-Funktionen.",
     "success_btn": "Super!",

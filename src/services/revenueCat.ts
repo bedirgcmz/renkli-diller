@@ -25,6 +25,11 @@ export const PACKAGE_IDS = {
 } as const;
 
 export type PackageType = keyof typeof PACKAGE_IDS;
+export type OfferingsLoadResult = {
+  current: PurchasesOffering | null;
+  reason: "ok" | "expo_go" | "not_configured" | "no_current_offering" | "error";
+  error?: string;
+};
 
 export async function initRevenueCat(userId?: string): Promise<void> {
   if (isExpoGo) return;
@@ -115,11 +120,27 @@ export function setupCustomerInfoListener(
   };
 }
 
-export async function getOfferings(): Promise<PurchasesOffering | null> {
-  if (isExpoGo) return null;
-  if (!(await Purchases.isConfigured())) return null;
-  const offerings = await Purchases.getOfferings();
-  return offerings.current;
+export async function getOfferings(): Promise<OfferingsLoadResult> {
+  if (isExpoGo) return { current: null, reason: "expo_go" };
+  if (!(await Purchases.isConfigured())) {
+    return { current: null, reason: "not_configured" };
+  }
+
+  try {
+    const offerings = await Purchases.getOfferings();
+    if (!offerings.current) {
+      return { current: null, reason: "no_current_offering" };
+    }
+
+    return { current: offerings.current, reason: "ok" };
+  } catch (e: unknown) {
+    const err = asRCError(e);
+    return {
+      current: null,
+      reason: "error",
+      error: err.message ?? "Offerings load failed",
+    };
+  }
 }
 
 // RevenueCat errors are plain objects with optional typed fields.
