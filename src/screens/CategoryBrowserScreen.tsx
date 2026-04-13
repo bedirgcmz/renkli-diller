@@ -46,7 +46,7 @@ export default function CategoryBrowserScreen() {
 
   const handleCategoryPress = (cat: Category) => {
     if (!cat.is_free && !isPremium) {
-      navigation.navigate("Paywall");
+      navigation.navigate("Paywall", { source: "sentences" });
       return;
     }
     setSelectedCategory(cat);
@@ -183,6 +183,7 @@ export default function CategoryBrowserScreen() {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const isLocked = !item.is_free && !isPremium;
+          const isPremiumUnlocked = !item.is_free && isPremium;
 
           return (
             <TouchableOpacity
@@ -211,6 +212,13 @@ export default function CategoryBrowserScreen() {
                     <Ionicons name="lock-closed" size={10} color={colors.premiumAccent} />
                     <Text style={[styles.lockBadgeText, { color: colors.premiumAccent }]}>
                       {t("common.premium_badge")}
+                    </Text>
+                  </View>
+                ) : isPremiumUnlocked ? (
+                  <View style={[styles.lockBadge, { backgroundColor: colors.premiumAccent + "18" }]}>
+                    <Ionicons name="checkmark-circle" size={10} color={colors.premiumAccent} />
+                    <Text style={[styles.lockBadgeText, { color: colors.premiumAccent }]}>
+                      {t("common.premium_unlocked")}
                     </Text>
                   </View>
                 ) : (

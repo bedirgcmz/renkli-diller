@@ -20,7 +20,9 @@
     "dont_have_account": "Har du inget konto?",
     "forgot_password": "Glömt lösenord",
     "show_password": "Visa",
-    "hide_password": "Dölj"
+    "hide_password": "Dölj",
+    "why_premium_title": "Varför användare uppgraderar till Premium",
+    "why_premium_body": "Premium tar bort små dagliga gränser och gör det lättare att bygga en riktig språkrutin."
   },
   "tabs": {
     "learn": "Lär",
@@ -251,6 +253,8 @@
     "price": "14.99",
     "lifetime": "Engångsbetalning",
     "feature_ai": "AI-översättare (obegränsat)",
+    "feature_dialog": "Obegränsad dialogträning",
+    "feature_games": "Obegränsade spel och poängspårning",
     "feature_sentences": "500+ förinställda meningar",
     "feature_unlimited_add": "Obegränsat tillägg av meningar",
     "feature_tts": "Dubbel språk TTS",
@@ -267,6 +271,18 @@
     "already_premium": "Du är redan Premium!",
     "paywall_title": "Använd Parlio\nFritt",
     "paywall_subtitle": "Full tillgång till alla premiumfunktioner",
+    "paywall_context_sentences_title": "Spara hur många meningar du vill",
+    "paywall_context_sentences_subtitle": "Premium tar bort gratisgränsen för meningar så att du kan bygga vidare på ditt eget studiebibliotek.",
+    "paywall_context_ai_title": "Fortsätt översätta utan gränser",
+    "paywall_context_ai_subtitle": "Lås upp obegränsad AI-hjälp, spara dina bästa översättningar och gör dem direkt till studiematerial.",
+    "paywall_context_reading_title": "Lås upp premiumläsning",
+    "paywall_context_reading_subtitle": "Öppna premiumtexter, extra läsverktyg och en smidigare daglig läsrutin.",
+    "paywall_context_quiz_title": "Öva så mycket du vill",
+    "paywall_context_quiz_subtitle": "Ta bort dagens gränser och behåll flytet i quiz, bygg mening och auto-läge.",
+    "paywall_context_dialog_title": "Lås upp obegränsad dialogträning",
+    "paywall_context_dialog_subtitle": "Fortsätt prata i verkliga scenarier utan att fastna i gratisgränser.",
+    "paywall_context_games_title": "Spela utan dagliga gränser",
+    "paywall_context_games_subtitle": "Premium håller din spelstreak, din poängutveckling och din träningsenergi igång varje dag.",
     "pkg_monthly": "Månadsvis",
     "pkg_annual": "Årsvis",
     "pkg_lifetime": "Livstid",
@@ -338,6 +354,7 @@
     "no": "Nej",
     "free": "Gratis",
     "premium_badge": "Premium",
+    "premium_unlocked": "Upplåst med Premium",
     "upgrade": "Uppgradera",
     "restart": "Starta om",
     "preview": "Förhandsvisning:",
@@ -640,7 +657,9 @@
     "add_sentence_title": "Mening sparad! ✨",
     "add_sentence_body": "Den syns nu i fliken Meningar. Lägg till i din inlärningslista för att använda i alla studielägen.",
     "ai_translate_title": "AI-översättning klar! 🤖",
-    "ai_translate_body": "Tryck på Spara för att lägga till denna översättning. Nyckelord färgkodas och är redo för övning."
+    "ai_translate_body": "Tryck på Spara för att lägga till denna översättning. Nyckelord färgkodas och är redo för övning.",
+    "premium_intro_title": "Premium låser upp hela din lärväg",
+    "premium_intro_body": "När du vill ger Premium obegränsad AI-hjälp, mer läsning och dialogträning och färre avbrott i din rutin."
   },
   "games": {
     "hub": {
@@ -761,7 +780,14 @@
       "difficulty_hard_desc": "Nyanser och tonsskillnader",
       "start_button": "Starta",
       "no_scenarios": "Inga dialoger tillgängliga för denna kategori och svårighetsgrad ännu.",
-      "start_failed": "Den här dialogen kunde inte startas just nu. Prova en annan."
+      "start_failed": "Den här dialogen kunde inte startas just nu. Prova en annan.",
+      "remaining_count": "Det finns {{count}} ej inlärda dialoger kvar i det här valet",
+      "remaining_last": "Det finns 1 ej inlärd dialog kvar i det här valet",
+      "remaining_complete": "Du har lärt dig alla dialoger i det här valet",
+      "completed_title": "Du har klarat den här nivån",
+      "completed_body": "Du har lärt dig alla dialoger i den här kategorin och svårighetsgraden. Du kan öva på dina inlärda dialoger igen eller välja en annan kategori eller nivå.",
+      "completed_continue": "Öva på inlärda dialoger",
+      "completed_change": "Välj något annat"
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

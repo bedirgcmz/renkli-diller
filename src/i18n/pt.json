@@ -20,7 +20,9 @@
     "dont_have_account": "Não tem uma conta?",
     "forgot_password": "Esqueci minha senha",
     "show_password": "Mostrar",
-    "hide_password": "Ocultar"
+    "hide_password": "Ocultar",
+    "why_premium_title": "Por que os usuários fazem upgrade para o Premium",
+    "why_premium_body": "O Premium remove pequenos limites diários e abre o caminho mais fluido para criar um hábito real com o idioma."
   },
   "tabs": {
     "learn": "Aprender",
@@ -251,6 +253,8 @@
     "price": "14.99",
     "lifetime": "Pagamento único",
     "feature_ai": "Tradutor IA (ilimitado)",
+    "feature_dialog": "Prática de diálogos ilimitada",
+    "feature_games": "Jogos ilimitados e acompanhamento de pontuação",
     "feature_sentences": "500+ frases predefinidas",
     "feature_unlimited_add": "Frases ilimitadas",
     "feature_tts": "Áudio em dois idiomas",
@@ -267,6 +271,18 @@
     "already_premium": "Você já é Premium!",
     "paywall_title": "Use o Parlio\nLivremente",
     "paywall_subtitle": "Acesso total a todos os recursos premium",
+    "paywall_context_sentences_title": "Salve quantas frases quiser",
+    "paywall_context_sentences_subtitle": "O Premium remove o limite gratuito de frases para você continuar montando sua própria biblioteca de estudo.",
+    "paywall_context_ai_title": "Continue traduzindo sem limites",
+    "paywall_context_ai_subtitle": "Desbloqueie ajuda ilimitada com IA, salve suas melhores traduções e transforme tudo em material de estudo na hora.",
+    "paywall_context_reading_title": "Desbloqueie a leitura Premium",
+    "paywall_context_reading_subtitle": "Abra textos premium, ferramentas extras de leitura e uma rotina diária mais fluida.",
+    "paywall_context_quiz_title": "Pratique o quanto quiser",
+    "paywall_context_quiz_subtitle": "Remova os limites diários e mantenha seu ritmo no quiz, montar frases e modo automático.",
+    "paywall_context_dialog_title": "Desbloqueie diálogos ilimitados",
+    "paywall_context_dialog_subtitle": "Continue falando em cenários reais sem bater nas barreiras da versão gratuita.",
+    "paywall_context_games_title": "Jogue sem limite diário",
+    "paywall_context_games_subtitle": "O Premium mantém sua sequência de jogos, seu progresso e sua energia de prática em movimento todos os dias.",
     "pkg_monthly": "Mensal",
     "pkg_annual": "Anual",
     "pkg_lifetime": "Vitalício",
@@ -338,6 +354,7 @@
     "no": "Não",
     "free": "Grátis",
     "premium_badge": "Premium",
+    "premium_unlocked": "Desbloqueado com Premium",
     "upgrade": "Atualizar",
     "restart": "Reiniciar",
     "preview": "Pré-visualização:",
@@ -640,7 +657,9 @@
     "add_sentence_title": "Frase salva! ✨",
     "add_sentence_body": "Agora está visível na aba Frases. Adicione à sua lista para usar em todos os modos de estudo.",
     "ai_translate_title": "Tradução IA pronta! 🤖",
-    "ai_translate_body": "Toque em Salvar para adicionar esta tradução. As palavras-chave serão coloridas e prontas para praticar."
+    "ai_translate_body": "Toque em Salvar para adicionar esta tradução. As palavras-chave serão coloridas e prontas para praticar.",
+    "premium_intro_title": "O Premium desbloqueia todo o seu caminho",
+    "premium_intro_body": "Quando você quiser, o Premium libera ajuda ilimitada com IA, mais leitura e diálogos, e menos interrupções na sua rotina."
   },
   "games": {
     "hub": {
@@ -761,7 +780,14 @@
       "difficulty_hard_desc": "Nuances e diferenças de tom",
       "start_button": "Começar",
       "no_scenarios": "Ainda não há diálogos disponíveis para esta categoria e dificuldade.",
-      "start_failed": "Não foi possível iniciar este diálogo agora. Tente outro."
+      "start_failed": "Não foi possível iniciar este diálogo agora. Tente outro.",
+      "remaining_count": "Esta escolha ainda tem {{count}} diálogos não aprendidos",
+      "remaining_last": "Esta escolha ainda tem 1 diálogo não aprendido",
+      "remaining_complete": "Você dominou todos os diálogos desta escolha",
+      "completed_title": "Você concluiu este nível",
+      "completed_body": "Você dominou todos os diálogos desta categoria e dificuldade. Pode praticar novamente os diálogos aprendidos ou escolher outra categoria ou nível.",
+      "completed_continue": "Praticar diálogos aprendidos",
+      "completed_change": "Escolher outra opção"
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

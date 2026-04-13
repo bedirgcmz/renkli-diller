@@ -305,7 +305,7 @@ export default function AITranslateScreen() {
         setHasAccess(false);
         setTrialDaysLeft(0);
         setTrialStarted(true);
-        navigation.navigate("Paywall");
+        navigation.navigate("Paywall", { source: "ai" });
       } else if (err instanceof Error && err.message === "daily_limit_reached") {
         setDailyLimitReached(true);
         setHasAccess(false);
@@ -449,7 +449,7 @@ export default function AITranslateScreen() {
               </View>
               <TouchableOpacity
                 style={[styles.paywallBtn, { backgroundColor: colors.premiumAccent }]}
-                onPress={() => navigation.navigate("Paywall")}
+                onPress={() => navigation.navigate("Paywall", { source: "ai" })}
                 activeOpacity={0.85}
               >
                 <Text style={styles.paywallBtnText}>{t("ai_translator.go_premium")}</Text>

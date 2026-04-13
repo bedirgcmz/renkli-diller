@@ -115,6 +115,14 @@ export type RootStackParamList = {
   Main: undefined;
 };
 
+export type PaywallSource =
+  | "sentences"
+  | "ai"
+  | "reading"
+  | "quiz"
+  | "dialog"
+  | "games";
+
 export type HomeStackParamList = {
   HomeMain: undefined;
   Learn: { initialTab?: "study" | "listening" } | undefined;
@@ -134,7 +142,7 @@ export type MainStackParamList = {
   AddSentence: undefined;
   EditSentence: { sentenceId: string; isPreset: boolean };
   Settings: undefined;
-  Paywall: undefined;
+  Paywall: { source?: PaywallSource } | undefined;
   CategoryBrowser: undefined;
   AutoMode: undefined;
   ChangeEmail: undefined;

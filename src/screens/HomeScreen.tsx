@@ -15,9 +15,11 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { HeroHeader } from "@/components/HeroHeader";
+import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { HomeStackParamList, MainStackParamList } from "@/types";
 import { CoachMarksOverlay, CoachMarkStep } from "@/components/CoachMarksOverlay";
 import { useOnboarding } from "@/providers/OnboardingProvider";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Nav = CompositeNavigationProp<
@@ -44,7 +46,9 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
-  const { isCoachMarksDone, isReady, markCoachMarksDone } = useOnboarding();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
+  const { isCoachMarksDone, isReady, markCoachMarksDone, isHintShown, markHintShown } =
+    useOnboarding();
 
   // Refs for each card and their layout Y in the ScrollView
   const scrollRef = useRef<ScrollView>(null);
@@ -53,6 +57,7 @@ export default function HomeScreen() {
 
   const [coachVisible, setCoachVisible] = useState(false);
   const [coachSteps, setCoachSteps] = useState<CoachMarkStep[]>([]);
+  const [premiumHintVisible, setPremiumHintVisible] = useState(false);
 
   const cards: ActivityCard[] = [
     {
@@ -196,6 +201,15 @@ export default function HomeScreen() {
     }
   }, [isReady, isCoachMarksDone]);
 
+  React.useEffect(() => {
+    if (!isReady || !isCoachMarksDone || coachVisible || isPremium || isHintShown("premiumIntro")) {
+      return;
+    }
+
+    const timer = setTimeout(() => setPremiumHintVisible(true), 700);
+    return () => clearTimeout(timer);
+  }, [coachVisible, isCoachMarksDone, isHintShown, isPremium, isReady]);
+
   const handleCoachDone = useCallback(() => {
     setCoachVisible(false);
     markCoachMarksDone();
@@ -216,6 +230,11 @@ export default function HomeScreen() {
       scrollRef.current?.scrollTo({ y: Math.max(0, y - 100), animated: false });
     }
   }, []);
+
+  const closePremiumHint = useCallback(() => {
+    setPremiumHintVisible(false);
+    markHintShown("premiumIntro");
+  }, [markHintShown]);
 
   return (
     <SafeAreaView
@@ -269,6 +288,12 @@ export default function HomeScreen() {
           // Scroll to card before measuring (only for card steps)
           if (index < cards.length) scrollToCard(index);
         }}
+      />
+      <HintBottomSheet
+        visible={premiumHintVisible}
+        title={t("hints.premium_intro_title")}
+        body={t("hints.premium_intro_body")}
+        onClose={closePremiumHint}
       />
     </SafeAreaView>
   );

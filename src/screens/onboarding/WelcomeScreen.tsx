@@ -180,6 +180,39 @@ export default function WelcomeScreen() {
             >
               <Text style={styles.startButtonText}>{t("onboarding.get_started")}</Text>
             </TouchableOpacity>
+
+            <View
+              style={[
+                styles.premiumCard,
+                {
+                  backgroundColor: colors.surfaceSecondary,
+                  borderColor: colors.premiumAccent + "35",
+                },
+              ]}
+            >
+              <Text style={[styles.premiumCardEyebrow, { color: colors.premiumAccent }]}>
+                PREMIUM
+              </Text>
+              <Text style={[styles.premiumCardTitle, { color: colors.text }]}>
+                {t("onboarding.why_premium_title")}
+              </Text>
+              <Text style={[styles.premiumCardBody, { color: colors.textSecondary }]}>
+                {t("onboarding.why_premium_body")}
+              </Text>
+
+              {[t("premium.feature_ai"), t("premium.feature_reading"), t("premium.feature_dialog")].map(
+                (feature) => (
+                  <View key={feature} style={styles.premiumBulletRow}>
+                    <Text style={[styles.premiumBulletIcon, { color: colors.premiumAccent }]}>
+                      ✓
+                    </Text>
+                    <Text style={[styles.premiumBulletText, { color: colors.text }]}>
+                      {feature}
+                    </Text>
+                  </View>
+                ),
+              )}
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -276,5 +309,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#fff",
+  },
+  premiumCard: {
+    marginTop: 18,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+  },
+  premiumCardEyebrow: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  premiumCardTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  premiumCardBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  premiumBulletRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  premiumBulletIcon: {
+    fontSize: 14,
+    fontWeight: "800",
+    marginRight: 10,
+  },
+  premiumBulletText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

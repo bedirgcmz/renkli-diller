@@ -20,7 +20,9 @@
     "dont_have_account": "Haben Sie kein Konto?",
     "forgot_password": "Passwort vergessen",
     "show_password": "Zeigen",
-    "hide_password": "Verbergen"
+    "hide_password": "Verbergen",
+    "why_premium_title": "Warum Nutzer auf Premium upgraden",
+    "why_premium_body": "Premium entfernt kleine Tageslimits und macht es leichter, eine echte Sprachlern-Routine aufzubauen."
   },
   "tabs": {
     "learn": "Lernen",
@@ -251,6 +253,8 @@
     "price": "14.99",
     "lifetime": "Einmalzahlung",
     "feature_ai": "KI-Übersetzer (unbegrenzt)",
+    "feature_dialog": "Unbegrenzte Dialogübungen",
+    "feature_games": "Unbegrenzte Spiele und Punkteverfolgung",
     "feature_sentences": "500+ voreingestellte Sätze",
     "feature_unlimited_add": "Unbegrenztes Hinzufügen von Sätzen",
     "feature_tts": "Zweisprachige TTS",
@@ -267,6 +271,18 @@
     "already_premium": "Sie sind bereits Premium!",
     "paywall_title": "Parlio\nFrei Nutzen",
     "paywall_subtitle": "Voller Zugriff auf alle Premium-Funktionen",
+    "paywall_context_sentences_title": "Speichere so viele Sätze, wie du willst",
+    "paywall_context_sentences_subtitle": "Premium entfernt das Satzlimit und lässt dich deine eigene Lernbibliothek weiter ausbauen.",
+    "paywall_context_ai_title": "Übersetze ohne Grenzen weiter",
+    "paywall_context_ai_subtitle": "Schalte unbegrenzte KI-Hilfe frei, speichere starke Übersetzungen und mache sofort Lernmaterial daraus.",
+    "paywall_context_reading_title": "Schalte Premium-Lesen frei",
+    "paywall_context_reading_subtitle": "Öffne Premium-Texte, zusätzliche Lesetools und eine flüssigere tägliche Leseroutine.",
+    "paywall_context_quiz_title": "Übe, so viel du willst",
+    "paywall_context_quiz_subtitle": "Entferne Tageslimits und halte deinen Schwung in Quiz, Satzbau und Auto-Modus.",
+    "paywall_context_dialog_title": "Schalte unbegrenzte Dialogübungen frei",
+    "paywall_context_dialog_subtitle": "Sprich weiter in realen Szenarien, ohne an Free-User-Grenzen zu stoßen.",
+    "paywall_context_games_title": "Spiele ohne Tageslimits",
+    "paywall_context_games_subtitle": "Premium hält deine Spielserie, deinen Fortschritt und deine tägliche Energie in Bewegung.",
     "pkg_monthly": "Monatlich",
     "pkg_annual": "Jährlich",
     "pkg_lifetime": "Lebenslang",
@@ -338,6 +354,7 @@
     "no": "Nein",
     "free": "Kostenlos",
     "premium_badge": "Premium",
+    "premium_unlocked": "Mit Premium freigeschaltet",
     "upgrade": "Upgrade",
     "restart": "Neu starten",
     "preview": "Vorschau:",
@@ -640,7 +657,9 @@
     "add_sentence_title": "Satz gespeichert! ✨",
     "add_sentence_body": "Er ist jetzt im Sätze-Tab sichtbar. Füge ihn zur Lernliste hinzu, um ihn in allen Modi zu nutzen.",
     "ai_translate_title": "KI-Übersetzung bereit! 🤖",
-    "ai_translate_body": "Tippe auf Speichern, um diese Übersetzung zu deinen Sätzen hinzuzufügen. Keywords werden farbig markiert."
+    "ai_translate_body": "Tippe auf Speichern, um diese Übersetzung zu deinen Sätzen hinzuzufügen. Keywords werden farbig markiert.",
+    "premium_intro_title": "Premium öffnet deinen ganzen Lernweg",
+    "premium_intro_body": "Wenn du bereit bist, schaltet Premium unbegrenzte KI-Hilfe, mehr Lesen und Dialogübungen sowie weniger Unterbrechungen in deiner Routine frei."
   },
   "games": {
     "hub": {
@@ -761,7 +780,14 @@
       "difficulty_hard_desc": "Nuancen und Tonunterschiede",
       "start_button": "Starten",
       "no_scenarios": "Für diese Kategorie und diesen Schwierigkeitsgrad gibt es noch keine Dialoge.",
-      "start_failed": "Dieser Dialog konnte gerade nicht gestartet werden. Bitte versuche einen anderen."
+      "start_failed": "Dieser Dialog konnte gerade nicht gestartet werden. Bitte versuche einen anderen.",
+      "remaining_count": "Für diese Auswahl bleiben noch {{count}} nicht gelernte Dialoge",
+      "remaining_last": "Für diese Auswahl bleibt noch 1 nicht gelernter Dialog",
+      "remaining_complete": "Du hast alle Dialoge in dieser Auswahl gemeistert",
+      "completed_title": "Du hast diese Stufe abgeschlossen",
+      "completed_body": "Du hast alle Dialoge in dieser Kategorie und diesem Schwierigkeitsgrad gemeistert. Du kannst deine gelernten Dialoge erneut üben oder eine andere Kategorie oder Stufe wählen.",
+      "completed_continue": "Gelernte Dialoge üben",
+      "completed_change": "Etwas anderes wählen"
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

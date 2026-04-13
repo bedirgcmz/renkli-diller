@@ -354,7 +354,7 @@ export default function AutoModeScreen() {
           </Text>
           <TouchableOpacity
             style={[styles.limitBannerBtn, { backgroundColor: colors.warning }]}
-            onPress={() => navigation.navigate("Paywall")}
+            onPress={() => navigation.navigate("Paywall", { source: "quiz" })}
             activeOpacity={0.85}
           >
             <Text style={styles.limitBannerBtnText}>{t("premium.title")} →</Text>

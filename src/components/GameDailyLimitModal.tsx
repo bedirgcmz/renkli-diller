@@ -26,7 +26,7 @@ export default function GameDailyLimitModal({ visible, onClose }: Props) {
 
   const handleUpgrade = () => {
     onClose();
-    navigation.navigate("Paywall");
+    navigation.navigate("Paywall", { source: "games" });
   };
 
   return (

@@ -10,6 +10,7 @@ const KEYS = {
   HINT_QUIZ_DONE: "@parlio/hint_quiz_done",
   HINT_ADD_SENTENCE: "@parlio/hint_add_sentence",
   HINT_AI_TRANSLATE: "@parlio/hint_ai_translate",
+  HINT_PREMIUM_INTRO: "@parlio/hint_premium_intro",
 };
 
 export type HintKey =
@@ -18,7 +19,8 @@ export type HintKey =
   | "removeLearning"
   | "quizDone"
   | "addSentence"
-  | "aiTranslate";
+  | "aiTranslate"
+  | "premiumIntro";
 
 const HINT_KEY_MAP: Record<HintKey, string> = {
   learned: KEYS.HINT_LEARNED,
@@ -27,6 +29,7 @@ const HINT_KEY_MAP: Record<HintKey, string> = {
   quizDone: KEYS.HINT_QUIZ_DONE,
   addSentence: KEYS.HINT_ADD_SENTENCE,
   aiTranslate: KEYS.HINT_AI_TRANSLATE,
+  premiumIntro: KEYS.HINT_PREMIUM_INTRO,
 };
 
 function getScopedKey(baseKey: string, userId: string | null): string {

@@ -77,7 +77,10 @@ export default function AddSentenceScreen() {
         t("add_sentence.upgrade_to_add_more"),
         [
           { text: t("common.cancel"), style: "cancel" },
-          { text: t("premium.title"), onPress: () => navigation.navigate("Paywall") },
+          {
+            text: t("premium.title"),
+            onPress: () => navigation.navigate("Paywall", { source: "sentences" }),
+          },
         ],
       );
       return;

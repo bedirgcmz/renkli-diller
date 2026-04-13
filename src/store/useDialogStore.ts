@@ -21,6 +21,22 @@ interface DialogLimitStatus {
   blockedReason: "daily_limit" | "total_limit" | null;
 }
 
+interface DialogPoolStatus {
+  totalScenarios: number;
+  freshCount: number;
+  unlearnedCount: number;
+  learnedCount: number;
+  remainingCount: number;
+  completedSelection: boolean;
+}
+
+interface ScenarioPoolData {
+  scenarios: DialogScenario[];
+  fresh: DialogScenario[];
+  unlearned: DialogScenario[];
+  learned: DialogScenario[];
+}
+
 interface DialogState {
   // Setup
   categories: DialogCategory[];
@@ -44,6 +60,7 @@ interface DialogState {
 
   // Limit
   limitStatus: DialogLimitStatus | null;
+  poolStatus: DialogPoolStatus | null;
 
   // UI
   loading: boolean;
@@ -54,7 +71,13 @@ interface DialogState {
   setSelectedCategory: (category: DialogCategory | null) => void;
   setSelectedDifficulty: (difficulty: DialogDifficultyFilter | null) => void;
   fetchLimitStatus: (userId: string, isPremium: boolean) => Promise<void>;
-  startSession: (userId: string, isPremium: boolean, scenarioId?: string) => Promise<boolean>;
+  fetchPoolStatus: (userId: string) => Promise<void>;
+  startSession: (
+    userId: string,
+    isPremium: boolean,
+    scenarioId?: string,
+    allowLearnedFallback?: boolean
+  ) => Promise<boolean>;
   selectOption: (
     userId: string,
     optionId: string,
@@ -65,6 +88,53 @@ interface DialogState {
   abandonSession: (userId: string) => Promise<void>;
   markAsLearned: (userId: string, scenarioId: string) => Promise<void>;
   reset: () => void;
+}
+
+async function getScenarioPool(
+  userId: string,
+  categoryId: string,
+  difficulty: DialogDifficultyFilter
+): Promise<ScenarioPoolData> {
+  const { data: scenarios, error: scenarioError } = await supabase
+    .from("dialog_scenarios")
+    .select("*")
+    .eq("category_id", categoryId)
+    .eq("difficulty", difficulty)
+    .eq("is_active", true)
+    .eq("qa_status", "approved")
+    .order("order_index");
+
+  if (scenarioError) throw scenarioError;
+
+  const scenarioList = ((scenarios ?? []) as DialogScenario[]).filter(Boolean);
+  if (scenarioList.length === 0) {
+    return { scenarios: [], fresh: [], unlearned: [], learned: [] };
+  }
+
+  const scenarioIds = scenarioList.map((s) => s.id);
+  const { data: progressRows, error: progressError } = await supabase
+    .from("user_dialog_progress")
+    .select("scenario_id, is_learned")
+    .eq("user_id", userId)
+    .in("scenario_id", scenarioIds);
+
+  if (progressError) throw progressError;
+
+  const playedIds = new Set((progressRows ?? []).map((p: any) => p.scenario_id));
+  const learnedIds = new Set(
+    (progressRows ?? []).filter((p: any) => p.is_learned).map((p: any) => p.scenario_id)
+  );
+
+  const fresh = scenarioList.filter((s) => !playedIds.has(s.id));
+  const unlearned = scenarioList.filter((s) => playedIds.has(s.id) && !learnedIds.has(s.id));
+  const learned = scenarioList.filter((s) => learnedIds.has(s.id));
+
+  return {
+    scenarios: scenarioList,
+    fresh,
+    unlearned,
+    learned,
+  };
 }
 
 export const useDialogStore = create<DialogState>((set, get) => ({
@@ -85,6 +155,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
   sessionWrongAttempts: 0,
 
   limitStatus: null,
+  poolStatus: null,
 
   loading: false,
   error: null,
@@ -155,7 +226,31 @@ export const useDialogStore = create<DialogState>((set, get) => ({
     }
   },
 
-  startSession: async (userId, isPremium, scenarioId) => {
+  fetchPoolStatus: async (userId) => {
+    const { selectedCategory, selectedDifficulty } = get();
+    if (!selectedCategory || !selectedDifficulty) {
+      set({ poolStatus: null });
+      return;
+    }
+
+    try {
+      const pool = await getScenarioPool(userId, selectedCategory.id, selectedDifficulty);
+      set({
+        poolStatus: {
+          totalScenarios: pool.scenarios.length,
+          freshCount: pool.fresh.length,
+          unlearnedCount: pool.unlearned.length,
+          learnedCount: pool.learned.length,
+          remainingCount: pool.fresh.length + pool.unlearned.length,
+          completedSelection: pool.scenarios.length > 0 && pool.fresh.length + pool.unlearned.length === 0,
+        },
+      });
+    } catch (e: any) {
+      set({ error: e.message, poolStatus: null });
+    }
+  },
+
+  startSession: async (userId, isPremium, scenarioId, allowLearnedFallback = true) => {
     const { selectedCategory, selectedDifficulty } = get();
     if (!scenarioId && (!selectedCategory || !selectedDifficulty)) return false;
 
@@ -179,44 +274,39 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         }
         scenario = scenarioData as DialogScenario;
       } else {
-        // Pick a random approved scenario for this category + difficulty
-        const { data: scenarios, error: scenarioError } = await supabase
-          .from("dialog_scenarios")
-          .select("*")
-          .eq("category_id", selectedCategory!.id)
-          .eq("difficulty", selectedDifficulty!)
-          .eq("is_active", true)
-          .eq("qa_status", "approved")
-          .order("order_index");
+        const pool = await getScenarioPool(userId, selectedCategory!.id, selectedDifficulty!);
 
-        if (scenarioError) throw scenarioError;
-        if (!scenarios || scenarios.length === 0) {
+        if (pool.scenarios.length === 0) {
           set({ error: "no_scenarios", loading: false });
           return false;
         }
 
-        // Smart scenario selection:
-        // Priority 1 — never played (no progress row)
-        // Priority 2 — played but not learned
-        // Priority 3 — learned (all others exhausted)
-        const scenarioIds = scenarios.map((s: any) => s.id);
-        const { data: progressRows } = await supabase
-          .from("user_dialog_progress")
-          .select("scenario_id, is_learned")
-          .eq("user_id", userId)
-          .in("scenario_id", scenarioIds);
+        const availablePool =
+          pool.fresh.length > 0
+            ? pool.fresh
+            : pool.unlearned.length > 0
+              ? pool.unlearned
+              : allowLearnedFallback
+                ? pool.learned
+                : [];
 
-        const playedIds = new Set((progressRows ?? []).map((p: any) => p.scenario_id));
-        const learnedIds = new Set(
-          (progressRows ?? []).filter((p: any) => p.is_learned).map((p: any) => p.scenario_id)
-        );
+        if (availablePool.length === 0) {
+          set({
+            error: "completed_selection",
+            loading: false,
+            poolStatus: {
+              totalScenarios: pool.scenarios.length,
+              freshCount: pool.fresh.length,
+              unlearnedCount: pool.unlearned.length,
+              learnedCount: pool.learned.length,
+              remainingCount: pool.fresh.length + pool.unlearned.length,
+              completedSelection: true,
+            },
+          });
+          return false;
+        }
 
-        const fresh = scenarios.filter((s: any) => !playedIds.has(s.id));
-        const unlearned = scenarios.filter((s: any) => playedIds.has(s.id) && !learnedIds.has(s.id));
-        const learned = scenarios.filter((s: any) => learnedIds.has(s.id));
-
-        const pool = fresh.length > 0 ? fresh : unlearned.length > 0 ? unlearned : learned;
-        scenario = pool[Math.floor(Math.random() * pool.length)] as DialogScenario;
+        scenario = availablePool[Math.floor(Math.random() * availablePool.length)] as DialogScenario;
       }
 
       // Fetch turns + options
@@ -487,10 +577,11 @@ export const useDialogStore = create<DialogState>((set, get) => ({
       isCorrect: null,
       sessionCorrectFirstTry: 0,
       sessionWrongAttempts: 0,
-      selectedCategory: null,
-      selectedDifficulty: null,
-      limitStatus: null,
-      error: null,
-    });
+        selectedCategory: null,
+        selectedDifficulty: null,
+        limitStatus: null,
+        poolStatus: null,
+        error: null,
+      });
   },
 }));

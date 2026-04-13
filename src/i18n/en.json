@@ -20,7 +20,9 @@
     "dont_have_account": "Don't have an account?",
     "forgot_password": "Forgot password",
     "show_password": "Show",
-    "hide_password": "Hide"
+    "hide_password": "Hide",
+    "why_premium_title": "Why users upgrade to Premium",
+    "why_premium_body": "Premium removes the small daily caps and opens the fastest path to a real language habit."
   },
   "tabs": {
     "learn": "Learn",
@@ -251,6 +253,8 @@
     "price": "14.99",
     "lifetime": "One-time payment",
     "feature_ai": "AI Translator (unlimited)",
+    "feature_dialog": "Unlimited dialog practice",
+    "feature_games": "Unlimited games and score tracking",
     "feature_sentences": "500+ preset sentences",
     "feature_unlimited_add": "Unlimited sentence adding",
     "feature_tts": "Dual language TTS",
@@ -267,6 +271,18 @@
     "already_premium": "You're already Premium!",
     "paywall_title": "Use Parlio\nFreely",
     "paywall_subtitle": "Full access to all premium features",
+    "paywall_context_sentences_title": "Save every sentence you want",
+    "paywall_context_sentences_subtitle": "Premium removes the free sentence cap so you can keep building your own study library.",
+    "paywall_context_ai_title": "Keep translating without limits",
+    "paywall_context_ai_subtitle": "Unlock unlimited AI help, save your best translations, and turn them into study material instantly.",
+    "paywall_context_reading_title": "Unlock premium reading flow",
+    "paywall_context_reading_subtitle": "Open premium texts, extra reading tools, and a smoother daily reading routine.",
+    "paywall_context_quiz_title": "Practice as much as you want",
+    "paywall_context_quiz_subtitle": "Remove daily caps and keep your momentum across quiz, build sentence, and auto practice.",
+    "paywall_context_dialog_title": "Open unlimited dialog practice",
+    "paywall_context_dialog_subtitle": "Keep speaking through real scenarios without hitting free-user walls.",
+    "paywall_context_games_title": "Play without daily caps",
+    "paywall_context_games_subtitle": "Premium keeps your game streak, score progress, and practice energy moving every day.",
     "pkg_monthly": "Monthly",
     "pkg_annual": "Annual",
     "pkg_lifetime": "Lifetime",
@@ -338,6 +354,7 @@
     "no": "No",
     "free": "Free",
     "premium_badge": "Premium",
+    "premium_unlocked": "Unlocked with Premium",
     "upgrade": "Upgrade",
     "restart": "Restart",
     "preview": "Preview:",
@@ -640,7 +657,9 @@
     "add_sentence_title": "Sentence saved! ✨",
     "add_sentence_body": "It's now visible in the Sentences tab. Add it to your learning list to use it in all study modes.",
     "ai_translate_title": "AI translation ready! 🤖",
-    "ai_translate_body": "Tap Save to add this translation to your sentences. Keywords will be color-coded and ready for practice."
+    "ai_translate_body": "Tap Save to add this translation to your sentences. Keywords will be color-coded and ready for practice.",
+    "premium_intro_title": "Premium unlocks your full learning path",
+    "premium_intro_body": "When you're ready, Premium opens unlimited AI help, more reading and dialog practice, and fewer interruptions in your routine."
   },
   "games": {
     "hub": {
@@ -761,7 +780,14 @@
       "difficulty_hard_desc": "Nuance and tone differences",
       "start_button": "Start",
       "no_scenarios": "No dialogs available for this category and difficulty yet.",
-      "start_failed": "This dialog could not be started right now. Please try another one."
+      "start_failed": "This dialog could not be started right now. Please try another one.",
+      "remaining_count": "This choice has {{count}} unlearned dialogs left",
+      "remaining_last": "This choice has 1 unlearned dialog left",
+      "remaining_complete": "You've mastered all dialogs in this choice",
+      "completed_title": "You've completed this level",
+      "completed_body": "You've mastered all dialogs in this category and difficulty. You can practice your learned dialogs again or choose a different category or level.",
+      "completed_continue": "Practice Learned Dialogs",
+      "completed_change": "Choose Another One"
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

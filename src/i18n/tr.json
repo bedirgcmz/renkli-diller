@@ -20,7 +20,9 @@
     "dont_have_account": "Hesabınız yok mu?",
     "forgot_password": "Şifremi unuttum",
     "show_password": "Göster",
-    "hide_password": "Gizle"
+    "hide_password": "Gizle",
+    "why_premium_title": "Kullanıcılar neden Premium'a geçiyor?",
+    "why_premium_body": "Premium küçük günlük sınırları kaldırır ve gerçek bir dil rutini kurmanın en hızlı yolunu açar."
   },
   "tabs": {
     "learn": "Öğren",
@@ -251,6 +253,8 @@
     "price": "14.99",
     "lifetime": "Tek seferlik ödeme",
     "feature_ai": "AI Çevirmen (sınırsız)",
+    "feature_dialog": "Sınırsız diyalog pratiği",
+    "feature_games": "Sınırsız oyun ve skor takibi",
     "feature_sentences": "500+ hazır cümle",
     "feature_unlimited_add": "Sınırsız cümle ekleme",
     "feature_tts": "Çift dil seslendirme",
@@ -267,6 +271,18 @@
     "already_premium": "Zaten Premium üyesiniz!",
     "paywall_title": "Parlio'yu\nÖzgürce Kullan",
     "paywall_subtitle": "Tüm premium özelliklere tam erişim",
+    "paywall_context_sentences_title": "İstediğin kadar cümle kaydet",
+    "paywall_context_sentences_subtitle": "Premium, ücretsiz cümle sınırını kaldırır ve kendi çalışma kütüphaneni büyütmeni sağlar.",
+    "paywall_context_ai_title": "Çeviriye limitsiz devam et",
+    "paywall_context_ai_subtitle": "Sınırsız AI desteğini aç, en iyi çevirilerini kaydet ve onları anında çalışma materyaline dönüştür.",
+    "paywall_context_reading_title": "Premium okuma akışını aç",
+    "paywall_context_reading_subtitle": "Premium metinlere, ek okuma araçlarına ve daha akıcı bir günlük okuma rutinine eriş.",
+    "paywall_context_quiz_title": "İstediğin kadar pratik yap",
+    "paywall_context_quiz_subtitle": "Günlük sınırları kaldır ve quiz, cümle kurma ve otomatik pratik akışında momentumunu koru.",
+    "paywall_context_dialog_title": "Sınırsız diyalog pratiğinin kilidini aç",
+    "paywall_context_dialog_subtitle": "Gerçek senaryolarla konuşma pratiğine ücretsiz kullanıcı duvarlarına takılmadan devam et.",
+    "paywall_context_games_title": "Günlük sınır olmadan oyna",
+    "paywall_context_games_subtitle": "Premium, oyun serini, skor ilerlemeni ve günlük çalışma enerjini kesintisiz sürdürür.",
     "pkg_monthly": "Aylık",
     "pkg_annual": "Yıllık",
     "pkg_lifetime": "Ömürlük",
@@ -338,6 +354,7 @@
     "no": "Hayır",
     "free": "Ücretsiz",
     "premium_badge": "Premium",
+    "premium_unlocked": "Premium ile Açıldı",
     "upgrade": "Yükselt",
     "restart": "Yeniden Başlat",
     "preview": "Önizleme:",
@@ -640,7 +657,9 @@
     "add_sentence_title": "Cümlen kaydedildi! ✨",
     "add_sentence_body": "Cümleler sekmesinde görünür. Öğrenme listene ekleyince tüm çalışma modlarında kullanabilirsin.",
     "ai_translate_title": "AI çeviri hazır! 🤖",
-    "ai_translate_body": "Kaydet butonuna basarak bu çeviriyi cümlelerine ekleyebilirsin. Keyword'ler otomatik renklenerek çalışmana hazır olacak."
+    "ai_translate_body": "Kaydet butonuna basarak bu çeviriyi cümlelerine ekleyebilirsin. Keyword'ler otomatik renklenerek çalışmana hazır olacak.",
+    "premium_intro_title": "Premium tüm öğrenme yolunu açar",
+    "premium_intro_body": "Hazır olduğunda Premium; sınırsız AI desteği, daha fazla okuma ve diyalog pratiği ve rutininde daha az kesinti sunar."
   },
   "games": {
     "hub": {
@@ -761,7 +780,14 @@
       "difficulty_hard_desc": "Nüans ve ton farkı",
       "start_button": "Başlat",
       "no_scenarios": "Bu kategori ve zorlukta henüz diyalog yok.",
-      "start_failed": "Bu diyalog şu anda başlatılamadı. Lütfen başka birini deneyin."
+      "start_failed": "Bu diyalog şu anda başlatılamadı. Lütfen başka birini deneyin.",
+      "remaining_count": "Bu seçimde {{count}} öğrenilmemiş dialog kaldı",
+      "remaining_last": "Bu seçimde 1 öğrenilmemiş dialog kaldı",
+      "remaining_complete": "Bu seçimdeki tüm dialogları öğrendin",
+      "completed_title": "Bu seviyeyi tamamladın",
+      "completed_body": "Bu kategori ve zorluktaki tüm dialogları öğrendin. İstersen öğrendiğin dialoglarla tekrar pratik yapabilir ya da başka bir kategori veya seviye seçebilirsin.",
+      "completed_continue": "Öğrendiklerimle Pratik Yap",
+      "completed_change": "Başka Seçim Yap"
     },
     "play": {
       "turn_progress": "{{current}} / {{total}}",

@@ -56,9 +56,11 @@ export default function DialogSetupScreen() {
     selectedCategory,
     selectedDifficulty,
     limitStatus,
+    poolStatus,
     loading,
     fetchCategories,
     fetchLimitStatus,
+    fetchPoolStatus,
     setSelectedCategory,
     setSelectedDifficulty,
     startSession,
@@ -66,6 +68,7 @@ export default function DialogSetupScreen() {
   } = useDialogStore();
 
   const [limitModalVisible, setLimitModalVisible] = useState(false);
+  const [completedModalVisible, setCompletedModalVisible] = useState(false);
   const [starting, setStarting] = useState(false);
 
   useEffect(() => {
@@ -73,6 +76,14 @@ export default function DialogSetupScreen() {
     fetchCategories();
     if (user) fetchLimitStatus(user.id, isPremium);
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !selectedCategory || !selectedDifficulty) {
+      setCompletedModalVisible(false);
+      return;
+    }
+    fetchPoolStatus(user.id);
+  }, [fetchPoolStatus, selectedCategory, selectedDifficulty, user]);
 
   const handleStart = async () => {
     if (!selectedCategory || !selectedDifficulty || !user) return;
@@ -84,7 +95,7 @@ export default function DialogSetupScreen() {
     }
 
     setStarting(true);
-    const ok = await startSession(user.id, isPremium);
+    const ok = await startSession(user.id, isPremium, undefined, false);
     setStarting(false);
 
     if (ok) {
@@ -95,15 +106,34 @@ export default function DialogSetupScreen() {
     const latestError = useDialogStore.getState().error;
     if (latestError === "no_scenarios") {
       Alert.alert(t("common.error"), t("dialog.setup.no_scenarios"));
+    } else if (latestError === "completed_selection") {
+      setCompletedModalVisible(true);
     } else if (latestError === "invalid_scenario") {
       Alert.alert(t("common.error"), t("dialog.setup.start_failed"));
     }
   };
 
+  const handleContinueWithLearned = async () => {
+    if (!user) return;
+    setCompletedModalVisible(false);
+    setStarting(true);
+    const ok = await startSession(user.id, isPremium, undefined, true);
+    setStarting(false);
+
+    if (ok) {
+      navigation.navigate("DialogPlay");
+      return;
+    }
+
+    Alert.alert(t("common.error"), t("dialog.setup.start_failed"));
+  };
+
   const canStart = !!selectedCategory && !!selectedDifficulty && !starting;
   const handleGoPremium = () => {
     setLimitModalVisible(false);
-    navigation.getParent<NativeStackNavigationProp<MainStackParamList>>()?.navigate("Paywall");
+    navigation
+      .getParent<NativeStackNavigationProp<MainStackParamList>>()
+      ?.navigate("Paywall", { source: "dialog" });
   };
 
   return (
@@ -203,6 +233,40 @@ export default function DialogSetupScreen() {
 
       {/* Sticky bottom start button */}
       <View style={[styles.bottomBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+        {selectedCategory && selectedDifficulty && poolStatus && (
+          <View
+            style={[
+              styles.poolBadge,
+              {
+                backgroundColor: poolStatus.completedSelection
+                  ? colors.success + "18"
+                  : ACCENT + "14",
+                borderColor: poolStatus.completedSelection ? colors.success + "55" : ACCENT + "45",
+              },
+            ]}
+          >
+            <Ionicons
+              name={poolStatus.completedSelection ? "checkmark-circle-outline" : "layers-outline"}
+              size={15}
+              color={poolStatus.completedSelection ? colors.success : ACCENT}
+            />
+            <Text
+              style={[
+                styles.poolBadgeText,
+                { color: poolStatus.completedSelection ? colors.success : colors.textSecondary },
+              ]}
+            >
+              {poolStatus.totalScenarios === 0
+                ? t("dialog.setup.no_scenarios")
+                : poolStatus.completedSelection
+                  ? t("dialog.setup.remaining_complete")
+                  : poolStatus.remainingCount === 1
+                    ? t("dialog.setup.remaining_last")
+                    : t("dialog.setup.remaining_count", { count: poolStatus.remainingCount })}
+            </Text>
+          </View>
+        )}
+
         {limitStatus && !limitStatus.canPlay ? (
           <TouchableOpacity
             style={[styles.startBtn, { backgroundColor: colors.border }]}
@@ -250,6 +314,14 @@ export default function DialogSetupScreen() {
         t={t}
         colors={colors}
         onGoPremium={handleGoPremium}
+      />
+
+      <CompletedSelectionModal
+        visible={completedModalVisible}
+        onClose={() => setCompletedModalVisible(false)}
+        onContinue={handleContinueWithLearned}
+        t={t}
+        colors={colors}
       />
     </SafeAreaView>
   );
@@ -343,6 +415,51 @@ function LimitModal({
   );
 }
 
+function CompletedSelectionModal({
+  visible,
+  onClose,
+  onContinue,
+  t,
+  colors,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onContinue: () => void;
+  t: (key: string) => string;
+  colors: any;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.modalOverlay} onPress={onClose}>
+        <Pressable style={[styles.modalCard, { backgroundColor: colors.cardBackground }]}>
+          <Text style={styles.modalEmoji}>🎓</Text>
+          <Text style={[styles.modalTitle, { color: colors.text }]}>
+            {t("dialog.setup.completed_title")}
+          </Text>
+          <Text style={[styles.modalBody, { color: colors.textSecondary }]}>
+            {t("dialog.setup.completed_body")}
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.premiumBtn, { backgroundColor: "#8B5CF6" }]}
+            onPress={onContinue}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="refresh-outline" size={16} color="#fff" />
+            <Text style={styles.premiumBtnText}>{t("dialog.setup.completed_continue")}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.8}>
+            <Text style={[styles.closeBtnText, { color: colors.textSecondary }]}>
+              {t("dialog.setup.completed_change")}
+            </Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
   container:       { flex: 1 },
   header:          { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12 },
@@ -363,6 +480,8 @@ const styles = StyleSheet.create({
   categoryCheck:   { position: "absolute", top: 8, right: 8 },
 
   bottomBar:       { paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth },
+  poolBadge:       { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 10 },
+  poolBadgeText:   { fontSize: 13, fontWeight: "600", flex: 1 },
   startBtn:        { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 16 },
   startBtnText:    { fontSize: 16, fontWeight: "700" },
 

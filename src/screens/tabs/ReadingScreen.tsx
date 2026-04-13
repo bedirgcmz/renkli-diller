@@ -11,7 +11,7 @@ import {
   Share,
   useWindowDimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useTranslation } from "react-i18next";
@@ -540,6 +540,7 @@ function HistorySheet({
   colors: any;
   t: any;
 }) {
+  const insets = useSafeAreaInsets();
   const [entries, setEntries] = useState<import("@/types").CompletedReadingEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [detailEntry, setDetailEntry] = useState<import("@/types").CompletedReadingEntry | null>(null);
@@ -564,7 +565,13 @@ function HistorySheet({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <Pressable style={hStyles.backdrop} onPress={onClose}>
         <Pressable
-          style={[hStyles.sheet, { backgroundColor: colors.cardBackground ?? colors.surface }]}
+          style={[
+            hStyles.sheet,
+            {
+              backgroundColor: colors.cardBackground ?? colors.surface,
+              paddingBottom: Math.max(insets.bottom, 12),
+            },
+          ]}
           onPress={() => {}}
         >
           {/* Header */}
@@ -650,6 +657,7 @@ function TextDetailModal({
   colors: any;
   t: any;
 }) {
+  const insets = useSafeAreaInsets();
   const [releraning, setReleraning] = useState(false);
   const [feedback, setFeedback] = useState(false);
 
@@ -669,7 +677,13 @@ function TextDetailModal({
     <Modal visible animationType="slide" transparent onRequestClose={onClose}>
       <Pressable style={hStyles.backdrop} onPress={onClose}>
         <Pressable
-          style={[hStyles.detailSheet, { backgroundColor: colors.cardBackground ?? colors.surface }]}
+          style={[
+            hStyles.detailSheet,
+            {
+              backgroundColor: colors.cardBackground ?? colors.surface,
+              paddingBottom: Math.max(insets.bottom, 12),
+            },
+          ]}
           onPress={() => {}}
         >
           <View style={[hStyles.header, { borderBottomColor: colors.divider }]}>
@@ -683,7 +697,15 @@ function TextDetailModal({
               {stripMarkers(rawBody)}
             </Text>
           </ScrollView>
-          <View style={[hStyles.detailFooter, { borderTopColor: colors.divider }]}>
+          <View
+            style={[
+              hStyles.detailFooter,
+              {
+                borderTopColor: colors.divider,
+                paddingBottom: Math.max(insets.bottom, 12),
+              },
+            ]}
+          >
             {feedback ? (
               <View style={hStyles.feedbackRow}>
                 <Ionicons name="checkmark-circle" size={18} color="#49C98A" />
@@ -771,6 +793,7 @@ const hStyles = StyleSheet.create({
   detailBody: { fontSize: 16, lineHeight: 26 },
   detailFooter: {
     padding: 16,
+    paddingBottom: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   relearnBtn: {
@@ -1214,7 +1237,7 @@ export default function ReadingScreen() {
               </Text>
               <TouchableOpacity
                 style={[styles.paywallBtn, { backgroundColor: colors.premiumAccent }]}
-                onPress={() => navigation.navigate("Paywall")}
+                onPress={() => navigation.navigate("Paywall", { source: "reading" })}
                 activeOpacity={0.85}
               >
                 <Text style={styles.paywallBtnText}>{t("reading.unlock_premium")}</Text>
@@ -1301,7 +1324,7 @@ export default function ReadingScreen() {
                 </View>
                 <TouchableOpacity
                   style={[styles.upsellFullBtn, { backgroundColor: colors.premiumAccent }]}
-                  onPress={() => navigation.navigate("Paywall")}
+                  onPress={() => navigation.navigate("Paywall", { source: "reading" })}
                   activeOpacity={0.85}
                 >
                   <Text style={styles.paywallBtnText}>{t("reading.unlock_premium")}</Text>

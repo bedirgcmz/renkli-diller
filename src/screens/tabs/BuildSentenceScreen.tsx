@@ -445,7 +445,7 @@ export default function BuildSentenceScreen() {
           </Text>
           <TouchableOpacity
             style={[styles.primaryBtn, styles.premiumBtn]}
-            onPress={() => navigation.navigate("Paywall")}
+            onPress={() => navigation.navigate("Paywall", { source: "quiz" })}
             activeOpacity={0.8}
           >
             <Text style={styles.primaryBtnText}>✨ Premium</Text>

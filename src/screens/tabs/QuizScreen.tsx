@@ -597,7 +597,7 @@ export default function QuizScreen() {
             </Text>
             <TouchableOpacity
               style={[styles.upgradeBannerBtn, { backgroundColor: colors.warning }]}
-              onPress={() => navigation.navigate("Paywall")}
+              onPress={() => navigation.navigate("Paywall", { source: "quiz" })}
               activeOpacity={0.85}
             >
               <Text style={styles.upgradeBannerBtnText}>{t("premium.title")} →</Text>

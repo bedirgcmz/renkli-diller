@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/useTheme";
 import { SentenceTag } from "@/types";
 import { TAG_OPTIONS, TAG_GROUPS } from "@/utils/constants";
@@ -31,6 +32,7 @@ export function TagFilterModal({
 }: TagFilterModalProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [draft, setDraft] = useState<SentenceTag[]>(selectedTags);
 
   useEffect(() => {
@@ -65,7 +67,15 @@ export function TagFilterModal({
         activeOpacity={1}
         onPress={onClose}
       />
-      <View style={[styles.sheet, { backgroundColor: colors.cardBackground }]}>
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: colors.cardBackground,
+            paddingBottom: Math.max(insets.bottom, 12),
+          },
+        ]}
+      >
         {/* Handle */}
         <View style={[styles.handle, { backgroundColor: colors.border }]} />
 
@@ -140,7 +150,15 @@ export function TagFilterModal({
         </ScrollView>
 
         {/* Apply button */}
-        <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+        <View
+          style={[
+            styles.footer,
+            {
+              borderTopColor: colors.divider,
+              paddingBottom: Math.max(insets.bottom, 12),
+            },
+          ]}
+        >
           <TouchableOpacity
             style={[styles.applyBtn, { backgroundColor: colors.primary }]}
             onPress={handleApply}
@@ -210,7 +228,6 @@ const styles = StyleSheet.create({
     right: 0,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingBottom: 34,
     maxHeight: "80%",
   },
   handle: {
@@ -272,6 +289,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingTop: 14,
+    paddingBottom: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   applyBtn: {

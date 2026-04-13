@@ -23,10 +23,12 @@ const TERMS_URL = "https://parlio-privacy-terms-page.vercel.app/terms";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import type { PurchasesPackage } from "react-native-purchases";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/providers/ThemeProvider";
 import { useAuthStore } from "@/store/useAuthStore";
+import type { MainStackParamList, PaywallSource } from "@/types";
 import {
   getOfferings,
   purchasePackage,
@@ -41,21 +43,73 @@ interface PackageOption {
 
 const ALL_FEATURES = [
   "feature_ai",
+  "feature_dialog",
+  "feature_games",
   "feature_unlimited_add",
   "feature_sentences",
   "feature_reading",
+  "feature_tts",
   "feature_quiz",
   "feature_build",
   "feature_categories",
   "feature_auto",
+  "feature_stats",
 ] as const;
 
-const COLLAPSED_COUNT = 3;
+type FeatureKey = (typeof ALL_FEATURES)[number];
+
+const PAYWALL_VARIANTS: Record<
+  PaywallSource | "generic",
+  {
+    titleKey: string;
+    subtitleKey: string;
+    featureKeys: readonly FeatureKey[];
+  }
+> = {
+  generic: {
+    titleKey: "premium.paywall_title",
+    subtitleKey: "premium.paywall_subtitle",
+    featureKeys: ALL_FEATURES,
+  },
+  sentences: {
+    titleKey: "premium.paywall_context_sentences_title",
+    subtitleKey: "premium.paywall_context_sentences_subtitle",
+    featureKeys: ["feature_unlimited_add", "feature_sentences", "feature_categories", "feature_ai"],
+  },
+  ai: {
+    titleKey: "premium.paywall_context_ai_title",
+    subtitleKey: "premium.paywall_context_ai_subtitle",
+    featureKeys: ["feature_ai", "feature_sentences", "feature_categories", "feature_dialog"],
+  },
+  reading: {
+    titleKey: "premium.paywall_context_reading_title",
+    subtitleKey: "premium.paywall_context_reading_subtitle",
+    featureKeys: ["feature_reading", "feature_tts", "feature_stats", "feature_quiz"],
+  },
+  quiz: {
+    titleKey: "premium.paywall_context_quiz_title",
+    subtitleKey: "premium.paywall_context_quiz_subtitle",
+    featureKeys: ["feature_quiz", "feature_build", "feature_auto", "feature_stats"],
+  },
+  dialog: {
+    titleKey: "premium.paywall_context_dialog_title",
+    subtitleKey: "premium.paywall_context_dialog_subtitle",
+    featureKeys: ["feature_dialog", "feature_ai", "feature_sentences", "feature_quiz"],
+  },
+  games: {
+    titleKey: "premium.paywall_context_games_title",
+    subtitleKey: "premium.paywall_context_games_subtitle",
+    featureKeys: ["feature_games", "feature_stats", "feature_auto", "feature_quiz"],
+  },
+};
+
+const COLLAPSED_COUNT = 4;
 
 export default function PaywallScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<MainStackParamList, "Paywall">>();
   const setPremiumStatus = useAuthStore((s) => s.setPremiumStatus);
   const { height: windowHeight } = useWindowDimensions();
 
@@ -70,6 +124,11 @@ export default function PaywallScreen() {
   const [offeringsMessageKey, setOfferingsMessageKey] = useState<
     "premium.offline_note" | "premium.not_configured_note" | "premium.no_packages_note"
   >("premium.offline_note");
+  const variant = PAYWALL_VARIANTS[route.params?.source ?? "generic"];
+  const featureKeys = React.useMemo(
+    () => Array.from(new Set([...variant.featureKeys, ...ALL_FEATURES])),
+    [variant.featureKeys],
+  );
 
   useEffect(() => {
     loadOfferings();
@@ -181,18 +240,18 @@ export default function PaywallScreen() {
           <Text style={s.badgeTxt}>PREMIUM</Text>
         </LinearGradient>
 
-        <Text style={s.title}>{t("premium.paywall_title")}</Text>
-        <Text style={s.subtitle}>{t("premium.paywall_subtitle")}</Text>
+        <Text style={s.title}>{t(variant.titleKey)}</Text>
+        <Text style={s.subtitle}>{t(variant.subtitleKey)}</Text>
 
         {/* Özellik listesi */}
         <View style={s.featureList}>
-          {(showAllFeatures ? ALL_FEATURES : ALL_FEATURES.slice(0, COLLAPSED_COUNT)).map((key) => (
+          {(showAllFeatures ? featureKeys : featureKeys.slice(0, COLLAPSED_COUNT)).map((key) => (
             <View key={key} style={s.featureRow}>
               <Text style={s.featureCheck}>✓</Text>
               <Text style={s.featureText}>{t(`premium.${key}`)}</Text>
             </View>
           ))}
-          {!showAllFeatures && (
+          {!showAllFeatures && featureKeys.length > COLLAPSED_COUNT && (
             <TouchableOpacity
               style={s.showAllBtn}
               onPress={() => {
@@ -201,7 +260,9 @@ export default function PaywallScreen() {
               }}
               activeOpacity={0.7}
             >
-              <Text style={s.showAllTxt}>{t("premium.show_all_features", { count: ALL_FEATURES.length - COLLAPSED_COUNT })}</Text>
+              <Text style={s.showAllTxt}>
+                {t("premium.show_all_features", { count: featureKeys.length - COLLAPSED_COUNT })}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
