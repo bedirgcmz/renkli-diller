@@ -193,7 +193,9 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         .eq("image_generation_status", "generated")
         .not("image_path", "is", null);
 
-      console.log("[sentence_visuals] fetched:", visuals?.length, "error:", visualsError?.message);
+      if (__DEV__) {
+        console.log("[sentence_visuals] fetched:", visuals?.length, "error:", visualsError?.message);
+      }
 
       if (visuals) {
         for (const v of visuals as { sentence_id: number; image_path: string }[]) {

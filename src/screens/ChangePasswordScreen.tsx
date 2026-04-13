@@ -11,7 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
@@ -34,6 +34,7 @@ function getPasswordStrength(password: string): StrengthLevel {
 export default function ChangePasswordScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { verifyAndUpdatePassword } = useAuthStore();
 
@@ -48,6 +49,7 @@ export default function ChangePasswordScreen() {
 
   const newPassRef = useRef<TextInput>(null);
   const confirmPassRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   const strength = getPasswordStrength(newPassword);
   const strengthColor =
@@ -68,6 +70,12 @@ export default function ChangePasswordScreen() {
     passwordsMatch &&
     confirmPassword.length > 0 &&
     !loading;
+
+  const scrollToBottomField = () => {
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 80);
+  };
 
   const handleSave = async () => {
     if (!canSubmit) return;
@@ -119,7 +127,11 @@ export default function ChangePasswordScreen() {
 
   return (
     <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
+      >
         {/* Header */}
         <View style={[s.header, { borderBottomColor: colors.divider }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={12}>
@@ -130,7 +142,8 @@ export default function ChangePasswordScreen() {
         </View>
 
         <ScrollView
-          contentContainerStyle={s.scroll}
+          ref={scrollRef}
+          contentContainerStyle={[s.scroll, { paddingBottom: 24 + insets.bottom }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -166,6 +179,7 @@ export default function ChangePasswordScreen() {
               colors={colors}
               returnKeyType="next"
               onSubmitEditing={() => confirmPassRef.current?.focus()}
+              onFocus={scrollToBottomField}
             />
 
             {newPassword.length > 0 && (
@@ -234,6 +248,7 @@ export default function ChangePasswordScreen() {
               hasError={confirmPassword.length > 0 && !passwordsMatch}
               returnKeyType="done"
               onSubmitEditing={handleSave}
+              onFocus={scrollToBottomField}
             />
             {confirmPassword.length > 0 && !passwordsMatch && (
               <View style={s.hintRow}>
@@ -279,10 +294,14 @@ interface PasswordInputProps {
   hasError?: boolean;
   returnKeyType?: "next" | "done";
   onSubmitEditing?: () => void;
+  onFocus?: () => void;
 }
 
 const PasswordInput = React.forwardRef<TextInput, PasswordInputProps>(
-  ({ value, onChangeText, show, onToggleShow, placeholder, colors, hasError, returnKeyType, onSubmitEditing }, ref) => (
+  (
+    { value, onChangeText, show, onToggleShow, placeholder, colors, hasError, returnKeyType, onSubmitEditing, onFocus },
+    ref
+  ) => (
     <View
       style={[
         s.inputRow,
@@ -305,6 +324,7 @@ const PasswordInput = React.forwardRef<TextInput, PasswordInputProps>(
         autoCorrect={false}
         returnKeyType={returnKeyType}
         onSubmitEditing={onSubmitEditing}
+        onFocus={onFocus}
       />
       <TouchableOpacity onPress={onToggleShow} hitSlop={8}>
         <Ionicons
