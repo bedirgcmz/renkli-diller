@@ -9,6 +9,8 @@
     "sign_in": "Entrar",
     "sign_up": "Cadastrar",
     "full_name": "Nome completo",
+    "check_email_title": "Verifique seu e-mail",
+    "check_email_body": "Enviamos um link de verificação para {{email}}. Confirme seu e-mail e depois entre para continuar.",
     "email": "E-mail",
     "password": "Senha",
     "confirm_password": "Confirmar senha",

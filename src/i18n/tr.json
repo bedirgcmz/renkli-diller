@@ -9,6 +9,8 @@
     "sign_in": "Giriş Yap",
     "sign_up": "Kayıt Ol",
     "full_name": "Ad Soyad",
+    "check_email_title": "E-postanı kontrol et",
+    "check_email_body": "{{email}} adresine bir doğrulama bağlantısı gönderdik. E-postanı onayladıktan sonra giriş yaparak devam edebilirsin.",
     "email": "E-posta",
     "password": "Şifre",
     "confirm_password": "Şifre Tekrar",

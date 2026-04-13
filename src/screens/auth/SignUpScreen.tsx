@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -31,6 +32,7 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
   const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [verificationPending, setVerificationPending] = useState(false);
 
   const validate = () => {
     if (!email || !email.includes("@")) {
@@ -58,8 +60,39 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
       return;
     }
 
-    onSwitchToSignIn?.();
+    setVerificationPending(true);
   };
+
+  if (verificationPending) {
+    return (
+      <KeyboardAvoidingView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <View style={[styles.successIcon, { backgroundColor: colors.accent + "18" }]}>
+            <Ionicons name="mail-open-outline" size={34} color={colors.accent} />
+          </View>
+
+          <Text style={[styles.title, styles.successTitle, { color: colors.text }]}>
+            {t("onboarding.check_email_title")}
+          </Text>
+
+          <Text style={[styles.successBody, { color: colors.textSecondary }]}>
+            {t("onboarding.check_email_body", { email: email.trim() })}
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.primaryButton, { backgroundColor: colors.accent }]}
+            onPress={() => onSwitchToSignIn?.()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryButtonText}>{t("onboarding.sign_in")}</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -183,6 +216,25 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 24,
+    textAlign: "center",
+  },
+  successIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  successTitle: {
+    marginBottom: 12,
+  },
+  successBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: "center",
+    marginBottom: 12,
   },
   inputGroup: {
     borderWidth: 1,

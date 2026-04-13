@@ -9,6 +9,8 @@
     "sign_in": "Anmelden",
     "sign_up": "Registrieren",
     "full_name": "Vollständiger Name",
+    "check_email_title": "E-Mail prüfen",
+    "check_email_body": "Wir haben einen Bestätigungslink an {{email}} gesendet. Bestätigen Sie Ihre E-Mail und melden Sie sich dann an.",
     "email": "E-Mail",
     "password": "Passwort",
     "confirm_password": "Passwort bestätigen",

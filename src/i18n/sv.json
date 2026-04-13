@@ -9,6 +9,8 @@
     "sign_in": "Logga in",
     "sign_up": "Registrera dig",
     "full_name": "Fullständigt namn",
+    "check_email_title": "Kontrollera din e-post",
+    "check_email_body": "Vi skickade en verifieringslänk till {{email}}. Bekräfta din e-post och logga sedan in för att fortsätta.",
     "email": "E-post",
     "password": "Lösenord",
     "confirm_password": "Bekräfta lösenord",

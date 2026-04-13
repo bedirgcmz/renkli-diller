@@ -9,6 +9,8 @@
     "sign_in": "Iniciar sesión",
     "sign_up": "Registrarse",
     "full_name": "Nombre completo",
+    "check_email_title": "Revisa tu correo",
+    "check_email_body": "Enviamos un enlace de verificación a {{email}}. Confirma tu correo y luego inicia sesión para continuar.",
     "email": "Correo electrónico",
     "password": "Contraseña",
     "confirm_password": "Confirmar contraseña",
