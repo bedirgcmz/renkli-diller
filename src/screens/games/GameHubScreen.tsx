@@ -66,6 +66,7 @@ export default function GameHubScreen() {
     loadUserStats,
     loadLeaderboard,
     checkInactivityDemotion,
+    retryPendingScore,
   } = useGameStore();
 
   const [selectedFilter, setSelectedFilter] = useState<GameFilter>("global");
@@ -91,6 +92,7 @@ export default function GameHubScreen() {
     loadUserStats();
     loadLeaderboard("speed_round", "weekly");
     checkInactivityDemotion();
+    void retryPendingScore();
   }, [user]);
 
   useEffect(() => {

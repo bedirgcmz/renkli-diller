@@ -85,7 +85,14 @@ export default function WordRainScreen() {
   const { user } = useAuthStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const { targetLanguage, uiLanguage } = useSettingsStore();
-  const { tutorialSeen, markTutorialSeen, submitScore, dailyLimitReached, setDailyLimitReached } = useGameStore();
+  const {
+    tutorialSeen,
+    markTutorialSeen,
+    submitScore,
+    dailyLimitReached,
+    setDailyLimitReached,
+    retryPendingScore,
+  } = useGameStore();
 
   const {
     bgMusicEnabled,
@@ -193,10 +200,13 @@ export default function WordRainScreen() {
       ) {
         handlePause();
       }
+      if (nextState === "active") {
+        void retryPendingScore();
+      }
       appStateRef.current = nextState;
     });
     return () => sub.remove();
-  }, [phase]);
+  }, [phase, retryPendingScore]);
 
   // ----------------------------------------------------------------
   // Load pool + audio settings
@@ -208,6 +218,7 @@ export default function WordRainScreen() {
   useEffect(() => {
     if (!user) return;
     loadPool();
+    void retryPendingScore();
   }, [user]);
 
   async function loadPool() {
