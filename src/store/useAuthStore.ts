@@ -588,8 +588,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   updateEmail: async (newEmail: string) => {
     try {
+      const { user } = get();
+      if (!user) return { success: false, error: "No user logged in" };
+
       const { error } = await supabase.auth.updateUser({ email: newEmail });
       if (error) return { success: false, error: error.message };
+
+      set({ user: { ...user, email: newEmail } });
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message ?? "Update failed" };
