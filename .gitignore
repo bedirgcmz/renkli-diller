@@ -46,9 +46,13 @@ yarn-error.*
 
 # Supabase CLI temp files
 supabase/.temp/
+supabase/migrations/dialog-seeds/
+
 
 # Local app documentation (Claude Code reference)
 APP_DOCS.md
 RELEASE_FLOW_AUDIT.md
 HIGH_PRIORITY_FIXES.md
 MEDIUM_RISK_BACKLOG.md
+LOW_RISK_BACKLOG.md
+/dialog-seeds
