@@ -1238,8 +1238,14 @@ const styles = StyleSheet.create({
   topBadge: { flex: 1, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 10, alignItems: "center" },
   topBadgeLabel: { fontSize: 11, marginBottom: 2 },
   topBadgeValue: { fontSize: 14, fontWeight: "700" },
-  boardWrap: { flex: 1, paddingHorizontal: 16, paddingBottom: 10 },
-  board: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-start" },
+  boardWrap: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  board: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignSelf: "center" },
   card: {
     minHeight: 78,
     borderRadius: 16,

@@ -18,6 +18,7 @@ import { establishSessionFromCallbackUrl, isAuthCallbackUrl } from "@/lib/authCa
 
 // Achievements
 import { AchievementToast } from "@/components/AchievementToast";
+import { NotificationSyncBridge } from "@/components/NotificationSyncBridge";
 import { useAchievementStore } from "@/store/useAchievementStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -85,6 +86,7 @@ export default function App() {
               <OnboardingProvider>
                 <AppNavigator />
                 <AchievementToast />
+                <NotificationSyncBridge />
                 <StatusBar style="auto" />
               </OnboardingProvider>
             </ThemeProvider>

@@ -247,6 +247,32 @@
     "send_feedback": "Envoyer un avis",
     "rate_app": "Évaluer l'application"
   },
+  "notifications_plan": {
+    "daily": {
+      "title": "Ta session quotidienne Parlio est prête",
+      "body": "Quelques minutes bien concentrées te rapprochent de ton objectif de {{goal}} phrases."
+    },
+    "goal_nudge": {
+      "title": "Plus que {{remaining}} aujourd'hui",
+      "body": "Tu es déjà à {{done}}/{{goal}}. Termine ton objectif du jour avec une courte session."
+    },
+    "streak_saver": {
+      "title": "Protège ta série de {{streak}} jours",
+      "body": "Une courte session aujourd'hui suffit pour garder ton élan."
+    },
+    "comeback": {
+      "title": "Retrouve ton rythme",
+      "body": "Tes mots t'attendent. Une courte session aujourd'hui te remet sur les rails."
+    },
+    "weekly_review": {
+      "title": "Ton récap hebdomadaire est prêt",
+      "body": "Fais une courte session et emporte ton élan vers la semaine prochaine."
+    },
+    "game_momentum": {
+      "title": "Garde ton élan dans la ligue {{league}}",
+      "body_generic": "Lance une partie rapide et garde ta progression de jeu en mouvement."
+    }
+  },
   "premium": {
     "title": "Passer à Premium",
     "subtitle": "Déverrouillez toutes les fonctionnalités",
@@ -404,6 +430,10 @@
     "quiz_finish": "Terminer",
     "quiz_next": "Suivant",
     "quiz_premium_only": "Fonction premium",
+    "quiz_premium_title": "Le quiz de vocabulaire de lecture est Premium",
+    "quiz_premium_body": "Passe à Premium pour t'entraîner sur les mots mis en évidence de ce texte avec un quiz de vocabulaire rapide.",
+    "source_audio_premium_title": "L'audio dans la langue source est Premium",
+    "source_audio_premium_body": "Passe à Premium pour écouter ce texte dans ta langue source quand tu veux.",
     "share": "Partager",
     "share_text": "J'ai étudié le texte \"{title}\" aujourd'hui — apprenez les langues avec Parlio !",
     "show_translation": "Afficher la traduction",

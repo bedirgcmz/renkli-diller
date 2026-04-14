@@ -49,11 +49,11 @@ const ALL_FEATURES = [
   "feature_sentences",
   "feature_reading",
   "feature_tts",
+  "feature_pdf",
   "feature_quiz",
   "feature_build",
   "feature_categories",
   "feature_auto",
-  "feature_stats",
 ] as const;
 
 type FeatureKey = (typeof ALL_FEATURES)[number];
@@ -84,12 +84,12 @@ const PAYWALL_VARIANTS: Record<
   reading: {
     titleKey: "premium.paywall_context_reading_title",
     subtitleKey: "premium.paywall_context_reading_subtitle",
-    featureKeys: ["feature_reading", "feature_tts", "feature_stats", "feature_quiz"],
+    featureKeys: ["feature_reading", "feature_tts", "feature_pdf", "feature_quiz"],
   },
   quiz: {
     titleKey: "premium.paywall_context_quiz_title",
     subtitleKey: "premium.paywall_context_quiz_subtitle",
-    featureKeys: ["feature_quiz", "feature_build", "feature_auto", "feature_stats"],
+    featureKeys: ["feature_quiz", "feature_build", "feature_auto", "feature_sentences"],
   },
   dialog: {
     titleKey: "premium.paywall_context_dialog_title",
@@ -99,7 +99,7 @@ const PAYWALL_VARIANTS: Record<
   games: {
     titleKey: "premium.paywall_context_games_title",
     subtitleKey: "premium.paywall_context_games_subtitle",
-    featureKeys: ["feature_games", "feature_stats", "feature_auto", "feature_quiz"],
+    featureKeys: ["feature_games", "feature_categories", "feature_sentences", "feature_quiz"],
   },
 };
 

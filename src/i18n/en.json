@@ -247,6 +247,32 @@
     "send_feedback": "Send Feedback",
     "rate_app": "Rate the App"
   },
+  "notifications_plan": {
+    "daily": {
+      "title": "Your daily Parlio session is ready",
+      "body": "A few focused minutes will move your {{goal}}-sentence goal forward."
+    },
+    "goal_nudge": {
+      "title": "Only {{remaining}} more today",
+      "body": "You're already at {{done}}/{{goal}}. Finish today's goal with one quick round."
+    },
+    "streak_saver": {
+      "title": "Protect your {{streak}}-day streak",
+      "body": "A short practice today is enough to keep your momentum alive."
+    },
+    "comeback": {
+      "title": "Pick up your rhythm again",
+      "body": "Your words are waiting. A quick session today will get you back on track."
+    },
+    "weekly_review": {
+      "title": "Your weekly review is ready",
+      "body": "Check in for a short session and carry your streak into next week."
+    },
+    "game_momentum": {
+      "title": "Keep your {{league}} league momentum",
+      "body_generic": "Play a quick round and keep your game progress moving."
+    }
+  },
   "premium": {
     "title": "Go Premium",
     "subtitle": "Unlock all features",
@@ -404,6 +430,10 @@
     "quiz_finish": "Finish",
     "quiz_next": "Next",
     "quiz_premium_only": "Premium feature",
+    "quiz_premium_title": "Reading keyword quiz is Premium",
+    "quiz_premium_body": "Go Premium to practice the highlighted words from this text with a quick vocabulary quiz.",
+    "source_audio_premium_title": "Source language audio is Premium",
+    "source_audio_premium_body": "Go Premium to listen to this text in your source language whenever you want.",
     "share": "Share",
     "share_text": "I studied the text \"{title}\" today — learn languages with Parlio!",
     "show_translation": "Show translation",

@@ -247,6 +247,32 @@
     "send_feedback": "Enviar comentarios",
     "rate_app": "Calificar la app"
   },
+  "notifications_plan": {
+    "daily": {
+      "title": "Tu sesión diaria de Parlio está lista",
+      "body": "Unos minutos de enfoque te acercan a tu meta de {{goal}} frases."
+    },
+    "goal_nudge": {
+      "title": "Solo faltan {{remaining}} hoy",
+      "body": "Ya vas {{done}}/{{goal}}. Termina tu meta de hoy con una ronda rápida."
+    },
+    "streak_saver": {
+      "title": "Protege tu racha de {{streak}} días",
+      "body": "Una sesión corta hoy basta para mantener tu ritmo."
+    },
+    "comeback": {
+      "title": "Vuelve a encontrar tu ritmo",
+      "body": "Tus palabras te están esperando. Una sesión corta hoy te pone en marcha otra vez."
+    },
+    "weekly_review": {
+      "title": "Tu resumen semanal está listo",
+      "body": "Haz una sesión corta y lleva tu impulso a la próxima semana."
+    },
+    "game_momentum": {
+      "title": "Mantén tu impulso en la liga {{league}}",
+      "body_generic": "Juega una ronda rápida y mantén en marcha tu progreso en los juegos."
+    }
+  },
   "premium": {
     "title": "Ir a Premium",
     "subtitle": "Desbloquea todas las funciones",
@@ -404,6 +430,10 @@
     "quiz_finish": "Terminar",
     "quiz_next": "Siguiente",
     "quiz_premium_only": "Función premium",
+    "quiz_premium_title": "El quiz de palabras de lectura es Premium",
+    "quiz_premium_body": "Hazte Premium para practicar las palabras destacadas de este texto con un quiz rápido de vocabulario.",
+    "source_audio_premium_title": "El audio en el idioma de origen es Premium",
+    "source_audio_premium_body": "Hazte Premium para escuchar este texto en tu idioma de origen cuando quieras.",
     "share": "Compartir",
     "share_text": "¡Estudié el texto \"{title}\" hoy — aprende idiomas con Parlio!",
     "show_translation": "Mostrar traducción",

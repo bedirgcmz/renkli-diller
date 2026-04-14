@@ -247,6 +247,32 @@
     "send_feedback": "Skicka feedback",
     "rate_app": "Betygsätt appen"
   },
+  "notifications_plan": {
+    "daily": {
+      "title": "Ditt dagliga Parlio-pass är redo",
+      "body": "Några fokuserade minuter för dig närmare ditt mål på {{goal}} meningar."
+    },
+    "goal_nudge": {
+      "title": "Bara {{remaining}} kvar i dag",
+      "body": "Du är redan på {{done}}/{{goal}}. Avsluta dagens mål med en snabb runda."
+    },
+    "streak_saver": {
+      "title": "Skydda din streak på {{streak}} dagar",
+      "body": "En kort session i dag räcker för att hålla din rytm vid liv."
+    },
+    "comeback": {
+      "title": "Hitta tillbaka till rytmen",
+      "body": "Dina ord väntar. En kort session i dag får dig tillbaka på spår."
+    },
+    "weekly_review": {
+      "title": "Din veckoöversikt är redo",
+      "body": "Gör en kort session och ta med dig rytmen in i nästa vecka."
+    },
+    "game_momentum": {
+      "title": "Behåll ditt momentum i {{league}}-ligan",
+      "body_generic": "Spela en snabb runda och håll ditt spelmomentum igång."
+    }
+  },
   "premium": {
     "title": "Gå Premium",
     "subtitle": "Lås upp alla funktioner",
@@ -404,6 +430,10 @@
     "quiz_finish": "Avsluta",
     "quiz_next": "Nästa",
     "quiz_premium_only": "Premiumfunktion",
+    "quiz_premium_title": "Läsningens nyckelordsquiz är Premium",
+    "quiz_premium_body": "Bli Premium för att träna de markerade orden i den här texten med ett snabbt ordförrådsquiz.",
+    "source_audio_premium_title": "Ljud på källspråket är Premium",
+    "source_audio_premium_body": "Bli Premium för att lyssna på den här texten på ditt källspråk när du vill.",
     "share": "Dela",
     "share_text": "Jag studerade texten \"{title}\" idag — lär dig språk med Parlio!",
     "show_translation": "Visa översättning",

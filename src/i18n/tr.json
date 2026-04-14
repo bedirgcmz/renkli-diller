@@ -247,6 +247,32 @@
     "send_feedback": "Öneri / Şikayet Gönder",
     "rate_app": "Uygulamayı Değerlendirin"
   },
+  "notifications_plan": {
+    "daily": {
+      "title": "Günlük Parlio seansın hazır",
+      "body": "Birkaç odaklı dakika, {{goal}} cümlelik günlük hedefini ileri taşır."
+    },
+    "goal_nudge": {
+      "title": "Bugün sadece {{remaining}} tane kaldı",
+      "body": "{{done}}/{{goal}} seviyesindesin. Tek bir kısa turla bugünkü hedefini tamamla."
+    },
+    "streak_saver": {
+      "title": "{{streak}} günlük serini koru",
+      "body": "Bugün kısa bir pratik yapman, ivmeni canlı tutmaya yeter."
+    },
+    "comeback": {
+      "title": "Ritmini yeniden yakala",
+      "body": "Kelimelerin seni bekliyor. Bugün kısa bir seans seni yeniden rayına oturtur."
+    },
+    "weekly_review": {
+      "title": "Haftalık özetin hazır",
+      "body": "Kısa bir seansla haftayı kapat ve ritmini gelecek haftaya taşı."
+    },
+    "game_momentum": {
+      "title": "{{league}} ligindeki ivmeni koru",
+      "body_generic": "Kısa bir oyun aç ve oyun ilerlemeni sıcak tut."
+    }
+  },
   "premium": {
     "title": "Premium'a Geç",
     "subtitle": "Tüm özelliklerin kilidini açın",
@@ -404,6 +430,10 @@
     "quiz_finish": "Bitir",
     "quiz_next": "Sonraki",
     "quiz_premium_only": "Premium özellik",
+    "quiz_premium_title": "Okuma kelime quiz'i Premium'a özel",
+    "quiz_premium_body": "Bu metindeki vurgulanan kelimelerle quiz pratiği yapmak için Premium'a geç.",
+    "source_audio_premium_title": "Kaynak dil seslendirmesi Premium'a özel",
+    "source_audio_premium_body": "Bu metni istediğin zaman kaynak dilinde dinlemek için Premium'a geç.",
     "share": "Paylaş",
     "share_text": "Bugün \"{title}\" metnini çalıştım - Parlio ile dil öğren!",
     "show_translation": "Çeviriyi göster",

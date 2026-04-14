@@ -77,6 +77,8 @@ async function reconcileNotificationState(settings: Settings): Promise<Settings>
   const syncOk = await syncDailyReminderSchedule({
     enabled: settings.notifications,
     reminderTime: settings.reminderTime,
+    uiLanguage: settings.uiLanguage,
+    dailyGoal: settings.dailyGoal,
   });
 
   if (!settings.notifications || syncOk) {
@@ -263,8 +265,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           target_language: requestedSettings.targetLanguage,
           theme: requestedSettings.theme,
           daily_goal: requestedSettings.dailyGoal,
-          notifications: requestedSettings.notifications,
-          reminder_time: requestedSettings.reminderTime,
+          notifications: resolvedSettings.notifications,
+          reminder_time: resolvedSettings.reminderTime,
           auto_mode_speed: requestedSettings.autoModeSpeed,
           show_translations: requestedSettings.showTranslations,
           tts_enabled: requestedSettings.ttsEnabled,

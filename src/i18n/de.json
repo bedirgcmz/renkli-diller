@@ -247,6 +247,32 @@
     "send_feedback": "Feedback senden",
     "rate_app": "App bewerten"
   },
+  "notifications_plan": {
+    "daily": {
+      "title": "Deine tägliche Parlio-Session ist bereit",
+      "body": "Ein paar fokussierte Minuten bringen dich deinem Ziel von {{goal}} Sätzen näher."
+    },
+    "goal_nudge": {
+      "title": "Heute fehlen nur noch {{remaining}}",
+      "body": "Du bist schon bei {{done}}/{{goal}}. Beende dein Tagesziel mit einer kurzen Runde."
+    },
+    "streak_saver": {
+      "title": "Schütze deine Serie von {{streak}} Tagen",
+      "body": "Eine kurze Session heute reicht, um deinen Rhythmus zu halten."
+    },
+    "comeback": {
+      "title": "Finde wieder in deinen Rhythmus",
+      "body": "Deine Wörter warten schon. Eine kurze Session heute bringt dich zurück in den Flow."
+    },
+    "weekly_review": {
+      "title": "Dein Wochenrückblick ist bereit",
+      "body": "Mach eine kurze Session und nimm deinen Schwung mit in die neue Woche."
+    },
+    "game_momentum": {
+      "title": "Halte dein Momentum in der {{league}}-Liga",
+      "body_generic": "Spiel eine kurze Runde und halte deinen Spielfortschritt in Bewegung."
+    }
+  },
   "premium": {
     "title": "Premium werden",
     "subtitle": "Alle Funktionen freischalten",
@@ -404,6 +430,10 @@
     "quiz_finish": "Beenden",
     "quiz_next": "Weiter",
     "quiz_premium_only": "Premium-Funktion",
+    "quiz_premium_title": "Das Lese-Schlüsselwortquiz ist Premium",
+    "quiz_premium_body": "Wechsle zu Premium, um die markierten Wörter dieses Textes mit einem kurzen Vokabelquiz zu üben.",
+    "source_audio_premium_title": "Audio in der Ausgangssprache ist Premium",
+    "source_audio_premium_body": "Wechsle zu Premium, um diesen Text jederzeit in deiner Ausgangssprache anzuhören.",
     "share": "Teilen",
     "share_text": "Ich habe heute den Text \"{title}\" gelernt — lerne Sprachen mit Parlio!",
     "show_translation": "Übersetzung anzeigen",

@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Share,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -915,6 +916,44 @@ export default function ReadingScreen() {
     });
   }, [speaking, currentText, targetLanguage]);
 
+  const handleQuizPress = useCallback(() => {
+    if (isPremium) {
+      setQuizVisible(true);
+      return;
+    }
+
+    Alert.alert(
+      t("reading.quiz_premium_title"),
+      t("reading.quiz_premium_body"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("reading.unlock_premium"),
+          onPress: () => navigation.navigate("Paywall", { source: "reading" }),
+        },
+      ],
+    );
+  }, [isPremium, navigation, t]);
+
+  const handleSourceAudioPress = useCallback(() => {
+    if (isPremium) {
+      void speakText(uiLanguage, "source");
+      return;
+    }
+
+    Alert.alert(
+      t("reading.source_audio_premium_title"),
+      t("reading.source_audio_premium_body"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("reading.unlock_premium"),
+          onPress: () => navigation.navigate("Paywall", { source: "reading" }),
+        },
+      ],
+    );
+  }, [isPremium, navigation, speakText, t, uiLanguage]);
+
   const handleShare = useCallback(async () => {
     if (!currentText) return;
     const textTitle = getField<string>(currentText, `title_${uiLanguage}`) ?? "";
@@ -1035,11 +1074,11 @@ export default function ReadingScreen() {
               <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
-          {/* Vocab quiz (premium) */}
-          {isPremium && keywords.length >= 2 && (
+          {/* Vocab quiz gate / feature entry */}
+          {keywords.length >= 2 && (
             <TouchableOpacity
               style={[styles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
-              onPress={() => setQuizVisible(true)}
+              onPress={handleQuizPress}
               activeOpacity={0.75}
             >
               <Ionicons name="help-circle-outline" size={20} color={colors.textSecondary} />
@@ -1173,24 +1212,22 @@ export default function ReadingScreen() {
                 {sourceVisible ? t("reading.hide_translation") : t("reading.show_translation")}
               </Text>
             </TouchableOpacity>
-            {isPremium && (
-              <TouchableOpacity
-                style={[
-                  styles.ttsIconBtn,
-                  {
-                    backgroundColor: speaking === "source" ? colors.primary + "18" : "transparent",
-                  },
-                ]}
-                onPress={() => speakText(uiLanguage, "source")}
-                activeOpacity={0.75}
-              >
-                <Ionicons
-                  name={speaking === "source" ? "stop-circle" : "volume-medium-outline"}
-                  size={17}
-                  color={speaking === "source" ? colors.primary : colors.textTertiary}
-                />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={[
+                styles.ttsIconBtn,
+                {
+                  backgroundColor: speaking === "source" ? colors.primary + "18" : "transparent",
+                },
+              ]}
+              onPress={handleSourceAudioPress}
+              activeOpacity={0.75}
+            >
+              <Ionicons
+                name={speaking === "source" ? "stop-circle" : "volume-medium-outline"}
+                size={17}
+                color={speaking === "source" ? colors.primary : colors.textTertiary}
+              />
+            </TouchableOpacity>
           </View>
           {sourceVisible && (
             <View style={{ marginTop: 10 }}>
