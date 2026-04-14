@@ -134,7 +134,7 @@ export type HomeStackParamList = {
   WordRain: { filter: import("./game").GameFilter; forceTutorial?: boolean };
   MemoryMatch: {
     filter: import("./game").GameFilter;
-    difficultyFilter: import("./game").GameDifficultyFilter;
+    difficultyFilter?: import("./game").GameDifficultyFilter;
     forceTutorial?: boolean;
   };
   DialogSetup: undefined;

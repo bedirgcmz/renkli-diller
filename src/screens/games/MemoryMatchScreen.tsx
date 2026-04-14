@@ -62,6 +62,13 @@ const LAST_10_THRESHOLD = 10;
 const COMBO_X2 = 3;
 const COMBO_X3 = 6;
 
+const DIFFICULTY_OPTIONS: { key: GameDifficultyFilter }[] = [
+  { key: "mixed" },
+  { key: "easy" },
+  { key: "medium" },
+  { key: "hard" },
+];
+
 function buildCards(items: GameVocabularyItem[]): MemoryCard[] {
   return shuffle(
     items.flatMap((item) => [
@@ -84,7 +91,7 @@ function buildCards(items: GameVocabularyItem[]): MemoryCard[] {
 export default function MemoryMatchScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
-  const { filter, difficultyFilter, forceTutorial } = route.params;
+  const { filter, difficultyFilter = "mixed", forceTutorial } = route.params;
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
@@ -114,6 +121,7 @@ export default function MemoryMatchScreen() {
 
   const [musicPickerVisible, setMusicPickerVisible] = useState(false);
   const [phase, setPhase] = useState<GamePhase>("loading");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficultyFilter>(difficultyFilter);
   const [poolError, setPoolError] = useState<"empty" | "network" | null>(null);
   const [pool, setPool] = useState<GameVocabularyItem[]>([]);
   const [poolSize, setPoolSize] = useState(0);
@@ -188,7 +196,7 @@ export default function MemoryMatchScreen() {
     if (!user) return;
     loadPool();
     void retryPendingScore();
-  }, [user]);
+  }, [user, selectedDifficulty, filter, uiLanguage, targetLanguage]);
 
   function clearAllTimers() {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -251,7 +259,7 @@ export default function MemoryMatchScreen() {
       const { items, meta } = await buildGamePool({
         userId: user!.id,
         filter,
-        difficultyFilter,
+        difficultyFilter: selectedDifficulty,
         gameType: "memory_match",
         sourceLang: uiLanguage,
         targetLang: targetLanguage,
@@ -511,7 +519,7 @@ export default function MemoryMatchScreen() {
   const boardWidth = screenWidth - 32;
   const cardWidth = Math.max(68, Math.floor((boardWidth - cardGap * 3) / 4));
 
-  const difficultyBadge = t(`games.difficulty.${difficultyFilter}` as const);
+  const difficultyBadge = t(`games.difficulty.${selectedDifficulty}` as const);
 
   if (poolError) {
     return (
@@ -601,6 +609,39 @@ export default function MemoryMatchScreen() {
                     value={`${uiLanguage.toUpperCase()} -> ${targetLanguage.toUpperCase()}`}
                     colors={colors}
                   />
+                </View>
+
+                <View style={styles.difficultySection}>
+                  <Text style={[styles.difficultyTitle, { color: colors.textSecondary }]}>
+                    {t("games.hub.memory_difficulty_label")}
+                  </Text>
+                  <View style={styles.difficultyChips}>
+                    {DIFFICULTY_OPTIONS.map(({ key }) => {
+                      const active = selectedDifficulty === key;
+                      return (
+                        <TouchableOpacity
+                          key={key}
+                          onPress={() => setSelectedDifficulty(key)}
+                          style={[
+                            styles.difficultyChip,
+                            {
+                              backgroundColor: active ? colors.primary : colors.cardBackground,
+                              borderColor: active ? colors.primary : colors.border,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.difficultyChipText,
+                              { color: active ? "#fff" : colors.text },
+                            ]}
+                          >
+                            {t(`games.difficulty.${key}`)}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
 
                 <View style={[styles.statsPreview, { backgroundColor: colors.cardBackground }]}>
@@ -969,6 +1010,16 @@ const styles = StyleSheet.create({
   readyEmoji: { fontSize: 52, marginBottom: 12 },
   readyTitle: { fontSize: 24, fontWeight: "700", marginBottom: 6 },
   readyPattern: { fontSize: 13, marginBottom: 20 },
+  difficultySection: { width: "100%", marginBottom: 16 },
+  difficultyTitle: { fontSize: 12, fontWeight: "600", marginBottom: 8, textAlign: "center" },
+  difficultyChips: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 },
+  difficultyChip: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  difficultyChipText: { fontSize: 13, fontWeight: "600" },
   readyMetaRow: {
     flexDirection: "row",
     alignItems: "center",

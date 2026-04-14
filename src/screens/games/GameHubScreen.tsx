@@ -22,7 +22,6 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAudioSettingsStore } from "@/store/useAudioSettingsStore";
 import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
 import {
-  GameDifficultyFilter,
   GameFilter,
   GameLeaderboardEntry,
   GameType,
@@ -38,13 +37,6 @@ const FILTER_KEYS: { key: GameFilter; i18nKey: string }[] = [
   { key: "user_learning", i18nKey: "games.hub.filter_learning" },
   { key: "user_learned",  i18nKey: "games.hub.filter_learned" },
   { key: "mixed",         i18nKey: "games.hub.filter_mixed" },
-];
-
-const DIFFICULTY_OPTIONS: { key: GameDifficultyFilter }[] = [
-  { key: "mixed" },
-  { key: "easy" },
-  { key: "medium" },
-  { key: "hard" },
 ];
 
 const LEAGUE_ICONS: Record<LeagueType, string> = {
@@ -79,7 +71,6 @@ export default function GameHubScreen() {
   } = useGameStore();
 
   const [selectedFilter, setSelectedFilter] = useState<GameFilter>("global");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficultyFilter>("mixed");
   const [selectedLeaderboardGame, setSelectedLeaderboardGame] = useState<GameType>("speed_round");
   const [leaderboardModalVisible, setLeaderboardModalVisible] = useState(false);
   const [demotionWarning, setDemotionWarning] = useState<{
@@ -277,44 +268,6 @@ export default function GameHubScreen() {
           })}
         </ScrollView>
 
-        <View style={styles.sectionLabel}>
-          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-            {t("games.hub.memory_difficulty_label")}
-          </Text>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-          contentContainerStyle={styles.filterContent}
-        >
-          {DIFFICULTY_OPTIONS.map(({ key }) => {
-            const active = selectedDifficulty === key;
-            return (
-              <TouchableOpacity
-                key={key}
-                onPress={() => setSelectedDifficulty(key)}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: active ? colors.primary : colors.cardBackground,
-                    borderColor: active ? colors.primary : colors.border,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    { color: active ? "#fff" : colors.text },
-                  ]}
-                >
-                  {t(`games.difficulty.${key}`)}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
         {/* Game Cards */}
         <GameCard
           icon="flash"
@@ -370,13 +323,11 @@ export default function GameHubScreen() {
           onPlay={() =>
             navigation.navigate("MemoryMatch", {
               filter: selectedFilter,
-              difficultyFilter: selectedDifficulty,
             })
           }
           onHowToPlay={() =>
             navigation.navigate("MemoryMatch", {
               filter: selectedFilter,
-              difficultyFilter: selectedDifficulty,
               forceTutorial: true,
             })
           }
