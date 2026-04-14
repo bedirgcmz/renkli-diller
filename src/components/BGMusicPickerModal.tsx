@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BG_TRACK_LIST } from "@/audio/audioAssets";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -23,6 +24,7 @@ interface Props {
 export function BGMusicPickerModal({ visible, initialTrackId, onConfirm, onCancel }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [selectedId, setSelectedId] = useState(initialTrackId);
   const [previewingId, setPreviewingId] = useState<string | null>(null);
   const previewPlayerRef = useRef<AudioPlayer | null>(null);
@@ -82,7 +84,13 @@ export function BGMusicPickerModal({ visible, initialTrackId, onConfirm, onCance
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={handleCancel}>
         <TouchableOpacity
           activeOpacity={1}
-          style={[styles.sheet, { backgroundColor: colors.cardBackground }]}
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.cardBackground,
+              paddingBottom: Math.max(insets.bottom, 16) + 20,
+            },
+          ]}
         >
           {/* Header */}
           <Text style={[styles.title, { color: colors.text }]}>
