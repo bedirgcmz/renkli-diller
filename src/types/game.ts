@@ -2,9 +2,10 @@
 // Game Types
 // ============================================================
 
-export type GameType = "speed_round" | "word_rain";
+export type GameType = "speed_round" | "word_rain" | "memory_match";
 export type LeagueType = "bronze" | "silver" | "gold";
 export type GameFilter = "global" | "user_learning" | "user_learned" | "mixed";
+export type GameDifficultyFilter = "mixed" | "easy" | "medium" | "hard";
 
 export type GamePhase =
   | "loading"
@@ -78,6 +79,7 @@ export interface UserGameStats {
   gamesPlayed: number;
   bestSpeedRound: number;
   bestWordRain: number;
+  bestMemoryMatch: number;
   lastPlayedAt: string | null;
 }
 
@@ -125,7 +127,9 @@ export const LEAGUE_LABELS: Record<LeagueType, string> = {
 export const MIN_POOL_SIZE: Record<GameType, number> = {
   speed_round: 10,
   word_rain:   15,
+  memory_match: 8,
 };
 
 // Word Rain max characters for eligibility
 export const WORD_RAIN_MAX_CHARS = 32;
+export const MEMORY_MATCH_MAX_CHARS = 24;

@@ -19,17 +19,20 @@ interface GameStoreState {
   leaderboard: {
     speed_round: { weekly: GameLeaderboard | null; alltime: GameLeaderboard | null };
     word_rain:   { weekly: GameLeaderboard | null; alltime: GameLeaderboard | null };
+    memory_match:{ weekly: GameLeaderboard | null; alltime: GameLeaderboard | null };
   };
   leaderboardLoading: {
     speed_round: { weekly: boolean; alltime: boolean };
     word_rain:   { weekly: boolean; alltime: boolean };
+    memory_match:{ weekly: boolean; alltime: boolean };
   };
   leaderboardFetchedAt: {
     speed_round: { weekly: number | null; alltime: number | null };
     word_rain:   { weekly: number | null; alltime: number | null };
+    memory_match:{ weekly: number | null; alltime: number | null };
   };
-  tutorialSeen: { speed_round: boolean; word_rain: boolean };
-  dailyLimitReached: { speed_round: boolean; word_rain: boolean };
+  tutorialSeen: { speed_round: boolean; word_rain: boolean; memory_match: boolean };
+  dailyLimitReached: { speed_round: boolean; word_rain: boolean; memory_match: boolean };
   pendingScores: RawSessionStats[];
   loading: boolean;
   submitLoading: boolean;
@@ -59,17 +62,20 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   leaderboard: {
     speed_round: { weekly: null, alltime: null },
     word_rain:   { weekly: null, alltime: null },
+    memory_match:{ weekly: null, alltime: null },
   },
   leaderboardLoading: {
     speed_round: { weekly: false, alltime: false },
     word_rain:   { weekly: false, alltime: false },
+    memory_match:{ weekly: false, alltime: false },
   },
   leaderboardFetchedAt: {
     speed_round: { weekly: null, alltime: null },
     word_rain:   { weekly: null, alltime: null },
+    memory_match:{ weekly: null, alltime: null },
   },
-  tutorialSeen: { speed_round: false, word_rain: false },
-  dailyLimitReached: { speed_round: false, word_rain: false },
+  tutorialSeen: { speed_round: false, word_rain: false, memory_match: false },
+  dailyLimitReached: { speed_round: false, word_rain: false, memory_match: false },
   pendingScores: [],
   loading: false,
   submitLoading: false,
@@ -100,6 +106,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
           gamesPlayed: 0,
           bestSpeedRound: 0,
           bestWordRain: 0,
+          bestMemoryMatch: 0,
           lastPlayedAt: null,
         },
       });
@@ -113,6 +120,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         gamesPlayed: data.games_played,
         bestSpeedRound: data.best_speed_round,
         bestWordRain: data.best_word_rain,
+        bestMemoryMatch: data.best_memory_match ?? 0,
         lastPlayedAt: data.last_played_at,
       },
     });
@@ -186,6 +194,10 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
                 stats.gameType === "word_rain" && result.personalBestBroken
                   ? result.score
                   : state.userStats.bestWordRain,
+              bestMemoryMatch:
+                stats.gameType === "memory_match" && result.personalBestBroken
+                  ? result.score
+                  : state.userStats.bestMemoryMatch,
               lastPlayedAt: new Date().toISOString(),
             }
           : state.userStats,
@@ -369,17 +381,20 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       leaderboard: {
         speed_round: { weekly: null, alltime: null },
         word_rain: { weekly: null, alltime: null },
+        memory_match: { weekly: null, alltime: null },
       },
       leaderboardLoading: {
         speed_round: { weekly: false, alltime: false },
         word_rain: { weekly: false, alltime: false },
+        memory_match: { weekly: false, alltime: false },
       },
       leaderboardFetchedAt: {
         speed_round: { weekly: null, alltime: null },
         word_rain: { weekly: null, alltime: null },
+        memory_match: { weekly: null, alltime: null },
       },
-      tutorialSeen: { speed_round: false, word_rain: false },
-      dailyLimitReached: { speed_round: false, word_rain: false },
+      tutorialSeen: { speed_round: false, word_rain: false, memory_match: false },
+      dailyLimitReached: { speed_round: false, word_rain: false, memory_match: false },
       pendingScores: [],
       loading: false,
       submitLoading: false,
