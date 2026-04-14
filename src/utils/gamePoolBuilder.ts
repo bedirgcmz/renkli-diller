@@ -43,13 +43,6 @@ function isEligible(item: GameVocabularyItem, gameType: GameType): boolean {
   return true;
 }
 
-function matchesDifficulty(item: GameVocabularyItem, difficultyFilter: GameDifficultyFilter): boolean {
-  if (difficultyFilter === "mixed") return true;
-  if (difficultyFilter === "easy") return item.difficulty === 1;
-  if (difficultyFilter === "medium") return item.difficulty === 2;
-  return item.difficulty === 3;
-}
-
 // ----------------------------------------------------------------
 // Build game-ready pool from Supabase
 //
@@ -170,7 +163,7 @@ export async function buildGamePool(params: {
 
   for (const item of [...userItems, ...globalItems]) {
     const key = item.sourceText.trim().toLowerCase();
-    if (!seenSource.has(key) && matchesDifficulty(item, difficultyFilter)) {
+    if (!seenSource.has(key)) {
       seenSource.add(key);
       merged.push(item);
     }

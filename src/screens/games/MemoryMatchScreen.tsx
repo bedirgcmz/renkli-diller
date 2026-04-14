@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   AppState,
   AppStateStatus,
   StyleSheet,
@@ -123,6 +124,7 @@ export default function MemoryMatchScreen() {
   const [phase, setPhase] = useState<GamePhase>("loading");
   const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficultyFilter>(difficultyFilter);
   const [poolError, setPoolError] = useState<"empty" | "network" | null>(null);
+  const [isPoolRefreshing, setIsPoolRefreshing] = useState(false);
   const [pool, setPool] = useState<GameVocabularyItem[]>([]);
   const [poolSize, setPoolSize] = useState(0);
   const [roundNumber, setRoundNumber] = useState(1);
@@ -143,6 +145,7 @@ export default function MemoryMatchScreen() {
 
   const limitReached = dailyLimitReached.memory_match;
   const sessionIdRef = useRef<string>(generateUUID());
+  const loadRequestIdRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transitionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -194,7 +197,9 @@ export default function MemoryMatchScreen() {
 
   useEffect(() => {
     if (!user) return;
-    loadPool();
+    void loadPool({
+      preservePhase: phaseRef.current === "ready" || phaseRef.current === "tutorial",
+    });
     void retryPendingScore();
   }, [user, selectedDifficulty, filter, uiLanguage, targetLanguage]);
 
@@ -251,8 +256,16 @@ export default function MemoryMatchScreen() {
     resolvingRef.current = false;
   }
 
-  async function loadPool() {
-    setPhase("loading");
+  async function loadPool(options?: { preservePhase?: boolean }) {
+    const preservePhase = options?.preservePhase ?? false;
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
+
+    if (preservePhase) {
+      setIsPoolRefreshing(true);
+    } else {
+      setPhase("loading");
+    }
     setPoolError(null);
 
     try {
@@ -265,22 +278,34 @@ export default function MemoryMatchScreen() {
         targetLang: targetLanguage,
       });
 
+      if (requestId !== loadRequestIdRef.current) return;
+
       if (!meta.isEnough) {
         setPoolError("empty");
+        setPool([]);
+        setPoolSize(0);
         return;
       }
 
       setPool(items);
       setPoolSize(meta.usable);
       resetPoolCursor(items);
+      setPoolError(null);
 
-      if (forceTutorial || !tutorialSeen.memory_match) {
-        setPhase("tutorial");
-      } else {
-        setPhase("ready");
+      if (!preservePhase) {
+        if (forceTutorial || !tutorialSeen.memory_match) {
+          setPhase("tutorial");
+        } else {
+          setPhase("ready");
+        }
       }
     } catch {
+      if (requestId !== loadRequestIdRef.current) return;
       setPoolError("network");
+    } finally {
+      if (requestId === loadRequestIdRef.current) {
+        setIsPoolRefreshing(false);
+      }
     }
   }
 
@@ -430,7 +455,7 @@ export default function MemoryMatchScreen() {
       return;
     }
     setDailyLimitReached("memory_match", false);
-    loadPool();
+    void loadPool();
   }
 
   function applyWrongPenalty(): boolean {
@@ -521,7 +546,7 @@ export default function MemoryMatchScreen() {
 
   const difficultyBadge = t(`games.difficulty.${selectedDifficulty}` as const);
 
-  if (poolError) {
+  if (poolError && phase === "loading") {
     return (
       <>
         <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top"]}>
@@ -642,6 +667,29 @@ export default function MemoryMatchScreen() {
                       );
                     })}
                   </View>
+                  {(isPoolRefreshing || poolError) && (
+                    <View style={styles.difficultyFeedbackRow}>
+                      {isPoolRefreshing ? (
+                        <>
+                          <ActivityIndicator size="small" color={colors.primary} />
+                          <Text style={[styles.difficultyFeedbackText, { color: colors.textSecondary }]}>
+                            {t("games.common.loading_pool")}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text
+                          style={[
+                            styles.difficultyFeedbackText,
+                            { color: poolError === "empty" ? colors.error : colors.textSecondary },
+                          ]}
+                        >
+                          {poolError === "empty"
+                            ? t("games.memory_match.pool_empty_cta")
+                            : t("games.common.pool_empty_global")}
+                        </Text>
+                      )}
+                    </View>
+                  )}
                 </View>
 
                 <View style={[styles.statsPreview, { backgroundColor: colors.cardBackground }]}>
@@ -659,7 +707,15 @@ export default function MemoryMatchScreen() {
                 </View>
 
                 <TouchableOpacity
-                  style={[styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 24 }]}
+                  style={[
+                    styles.primaryBtn,
+                    {
+                      backgroundColor: colors.primary,
+                      marginTop: 24,
+                      opacity: isPoolRefreshing || poolError ? 0.5 : 1,
+                    },
+                  ]}
+                  disabled={isPoolRefreshing || !!poolError}
                   onPress={startCountdown}
                 >
                   <Ionicons name="play" size={18} color="#fff" style={{ marginRight: 6 }} />
@@ -1013,6 +1069,15 @@ const styles = StyleSheet.create({
   difficultySection: { width: "100%", marginBottom: 16 },
   difficultyTitle: { fontSize: 12, fontWeight: "600", marginBottom: 8, textAlign: "center" },
   difficultyChips: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 },
+  difficultyFeedbackRow: {
+    minHeight: 24,
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  difficultyFeedbackText: { fontSize: 12, textAlign: "center" },
   difficultyChip: {
     borderWidth: 1,
     borderRadius: 999,
