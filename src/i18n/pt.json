@@ -728,6 +728,7 @@
       "language_label": "Idioma",
       "round_label": "Rodada",
       "matched_label": "Pares",
+      "time_penalty_feedback": "-{{seconds}} s",
       "pool_empty_cta": "Tente outro filtro ou dificuldade.",
       "paused_stats": "{{correct}} corretos • {{wrong}} erros • {{score}} pts"
     },

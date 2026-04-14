@@ -728,6 +728,7 @@
       "language_label": "Sprache",
       "round_label": "Runde",
       "matched_label": "Gefunden",
+      "time_penalty_feedback": "-{{seconds}} Sek.",
       "pool_empty_cta": "Versuche einen anderen Filter oder Schwierigkeitsgrad.",
       "paused_stats": "{{correct}} richtig • {{wrong}} falsch • {{score}} Punkte"
     },

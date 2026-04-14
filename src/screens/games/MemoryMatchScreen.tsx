@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   AppState,
   AppStateStatus,
+  Easing,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -155,6 +157,9 @@ export default function MemoryMatchScreen() {
   const phaseRef = useRef<GamePhase>("loading");
   const resolvingRef = useRef(false);
   const endedRef = useRef(false);
+  const penaltyOpacity = useRef(new Animated.Value(0)).current;
+  const penaltyTranslateY = useRef(new Animated.Value(-10)).current;
+  const penaltyScale = useRef(new Animated.Value(0.96)).current;
 
   const { startBgMusic, stopBgMusic, playSfx } = useGameAudio({
     bgMusicEnabled,
@@ -474,6 +479,60 @@ export default function MemoryMatchScreen() {
     return depleted;
   }
 
+  function showTimePenaltyFeedback() {
+    penaltyOpacity.stopAnimation();
+    penaltyTranslateY.stopAnimation();
+    penaltyScale.stopAnimation();
+
+    penaltyOpacity.setValue(0);
+    penaltyTranslateY.setValue(-10);
+    penaltyScale.setValue(0.96);
+
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(penaltyOpacity, {
+          toValue: 1,
+          duration: 120,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(penaltyTranslateY, {
+          toValue: 10,
+          duration: 180,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(penaltyScale, {
+          toValue: 1,
+          duration: 160,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(penaltyOpacity, {
+          toValue: 0,
+          duration: 380,
+          delay: 120,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(penaltyTranslateY, {
+          toValue: 52,
+          duration: 500,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(penaltyScale, {
+          toValue: 0.92,
+          duration: 500,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }
+
   function handleCardPress(card: MemoryCard) {
     if (phase !== "playing" || resolvingRef.current) return;
     if (matchedCardIds.includes(card.id) || selectedCardIds.includes(card.id)) return;
@@ -523,6 +582,7 @@ export default function MemoryMatchScreen() {
     setWrong((prev) => prev + 1);
     setCombo(0);
     setWrongCardIds(pairSelection);
+    showTimePenaltyFeedback();
     const depleted = applyWrongPenalty();
 
     transitionRef.current = setTimeout(() => {
@@ -877,6 +937,21 @@ export default function MemoryMatchScreen() {
 
   return (
     <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top"]}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.penaltyFeedback,
+          {
+            opacity: penaltyOpacity,
+            transform: [{ translateY: penaltyTranslateY }, { scale: penaltyScale }],
+          },
+        ]}
+      >
+        <Text style={[styles.penaltyFeedbackText, { color: colors.error }]}>
+          {t("games.memory_match.time_penalty_feedback", { seconds: TIME_PENALTY_SEC })}
+        </Text>
+      </Animated.View>
+
       <View style={styles.gameHeader}>
         <TouchableOpacity onPress={handlePause} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Ionicons name="pause" size={22} color={colors.text} />
@@ -1130,6 +1205,15 @@ const styles = StyleSheet.create({
   readyAudioLabel: { fontSize: 13, fontWeight: "500" },
   errorTitle: { fontSize: 18, fontWeight: "700", marginTop: 12, textAlign: "center" },
   errorDesc: { fontSize: 14, marginTop: 8, marginBottom: 24, textAlign: "center" },
+  penaltyFeedback: {
+    position: "absolute",
+    top: 54,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+    alignItems: "center",
+  },
+  penaltyFeedbackText: { fontSize: 18, fontWeight: "800" },
   gameHeader: {
     flexDirection: "row",
     alignItems: "center",

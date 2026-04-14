@@ -728,6 +728,7 @@
       "language_label": "Langue",
       "round_label": "Manche",
       "matched_label": "Paires",
+      "time_penalty_feedback": "-{{seconds}} s",
       "pool_empty_cta": "Essaie un autre filtre ou niveau de difficulté.",
       "paused_stats": "{{correct}} correctes • {{wrong}} fautes • {{score}} pts"
     },

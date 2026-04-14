@@ -728,6 +728,7 @@
       "language_label": "Språk",
       "round_label": "Runda",
       "matched_label": "Par",
+      "time_penalty_feedback": "-{{seconds}} sek",
       "pool_empty_cta": "Prova ett annat filter eller en annan svårighetsgrad.",
       "paused_stats": "{{correct}} rätt • {{wrong}} fel • {{score}} poäng"
     },
