@@ -132,6 +132,11 @@ export type HomeStackParamList = {
   GameHub: undefined;
   SpeedRound: { filter: import("./game").GameFilter; forceTutorial?: boolean };
   WordRain: { filter: import("./game").GameFilter; forceTutorial?: boolean };
+  MemoryMatch: {
+    filter: import("./game").GameFilter;
+    difficultyFilter?: import("./game").GameDifficultyFilter;
+    forceTutorial?: boolean;
+  };
   DialogSetup: undefined;
   DialogPlay: undefined;
   DialogComplete: undefined;

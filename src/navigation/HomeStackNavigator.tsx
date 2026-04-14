@@ -9,6 +9,7 @@ import BuildSentenceScreen from "@/screens/tabs/BuildSentenceScreen";
 import GameHubScreen from "@/screens/games/GameHubScreen";
 import SpeedRoundScreen from "@/screens/games/SpeedRoundScreen";
 import WordRainScreen from "@/screens/games/WordRainScreen";
+import MemoryMatchScreen from "@/screens/games/MemoryMatchScreen";
 import DialogSetupScreen from "@/screens/dialog/DialogSetupScreen";
 import DialogPlayScreen from "@/screens/dialog/DialogPlayScreen";
 import DialogCompleteScreen from "@/screens/dialog/DialogCompleteScreen";
@@ -26,6 +27,7 @@ export default function HomeStackNavigator() {
       <Stack.Screen name="GameHub" component={GameHubScreen} />
       <Stack.Screen name="SpeedRound" component={SpeedRoundScreen} />
       <Stack.Screen name="WordRain" component={WordRainScreen} />
+      <Stack.Screen name="MemoryMatch" component={MemoryMatchScreen} />
       <Stack.Screen name="DialogSetup" component={DialogSetupScreen} />
       <Stack.Screen name="DialogPlay" component={DialogPlayScreen} />
       <Stack.Screen name="DialogComplete" component={DialogCompleteScreen} />

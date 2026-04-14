@@ -323,7 +323,9 @@
     "learning_only": "Frases em progresso",
     "generating": "Gerando...",
     "select_filter": "Escolha o que incluir",
-    "no_sentences": "Nenhuma frase com o filtro selecionado."
+    "no_sentences": "Nenhuma frase com o filtro selecionado.",
+    "premium_required_title": "Exportar PDF é Premium",
+    "premium_required_body": "Vá para o Premium para exportar suas frases em PDF."
   },
   "categories": {
     "daily_conversation": "Conversa do dia a dia",
@@ -681,7 +683,14 @@
       "filter_global": "Global",
       "filter_learning": "Aprendendo",
       "filter_learned": "Aprendido",
-      "filter_mixed": "Tudo"
+      "filter_mixed": "Tudo",
+      "memory_difficulty_label": "Dificuldade do Memory Match"
+    },
+    "difficulty": {
+      "mixed": "Misto",
+      "easy": "Fácil",
+      "medium": "Médio",
+      "hard": "Difícil"
     },
     "league": {
       "bronze": "Bronze",
@@ -710,6 +719,20 @@
       "level": "Nível {{n}}",
       "caught": "Capturadas",
       "missed": "Perdidas"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Combine pares de tradução visíveis antes que o tempo acabe",
+      "pattern": "90 s • 8 pares • penalidade de 2 s",
+      "tutorial_title": "Como jogar Memory Match",
+      "tutorial_body": "Todas as cartas começam viradas para cima. Toque em uma carta e depois encontre seu par de tradução.\n\nAcertos removem o par. Erros tiram 2 segundos e zeram o combo.",
+      "pool_label": "Pool",
+      "language_label": "Idioma",
+      "round_label": "Rodada",
+      "matched_label": "Pares",
+      "time_penalty_feedback": "-{{seconds}} s",
+      "pool_empty_cta": "Tente outro filtro ou dificuldade.",
+      "paused_stats": "{{correct}} corretos • {{wrong}} erros • {{score}} pts"
     },
     "common": {
       "how_to_play": "Como jogar",
@@ -745,6 +768,7 @@
     "result": {
       "title_speed": "Speed Round concluído!",
       "title_rain": "Word Rain concluído!",
+      "title_memory": "Memory Match concluído!",
       "score": "Pontuação",
       "accuracy": "Precisão",
       "combo": "Combo máx.",

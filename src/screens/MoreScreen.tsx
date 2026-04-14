@@ -91,7 +91,17 @@ export default function MoreScreen() {
           label: t("profile.export_pdf"),
           onPress: () => {
             if (!isPremium) {
-              Alert.alert(t("common.premium_badge"), t("add_sentence.upgrade_to_add_more"));
+              Alert.alert(
+                t("pdf_export.premium_required_title"),
+                t("pdf_export.premium_required_body"),
+                [
+                  { text: t("common.cancel"), style: "cancel" },
+                  {
+                    text: t("premium.purchase_btn"),
+                    onPress: () => navigation.navigate("Paywall", { source: "sentences" }),
+                  },
+                ],
+              );
               return;
             }
             setPdfModalVisible(true);

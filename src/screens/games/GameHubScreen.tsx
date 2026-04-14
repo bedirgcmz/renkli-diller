@@ -24,6 +24,7 @@ import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
 import {
   GameFilter,
   GameLeaderboardEntry,
+  GameType,
   LEAGUE_THRESHOLDS,
   LeagueType,
 } from "@/types/game";
@@ -70,6 +71,7 @@ export default function GameHubScreen() {
   } = useGameStore();
 
   const [selectedFilter, setSelectedFilter] = useState<GameFilter>("global");
+  const [selectedLeaderboardGame, setSelectedLeaderboardGame] = useState<GameType>("speed_round");
   const [leaderboardModalVisible, setLeaderboardModalVisible] = useState(false);
   const [demotionWarning, setDemotionWarning] = useState<{
     days: number; league: string;
@@ -90,10 +92,14 @@ export default function GameHubScreen() {
   useEffect(() => {
     if (!user) return;
     loadUserStats();
-    loadLeaderboard("speed_round", "weekly");
     checkInactivityDemotion();
     void retryPendingScore();
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    void loadLeaderboard(selectedLeaderboardGame, "weekly");
+  }, [user, selectedLeaderboardGame]);
 
   useEffect(() => {
     loadAudioSettings();
@@ -119,16 +125,22 @@ export default function GameHubScreen() {
     ? Math.min((cumulative / nextThreshold) * 100, 100)
     : 100;
 
-  const speedRoundLeaderboard = leaderboard.speed_round.weekly;
-  const weeklyLeaderboardLoading = leaderboardLoading.speed_round.weekly;
-  const alltimeLeaderboardLoading = leaderboardLoading.speed_round.alltime;
-  const topEntries = speedRoundLeaderboard?.entries.slice(0, 3) ?? [];
-  const myRank = speedRoundLeaderboard?.myRank ?? null;
+  const currentWeeklyLeaderboard = leaderboard[selectedLeaderboardGame].weekly;
+  const weeklyLeaderboardLoading = leaderboardLoading[selectedLeaderboardGame].weekly;
+  const alltimeLeaderboardLoading = leaderboardLoading[selectedLeaderboardGame].alltime;
+  const topEntries = currentWeeklyLeaderboard?.entries.slice(0, 3) ?? [];
+  const myRank = currentWeeklyLeaderboard?.myRank ?? null;
+
+  const gameNames: Record<GameType, string> = {
+    speed_round: t("games.speed_round.name"),
+    word_rain: t("games.word_rain.name"),
+    memory_match: t("games.memory_match.name"),
+  };
 
   const openLeaderboardModal = () => {
     setLeaderboardModalVisible(true);
-    void loadLeaderboard("speed_round", "weekly");
-    void loadLeaderboard("speed_round", "alltime");
+    void loadLeaderboard(selectedLeaderboardGame, "weekly");
+    void loadLeaderboard(selectedLeaderboardGame, "alltime");
   };
 
   return (
@@ -294,12 +306,78 @@ export default function GameHubScreen() {
           comingSoon={false}
         />
 
+        <GameCard
+          icon="layers"
+          iconColor="#22C55E"
+          name={t("games.memory_match.name")}
+          desc={t("games.memory_match.desc")}
+          pattern={t("games.memory_match.pattern")}
+          bestScore={userStats?.bestMemoryMatch ?? 0}
+          colors={colors}
+          isSmallScreen={isSmallScreen}
+          bgMusicEnabled={bgMusicEnabled}
+          sfxEnabled={sfxEnabled}
+          onToggleBgMusic={() => setBgMusicEnabled(!bgMusicEnabled)}
+          onToggleSfx={() => setSfxEnabled(!sfxEnabled)}
+          onPickMusic={() => setMusicPickerGameId("memory_match")}
+          onPlay={() =>
+            navigation.navigate("MemoryMatch", {
+              filter: selectedFilter,
+            })
+          }
+          onHowToPlay={() =>
+            navigation.navigate("MemoryMatch", {
+              filter: selectedFilter,
+              forceTutorial: true,
+            })
+          }
+        />
+
         {/* Leaderboard Preview */}
         <View style={styles.sectionLabel}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-            {t("games.hub.leaderboard_title")} — {t("games.speed_round.name")}
+            {t("games.hub.leaderboard_title")} — {gameNames[selectedLeaderboardGame]}
           </Text>
         </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterContent}
+        >
+          {(
+            [
+              { key: "speed_round", label: gameNames.speed_round },
+              { key: "word_rain", label: gameNames.word_rain },
+              { key: "memory_match", label: gameNames.memory_match },
+            ] as { key: GameType; label: string }[]
+          ).map(({ key, label }) => {
+            const active = selectedLeaderboardGame === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                onPress={() => setSelectedLeaderboardGame(key)}
+                style={[
+                  styles.filterChip,
+                  {
+                    backgroundColor: active ? colors.primary : colors.cardBackground,
+                    borderColor: active ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    { color: active ? "#fff" : colors.text },
+                  ]}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
 
         <View style={[styles.leaderboardCard, { backgroundColor: colors.cardBackground }]}>
           {weeklyLeaderboardLoading ? (
@@ -347,8 +425,8 @@ export default function GameHubScreen() {
         onClose={() => setLeaderboardModalVisible(false)}
         weeklyLoading={weeklyLeaderboardLoading}
         alltimeLoading={alltimeLeaderboardLoading}
-        weekly={leaderboard.speed_round.weekly}
-        alltime={leaderboard.speed_round.alltime}
+        weekly={leaderboard[selectedLeaderboardGame].weekly}
+        alltime={leaderboard[selectedLeaderboardGame].alltime}
         currentUserId={user?.id ?? null}
       />
     </SafeAreaView>

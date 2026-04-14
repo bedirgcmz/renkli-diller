@@ -11,7 +11,7 @@ import { countTodayLearned } from "@/utils/progressHelpers";
 export function HeroHeader() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
-  const { user } = useAuthStore();
+  const displayName = useAuthStore((state) => state.user?.display_name ?? "");
   const { stats, progress, loadProgress } = useProgressStore();
   const { dailyGoal } = useSettingsStore();
 
@@ -33,7 +33,7 @@ export function HeroHeader() {
         : "home.greeting_evening";
   const greetingEmoji = hour < 12 ? "🌅" : hour < 18 ? "☀️" : "🌙";
 
-  const firstName = user?.display_name?.split(" ")[0] ?? "";
+  const firstName = displayName.split(" ")[0] ?? "";
   const goalProgress = Math.min(todayLearned / Math.max(dailyGoal, 1), 1);
   const progressPct = `${Math.round(goalProgress * 100)}%`;
 

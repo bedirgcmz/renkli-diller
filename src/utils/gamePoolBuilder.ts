@@ -1,8 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import {
+  GameDifficultyFilter,
   GameFilter,
   GameType,
   GameVocabularyItem,
+  MEMORY_MATCH_MAX_CHARS,
   MIN_POOL_SIZE,
   PoolBuildMeta,
   WORD_RAIN_MAX_CHARS,
@@ -37,6 +39,7 @@ export function getLengthBucket(text: string): "short" | "medium" | "long" {
 // ----------------------------------------------------------------
 function isEligible(item: GameVocabularyItem, gameType: GameType): boolean {
   if (gameType === "word_rain") return item.lengthBucket !== "long";
+  if (gameType === "memory_match") return item.targetText.trim().length <= MEMORY_MATCH_MAX_CHARS;
   return true;
 }
 
@@ -53,11 +56,19 @@ function isEligible(item: GameVocabularyItem, gameType: GameType): boolean {
 export async function buildGamePool(params: {
   userId: string;
   filter: GameFilter;
+  difficultyFilter?: GameDifficultyFilter;
   gameType: GameType;
   sourceLang: string;
   targetLang: string;
 }): Promise<{ items: GameVocabularyItem[]; meta: PoolBuildMeta }> {
-  const { userId, filter, gameType, sourceLang, targetLang } = params;
+  const {
+    userId,
+    filter,
+    difficultyFilter = "mixed",
+    gameType,
+    sourceLang,
+    targetLang,
+  } = params;
   const minRequired = MIN_POOL_SIZE[gameType];
 
   let userItems: GameVocabularyItem[] = [];
@@ -123,6 +134,11 @@ export async function buildGamePool(params: {
 
     if (gameType === "word_rain") {
       query = query.in("length_bucket", ["short", "medium"]);
+    }
+
+    if (difficultyFilter !== "mixed") {
+      const difficulty = difficultyFilter === "easy" ? 1 : difficultyFilter === "medium" ? 2 : 3;
+      query = query.eq("difficulty", difficulty);
     }
 
     const { data: vocab } = await query;

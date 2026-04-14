@@ -323,7 +323,9 @@
     "learning_only": "Frases en progreso",
     "generating": "Generando...",
     "select_filter": "Elegir qué incluir",
-    "no_sentences": "No hay frases con el filtro seleccionado."
+    "no_sentences": "No hay frases con el filtro seleccionado.",
+    "premium_required_title": "La exportación PDF es Premium",
+    "premium_required_body": "Hazte Premium para exportar tus frases como PDF."
   },
   "categories": {
     "daily_conversation": "Conversación diaria",
@@ -681,7 +683,14 @@
       "filter_global": "Global",
       "filter_learning": "Aprendiendo",
       "filter_learned": "Aprendido",
-      "filter_mixed": "Todo"
+      "filter_mixed": "Todo",
+      "memory_difficulty_label": "Dificultad de Memory Match"
+    },
+    "difficulty": {
+      "mixed": "Mixto",
+      "easy": "Fácil",
+      "medium": "Medio",
+      "hard": "Difícil"
     },
     "league": {
       "bronze": "Bronce",
@@ -710,6 +719,20 @@
       "level": "Nivel {{n}}",
       "caught": "Atrapadas",
       "missed": "Perdidas"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Empareja traducciones visibles antes de que se acabe el tiempo",
+      "pattern": "90 s • 8 pares • penalización de 2 s",
+      "tutorial_title": "Cómo jugar Memory Match",
+      "tutorial_body": "Todas las cartas empiezan boca arriba. Toca una carta y luego encuentra su pareja de traducción.\n\nLos aciertos eliminan la pareja. Los errores restan 2 segundos y reinician el combo.",
+      "pool_label": "Grupo",
+      "language_label": "Idioma",
+      "round_label": "Ronda",
+      "matched_label": "Parejas",
+      "time_penalty_feedback": "-{{seconds}} s",
+      "pool_empty_cta": "Prueba con otro filtro o dificultad.",
+      "paused_stats": "{{correct}} correctas • {{wrong}} incorrectas • {{score}} pts"
     },
     "common": {
       "how_to_play": "Cómo jugar",
@@ -745,6 +768,7 @@
     "result": {
       "title_speed": "¡Speed Round terminado!",
       "title_rain": "¡Word Rain terminado!",
+      "title_memory": "¡Memory Match terminado!",
       "score": "Puntuación",
       "accuracy": "Precisión",
       "combo": "Combo máx.",

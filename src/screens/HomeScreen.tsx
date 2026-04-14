@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
@@ -47,6 +47,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
+  const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const { isCoachMarksDone, isReady, markCoachMarksDone, isHintShown, markHintShown } =
     useOnboarding();
 
@@ -209,6 +210,12 @@ export default function HomeScreen() {
     const timer = setTimeout(() => setPremiumHintVisible(true), 700);
     return () => clearTimeout(timer);
   }, [coachVisible, isCoachMarksDone, isHintShown, isPremium, isReady]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshProfile();
+    }, [refreshProfile])
+  );
 
   const handleCoachDone = useCallback(() => {
     setCoachVisible(false);

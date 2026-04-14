@@ -11,6 +11,7 @@ import {
 import * as AppleAuthentication from "expo-apple-authentication";
 import { clearAITrialCache } from "@/services/gemini";
 import { establishSessionFromCallbackUrl } from "@/lib/authCallback";
+import type { GameLeaderboard } from "@/types/game";
 import { useAchievementStore } from "./useAchievementStore";
 import { useGameStore } from "./useGameStore";
 import { useLeaderboardStore } from "./useLeaderboardStore";
@@ -60,6 +61,7 @@ interface AuthState {
   deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
+  refreshProfile: () => Promise<{ success: boolean; error?: string }>;
   uploadAvatar: (
     uri: string,
     base64?: string,
@@ -138,6 +140,73 @@ async function resolveAvatarPaths(userId: string, avatarUrl?: string): Promise<s
   }
 
   return AVATAR_FALLBACK_EXTENSIONS.map((ext) => `${userId}/avatar.${ext}`);
+}
+
+function syncProfileCaches(
+  userId: string,
+  updates: Partial<Pick<User, "display_name" | "avatar_url">>
+) {
+  const hasDisplayName = Object.prototype.hasOwnProperty.call(updates, "display_name");
+  const hasAvatarUrl = Object.prototype.hasOwnProperty.call(updates, "avatar_url");
+
+  if (!hasDisplayName && !hasAvatarUrl) return;
+
+  useLeaderboardStore.setState((state) => {
+    const patchEntry = (entry: typeof state.entries[number]) =>
+      entry.user_id === userId
+        ? {
+            ...entry,
+            ...(hasDisplayName ? { display_name: updates.display_name || entry.display_name } : {}),
+            ...(hasAvatarUrl ? { avatar_url: updates.avatar_url ?? null } : {}),
+          }
+        : entry;
+
+    return {
+      entries: state.entries.map(patchEntry),
+      myEntry: state.myEntry ? patchEntry(state.myEntry) : state.myEntry,
+      lastFetchedAt: null,
+    };
+  });
+
+  useGameStore.setState((state) => {
+    const patchLeaderboard = (leaderboard: GameLeaderboard | null): GameLeaderboard | null =>
+      leaderboard
+        ? {
+            ...leaderboard,
+            entries: leaderboard.entries.map((entry) =>
+              entry.userId === userId
+                ? {
+                    ...entry,
+                    ...(hasDisplayName ? { displayName: updates.display_name || entry.displayName } : {}),
+                    ...(hasAvatarUrl ? { avatarUrl: updates.avatar_url ?? null } : {}),
+                  }
+                : entry
+            ),
+          }
+        : leaderboard;
+
+    return {
+      leaderboard: {
+        speed_round: {
+          weekly: patchLeaderboard(state.leaderboard.speed_round.weekly),
+          alltime: patchLeaderboard(state.leaderboard.speed_round.alltime),
+        },
+        word_rain: {
+          weekly: patchLeaderboard(state.leaderboard.word_rain.weekly),
+          alltime: patchLeaderboard(state.leaderboard.word_rain.alltime),
+        },
+        memory_match: {
+          weekly: patchLeaderboard(state.leaderboard.memory_match.weekly),
+          alltime: patchLeaderboard(state.leaderboard.memory_match.alltime),
+        },
+      },
+      leaderboardFetchedAt: {
+        speed_round: { weekly: null, alltime: null },
+        word_rain: { weekly: null, alltime: null },
+        memory_match: { weekly: null, alltime: null },
+      },
+    };
+  });
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -489,10 +558,65 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       });
 
+      syncProfileCaches(user.id, {
+        ...(Object.prototype.hasOwnProperty.call(updates, "display_name")
+          ? { display_name: updates.display_name }
+          : {}),
+        ...(Object.prototype.hasOwnProperty.call(updates, "avatar_url")
+          ? { avatar_url: updates.avatar_url }
+          : {}),
+      });
+
+      void get().refreshProfile();
+
       return { success: true };
     } catch (error) {
       set({ loading: false });
       return { success: false, error: "An unexpected error occurred" };
+    }
+  },
+
+  refreshProfile: async () => {
+    const { user, isPremiumVerified } = get();
+    if (!user) return { success: false, error: "No user logged in" };
+
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url, is_premium, premium_override, premium_override_expires_at, leaderboard_visible")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      const premiumOverrideActive = isOverrideActive(profile);
+      const syncedPremium = isPremiumVerified
+        ? user.is_premium || premiumOverrideActive
+        : user.is_premium || premiumOverrideActive || (profile?.is_premium ?? false);
+
+      set((state) => ({
+        user: state.user
+          ? {
+              ...state.user,
+              display_name: profile?.display_name || "",
+              avatar_url: profile?.avatar_url || "",
+              premium_override: premiumOverrideActive,
+              is_premium: syncedPremium,
+              leaderboard_visible: profile?.leaderboard_visible ?? true,
+            }
+          : state.user,
+      }));
+
+      syncProfileCaches(user.id, {
+        display_name: profile?.display_name || "",
+        avatar_url: profile?.avatar_url || "",
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "An unexpected error occurred" };
     }
   },
 

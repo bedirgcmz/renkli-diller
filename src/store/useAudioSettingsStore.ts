@@ -5,7 +5,8 @@ const STORAGE_KEY = "@audio_settings_v1";
 
 export const DEFAULT_GAME_BG_TRACK: Record<string, string> = {
   speed_round: "bg1",
-  word_rain: "bg2",
+  word_rain: "bg3",
+  memory_match: "bg2",
 };
 
 interface AudioSettingsState {

@@ -323,7 +323,9 @@
     "learning_only": "Phrases en cours",
     "generating": "Génération...",
     "select_filter": "Choisir quoi inclure",
-    "no_sentences": "Aucune phrase avec le filtre sélectionné."
+    "no_sentences": "Aucune phrase avec le filtre sélectionné.",
+    "premium_required_title": "L'export PDF est Premium",
+    "premium_required_body": "Passez à Premium pour exporter vos phrases en PDF."
   },
   "categories": {
     "daily_conversation": "Conversation quotidienne",
@@ -681,7 +683,14 @@
       "filter_global": "Global",
       "filter_learning": "En apprentissage",
       "filter_learned": "Appris",
-      "filter_mixed": "Tout"
+      "filter_mixed": "Tout",
+      "memory_difficulty_label": "Difficulté de Memory Match"
+    },
+    "difficulty": {
+      "mixed": "Mixte",
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
     },
     "league": {
       "bronze": "Bronze",
@@ -710,6 +719,20 @@
       "level": "Niveau {{n}}",
       "caught": "Attrapés",
       "missed": "Manqués"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Associe les paires de traduction visibles avant la fin du temps",
+      "pattern": "90 s • 8 paires • pénalité de 2 s",
+      "tutorial_title": "Comment jouer à Memory Match",
+      "tutorial_body": "Toutes les cartes commencent face visible. Touchez une carte, puis trouvez sa paire de traduction.\n\nLes bonnes réponses retirent la paire. Les erreurs retirent 2 secondes et réinitialisent le combo.",
+      "pool_label": "Pool",
+      "language_label": "Langue",
+      "round_label": "Manche",
+      "matched_label": "Paires",
+      "time_penalty_feedback": "-{{seconds}} s",
+      "pool_empty_cta": "Essaie un autre filtre ou niveau de difficulté.",
+      "paused_stats": "{{correct}} correctes • {{wrong}} fautes • {{score}} pts"
     },
     "common": {
       "how_to_play": "Comment jouer",
@@ -745,6 +768,7 @@
     "result": {
       "title_speed": "Speed Round terminé !",
       "title_rain": "Word Rain terminé !",
+      "title_memory": "Memory Match terminé !",
       "score": "Score",
       "accuracy": "Précision",
       "combo": "Combo max",
