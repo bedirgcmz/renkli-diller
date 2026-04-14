@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AppState,
   AppStateStatus,
@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import { useTranslation } from "react-i18next";
 import { BGMusicPickerModal } from "@/components/BGMusicPickerModal";
 import GameDailyLimitModal from "@/components/GameDailyLimitModal";
 import { useTheme } from "@/hooks/useTheme";
@@ -61,19 +62,6 @@ const LAST_10_THRESHOLD = 10;
 const COMBO_X2 = 3;
 const COMBO_X3 = 6;
 
-function getDifficultyLabel(value: GameDifficultyFilter): string {
-  switch (value) {
-    case "easy":
-      return "Kolay";
-    case "medium":
-      return "Orta";
-    case "hard":
-      return "Zor";
-    default:
-      return "Karisik";
-  }
-}
-
 function buildCards(items: GameVocabularyItem[]): MemoryCard[] {
   return shuffle(
     items.flatMap((item) => [
@@ -97,6 +85,7 @@ export default function MemoryMatchScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { filter, difficultyFilter, forceTutorial } = route.params;
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const isSmallScreen = screenHeight < 760;
@@ -522,7 +511,7 @@ export default function MemoryMatchScreen() {
   const boardWidth = screenWidth - 32;
   const cardWidth = Math.max(68, Math.floor((boardWidth - cardGap * 3) / 4));
 
-  const difficultyBadge = useMemo(() => getDifficultyLabel(difficultyFilter), [difficultyFilter]);
+  const difficultyBadge = t(`games.difficulty.${difficultyFilter}` as const);
 
   if (poolError) {
     return (
@@ -531,16 +520,16 @@ export default function MemoryMatchScreen() {
           <View style={styles.centerContent}>
             <Ionicons name="sad-outline" size={48} color={colors.textSecondary} />
             <Text style={[styles.errorTitle, { color: colors.text }]}>
-              {poolError === "empty" ? "Bu havuzda yeterli kelime yok" : "Kelime havuzu yuklenemedi"}
+              {poolError === "empty" ? t("games.common.pool_empty") : t("games.common.pool_empty_global")}
             </Text>
             <Text style={[styles.errorDesc, { color: colors.textSecondary }]}>
-              {poolError === "empty" ? "Filtreyi veya zorlugu degistirip tekrar deneyebilirsin." : ""}
+              {poolError === "empty" ? t("games.memory_match.pool_empty_cta") : ""}
             </Text>
             <TouchableOpacity
               style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.primaryBtnText}>Hub'a Don</Text>
+              <Text style={styles.primaryBtnText}>{t("games.common.back_hub")}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -555,13 +544,13 @@ export default function MemoryMatchScreen() {
         <View style={styles.tutorialContainer}>
           <Text style={[styles.tutorialEmoji, isSmallScreen && { fontSize: 38, marginBottom: 10 }]}>🧠</Text>
           <Text style={[styles.tutorialTitle, { color: colors.text }, isSmallScreen && { fontSize: 18 }]}>
-            Memory Match nasil oynanir?
+            {t("games.memory_match.tutorial_title")}
           </Text>
           <Text style={[styles.tutorialBody, { color: colors.textSecondary }, isSmallScreen && { fontSize: 13 }]}>
-            Tum kartlar acik gelir. Bir kart sec, sonra onun ceviri esini bul. Dogru eslesme ciftleri temizler, yanlis eslesme ise 2 saniye dusurur ve combo'yu sifirlar.
+            {t("games.memory_match.tutorial_body")}
           </Text>
           <View style={styles.tutorialPatternRow}>
-            {["90 sn", "8 cift", "-2 sn ceza"].map((item) => (
+            {t("games.memory_match.pattern").split(" • ").map((item) => (
               <View key={item} style={[styles.patternTag, { backgroundColor: colors.cardBackground }]}>
                 <Text style={[styles.patternTagText, { color: colors.text }]}>{item}</Text>
               </View>
@@ -571,7 +560,7 @@ export default function MemoryMatchScreen() {
             style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
             onPress={handleTutorialDone}
           >
-            <Text style={styles.primaryBtnText}>Basla</Text>
+            <Text style={styles.primaryBtnText}>{t("games.common.start_game")}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -587,38 +576,42 @@ export default function MemoryMatchScreen() {
             <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Ionicons name="chevron-back" size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Memory Match</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t("games.memory_match.name")}</Text>
             <View style={{ width: 32 }} />
           </View>
 
           <View style={styles.centerContent}>
             {isLoading ? (
-              <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Kelime havuzu yukleniyor...</Text>
+              <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t("games.common.loading_pool")}</Text>
             ) : (
               <>
                 <Text style={[styles.readyEmoji, isSmallScreen && { fontSize: 38, marginBottom: 8 }]}>🧠</Text>
                 <Text style={[styles.readyTitle, { color: colors.text }, isSmallScreen && { fontSize: 20 }]}>
-                  Hazir misin?
+                  {t("games.common.countdown_ready")}
                 </Text>
                 <Text style={[styles.readyPattern, { color: colors.textSecondary }]}>
-                  90 sn • 8 cift • -2 sn ceza
+                  {t("games.memory_match.pattern")}
                 </Text>
 
                 <View style={[styles.readyMetaRow, { backgroundColor: colors.cardBackground }]}>
-                  <MetaPill label="Havuz" value={difficultyBadge} colors={colors} />
+                  <MetaPill label={t("games.memory_match.pool_label")} value={difficultyBadge} colors={colors} />
                   <MetaDivider colors={colors} />
-                  <MetaPill label="Dil" value={`${uiLanguage.toUpperCase()} -> ${targetLanguage.toUpperCase()}`} colors={colors} />
+                  <MetaPill
+                    label={t("games.memory_match.language_label")}
+                    value={`${uiLanguage.toUpperCase()} -> ${targetLanguage.toUpperCase()}`}
+                    colors={colors}
+                  />
                 </View>
 
                 <View style={[styles.statsPreview, { backgroundColor: colors.cardBackground }]}>
                   <StatItem
-                    label="En Yuksek"
+                    label={t("games.common.personal_best")}
                     value={(useGameStore.getState().userStats?.bestMemoryMatch ?? 0).toLocaleString()}
                     colors={colors}
                   />
                   <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
                   <StatItem
-                    label="Oynanan"
+                    label={t("games.common.games_played")}
                     value={(useGameStore.getState().userStats?.gamesPlayed ?? 0).toString()}
                     colors={colors}
                   />
@@ -629,7 +622,7 @@ export default function MemoryMatchScreen() {
                   onPress={startCountdown}
                 >
                   <Ionicons name="play" size={18} color="#fff" style={{ marginRight: 6 }} />
-                  <Text style={styles.primaryBtnText}>Basla</Text>
+                  <Text style={styles.primaryBtnText}>{t("games.common.start_game")}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.readyAudioRow}>
@@ -640,7 +633,7 @@ export default function MemoryMatchScreen() {
                       color={bgMusicEnabled ? colors.primary : colors.textTertiary}
                     />
                     <Text style={[styles.readyAudioLabel, { color: bgMusicEnabled ? colors.text : colors.textTertiary }]}>
-                      Muzik
+                      {t("games.audio.bg_music")}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setSfxEnabled(!sfxEnabled)}>
@@ -650,12 +643,12 @@ export default function MemoryMatchScreen() {
                       color={sfxEnabled ? colors.primary : colors.textTertiary}
                     />
                     <Text style={[styles.readyAudioLabel, { color: sfxEnabled ? colors.text : colors.textTertiary }]}>
-                      SFX
+                      {t("games.audio.sfx")}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.readyAudioBtn} onPress={() => setMusicPickerVisible(true)}>
                     <Ionicons name="list-outline" size={16} color={colors.primary} />
-                    <Text style={[styles.readyAudioLabel, { color: colors.primary }]}>Muzik Sec</Text>
+                    <Text style={[styles.readyAudioLabel, { color: colors.primary }]}>{t("games.audio.pick_music")}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -692,18 +685,18 @@ export default function MemoryMatchScreen() {
       <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
         <View style={styles.centerContent}>
           <Ionicons name="pause-circle-outline" size={64} color={colors.textSecondary} />
-          <Text style={[styles.pausedTitle, { color: colors.text }]}>Oyun duraklatildi</Text>
+          <Text style={[styles.pausedTitle, { color: colors.text }]}>{t("games.common.paused_title")}</Text>
           <Text style={[styles.pausedStats, { color: colors.textSecondary }]}>
-            {correct} dogru • {wrong} yanlis • {localScore} puan
+            {t("games.memory_match.paused_stats", { correct, wrong, score: localScore })}
           </Text>
           <TouchableOpacity
             style={[styles.primaryBtn, { backgroundColor: colors.primary, marginTop: 24 }]}
             onPress={handleResume}
           >
-            <Text style={styles.primaryBtnText}>Devam et</Text>
+            <Text style={styles.primaryBtnText}>{t("games.common.resume")}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 12 }}>
-            <Text style={[styles.linkText, { color: colors.textSecondary }]}>Hub'a don</Text>
+            <Text style={[styles.linkText, { color: colors.textSecondary }]}>{t("games.common.back_hub")}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -718,46 +711,48 @@ export default function MemoryMatchScreen() {
       <>
         <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={["top", "bottom"]}>
           <View style={styles.resultContainer}>
-            <Text style={[styles.resultTitle, { color: colors.text }]}>Memory Match bitti!</Text>
+            <Text style={[styles.resultTitle, { color: colors.text }]}>{t("games.result.title_memory")}</Text>
 
             {isNewRecord && (
               <View style={[styles.newRecordBanner, { backgroundColor: colors.warning + "25" }]}>
-                <Text style={[styles.newRecordText, { color: colors.warning }]}>🏆 Yeni rekor!</Text>
+                <Text style={[styles.newRecordText, { color: colors.warning }]}>
+                  🏆 {t("games.common.personal_best_new")}
+                </Text>
               </View>
             )}
 
             {submitResult?.leagueChanged && (
               <View style={[styles.leagueUpBanner, { backgroundColor: colors.success + "20" }]}>
                 <Text style={[styles.leagueUpText, { color: colors.success }]}>
-                  🎊 {submitResult.league} ligine yukseldin
+                  🎊 {t("games.league.promoted", { league: submitResult.league })}
                 </Text>
               </View>
             )}
 
             <View style={styles.statCardsRow}>
-              <StatCard label="Skor" value={score.toLocaleString()} color={colors.primary} colors={colors} />
-              <StatCard label="Dogruluk" value={`${accuracy}%`} color={colors.success} colors={colors} />
-              <StatCard label="Max Combo" value={`x${comboMax}`} color="#F59E0B" colors={colors} />
+              <StatCard label={t("games.result.score")} value={score.toLocaleString()} color={colors.primary} colors={colors} />
+              <StatCard label={t("games.result.accuracy")} value={`${accuracy}%`} color={colors.success} colors={colors} />
+              <StatCard label={t("games.result.combo")} value={`x${comboMax}`} color="#F59E0B" colors={colors} />
             </View>
 
             <View style={styles.statCardsRow}>
-              <StatCard label="Dogru" value={correct.toString()} color={colors.success} colors={colors} />
-              <StatCard label="Yanlis" value={wrong.toString()} color={colors.error} colors={colors} />
+              <StatCard label={t("games.result.correct")} value={correct.toString()} color={colors.success} colors={colors} />
+              <StatCard label={t("games.result.wrong")} value={wrong.toString()} color={colors.error} colors={colors} />
               {submitResult?.weeklyRank ? (
-                <StatCard label="Bu Hafta" value={`#${submitResult.weeklyRank}`} color={colors.primary} colors={colors} />
+                <StatCard label={t("games.hub.leaderboard_title")} value={`#${submitResult.weeklyRank}`} color={colors.primary} colors={colors} />
               ) : (
-                <StatCard label="Siralama" value="—" color={colors.border} colors={colors} />
+                <StatCard label={t("games.hub.no_rank")} value="—" color={colors.border} colors={colors} />
               )}
             </View>
 
             {isSubmitting && (
-              <Text style={[styles.submitStatus, { color: colors.textSecondary }]}>Skor kaydediliyor...</Text>
+              <Text style={[styles.submitStatus, { color: colors.textSecondary }]}>{t("games.common.score_submitting")}</Text>
             )}
             {submitError && submitError !== "duplicate_session" && (
               <Text style={[styles.submitStatus, { color: colors.error }]}>
                 {submitError === "daily_limit_reached"
-                  ? "Gunluk limit doldu"
-                  : "Skor simdi kaydedilemedi, sonra tekrar denenecek."}
+                  ? t("games.hub.daily_limit_reached")
+                  : t("games.common.score_failed")}
               </Text>
             )}
 
@@ -767,13 +762,13 @@ export default function MemoryMatchScreen() {
                 onPress={handlePlayAgain}
               >
                 <Ionicons name="refresh" size={16} color="#fff" style={{ marginRight: 6 }} />
-                <Text style={styles.primaryBtnText}>Tekrar oyna</Text>
+                <Text style={styles.primaryBtnText}>{t("games.common.play_again")}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.secondaryBtn, { borderColor: colors.border, flex: 1 }]}
                 onPress={() => navigation.goBack()}
               >
-                <Text style={[styles.secondaryBtnText, { color: colors.text }]}>Hub'a don</Text>
+                <Text style={[styles.secondaryBtnText, { color: colors.text }]}>{t("games.common.back_hub")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -821,9 +816,9 @@ export default function MemoryMatchScreen() {
       </View>
 
       <View style={styles.topStatsRow}>
-        <TopBadge label="Tur" value={roundNumber.toString()} colors={colors} />
-        <TopBadge label="Eslesen" value={`${roundPairsMatched}/${ROUND_PAIR_COUNT}`} colors={colors} />
-        <TopBadge label="Havuz" value={difficultyBadge} colors={colors} />
+        <TopBadge label={t("games.memory_match.round_label")} value={roundNumber.toString()} colors={colors} />
+        <TopBadge label={t("games.memory_match.matched_label")} value={`${roundPairsMatched}/${ROUND_PAIR_COUNT}`} colors={colors} />
+        <TopBadge label={t("games.memory_match.pool_label")} value={difficultyBadge} colors={colors} />
       </View>
 
       <View style={styles.boardWrap}>

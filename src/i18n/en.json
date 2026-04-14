@@ -681,7 +681,14 @@
       "filter_global": "Global",
       "filter_learning": "Learning",
       "filter_learned": "Learned",
-      "filter_mixed": "All"
+      "filter_mixed": "All",
+      "memory_difficulty_label": "Memory Match Difficulty"
+    },
+    "difficulty": {
+      "mixed": "Mixed",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
     },
     "league": {
       "bronze": "Bronze",
@@ -710,6 +717,19 @@
       "level": "Level {{n}}",
       "caught": "Caught",
       "missed": "Missed"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Match open translation pairs before time runs out",
+      "pattern": "90 sec • 8 pairs • -2 sec penalty",
+      "tutorial_title": "How to Play Memory Match",
+      "tutorial_body": "All cards start face up. Tap one card, then find its translation pair.\n\nCorrect matches clear the pair. Wrong matches cost 2 seconds and reset your combo.",
+      "pool_label": "Pool",
+      "language_label": "Language",
+      "round_label": "Round",
+      "matched_label": "Matched",
+      "pool_empty_cta": "Try a different filter or difficulty and try again.",
+      "paused_stats": "{{correct}} correct • {{wrong}} wrong • {{score}} pts"
     },
     "common": {
       "how_to_play": "How to Play",
@@ -745,6 +765,7 @@
     "result": {
       "title_speed": "Speed Round Over!",
       "title_rain": "Word Rain Over!",
+      "title_memory": "Memory Match Over!",
       "score": "Score",
       "accuracy": "Accuracy",
       "combo": "Max Combo",

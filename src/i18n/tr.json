@@ -681,7 +681,14 @@
       "filter_global": "Genel",
       "filter_learning": "Öğreniyorum",
       "filter_learned": "Öğrendim",
-      "filter_mixed": "Tümü"
+      "filter_mixed": "Tümü",
+      "memory_difficulty_label": "Memory Match Zorluğu"
+    },
+    "difficulty": {
+      "mixed": "Karışık",
+      "easy": "Kolay",
+      "medium": "Orta",
+      "hard": "Zor"
     },
     "league": {
       "bronze": "Bronz",
@@ -710,6 +717,19 @@
       "level": "Seviye {{n}}",
       "caught": "Yakalanan",
       "missed": "Kaçan"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Açık kartlardan doğru çeviri çiftlerini süre bitmeden eşleştir",
+      "pattern": "90 sn • 8 çift • -2 sn ceza",
+      "tutorial_title": "Memory Match Nasıl Oynanır?",
+      "tutorial_body": "Tüm kartlar açık başlar. Bir karta dokun, sonra onun çeviri eşini bul.\n\nDoğru eşleşmeler çifti temizler. Yanlış eşleşmeler 2 saniye düşürür ve comboyu sıfırlar.",
+      "pool_label": "Havuz",
+      "language_label": "Dil",
+      "round_label": "Tur",
+      "matched_label": "Eşleşen",
+      "pool_empty_cta": "Başka bir filtre veya zorluk seçip tekrar dene.",
+      "paused_stats": "{{correct}} doğru • {{wrong}} yanlış • {{score}} puan"
     },
     "common": {
       "how_to_play": "Nasıl Oynanır?",
@@ -745,6 +765,7 @@
     "result": {
       "title_speed": "Speed Round Bitti!",
       "title_rain": "Word Rain Bitti!",
+      "title_memory": "Memory Match Bitti!",
       "score": "Skor",
       "accuracy": "Doğruluk",
       "combo": "Max Combo",

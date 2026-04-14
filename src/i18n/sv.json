@@ -681,7 +681,14 @@
       "filter_global": "Global",
       "filter_learning": "Lär mig",
       "filter_learned": "Lärt",
-      "filter_mixed": "Alla"
+      "filter_mixed": "Alla",
+      "memory_difficulty_label": "Memory Match-svårighet"
+    },
+    "difficulty": {
+      "mixed": "Blandad",
+      "easy": "Lätt",
+      "medium": "Medel",
+      "hard": "Svår"
     },
     "league": {
       "bronze": "Brons",
@@ -710,6 +717,19 @@
       "level": "Nivå {{n}}",
       "caught": "Fångade",
       "missed": "Missade"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Matcha synliga översättningspar innan tiden tar slut",
+      "pattern": "90 sek • 8 par • 2 sek straff",
+      "tutorial_title": "Så spelar du Memory Match",
+      "tutorial_body": "Alla kort börjar öppna. Tryck på ett kort och hitta sedan dess översättningspar.\n\nRätta matchningar tar bort paret. Fel matchningar kostar 2 sekunder och nollställer combon.",
+      "pool_label": "Pool",
+      "language_label": "Språk",
+      "round_label": "Runda",
+      "matched_label": "Par",
+      "pool_empty_cta": "Prova ett annat filter eller en annan svårighetsgrad.",
+      "paused_stats": "{{correct}} rätt • {{wrong}} fel • {{score}} poäng"
     },
     "common": {
       "how_to_play": "Hur man spelar",
@@ -745,6 +765,7 @@
     "result": {
       "title_speed": "Speed Round över!",
       "title_rain": "Word Rain över!",
+      "title_memory": "Memory Match över!",
       "score": "Poäng",
       "accuracy": "Noggrannhet",
       "combo": "Max kombo",

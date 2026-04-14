@@ -681,7 +681,14 @@
       "filter_global": "Global",
       "filter_learning": "Lerne",
       "filter_learned": "Gelernt",
-      "filter_mixed": "Alle"
+      "filter_mixed": "Alle",
+      "memory_difficulty_label": "Memory Match Schwierigkeit"
+    },
+    "difficulty": {
+      "mixed": "Gemischt",
+      "easy": "Leicht",
+      "medium": "Mittel",
+      "hard": "Schwer"
     },
     "league": {
       "bronze": "Bronze",
@@ -710,6 +717,19 @@
       "level": "Level {{n}}",
       "caught": "Gefangen",
       "missed": "Verpasst"
+    },
+    "memory_match": {
+      "name": "Memory Match",
+      "desc": "Finde offene Übersetzungspaare, bevor die Zeit abläuft",
+      "pattern": "90 Sek • 8 Paare • -2 Sek Strafe",
+      "tutorial_title": "So spielst du Memory Match",
+      "tutorial_body": "Alle Karten starten offen. Tippe eine Karte an und finde dann ihr Übersetzungspaar.\n\nRichtige Treffer entfernen das Paar. Falsche Treffer kosten 2 Sekunden und setzen die Kombo zurück.",
+      "pool_label": "Pool",
+      "language_label": "Sprache",
+      "round_label": "Runde",
+      "matched_label": "Gefunden",
+      "pool_empty_cta": "Versuche einen anderen Filter oder Schwierigkeitsgrad.",
+      "paused_stats": "{{correct}} richtig • {{wrong}} falsch • {{score}} Punkte"
     },
     "common": {
       "how_to_play": "Spielanleitung",
@@ -745,6 +765,7 @@
     "result": {
       "title_speed": "Speed Round vorbei!",
       "title_rain": "Word Rain vorbei!",
+      "title_memory": "Memory Match vorbei!",
       "score": "Punkte",
       "accuracy": "Genauigkeit",
       "combo": "Max. Kombo",

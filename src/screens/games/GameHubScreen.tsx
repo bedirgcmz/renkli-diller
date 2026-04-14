@@ -40,11 +40,11 @@ const FILTER_KEYS: { key: GameFilter; i18nKey: string }[] = [
   { key: "mixed",         i18nKey: "games.hub.filter_mixed" },
 ];
 
-const DIFFICULTY_OPTIONS: { key: GameDifficultyFilter; label: string }[] = [
-  { key: "mixed", label: "Karisik" },
-  { key: "easy", label: "Kolay" },
-  { key: "medium", label: "Orta" },
-  { key: "hard", label: "Zor" },
+const DIFFICULTY_OPTIONS: { key: GameDifficultyFilter }[] = [
+  { key: "mixed" },
+  { key: "easy" },
+  { key: "medium" },
+  { key: "hard" },
 ];
 
 const LEAGUE_ICONS: Record<LeagueType, string> = {
@@ -143,7 +143,7 @@ export default function GameHubScreen() {
   const gameNames: Record<GameType, string> = {
     speed_round: t("games.speed_round.name"),
     word_rain: t("games.word_rain.name"),
-    memory_match: "Memory Match",
+    memory_match: t("games.memory_match.name"),
   };
 
   const openLeaderboardModal = () => {
@@ -279,7 +279,7 @@ export default function GameHubScreen() {
 
         <View style={styles.sectionLabel}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-            Memory Match Zorlugu
+            {t("games.hub.memory_difficulty_label")}
           </Text>
         </View>
         <ScrollView
@@ -288,7 +288,7 @@ export default function GameHubScreen() {
           style={styles.filterScroll}
           contentContainerStyle={styles.filterContent}
         >
-          {DIFFICULTY_OPTIONS.map(({ key, label }) => {
+          {DIFFICULTY_OPTIONS.map(({ key }) => {
             const active = selectedDifficulty === key;
             return (
               <TouchableOpacity
@@ -308,7 +308,7 @@ export default function GameHubScreen() {
                     { color: active ? "#fff" : colors.text },
                   ]}
                 >
-                  {label}
+                  {t(`games.difficulty.${key}`)}
                 </Text>
               </TouchableOpacity>
             );
@@ -356,9 +356,9 @@ export default function GameHubScreen() {
         <GameCard
           icon="layers"
           iconColor="#22C55E"
-          name="Memory Match"
-          desc="Acik kartlardan dogru ceviri ciftlerini 90 saniyede eslestir"
-          pattern="90 sn • 8 cift • -2 sn ceza"
+          name={t("games.memory_match.name")}
+          desc={t("games.memory_match.desc")}
+          pattern={t("games.memory_match.pattern")}
           bestScore={userStats?.bestMemoryMatch ?? 0}
           colors={colors}
           isSmallScreen={isSmallScreen}
