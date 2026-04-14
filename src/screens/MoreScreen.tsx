@@ -97,7 +97,7 @@ export default function MoreScreen() {
                 [
                   { text: t("common.cancel"), style: "cancel" },
                   {
-                    text: t("premium.go_premium"),
+                    text: t("premium.purchase_btn"),
                     onPress: () => navigation.navigate("Paywall", { source: "sentences" }),
                   },
                 ],
