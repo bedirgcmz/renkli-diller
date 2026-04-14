@@ -323,7 +323,9 @@
     "learning_only": "Çalıştıklarım",
     "generating": "Oluşturuluyor...",
     "select_filter": "PDF'e Dahil Edilecek Grup",
-    "no_sentences": "Seçilen filtreye göre cümle bulunamadı."
+    "no_sentences": "Seçilen filtreye göre cümle bulunamadı.",
+    "premium_required_title": "PDF İndirme Premium'a Özel",
+    "premium_required_body": "Cümlelerini PDF olarak dışa aktarmak için Premium'a geçin."
   },
   "categories": {
     "daily_conversation": "Günlük Konuşma",

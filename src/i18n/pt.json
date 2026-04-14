@@ -323,7 +323,9 @@
     "learning_only": "Frases em progresso",
     "generating": "Gerando...",
     "select_filter": "Escolha o que incluir",
-    "no_sentences": "Nenhuma frase com o filtro selecionado."
+    "no_sentences": "Nenhuma frase com o filtro selecionado.",
+    "premium_required_title": "Exportar PDF é Premium",
+    "premium_required_body": "Vá para o Premium para exportar suas frases em PDF."
   },
   "categories": {
     "daily_conversation": "Conversa do dia a dia",

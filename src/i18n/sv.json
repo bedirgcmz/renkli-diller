@@ -323,7 +323,9 @@
     "learning_only": "Meningar jag övar på",
     "generating": "Genererar...",
     "select_filter": "Välj vad som ska ingå",
-    "no_sentences": "Inga meningar hittades för valt filter."
+    "no_sentences": "Inga meningar hittades för valt filter.",
+    "premium_required_title": "PDF-export är Premium",
+    "premium_required_body": "Bli Premium för att exportera dina meningar som PDF."
   },
   "categories": {
     "daily_conversation": "Daglig konversation",

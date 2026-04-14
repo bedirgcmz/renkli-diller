@@ -323,7 +323,9 @@
     "learning_only": "Sentences in Progress",
     "generating": "Generating...",
     "select_filter": "Choose What to Include",
-    "no_sentences": "No sentences found for the selected filter."
+    "no_sentences": "No sentences found for the selected filter.",
+    "premium_required_title": "PDF Export Is Premium",
+    "premium_required_body": "Upgrade to Premium to export your sentences as PDF."
   },
   "categories": {
     "daily_conversation": "Daily Conversation",
