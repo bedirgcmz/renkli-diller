@@ -60,6 +60,7 @@ interface AuthState {
   deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (updates: Partial<User>) => Promise<{ success: boolean; error?: string }>;
+  refreshProfile: () => Promise<{ success: boolean; error?: string }>;
   uploadAvatar: (
     uri: string,
     base64?: string,
@@ -489,10 +490,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       });
 
+      void get().refreshProfile();
+
       return { success: true };
     } catch (error) {
       set({ loading: false });
       return { success: false, error: "An unexpected error occurred" };
+    }
+  },
+
+  refreshProfile: async () => {
+    const { user, isPremiumVerified } = get();
+    if (!user) return { success: false, error: "No user logged in" };
+
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url, is_premium, premium_override, premium_override_expires_at, leaderboard_visible")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      const premiumOverrideActive = isOverrideActive(profile);
+      const syncedPremium = isPremiumVerified
+        ? user.is_premium || premiumOverrideActive
+        : user.is_premium || premiumOverrideActive || (profile?.is_premium ?? false);
+
+      set((state) => ({
+        user: state.user
+          ? {
+              ...state.user,
+              display_name: profile?.display_name || "",
+              avatar_url: profile?.avatar_url || "",
+              premium_override: premiumOverrideActive,
+              is_premium: syncedPremium,
+              leaderboard_visible: profile?.leaderboard_visible ?? true,
+            }
+          : state.user,
+      }));
+
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message ?? "An unexpected error occurred" };
     }
   },
 
