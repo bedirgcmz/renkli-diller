@@ -156,7 +156,7 @@ export default function MemoryMatchScreen() {
   const { startBgMusic, stopBgMusic, playSfx } = useGameAudio({
     bgMusicEnabled,
     sfxEnabled,
-    bgTrackId: gameBgTrack["memory_match"] ?? "bg3",
+    bgTrackId: gameBgTrack["memory_match"] ?? "bg2",
     gameActive: phase === "playing",
   });
 
@@ -698,7 +698,7 @@ export default function MemoryMatchScreen() {
 
           <BGMusicPickerModal
             visible={musicPickerVisible}
-            initialTrackId={gameBgTrack["memory_match"] ?? "bg3"}
+            initialTrackId={gameBgTrack["memory_match"] ?? "bg2"}
             onConfirm={(trackId) => {
               setGameBgTrack("memory_match", trackId);
               setMusicPickerVisible(false);

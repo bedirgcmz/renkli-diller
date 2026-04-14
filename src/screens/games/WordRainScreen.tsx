@@ -112,7 +112,7 @@ export default function WordRainScreen() {
   const { startBgMusic, stopBgMusic, playSfx } = useGameAudio({
     bgMusicEnabled,
     sfxEnabled,
-    bgTrackId: gameBgTrack["word_rain"] ?? "bg2",
+    bgTrackId: gameBgTrack["word_rain"] ?? "bg3",
     gameActive: phase === "playing",
   });
   const [poolError, setPoolError] = useState<"empty" | "network" | null>(null);
@@ -693,7 +693,7 @@ export default function WordRainScreen() {
 
         <BGMusicPickerModal
           visible={musicPickerVisible}
-          initialTrackId={gameBgTrack["word_rain"] ?? "bg2"}
+          initialTrackId={gameBgTrack["word_rain"] ?? "bg3"}
           onConfirm={(trackId) => {
             setGameBgTrack("word_rain", trackId);
             setMusicPickerVisible(false);
