@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Animated,
   useWindowDimensions,
+  InteractionManager,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
@@ -63,13 +64,26 @@ export function CoachMarksOverlay({ steps, visible, onDone, onSkip, onBeforeStep
         setSpotLayout(step.layout);
       } else if (step.ref?.current) {
         step.ref.current.measureInWindow((x, y, w, h) => {
-          setSpotLayout({ x, y, width: w, height: h });
+          if (w > 0 && h > 0) {
+            setSpotLayout({ x, y, width: w, height: h });
+          }
         });
       }
     };
-    const t1 = setTimeout(measure, 200);
-    return () => clearTimeout(t1);
-  }, [stepIndex, visible]);
+
+    const interactionTask = InteractionManager.runAfterInteractions(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(measure);
+      });
+    });
+
+    const fallbackTimer = setTimeout(measure, 300);
+
+    return () => {
+      interactionTask.cancel();
+      clearTimeout(fallbackTimer);
+    };
+  }, [fadeAnim, onBeforeStep, step, stepIndex, visible]);
 
   // Fade in when layout arrives
   useEffect(() => {
@@ -99,9 +113,10 @@ export function CoachMarksOverlay({ steps, visible, onDone, onSkip, onBeforeStep
   // Tooltip: prefer below, fallback above
   const spaceBelow = SH - (spotY + spotH);
   const showBelow = spaceBelow >= TOOLTIP_H_ESTIMATE + TOOLTIP_MARGIN;
-  const tooltipTop = showBelow
+  const rawTooltipTop = showBelow
     ? spotY + spotH + TOOLTIP_MARGIN
     : spotY - TOOLTIP_H_ESTIMATE - TOOLTIP_MARGIN;
+  const tooltipTop = Math.max(16, Math.min(rawTooltipTop, SH - TOOLTIP_H_ESTIMATE - 16));
 
   const handleNext = () => {
     if (isLast) {
@@ -112,7 +127,13 @@ export function CoachMarksOverlay({ steps, visible, onDone, onSkip, onBeforeStep
   };
 
   return (
-    <Modal visible={visible} transparent animationType="none" statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      presentationStyle="overFullScreen"
+    >
       <Animated.View style={[styles.root, { opacity: fadeAnim }]} pointerEvents="box-none">
         {/* 4-quadrant dim overlay */}
         <View style={[styles.dim, { top: 0, left: 0, right: 0, height: spotY }]} />

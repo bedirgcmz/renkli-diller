@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,9 +27,7 @@ type Nav = CompositeNavigationProp<
   NativeStackNavigationProp<MainStackParamList>
 >;
 
-const { width: SW, height: SH } = Dimensions.get("window");
 const CARD_GAP = 12;
-const CARD_WIDTH = (SW - 32 - CARD_GAP) / 2;
 
 interface ActivityCard {
   icon: keyof typeof Ionicons.glyphMap;
@@ -44,8 +42,10 @@ interface ActivityCard {
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
+  const cardWidth = (screenWidth - 32 - CARD_GAP) / 2;
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const { isCoachMarksDone, isReady, markCoachMarksDone, isHintShown, markHintShown } =
@@ -155,13 +155,14 @@ export default function HomeScreen() {
 
   // Tab bar step layouts — calculated from screen geometry (4 equal tabs)
   const TAB_BAR_H = 56;
-  const TAB_W = SW / 4;
+  const tabBarHeight = TAB_BAR_H + insets.bottom;
+  const TAB_W = screenWidth / 4;
   // Sentences = index 1, Me = index 2, More = index 3
   const tabLayouts = [1, 2, 3].map((i) => ({
     x: i * TAB_W,
-    y: SH - TAB_BAR_H - insets.bottom,
+    y: screenHeight - tabBarHeight,
     width: TAB_W,
-    height: TAB_BAR_H,
+    height: tabBarHeight,
   }));
 
   const tabCoachKeys = [
@@ -189,7 +190,7 @@ export default function HomeScreen() {
 
     setCoachSteps([...cardSteps, ...tabSteps]);
     setCoachVisible(true);
-  }, [t, insets.bottom]);
+  }, [screenHeight, screenWidth, t, tabLayouts]);
 
   // Auto-start on first launch once provider is ready
   const hasAutoStarted = useRef(false);
@@ -268,7 +269,7 @@ export default function HomeScreen() {
               onLayout={(e) => {
                 cardLayoutYs.current[index] = e.nativeEvent.layout.y;
               }}
-              style={[styles.card, { backgroundColor: colors.cardBackground }]}
+              style={[styles.card, { width: cardWidth, backgroundColor: colors.cardBackground }]}
               onPress={() => card.onPress(navigation)}
               activeOpacity={0.75}
             >
@@ -324,7 +325,6 @@ const styles = StyleSheet.create({
     gap: CARD_GAP,
   },
   card: {
-    width: CARD_WIDTH,
     borderRadius: 16,
     padding: 16,
     shadowColor: "#000",
