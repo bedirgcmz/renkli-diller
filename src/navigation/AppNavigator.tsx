@@ -15,7 +15,12 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { user, initialized, initialize, passwordRecoveryActive } = useAuthStore();
-  const { loadSettings } = useSettingsStore();
+  const settingsInitialized = useSettingsStore((s) => s.initialized);
+  const settingsLoading = useSettingsStore((s) => s.loading);
+  const loadedForUserId = useSettingsStore((s) => s.loadedForUserId);
+  const loadSettings = useSettingsStore((s) => s.loadSettings);
+  const currentUserId = user?.id ?? null;
+  const settingsReadyForCurrentUser = settingsInitialized && loadedForUserId === currentUserId;
 
   useEffect(() => {
     initialize().catch((e) => console.error("[AppNavigator] init failed:", e));
@@ -27,7 +32,7 @@ export default function AppNavigator() {
   }, [initialized, user?.id, loadSettings]);
 
   // Show loading while initializing
-  if (!initialized) {
+  if (!initialized || !settingsReadyForCurrentUser || settingsLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />

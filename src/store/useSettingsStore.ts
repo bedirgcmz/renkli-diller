@@ -58,6 +58,30 @@ function getSettingsStorageKey(userId: string | null): string {
   return userId ? `user_settings:${userId}` : "user_settings:guest";
 }
 
+async function persistSettingsToSupabase(userId: string, settings: Settings): Promise<void> {
+  const { error } = await supabase.from("user_settings").upsert(
+    {
+      user_id: userId,
+      ui_language: settings.uiLanguage,
+      target_language: settings.targetLanguage,
+      theme: settings.theme,
+      daily_goal: settings.dailyGoal,
+      notifications: settings.notifications,
+      reminder_time: settings.reminderTime,
+      auto_mode_speed: settings.autoModeSpeed,
+      show_translations: settings.showTranslations,
+      tts_enabled: settings.ttsEnabled,
+      tts_voice: settings.ttsVoice,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" },
+  );
+
+  if (error && __DEV__) {
+    console.error("Error saving settings to Supabase:", error);
+  }
+}
+
 function toPersistedSettings(settings: Settings): Settings {
   return {
     uiLanguage: settings.uiLanguage,
@@ -159,6 +183,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const userId = await getCurrentUserId();
       const storageKey = getSettingsStorageKey(userId);
+      const guestStorageKey = getSettingsStorageKey(null);
       if (!force && get().initialized && get().loadedForUserId === userId) {
         set({ loading: false });
         return;
@@ -190,7 +215,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         return;
       }
 
-      // If no stored settings, try to load from Supabase
+      // If no local user-specific settings, try to load from Supabase
       if (userId) {
         const { data: settings } = await supabase
           .from("user_settings")
@@ -214,6 +239,30 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           const resolvedSettings = await reconcileNotificationState(mapped);
           set({ ...resolvedSettings, loading: false, initialized: true, loadedForUserId: userId });
           await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+          return;
+        }
+      }
+
+      // If a guest picked languages before logging in, migrate those choices
+      // into the authenticated user's settings on first login.
+      if (userId) {
+        const guestStored = await AsyncStorage.getItem(guestStorageKey);
+        if (guestStored) {
+          const settings = JSON.parse(guestStored) as Settings;
+          const resolvedSettings = await reconcileNotificationState({
+            ...DEFAULT_SETTINGS,
+            ...settings,
+          });
+
+          set({
+            ...resolvedSettings,
+            loading: false,
+            initialized: true,
+            loadedForUserId: userId,
+          });
+
+          await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+          await persistSettingsToSupabase(userId, resolvedSettings);
           return;
         }
       }
@@ -259,24 +308,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
       // Save to Supabase if user is logged in
       if (userId) {
-        const { error } = await supabase.from("user_settings").upsert({
-          user_id: userId,
-          ui_language: requestedSettings.uiLanguage,
-          target_language: requestedSettings.targetLanguage,
-          theme: requestedSettings.theme,
-          daily_goal: requestedSettings.dailyGoal,
-          notifications: resolvedSettings.notifications,
-          reminder_time: resolvedSettings.reminderTime,
-          auto_mode_speed: requestedSettings.autoModeSpeed,
-          show_translations: requestedSettings.showTranslations,
-          tts_enabled: requestedSettings.ttsEnabled,
-          tts_voice: requestedSettings.ttsVoice,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
-
-        if (error) {
-          if (__DEV__) console.error("Error saving settings to Supabase:", error);
-        }
+        await persistSettingsToSupabase(userId, resolvedSettings);
       }
     } catch (error) {
       if (__DEV__) console.error("Error saving settings:", error);
