@@ -85,10 +85,14 @@ let authSubscription: { unsubscribe: () => void } | null = null;
 
 // Module-level RC listener cleanup — ensures only one listener is active at a time.
 let rcListenerRemover: (() => void) | null = null;
+let lastHydratedSessionKey: string | null = null;
+let inFlightHydrationKey: string | null = null;
+let inFlightHydrationPromise: Promise<void> | null = null;
 
 const AVATAR_BUCKET = "user_profile_img";
 const AVATAR_FILE_PREFIX = "avatar.";
 const AVATAR_FALLBACK_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "heic", "heif"];
+const LEGACY_SESSION_STORAGE_KEY = "supabase_session";
 
 function clearClientStores() {
   useSentenceStore.getState().clear();
@@ -209,7 +213,158 @@ function syncProfileCaches(
   });
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set, get) => {
+  const persistLegacySessionCopy = async (session: any | null) => {
+    if (!session) {
+      await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+      return;
+    }
+
+    await AsyncStorage.setItem(LEGACY_SESSION_STORAGE_KEY, JSON.stringify(session));
+  };
+
+  const extractSessionTokens = (
+    session: any
+  ): { access_token: string; refresh_token: string } | null => {
+    const accessToken = session?.access_token;
+    const refreshToken = session?.refresh_token;
+
+    if (!accessToken || !refreshToken) return null;
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  };
+
+  const buildBasicUser = (session: any): User => ({
+    id: session.user.id,
+    email: session.user.email!,
+    display_name: "",
+    avatar_url: "",
+    is_premium: false,
+    premium_override: false,
+    leaderboard_visible: true,
+    created_at: session.user.created_at,
+  });
+
+  const primeAuthenticatedSession = (session: any) => {
+    if (!session?.user) return;
+
+    set((state) => ({
+      session,
+      user:
+        state.user && state.user.id === session.user.id
+          ? {
+              ...state.user,
+              email: session.user.email ?? state.user.email,
+              created_at: session.user.created_at ?? state.user.created_at,
+            }
+          : buildBasicUser(session),
+    }));
+  };
+
+  const attachRevenueCatListener = () => {
+    if (rcListenerRemover) {
+      rcListenerRemover();
+      rcListenerRemover = null;
+    }
+
+    rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
+  };
+
+  const hydrateAuthenticatedSession = async (session: any) => {
+    if (!session?.user) return;
+
+    const hydrationKey = `${session.user.id}:${session.refresh_token ?? session.access_token ?? "session"}`;
+    if (lastHydratedSessionKey === hydrationKey) {
+      primeAuthenticatedSession(session);
+      return;
+    }
+
+    if (inFlightHydrationKey === hydrationKey && inFlightHydrationPromise) {
+      primeAuthenticatedSession(session);
+      await inFlightHydrationPromise;
+      return;
+    }
+
+    const hydrationPromise = (async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+
+      const { active: rcActive, verified: rcVerified } = await logInUser(session.user.id).catch(() => ({
+        active: false,
+        verified: false,
+      }));
+
+      const hydratedUser: User = {
+        id: session.user.id,
+        email: session.user.email!,
+        display_name: profile?.display_name || "",
+        avatar_url: profile?.avatar_url || "",
+        premium_override: isOverrideActive(profile),
+        is_premium:
+          rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
+        leaderboard_visible: profile?.leaderboard_visible ?? true,
+        created_at: session.user.created_at,
+      };
+
+      set({
+        user: hydratedUser,
+        session,
+        initialized: true,
+        isPremiumVerified: rcVerified,
+      });
+
+      attachRevenueCatListener();
+      await persistLegacySessionCopy(session);
+      lastHydratedSessionKey = hydrationKey;
+    })();
+
+    inFlightHydrationKey = hydrationKey;
+    inFlightHydrationPromise = hydrationPromise;
+
+    try {
+      await hydrationPromise;
+    } finally {
+      if (inFlightHydrationKey === hydrationKey) {
+        inFlightHydrationKey = null;
+        inFlightHydrationPromise = null;
+      }
+    }
+  };
+
+  const scheduleHydration = (session: any, source: string) => {
+    void hydrateAuthenticatedSession(session).catch((error) => {
+      console.error(`[auth] hydration failed from ${source}:`, error);
+    });
+  };
+
+  const clearAuthenticatedState = async () => {
+    if (rcListenerRemover) {
+      rcListenerRemover();
+      rcListenerRemover = null;
+    }
+
+    clearClientStores();
+    set({
+      user: null,
+      session: null,
+      isPremiumVerified: false,
+      passwordRecoveryActive: false,
+    });
+
+    lastHydratedSessionKey = null;
+    inFlightHydrationKey = null;
+    inFlightHydrationPromise = null;
+    await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+    await clearAITrialCache();
+  };
+
+  return {
   user: null,
   session: null,
   loading: false,
@@ -276,11 +431,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
 
         // Start real-time RC listener (clears any previous one first)
-        if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
-        rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
+        attachRevenueCatListener();
 
         // Store session in AsyncStorage
-        await AsyncStorage.setItem("supabase_session", JSON.stringify(data.session));
+        await persistLegacySessionCopy(data.session);
       }
 
       return { success: true };
@@ -382,9 +536,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ user, session: data.session, loading: false, isPremiumVerified: rcVerified });
 
         // Start real-time RC listener (clears any previous one first)
-        if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
-        rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
-        await AsyncStorage.setItem("supabase_session", JSON.stringify(data.session));
+        attachRevenueCatListener();
+        await persistLegacySessionCopy(data.session);
       }
 
       return { success: true };
@@ -456,18 +609,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       // Remove RC listener before signing out
-      if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
       await supabase.auth.signOut();
-      await AsyncStorage.multiRemove(["supabase_session", "user_settings", "user_settings:guest"]);
-      await clearAITrialCache();
+      await clearAuthenticatedState();
+      await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
-      clearClientStores();
       set({
-        user: null,
-        session: null,
         loading: false,
-        isPremiumVerified: false,
-        passwordRecoveryActive: false,
       });
     } catch (error) {
       set({ loading: false });
@@ -494,17 +641,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       // Edge function deleted the user — clean up locally
-      if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
-      await AsyncStorage.multiRemove(["supabase_session", "user_settings", "user_settings:guest"]);
-      await clearAITrialCache();
+      await clearAuthenticatedState();
+      await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
-      clearClientStores();
       set({
-        user: null,
-        session: null,
         loading: false,
-        isPremiumVerified: false,
-        passwordRecoveryActive: false,
       });
       return { success: true };
     } catch (error: any) {
@@ -735,58 +876,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     try {
-      // Try to restore session from AsyncStorage
-      const storedSession = await AsyncStorage.getItem("supabase_session");
-      if (storedSession) {
-        const session = JSON.parse(storedSession);
-        const {
-          data: { user },
-          error: sessionError,
-        } = await supabase.auth.setSession(session);
-
-        if (sessionError) {
-          // Refresh token expired or invalid — clear stale session so we don't
-          // retry it on every subsequent app launch.
-          await AsyncStorage.removeItem("supabase_session");
-        } else if (user) {
-          // Fetch user profile
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
-
-          // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
-          const { active: rcActive, verified: rcVerified } = await logInUser(user.id).catch(
-            () => ({ active: false, verified: false })
-          );
-
-          const userData: User = {
-            id: user.id,
-            email: user.email!,
-            display_name: profile?.display_name || "",
-            avatar_url: profile?.avatar_url || "",
-            premium_override: isOverrideActive(profile),
-          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
-          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
-            leaderboard_visible: profile?.leaderboard_visible ?? true,
-            created_at: user.created_at,
-          };
-
-          set({
-            user: userData,
-            session,
-            initialized: true,
-            isPremiumVerified: rcVerified,
-          });
-
-          // Start real-time RC listener (clears any previous one first)
-          if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
-          rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
-          return;
-        }
-      }
-
       // Clean up any previous listener before attaching a new one.
       if (authSubscription) {
         authSubscription.unsubscribe();
@@ -801,58 +890,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
         console.log("AUTH STATE CHANGE EVENT:", event, !!session?.user);
-        if (event === "SIGNED_IN" && session?.user) {
-          // Set minimal user state synchronously so navigation unblocks immediately.
-          const basicUser: User = {
-            id: session.user.id,
-            email: session.user.email!,
-            display_name: "",
-            avatar_url: "",
-            is_premium: false,
-            premium_override: false,
-            leaderboard_visible: true,
-            created_at: session.user.created_at,
-          };
-          set({ user: basicUser, session });
-
-          // Defer all async work outside the callback to avoid the deadlock.
-          void (async () => {
-            try {
-              const { data: profile } = await supabase
-                .from("profiles")
-                .select("*")
-                .eq("id", session.user.id)
-                .single();
-
-              await AsyncStorage.setItem("supabase_session", JSON.stringify(session));
-
-              // RC login: use CustomerInfo returned directly by logIn() to avoid stale cache
-              const { active: rcActive, verified: rcVerified } = await logInUser(session.user.id).catch(
-                () => ({ active: false, verified: false })
-              );
-
-              set((state) => ({
-                user: state.user
-                  ? {
-                      ...state.user,
-                      display_name: profile?.display_name || "",
-                      avatar_url: profile?.avatar_url || "",
-                      premium_override: isOverrideActive(profile),
-          // RC active → premium. Manual override (active + not expired) → premium. RC unverified → trust cached Supabase value.
-          is_premium: rcActive || isOverrideActive(profile) || (!rcVerified && (profile?.is_premium ?? false)),
-                      leaderboard_visible: profile?.leaderboard_visible ?? true,
-                    }
-                  : state.user,
-                isPremiumVerified: rcVerified,
-              }));
-
-              // Start real-time RC listener (clears any previous one first)
-              if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
-              rcListenerRemover = setupCustomerInfoListener((active) => get().setPremiumStatus(active));
-            } catch (e) {
-              console.error("[onAuthStateChange] deferred async error:", e);
-            }
-          })();
+        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+          primeAuthenticatedSession(session);
+          scheduleHydration(session, event);
         } else if ((event === "USER_UPDATED" || event === "TOKEN_REFRESHED") && session?.user) {
           set((state) => ({
             session,
@@ -865,20 +905,84 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               : state.user,
           }));
 
-          void AsyncStorage.setItem("supabase_session", JSON.stringify(session));
+          void persistLegacySessionCopy(session);
+
+          if (!get().user || get().user?.id !== session.user.id) {
+            primeAuthenticatedSession(session);
+            scheduleHydration(session, event);
+          }
         } else if (event === "SIGNED_OUT") {
-          clearClientStores();
-          set({
-            user: null,
-            session: null,
-            isPremiumVerified: false,
-            passwordRecoveryActive: false,
-          });
-          void AsyncStorage.removeItem("supabase_session");
-          void clearAITrialCache();
+          void (async () => {
+            try {
+              const {
+                data: { session: currentSession },
+              } = await supabase.auth.getSession();
+
+              if (currentSession?.user) {
+                console.log("[auth] SIGNED_OUT ignored because a recoverable session still exists");
+                primeAuthenticatedSession(currentSession);
+                await hydrateAuthenticatedSession(currentSession);
+                return;
+              }
+            } catch (error) {
+              console.error("[auth] post-SIGNED_OUT verification failed:", error);
+            }
+
+            await clearAuthenticatedState();
+          })();
         }
       });
       authSubscription = subscription;
+
+      const {
+        data: { session: currentSession },
+        error: currentSessionError,
+      } = await supabase.auth.getSession();
+
+      if (currentSessionError) {
+        console.error("[auth] getSession during initialize failed:", currentSessionError);
+      }
+
+      if (currentSession?.user) {
+        console.log("[auth] initialize restored Supabase persisted session");
+        primeAuthenticatedSession(currentSession);
+        await hydrateAuthenticatedSession(currentSession);
+        set({ initialized: true });
+        return;
+      }
+
+      // Legacy fallback: previous builds stored a manual copy in AsyncStorage.
+      const storedSession = await AsyncStorage.getItem(LEGACY_SESSION_STORAGE_KEY);
+      if (storedSession) {
+        try {
+          const parsedSession = JSON.parse(storedSession);
+          const sessionTokens = extractSessionTokens(parsedSession);
+
+          if (!sessionTokens) {
+            console.log("[auth] removing malformed legacy session copy");
+            await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+          } else {
+            const {
+              data: restoredData,
+              error: sessionError,
+            } = await supabase.auth.setSession(sessionTokens);
+
+            if (sessionError || !restoredData.session?.user) {
+              console.log("[auth] removing stale legacy session copy");
+              await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+            } else {
+              console.log("[auth] initialize restored session from legacy fallback");
+              primeAuthenticatedSession(restoredData.session);
+              await hydrateAuthenticatedSession(restoredData.session);
+              set({ initialized: true });
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("[auth] failed to parse legacy session copy:", error);
+          await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+        }
+      }
 
       set({ initialized: true });
     } catch (error) {
@@ -902,4 +1006,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       passwordRecoveryActive: false,
     });
   },
-}));
+  };
+});
