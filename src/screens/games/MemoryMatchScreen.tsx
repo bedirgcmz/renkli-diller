@@ -99,6 +99,7 @@ export default function MemoryMatchScreen() {
   const { colors } = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const isSmallScreen = screenHeight < 760;
+  const isCompactBoard = screenWidth <= 375 || screenHeight < 760;
 
   const { user } = useAuthStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
@@ -600,9 +601,11 @@ export default function MemoryMatchScreen() {
   const timerColor = timeLeft <= LAST_10_THRESHOLD ? colors.error : colors.primary;
   const comboLabel = combo >= COMBO_X3 ? "🔥 x3" : combo >= COMBO_X2 ? "⚡ x2" : null;
   const roundPairsMatched = matchedCardIds.length / 2;
-  const cardGap = 8;
-  const boardWidth = screenWidth - 32;
-  const cardWidth = Math.max(68, Math.floor((boardWidth - cardGap * 3) / 4));
+  const boardHorizontalPadding = isCompactBoard ? 12 : 16;
+  const cardGap = isCompactBoard ? 6 : 8;
+  const boardWidth = screenWidth - boardHorizontalPadding * 2;
+  const rawCardWidth = Math.floor((boardWidth - cardGap * 3) / 4);
+  const cardWidth = isCompactBoard ? Math.max(60, rawCardWidth) : Math.max(68, rawCardWidth);
 
   const difficultyBadge = t(`games.difficulty.${selectedDifficulty}` as const);
 
@@ -987,13 +990,19 @@ export default function MemoryMatchScreen() {
         </View>
       </View>
 
-      <View style={styles.topStatsRow}>
+      <View style={[styles.topStatsRow, isCompactBoard && styles.topStatsRowCompact]}>
         <TopBadge label={t("games.memory_match.round_label")} value={roundNumber.toString()} colors={colors} />
         <TopBadge label={t("games.memory_match.matched_label")} value={`${roundPairsMatched}/${ROUND_PAIR_COUNT}`} colors={colors} />
         <TopBadge label={t("games.memory_match.pool_label")} value={difficultyBadge} colors={colors} />
       </View>
 
-      <View style={styles.boardWrap}>
+      <View
+        style={[
+          styles.boardWrap,
+          isCompactBoard && styles.boardWrapCompact,
+          { paddingHorizontal: boardHorizontalPadding },
+        ]}
+      >
         <View style={[styles.board, { gap: cardGap }]}>
           {cards.map((card) => {
             const matched = matchedCardIds.includes(card.id);
@@ -1026,6 +1035,7 @@ export default function MemoryMatchScreen() {
                 onPress={() => handleCardPress(card)}
                 style={[
                   styles.card,
+                  isCompactBoard && styles.cardCompact,
                   {
                     width: cardWidth,
                     backgroundColor: bgColor,
@@ -1038,7 +1048,12 @@ export default function MemoryMatchScreen() {
                   {card.side === "source" ? uiLanguage.toUpperCase() : targetLanguage.toUpperCase()}
                 </Text>
                 <Text
-                  style={[styles.cardText, { color: textColor }, isSmallScreen && { fontSize: 13 }]}
+                  style={[
+                    styles.cardText,
+                    { color: textColor },
+                    isSmallScreen && { fontSize: 13 },
+                    isCompactBoard && styles.cardTextCompact,
+                  ]}
                   adjustsFontSizeToFit
                   minimumFontScale={0.78}
                   numberOfLines={3}
@@ -1235,6 +1250,7 @@ const styles = StyleSheet.create({
   comboText: { fontSize: 13, fontWeight: "700" },
   audioIcons: { flexDirection: "row", alignItems: "center", gap: 10 },
   topStatsRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 14 },
+  topStatsRowCompact: { gap: 6, paddingHorizontal: 12, marginBottom: 10 },
   topBadge: { flex: 1, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 10, alignItems: "center" },
   topBadgeLabel: { fontSize: 11, marginBottom: 2 },
   topBadgeValue: { fontSize: 14, fontWeight: "700" },
@@ -1245,6 +1261,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  boardWrapCompact: {
+    paddingVertical: 6,
+  },
   board: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignSelf: "center" },
   card: {
     minHeight: 78,
@@ -1254,8 +1273,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     justifyContent: "space-between",
   },
+  cardCompact: {
+    minHeight: 72,
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
   cardLang: { fontSize: 10, fontWeight: "700", letterSpacing: 0.5 },
   cardText: { fontSize: 14, fontWeight: "700", lineHeight: 18 },
+  cardTextCompact: { fontSize: 12, lineHeight: 16 },
   scoreRow: {
     flexDirection: "row",
     justifyContent: "space-around",
