@@ -34,6 +34,7 @@ import {
   buildDistractors,
   shuffle,
 } from "@/utils/gamePoolBuilder";
+import { calculateAccuracy, calculateAuthoritativeGameScore } from "@/utils/gameScoring";
 import { HomeStackParamList } from "@/types";
 import "react-native-get-random-values";
 
@@ -62,13 +63,6 @@ const COMBO_X4 = 10;
 
 function getFallDuration(level: number): number {
   return Math.max(MIN_FALL_MS, BASE_FALL_MS - (level - 1) * FALL_STEP_MS);
-}
-
-function getComboMultiplier(combo: number): number {
-  if (combo >= COMBO_X4) return 4;
-  if (combo >= COMBO_X3) return 3;
-  if (combo >= COMBO_X2) return 2;
-  return 1;
 }
 
 type AnswerState = "idle" | "correct" | "wrong" | "missed";
@@ -125,7 +119,9 @@ export default function WordRainScreen() {
 
   // ---- Session ----
   const sessionIdRef = useRef<string>(generateUUID());
-  const gameStartTimeRef = useRef(0);
+  const elapsedMsRef = useRef(0);
+  const activeRunStartedAtRef = useRef<number | null>(null);
+  const endedRef = useRef(false);
 
   // ---- Game state (state + refs for stale closure safety) ----
   const [lives, setLives] = useState(MAX_LIVES);
@@ -295,6 +291,9 @@ export default function WordRainScreen() {
     comboMaxRef.current = 0;
     scoreRef.current   = 0;
     levelRef.current   = 1;
+    elapsedMsRef.current = 0;
+    activeRunStartedAtRef.current = Date.now();
+    endedRef.current = false;
 
     setLives(MAX_LIVES);
     setScore(0);
@@ -308,7 +307,6 @@ export default function WordRainScreen() {
     setSubmitError(null);
 
     sessionIdRef.current    = generateUUID();
-    gameStartTimeRef.current = Date.now();
 
     shuffledPoolRef.current = shuffle([...pool]);
     poolIndexRef.current    = 0;
@@ -408,12 +406,16 @@ export default function WordRainScreen() {
         correctRef.current = newCorrect;
         setCorrect(newCorrect);
 
-        const pts        = 10 * getComboMultiplier(newCombo) * levelRef.current;
-        scoreRef.current += pts;
+        const newLevel = Math.floor(newCorrect / LEVEL_UP_EVERY) + 1;
+        scoreRef.current = calculateAuthoritativeGameScore({
+          gameType: "word_rain",
+          correct: newCorrect,
+          comboMax: newComboMax,
+          levelReached: newLevel,
+        });
         setScore(scoreRef.current);
 
         // Level up?
-        const newLevel = Math.floor(newCorrect / LEVEL_UP_EVERY) + 1;
         if (newLevel > levelRef.current) {
           levelRef.current = newLevel;
           setLevel(newLevel);
@@ -452,6 +454,12 @@ export default function WordRainScreen() {
   // End game
   // ----------------------------------------------------------------
   function endGame() {
+    if (endedRef.current) return;
+    endedRef.current = true;
+    if (activeRunStartedAtRef.current) {
+      elapsedMsRef.current += Date.now() - activeRunStartedAtRef.current;
+      activeRunStartedAtRef.current = null;
+    }
     fallAnimRef.current?.stop();
     stopBgMusic();
     playSfx("finish");
@@ -463,7 +471,7 @@ export default function WordRainScreen() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const durationSec = Math.round((Date.now() - gameStartTimeRef.current) / 1000);
+    const durationSec = Math.round(elapsedMsRef.current / 1000);
 
     const stats: RawSessionStats = {
       sessionId:    sessionIdRef.current,
@@ -503,6 +511,10 @@ export default function WordRainScreen() {
   // ----------------------------------------------------------------
   function handlePause() {
     if (phase !== "playing") return;
+    if (activeRunStartedAtRef.current) {
+      elapsedMsRef.current += Date.now() - activeRunStartedAtRef.current;
+      activeRunStartedAtRef.current = null;
+    }
     fallAnimRef.current?.stop();
     setPhase("paused");
   }
@@ -517,6 +529,7 @@ export default function WordRainScreen() {
         if (prev <= 1) {
           clearInterval(countdownRef.current!);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          activeRunStartedAtRef.current = Date.now();
           setPhase("playing");
           setTimeout(() => spawnNextWord(), 50);
           return 0;
@@ -540,7 +553,7 @@ export default function WordRainScreen() {
   // ----------------------------------------------------------------
   // Derived
   // ----------------------------------------------------------------
-  const accuracy    = correct + wrong > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+  const accuracy    = calculateAccuracy(correct, wrong);
   const comboLabel  = combo >= COMBO_X4 ? "🔥 x4" : combo >= COMBO_X3 ? "🔥 x3" : combo >= COMBO_X2 ? "⚡ x2" : null;
   const fallTransY  = fallAnim.interpolate({ inputRange: [0, 1], outputRange: [-70, playfieldHeight + 10] });
 
@@ -761,6 +774,10 @@ export default function WordRainScreen() {
   // Render — Result
   // ----------------------------------------------------------------
   if (phase === "result") {
+    const finalCorrect = correctRef.current;
+    const finalWrong = wrongRef.current;
+    const finalMissed = missedRef.current;
+    const finalAccuracy = calculateAccuracy(finalCorrect, finalWrong);
     const finalScore   = submitResult?.score ?? scoreRef.current;
     const isNewRecord  = submitResult?.personalBestBroken ?? false;
     const leagueChanged = submitResult?.leagueChanged ?? false;
@@ -791,14 +808,14 @@ export default function WordRainScreen() {
 
           <View style={styles.statCardsRow}>
             <StatCard label={t("games.result.score")}    value={finalScore.toLocaleString()} color="#4DA3FF"      colors={colors} />
-            <StatCard label={t("games.result.accuracy")} value={`${accuracy}%`}              color={colors.success} colors={colors} />
+            <StatCard label={t("games.result.accuracy")} value={`${finalAccuracy}%`}         color={colors.success} colors={colors} />
             <StatCard label={t("games.result.level")}    value={`${levelRef.current}`}       color="#F59E0B"        colors={colors} />
           </View>
 
           <View style={styles.statCardsRow}>
-            <StatCard label={t("games.result.correct")} value={correct.toString()} color={colors.success} colors={colors} />
-            <StatCard label={t("games.result.wrong")}   value={wrong.toString()}   color={colors.error}   colors={colors} />
-            <StatCard label={t("games.result.missed")}  value={missed.toString()}  color={colors.textSecondary} colors={colors} />
+            <StatCard label={t("games.result.correct")} value={finalCorrect.toString()} color={colors.success} colors={colors} />
+            <StatCard label={t("games.result.wrong")}   value={finalWrong.toString()}   color={colors.error}   colors={colors} />
+            <StatCard label={t("games.result.missed")}  value={finalMissed.toString()}  color={colors.textSecondary} colors={colors} />
           </View>
 
           <View style={styles.statCardsRow}>
@@ -880,7 +897,7 @@ export default function WordRainScreen() {
         {/* Score + Level + Audio toggles */}
         <View style={styles.scoreLevel}>
           <Text style={[styles.scoreLevelText, { color: colors.text }]}>
-            {scoreRef.current}
+            {score}
           </Text>
           {comboLabel ? (
             <Text style={[styles.comboLabel, { color: "#F59E0B" }]}>{comboLabel}</Text>

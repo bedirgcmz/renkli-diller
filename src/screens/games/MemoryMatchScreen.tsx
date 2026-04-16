@@ -34,6 +34,7 @@ import {
   RawSessionStats,
 } from "@/types/game";
 import { buildGamePool, shuffle } from "@/utils/gamePoolBuilder";
+import { calculateAccuracy, calculateAuthoritativeGameScore } from "@/utils/gameScoring";
 import "react-native-get-random-values";
 
 type Nav = NativeStackNavigationProp<HomeStackParamList>;
@@ -158,6 +159,13 @@ export default function MemoryMatchScreen() {
   const phaseRef = useRef<GamePhase>("loading");
   const resolvingRef = useRef(false);
   const endedRef = useRef(false);
+  const correctRef = useRef(0);
+  const wrongRef = useRef(0);
+  const comboRef = useRef(0);
+  const comboMaxRef = useRef(0);
+  const timeLeftRef = useRef(GAME_DURATION);
+  const roundNumberRef = useRef(1);
+  const matchedCardIdsRef = useRef<string[]>([]);
   const penaltyOpacity = useRef(new Animated.Value(0)).current;
   const penaltyTranslateY = useRef(new Animated.Value(-10)).current;
   const penaltyScale = useRef(new Animated.Value(0.96)).current;
@@ -172,6 +180,34 @@ export default function MemoryMatchScreen() {
   useEffect(() => {
     phaseRef.current = phase;
   }, [phase]);
+
+  useEffect(() => {
+    correctRef.current = correct;
+  }, [correct]);
+
+  useEffect(() => {
+    wrongRef.current = wrong;
+  }, [wrong]);
+
+  useEffect(() => {
+    comboRef.current = combo;
+  }, [combo]);
+
+  useEffect(() => {
+    comboMaxRef.current = comboMax;
+  }, [comboMax]);
+
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+
+  useEffect(() => {
+    roundNumberRef.current = roundNumber;
+  }, [roundNumber]);
+
+  useEffect(() => {
+    matchedCardIdsRef.current = matchedCardIds;
+  }, [matchedCardIds]);
 
   useEffect(() => {
     return () => {
@@ -254,6 +290,8 @@ export default function MemoryMatchScreen() {
       return;
     }
 
+    roundNumberRef.current = round;
+    matchedCardIdsRef.current = [];
     setRoundNumber(round);
     setMatchedCardIds([]);
     setSelectedCardIds([]);
@@ -353,6 +391,13 @@ export default function MemoryMatchScreen() {
     setWrong(0);
     setCombo(0);
     setComboMax(0);
+    correctRef.current = 0;
+    wrongRef.current = 0;
+    comboRef.current = 0;
+    comboMaxRef.current = 0;
+    timeLeftRef.current = GAME_DURATION;
+    roundNumberRef.current = 1;
+    matchedCardIdsRef.current = [];
     setSubmitResult(null);
     setSubmitError(null);
     resetPoolCursor(pool);
@@ -366,12 +411,14 @@ export default function MemoryMatchScreen() {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
+        const next = Math.max(0, prev - 1);
+        timeLeftRef.current = next;
         if (prev <= 1) {
           clearInterval(timerRef.current!);
           endGame();
           return 0;
         }
-        return prev - 1;
+        return next;
       });
     }, 1000);
   }
@@ -400,11 +447,11 @@ export default function MemoryMatchScreen() {
     const stats: RawSessionStats = {
       sessionId: sessionIdRef.current,
       gameType: "memory_match",
-      correct,
-      wrong,
+      correct: correctRef.current,
+      wrong: wrongRef.current,
       missed: 0,
-      durationSec: GAME_DURATION - timeLeft,
-      comboMax,
+      durationSec: GAME_DURATION - timeLeftRef.current,
+      comboMax: comboMaxRef.current,
       levelReached: 1,
       poolSize,
       filterUsed: filter,
@@ -468,6 +515,7 @@ export default function MemoryMatchScreen() {
     let depleted = false;
     setTimeLeft((prev) => {
       const next = Math.max(0, prev - TIME_PENALTY_SEC);
+      timeLeftRef.current = next;
       if (next <= 0) {
         depleted = true;
         if (timerRef.current) {
@@ -556,9 +604,12 @@ export default function MemoryMatchScreen() {
     const isMatch = firstCard.pairId === card.pairId && firstCard.side !== card.side;
 
     if (isMatch) {
-      const nextCorrect = correct + 1;
-      const nextCombo = combo + 1;
-      const nextComboMax = Math.max(comboMax, nextCombo);
+      const nextCorrect = correctRef.current + 1;
+      const nextCombo = comboRef.current + 1;
+      const nextComboMax = Math.max(comboMaxRef.current, nextCombo);
+      correctRef.current = nextCorrect;
+      comboRef.current = nextCombo;
+      comboMaxRef.current = nextComboMax;
 
       setCorrect(nextCorrect);
       setCombo(nextCombo);
@@ -566,13 +617,15 @@ export default function MemoryMatchScreen() {
       playSfx(nextCombo === COMBO_X2 || nextCombo === COMBO_X3 ? "levelUp" : "correct");
 
       transitionRef.current = setTimeout(() => {
-        setMatchedCardIds((prev) => [...prev, ...pairSelection]);
+        const nextMatchedCardIds = [...matchedCardIdsRef.current, ...pairSelection];
+        matchedCardIdsRef.current = nextMatchedCardIds;
+        setMatchedCardIds(nextMatchedCardIds);
         setSelectedCardIds([]);
         resolvingRef.current = false;
 
-        const totalMatchedCards = matchedCardIds.length + 2;
+        const totalMatchedCards = nextMatchedCardIds.length;
         if (totalMatchedCards >= ROUND_PAIR_COUNT * 2 && phaseRef.current === "playing") {
-          startNextRound(roundNumber + 1);
+          startNextRound(roundNumberRef.current + 1);
         }
       }, CORRECT_DELAY_MS);
       return;
@@ -580,7 +633,9 @@ export default function MemoryMatchScreen() {
 
     playSfx("wrong");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    setWrong((prev) => prev + 1);
+    wrongRef.current += 1;
+    comboRef.current = 0;
+    setWrong(wrongRef.current);
     setCombo(0);
     setWrongCardIds(pairSelection);
     showTimePenaltyFeedback();
@@ -596,8 +651,16 @@ export default function MemoryMatchScreen() {
     }, WRONG_DELAY_MS);
   }
 
-  const accuracy = correct + wrong > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
-  const localScore = correct * 10 + comboMax * 5;
+  const resultCorrect = phase === "result" ? correctRef.current : correct;
+  const resultWrong = phase === "result" ? wrongRef.current : wrong;
+  const resultComboMax = phase === "result" ? comboMaxRef.current : comboMax;
+  const accuracy = calculateAccuracy(resultCorrect, resultWrong);
+  const localScore = calculateAuthoritativeGameScore({
+    gameType: "memory_match",
+    correct: resultCorrect,
+    comboMax: resultComboMax,
+    levelReached: 1,
+  });
   const timerColor = timeLeft <= LAST_10_THRESHOLD ? colors.error : colors.primary;
   const comboLabel = combo >= COMBO_X3 ? "🔥 x3" : combo >= COMBO_X2 ? "⚡ x2" : null;
   const roundPairsMatched = matchedCardIds.length / 2;
@@ -892,12 +955,12 @@ export default function MemoryMatchScreen() {
             <View style={styles.statCardsRow}>
               <StatCard label={t("games.result.score")} value={score.toLocaleString()} color={colors.primary} colors={colors} />
               <StatCard label={t("games.result.accuracy")} value={`${accuracy}%`} color={colors.success} colors={colors} />
-              <StatCard label={t("games.result.combo")} value={`x${comboMax}`} color="#F59E0B" colors={colors} />
+              <StatCard label={t("games.result.combo")} value={`x${resultComboMax}`} color="#F59E0B" colors={colors} />
             </View>
 
             <View style={styles.statCardsRow}>
-              <StatCard label={t("games.result.correct")} value={correct.toString()} color={colors.success} colors={colors} />
-              <StatCard label={t("games.result.wrong")} value={wrong.toString()} color={colors.error} colors={colors} />
+              <StatCard label={t("games.result.correct")} value={resultCorrect.toString()} color={colors.success} colors={colors} />
+              <StatCard label={t("games.result.wrong")} value={resultWrong.toString()} color={colors.error} colors={colors} />
               {submitResult?.weeklyRank ? (
                 <StatCard label={t("games.hub.leaderboard_title")} value={`#${submitResult.weeklyRank}`} color={colors.primary} colors={colors} />
               ) : (

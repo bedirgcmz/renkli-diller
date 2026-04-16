@@ -33,6 +33,7 @@ import {
   buildSpeedRoundQuestions,
   SpeedRoundQuestion,
 } from "@/utils/gamePoolBuilder";
+import { calculateAccuracy, calculateAuthoritativeGameScore } from "@/utils/gameScoring";
 import { HomeStackParamList } from "@/types";
 import "react-native-get-random-values"; // UUID support
 
@@ -134,6 +135,11 @@ export default function SpeedRoundScreen() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const comboToastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const comboToastedLevels = useRef<Set<number>>(new Set());
+  const correctRef = useRef(0);
+  const wrongRef = useRef(0);
+  const comboRef = useRef(0);
+  const comboMaxRef = useRef(0);
+  const timeLeftRef = useRef(GAME_DURATION);
 
   // ---- AppState (auto-pause) ----
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
@@ -146,6 +152,26 @@ export default function SpeedRoundScreen() {
       clearAllTimers();
     };
   }, []);
+
+  useEffect(() => {
+    correctRef.current = correct;
+  }, [correct]);
+
+  useEffect(() => {
+    wrongRef.current = wrong;
+  }, [wrong]);
+
+  useEffect(() => {
+    comboRef.current = combo;
+  }, [combo]);
+
+  useEffect(() => {
+    comboMaxRef.current = comboMax;
+  }, [comboMax]);
+
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   function clearAllTimers() {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -268,6 +294,11 @@ export default function SpeedRoundScreen() {
     setSelectedIndex(null);
     setShowLast10(false);
     comboToastedLevels.current = new Set();
+    correctRef.current = 0;
+    wrongRef.current = 0;
+    comboRef.current = 0;
+    comboMaxRef.current = 0;
+    timeLeftRef.current = GAME_DURATION;
     sessionIdRef.current = generateUUID();
     startTimer();
     startBgMusic();
@@ -280,6 +311,8 @@ export default function SpeedRoundScreen() {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
+        const next = Math.max(0, prev - 1);
+        timeLeftRef.current = next;
         if (prev <= LAST_10_THRESHOLD + 1 && !showLast10) {
           setShowLast10(true);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -289,7 +322,7 @@ export default function SpeedRoundScreen() {
           endGame();
           return 0;
         }
-        return prev - 1;
+        return next;
       });
     }, 1000);
   }
@@ -316,11 +349,15 @@ export default function SpeedRoundScreen() {
       if (optionIndex === q.correctIndex) {
         // Correct
         setAnswerState("correct");
-        const newCombo = combo + 1;
-        const newComboMax = Math.max(comboMax, newCombo);
+        const newCombo = comboRef.current + 1;
+        const newComboMax = Math.max(comboMaxRef.current, newCombo);
+        const newCorrect = correctRef.current + 1;
+        comboRef.current = newCombo;
+        comboMaxRef.current = newComboMax;
+        correctRef.current = newCorrect;
         setCombo(newCombo);
         setComboMax(newComboMax);
-        setCorrect((c) => c + 1);
+        setCorrect(newCorrect);
 
         // Combo toast (only on first reaching that level)
         if (newCombo === COMBO_X2 && !comboToastedLevels.current.has(COMBO_X2)) {
@@ -340,15 +377,17 @@ export default function SpeedRoundScreen() {
       } else {
         // Wrong
         setAnswerState("wrong");
+        comboRef.current = 0;
+        wrongRef.current += 1;
         setCombo(0);
-        setWrong((w) => w + 1);
+        setWrong(wrongRef.current);
         playSfx("wrong");
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
         transitionRef.current = setTimeout(nextQuestion, WRONG_DELAY_MS);
       }
     },
-    [answerState, phase, questions, currentIndex, combo, comboMax, t]
+    [answerState, phase, questions, currentIndex, t]
   );
 
   function nextQuestion() {
@@ -388,14 +427,19 @@ export default function SpeedRoundScreen() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
+    const finalCorrect = correctRef.current;
+    const finalWrong = wrongRef.current;
+    const finalComboMax = comboMaxRef.current;
+    const finalDurationSec = GAME_DURATION - timeLeftRef.current;
+
     const stats: RawSessionStats = {
       sessionId:    sessionIdRef.current,
       gameType:     "speed_round",
-      correct,
-      wrong,
+      correct:      finalCorrect,
+      wrong:        finalWrong,
       missed:       0,
-      durationSec:  GAME_DURATION - timeLeft,
-      comboMax,
+      durationSec:  finalDurationSec,
+      comboMax:     finalComboMax,
       levelReached: 1,
       poolSize,
       filterUsed:   filter,
@@ -464,9 +508,7 @@ export default function SpeedRoundScreen() {
   // Current question
   // ----------------------------------------------------------------
   const currentQuestion = questions[currentIndex] ?? null;
-  const accuracy = correct + wrong > 0
-    ? Math.round((correct / (correct + wrong)) * 100)
-    : 0;
+  const accuracy = calculateAccuracy(correct, wrong);
 
   const comboLabel =
     combo >= COMBO_X3 ? "🔥 x3" : combo >= COMBO_X2 ? "⚡ x2" : null;
@@ -680,7 +722,18 @@ export default function SpeedRoundScreen() {
 
   // ---- Result ----
   if (phase === "result") {
-    const score = submitResult?.score ?? (correct * 10 + comboMax * 5);
+    const finalCorrect = correctRef.current;
+    const finalWrong = wrongRef.current;
+    const finalComboMax = comboMaxRef.current;
+    const finalAccuracy = calculateAccuracy(finalCorrect, finalWrong);
+    const score =
+      submitResult?.score ??
+      calculateAuthoritativeGameScore({
+        gameType: "speed_round",
+        correct: finalCorrect,
+        comboMax: finalComboMax,
+        levelReached: 1,
+      });
     const isNewRecord = submitResult?.personalBestBroken ?? false;
     const leagueChanged = submitResult?.leagueChanged ?? false;
 
@@ -714,13 +767,13 @@ export default function SpeedRoundScreen() {
           {/* Stat cards */}
           <View style={styles.statCardsRow}>
             <StatCard label={t("games.result.score")}    value={score.toLocaleString()} color={colors.primary} colors={colors} />
-            <StatCard label={t("games.result.accuracy")} value={`${accuracy}%`}          color={colors.success} colors={colors} />
-            <StatCard label={t("games.result.combo")}    value={`x${comboMax}`}           color="#F59E0B"        colors={colors} />
+            <StatCard label={t("games.result.accuracy")} value={`${finalAccuracy}%`}     color={colors.success} colors={colors} />
+            <StatCard label={t("games.result.combo")}    value={`x${finalComboMax}`}      color="#F59E0B"        colors={colors} />
           </View>
 
           <View style={styles.statCardsRow}>
-            <StatCard label={t("games.result.correct")} value={correct.toString()} color={colors.success} colors={colors} />
-            <StatCard label={t("games.result.wrong")}   value={wrong.toString()}   color={colors.error}   colors={colors} />
+            <StatCard label={t("games.result.correct")} value={finalCorrect.toString()} color={colors.success} colors={colors} />
+            <StatCard label={t("games.result.wrong")}   value={finalWrong.toString()}   color={colors.error}   colors={colors} />
             {submitResult?.weeklyRank ? (
               <StatCard
                 label={t("games.hub.leaderboard_title")}

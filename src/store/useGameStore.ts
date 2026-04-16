@@ -10,6 +10,7 @@ import {
   RawSessionStats,
   UserGameStats,
 } from "@/types/game";
+import { validateRawSessionStats } from "@/utils/gameScoring";
 
 // ----------------------------------------------------------------
 // State (persistent/meta only — no in-game state here)
@@ -130,6 +131,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   submitScore: async (stats: RawSessionStats): Promise<GameSubmitResult | null> => {
     set({ submitLoading: true, error: null });
 
+    const validationError = validateRawSessionStats(stats);
+    if (validationError) {
+      set({ submitLoading: false, error: validationError });
+      return null;
+    }
+
     try {
       const { data, error } = await supabase.rpc("submit_game_score", {
         p_session_id:    stats.sessionId,
@@ -159,8 +166,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       }
 
       if (data?.error) {
-        // RPC-level error (daily_limit, invalid_stats, etc.)
-        set({ submitLoading: false, error: data.error });
+        // RPC-level errors are terminal for this payload, so clear it from retry queue.
+        set((state) => ({
+          submitLoading: false,
+          error: data.error,
+          pendingScores: state.pendingScores.filter((queued) => queued.sessionId !== stats.sessionId),
+        }));
         return null;
       }
 
@@ -200,7 +211,15 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
                   : state.userStats.bestMemoryMatch,
               lastPlayedAt: new Date().toISOString(),
             }
-          : state.userStats,
+          : {
+              league: result.league,
+              cumulativeScore: result.cumulativeScore,
+              gamesPlayed: 1,
+              bestSpeedRound: stats.gameType === "speed_round" ? result.score : 0,
+              bestWordRain: stats.gameType === "word_rain" ? result.score : 0,
+              bestMemoryMatch: stats.gameType === "memory_match" ? result.score : 0,
+              lastPlayedAt: new Date().toISOString(),
+            },
       }));
 
       return result;
@@ -218,10 +237,22 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
   // ---- Retry a pending (offline) score ----
   retryPendingScore: async () => {
-    const { pendingScores, submitScore } = get();
-    const nextPending = pendingScores[0];
-    if (!nextPending) return;
-    await submitScore(nextPending);
+    let attempts = 0;
+
+    while (attempts < 20) {
+      const { pendingScores, submitScore } = get();
+      const nextPending = pendingScores[0];
+      if (!nextPending) return;
+
+      const result = await submitScore(nextPending);
+      const currentError = get().error;
+
+      if (!result && currentError === "network") {
+        return;
+      }
+
+      attempts += 1;
+    }
   },
 
   // ---- Load leaderboard (with cache) ----
