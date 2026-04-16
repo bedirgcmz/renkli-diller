@@ -291,6 +291,7 @@ function VocabQuizModal({
   colors: any;
   t: any;
 }) {
+  const insets = useSafeAreaInsets();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -332,7 +333,15 @@ function VocabQuizModal({
   return (
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={qStyles.overlay}>
-        <View style={[qStyles.sheet, { backgroundColor: colors.cardBackground }]}>
+        <View
+          style={[
+            qStyles.sheet,
+            {
+              backgroundColor: colors.cardBackground,
+              paddingBottom: Math.max(insets.bottom, 12) + 12,
+            },
+          ]}
+        >
           {/* Header */}
           <View style={[qStyles.header, { borderBottomColor: colors.divider }]}>
             <Text style={[qStyles.title, { color: colors.text }]}>{t("reading.quiz_title")}</Text>

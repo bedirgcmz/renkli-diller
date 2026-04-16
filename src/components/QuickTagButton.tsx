@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/useTheme";
 import { SentenceTag } from "@/types";
 import { TAG_OPTIONS, TAG_GROUPS } from "@/utils/constants";
@@ -86,13 +87,22 @@ interface TagSheetProps {
 function TagSheet({ visible, onClose, currentTag, onSelect }: TagSheetProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const getOptionByValue = (value: SentenceTag) => TAG_OPTIONS.find((o) => o.value === value)!;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-      <View style={[styles.sheet, { backgroundColor: colors.cardBackground }]}>
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: colors.cardBackground,
+            paddingBottom: Math.max(insets.bottom, 12) + 12,
+          },
+        ]}
+      >
         {/* Handle */}
         <View style={[styles.handle, { backgroundColor: colors.border }]} />
 
@@ -111,7 +121,10 @@ function TagSheet({ visible, onClose, currentTag, onSelect }: TagSheetProps) {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: Math.max(insets.bottom, 12) },
+          ]}
         >
           {TAG_GROUPS.map((group) => (
             <View key={group.labelKey} style={styles.group}>

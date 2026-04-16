@@ -13,7 +13,7 @@ import {
   Platform,
   Clipboard,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -61,6 +61,7 @@ function SaveModal({
   t,
   colors,
 }: SaveModalProps) {
+  const insets = useSafeAreaInsets();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(
     categories[0]?.id
   );
@@ -102,7 +103,15 @@ function SaveModal({
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ width: "100%" }}
         >
-          <View style={[styles.modalSheet, { backgroundColor: colors.cardBackground }]}>
+          <View
+            style={[
+              styles.modalSheet,
+              {
+                backgroundColor: colors.cardBackground,
+                paddingBottom: Math.max(insets.bottom, Platform.OS === "ios" ? 16 : 12) + 12,
+              },
+            ]}
+          >
             {/* Handle */}
             <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
 
@@ -111,7 +120,11 @@ function SaveModal({
               {t("ai_translator.save_modal_title")}
             </Text>
 
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) }}
+            >
               {/* Source preview */}
               <View style={[styles.previewBox, { backgroundColor: colors.backgroundSecondary }]}>
                 <Text style={[styles.previewLabel, { color: colors.textTertiary }]}>

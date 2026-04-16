@@ -12,7 +12,7 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -30,6 +30,7 @@ import { useLeaderboardStore } from "@/store/useLeaderboardStore";
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { user, uploadAvatar, removeAvatar, updateProfile } = useAuthStore();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -426,7 +427,15 @@ export default function ProfileScreen() {
         onRequestClose={() => setPhotoSheetVisible(false)}
       >
         <Pressable style={styles.sheetBackdrop} onPress={() => setPhotoSheetVisible(false)}>
-          <Pressable style={[styles.sheet, { backgroundColor: colors.cardBackground }]}>
+          <Pressable
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: colors.cardBackground,
+                paddingBottom: Math.max(insets.bottom, 12) + 12,
+              },
+            ]}
+          >
             <Text style={[styles.sheetTitle, { color: colors.textSecondary }]}>
               {t("profile.change_photo")}
             </Text>

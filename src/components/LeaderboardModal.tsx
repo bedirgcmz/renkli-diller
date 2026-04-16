@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useLeaderboardStore, LeaderboardEntry } from "@/store/useLeaderboardStore";
@@ -188,6 +189,7 @@ function BlurredRows({
 export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const isPremium = user?.is_premium ?? false;
   const { entries, myEntry, loading, loadLeaderboard } = useLeaderboardStore();
@@ -243,7 +245,15 @@ export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props)
       onRequestClose={onClose}
     >
       <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: colors.cardBackground }]}>
+        <Pressable
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.cardBackground,
+              paddingBottom: Math.max(insets.bottom, 12) + 12,
+            },
+          ]}
+        >
           {/* Handle */}
           <View style={[styles.handle, { backgroundColor: colors.border }]} />
 
@@ -316,7 +326,10 @@ export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props)
             <ScrollView
               style={styles.list}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
+              contentContainerStyle={[
+                styles.listContent,
+                { paddingBottom: Math.max(insets.bottom, 12) },
+              ]}
             >
               {/* Column header */}
               <View style={styles.colHeader}>

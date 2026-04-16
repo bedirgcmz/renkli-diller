@@ -10,7 +10,7 @@ import {
   Modal,
   Pressable,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -611,6 +611,7 @@ function FullLeaderboardModal({
 }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<"weekly" | "alltime">("weekly");
 
   useEffect(() => {
@@ -627,7 +628,15 @@ function FullLeaderboardModal({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={[styles.modalSheet, { backgroundColor: colors.cardBackground }]}>
+        <Pressable
+          style={[
+            styles.modalSheet,
+            {
+              backgroundColor: colors.cardBackground,
+              paddingBottom: Math.max(insets.bottom, 12) + 8,
+            },
+          ]}
+        >
           <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
 
           <View style={styles.modalHeader}>
@@ -677,7 +686,10 @@ function FullLeaderboardModal({
 
           <ScrollView
             style={styles.modalList}
-            contentContainerStyle={styles.modalListContent}
+            contentContainerStyle={[
+              styles.modalListContent,
+              { paddingBottom: Math.max(insets.bottom, 12) },
+            ]}
             showsVerticalScrollIndicator={false}
           >
             {isLoading && entries.length === 0 ? (
