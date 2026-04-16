@@ -11,6 +11,8 @@
     "full_name": "Vollständiger Name",
     "check_email_title": "E-Mail prüfen",
     "check_email_body": "Wir haben einen Bestätigungslink an {{email}} gesendet. Bestätigen Sie Ihre E-Mail und melden Sie sich dann an.",
+    "saved_language_settings_title": "Frühere Spracheinstellungen wiederhergestellt",
+    "saved_language_settings_body": "Wir haben Ihre bisherigen Spracheinstellungen in Ihrem Konto gefunden. Aktuell verwenden Sie {{pair}}. Sie können Ihre Spracheinstellungen unter {{moreTab}} -> {{settingsLabel}} ändern.",
     "email": "E-Mail",
     "password": "Passwort",
     "confirm_password": "Passwort bestätigen",

@@ -11,6 +11,8 @@
     "full_name": "Nome completo",
     "check_email_title": "Verifique seu e-mail",
     "check_email_body": "Enviamos um link de verificação para {{email}}. Confirme seu e-mail e depois entre para continuar.",
+    "saved_language_settings_title": "Configurações de idioma anteriores restauradas",
+    "saved_language_settings_body": "Encontramos na sua conta as suas configurações anteriores de idioma. Você está usando {{pair}} agora. Pode alterar as configurações de idioma em {{moreTab}} -> {{settingsLabel}}.",
     "email": "E-mail",
     "password": "Senha",
     "confirm_password": "Confirmar senha",

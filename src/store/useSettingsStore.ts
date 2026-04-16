@@ -21,6 +21,10 @@ interface SettingsState extends Settings {
   loading: boolean;
   initialized: boolean;
   loadedForUserId: string | null;
+  pendingLanguagePreferenceNotice: {
+    uiLanguage: SupportedLanguage;
+    targetLanguage: SupportedLanguage;
+  } | null;
 
   // Actions
   setUILanguage: (lang: SupportedLanguage) => Promise<void>;
@@ -36,6 +40,7 @@ interface SettingsState extends Settings {
   loadSettings: (force?: boolean) => Promise<void>;
   saveSettings: (settings: Partial<Settings>) => Promise<void>;
   resetToDefaults: () => Promise<void>;
+  clearPendingLanguagePreferenceNotice: () => void;
   clear: () => void;
 }
 
@@ -97,6 +102,28 @@ function toPersistedSettings(settings: Settings): Settings {
   };
 }
 
+function parseStoredSettings(raw: string | null): Settings | null {
+  if (!raw) return null;
+
+  try {
+    return {
+      ...DEFAULT_SETTINGS,
+      ...(JSON.parse(raw) as Partial<Settings>),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function hasLanguagePairMismatch(candidate: Settings | null, resolved: Settings): boolean {
+  if (!candidate) return false;
+
+  return (
+    candidate.uiLanguage !== resolved.uiLanguage ||
+    candidate.targetLanguage !== resolved.targetLanguage
+  );
+}
+
 async function reconcileNotificationState(settings: Settings): Promise<Settings> {
   const syncOk = await syncDailyReminderSchedule({
     enabled: settings.notifications,
@@ -127,6 +154,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   loading: false,
   initialized: false,
   loadedForUserId: null,
+  pendingLanguagePreferenceNotice: null,
 
   setUILanguage: async (lang) => {
     set({ uiLanguage: lang });
@@ -189,39 +217,24 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         return;
       }
 
-      // Try to load from AsyncStorage first
-      let stored = await AsyncStorage.getItem(storageKey);
-      if (!stored) {
-        const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
-        if (legacy) {
-          stored = legacy;
-          await AsyncStorage.setItem(storageKey, legacy).catch(() => {});
-          await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
-        }
-      }
-      if (stored) {
-        const settings = JSON.parse(stored) as Settings;
-        const resolvedSettings = await reconcileNotificationState({
-          ...DEFAULT_SETTINGS,
-          ...settings,
-        });
-        set({
-          ...resolvedSettings,
-          loading: false,
-          initialized: true,
-          loadedForUserId: userId,
-        });
-        await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
-        return;
-      }
-
-      // If no local user-specific settings, try to load from Supabase
       if (userId) {
+        const guestSettings = parseStoredSettings(await AsyncStorage.getItem(guestStorageKey));
+
+        let cachedUserRaw = await AsyncStorage.getItem(storageKey);
+        if (!cachedUserRaw) {
+          const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
+          if (legacy) {
+            cachedUserRaw = legacy;
+            await AsyncStorage.setItem(storageKey, legacy).catch(() => {});
+            await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
+          }
+        }
+
         const { data: settings } = await supabase
           .from("user_settings")
           .select("*")
           .eq("user_id", userId)
-          .single();
+          .maybeSingle();
 
         if (settings) {
           const mapped: Settings = {
@@ -237,43 +250,120 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             ttsVoice: settings.tts_voice ?? DEFAULT_SETTINGS.ttsVoice,
           };
           const resolvedSettings = await reconcileNotificationState(mapped);
-          set({ ...resolvedSettings, loading: false, initialized: true, loadedForUserId: userId });
+          set({
+            ...resolvedSettings,
+            loading: false,
+            initialized: true,
+            loadedForUserId: userId,
+            pendingLanguagePreferenceNotice: hasLanguagePairMismatch(guestSettings, resolvedSettings)
+              ? {
+                  uiLanguage: resolvedSettings.uiLanguage,
+                  targetLanguage: resolvedSettings.targetLanguage,
+                }
+              : null,
+          });
           await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+          await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           return;
         }
-      }
 
-      // If a guest picked languages before logging in, migrate those choices
-      // into the authenticated user's settings on first login.
-      if (userId) {
-        const guestStored = await AsyncStorage.getItem(guestStorageKey);
-        if (guestStored) {
-          const settings = JSON.parse(guestStored) as Settings;
-          const resolvedSettings = await reconcileNotificationState({
-            ...DEFAULT_SETTINGS,
-            ...settings,
-          });
+        const cachedUserSettings = parseStoredSettings(cachedUserRaw);
+        if (cachedUserSettings) {
+          const resolvedSettings = await reconcileNotificationState(cachedUserSettings);
 
           set({
             ...resolvedSettings,
             loading: false,
             initialized: true,
             loadedForUserId: userId,
+            pendingLanguagePreferenceNotice: hasLanguagePairMismatch(guestSettings, resolvedSettings)
+              ? {
+                  uiLanguage: resolvedSettings.uiLanguage,
+                  targetLanguage: resolvedSettings.targetLanguage,
+                }
+              : null,
           });
 
           await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           await persistSettingsToSupabase(userId, resolvedSettings);
+          await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           return;
+        }
+
+        // First-time authenticated user: carry guest selection forward and persist it.
+        if (guestSettings) {
+          const resolvedSettings = await reconcileNotificationState(guestSettings);
+
+          set({
+            ...resolvedSettings,
+            loading: false,
+            initialized: true,
+            loadedForUserId: userId,
+            pendingLanguagePreferenceNotice: null,
+          });
+
+          await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+          await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+          await persistSettingsToSupabase(userId, resolvedSettings);
+          return;
+        }
+
+        const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
+        set({
+          ...resolvedDefaults,
+          loading: false,
+          initialized: true,
+          loadedForUserId: userId,
+          pendingLanguagePreferenceNotice: null,
+        });
+        await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedDefaults)));
+        await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedDefaults)));
+        return;
+      }
+
+      // Guest flow: use guest storage first, then legacy, then defaults.
+      let stored = await AsyncStorage.getItem(storageKey);
+      if (!stored) {
+        const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
+        if (legacy) {
+          stored = legacy;
+          await AsyncStorage.setItem(storageKey, legacy).catch(() => {});
+          await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
         }
       }
 
-      // Use defaults
+      const guestResolved = parseStoredSettings(stored);
+      if (guestResolved) {
+        const resolvedSettings = await reconcileNotificationState(guestResolved);
+        set({
+          ...resolvedSettings,
+          loading: false,
+          initialized: true,
+          loadedForUserId: null,
+          pendingLanguagePreferenceNotice: null,
+        });
+        await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+        return;
+      }
+
       const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
-      set({ ...resolvedDefaults, loading: false, initialized: true, loadedForUserId: userId });
+      set({
+        ...resolvedDefaults,
+        loading: false,
+        initialized: true,
+        loadedForUserId: userId,
+        pendingLanguagePreferenceNotice: null,
+      });
       await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedDefaults)));
     } catch (error) {
       if (__DEV__) console.error("Error loading settings:", error);
-      set({ ...DEFAULT_SETTINGS, loading: false, initialized: true, loadedForUserId: null });
+      set({
+        ...DEFAULT_SETTINGS,
+        loading: false,
+        initialized: true,
+        loadedForUserId: null,
+        pendingLanguagePreferenceNotice: null,
+      });
     }
   },
 
@@ -295,15 +385,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const userId = await getCurrentUserId();
       const storageKey = getSettingsStorageKey(userId);
+      const guestStorageKey = getSettingsStorageKey(null);
       const resolvedSettings = await reconcileNotificationState(requestedSettings);
 
       set({
         ...resolvedSettings,
         loadedForUserId: userId,
+        pendingLanguagePreferenceNotice: null,
       });
 
       // Save to AsyncStorage
       await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+      await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
       await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
 
       // Save to Supabase if user is logged in
@@ -321,9 +414,15 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       loading: false,
       initialized: true,
       loadedForUserId: state.loadedForUserId,
+      pendingLanguagePreferenceNotice: null,
     }));
     await get().saveSettings(DEFAULT_SETTINGS);
   },
+
+  clearPendingLanguagePreferenceNotice: () =>
+    set({
+      pendingLanguagePreferenceNotice: null,
+    }),
 
   clear: () =>
     set({
@@ -331,5 +430,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       loading: false,
       initialized: false,
       loadedForUserId: null,
+      pendingLanguagePreferenceNotice: null,
     }),
 }));

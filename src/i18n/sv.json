@@ -11,6 +11,8 @@
     "full_name": "Fullständigt namn",
     "check_email_title": "Kontrollera din e-post",
     "check_email_body": "Vi skickade en verifieringslänk till {{email}}. Bekräfta din e-post och logga sedan in för att fortsätta.",
+    "saved_language_settings_title": "Tidigare språkinställningar återställda",
+    "saved_language_settings_body": "Vi hittade dina tidigare språkinställningar i ditt konto. Du använder just nu {{pair}}. Du kan ändra språkinställningarna under {{moreTab}} -> {{settingsLabel}}.",
     "email": "E-post",
     "password": "Lösenord",
     "confirm_password": "Bekräfta lösenord",

@@ -11,6 +11,8 @@
     "full_name": "Ad Soyad",
     "check_email_title": "E-postanı kontrol et",
     "check_email_body": "{{email}} adresine bir doğrulama bağlantısı gönderdik. E-postanı onayladıktan sonra giriş yaparak devam edebilirsin.",
+    "saved_language_settings_title": "Önceki dil ayarlarınız geri yüklendi",
+    "saved_language_settings_body": "Hesabınızda önceki dil ayarlarınızı bulduk. Şu anda {{pair}} ayarını kullanıyorsunuz. Dil ayarlarınızı {{moreTab}} -> {{settingsLabel}} altından değiştirebilirsiniz.",
     "email": "E-posta",
     "password": "Şifre",
     "confirm_password": "Şifre Tekrar",
