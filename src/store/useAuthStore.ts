@@ -946,8 +946,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
       if (currentSession?.user) {
         console.log("[auth] initialize restored Supabase persisted session");
         primeAuthenticatedSession(currentSession);
-        await hydrateAuthenticatedSession(currentSession);
         set({ initialized: true });
+        scheduleHydration(currentSession, "initialize");
         return;
       }
 
@@ -973,8 +973,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
             } else {
               console.log("[auth] initialize restored session from legacy fallback");
               primeAuthenticatedSession(restoredData.session);
-              await hydrateAuthenticatedSession(restoredData.session);
               set({ initialized: true });
+              scheduleHydration(restoredData.session, "legacy_restore");
               return;
             }
           }

@@ -144,9 +144,36 @@ async function reconcileNotificationState(settings: Settings): Promise<Settings>
 
 async function getCurrentUserId(): Promise<string | null> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user?.id ?? null;
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.user?.id) {
+    return session.user.id;
+  }
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function mapSupabaseSettings(settings: any): Settings {
+  return {
+    uiLanguage: settings.ui_language ?? DEFAULT_SETTINGS.uiLanguage,
+    targetLanguage: settings.target_language ?? DEFAULT_SETTINGS.targetLanguage,
+    theme: settings.theme ?? DEFAULT_SETTINGS.theme,
+    dailyGoal: settings.daily_goal ?? DEFAULT_SETTINGS.dailyGoal,
+    notifications: settings.notifications ?? DEFAULT_SETTINGS.notifications,
+    reminderTime: settings.reminder_time ?? DEFAULT_SETTINGS.reminderTime,
+    autoModeSpeed: settings.auto_mode_speed ?? DEFAULT_SETTINGS.autoModeSpeed,
+    showTranslations: settings.show_translations ?? DEFAULT_SETTINGS.showTranslations,
+    ttsEnabled: settings.tts_enabled ?? DEFAULT_SETTINGS.ttsEnabled,
+    ttsVoice: settings.tts_voice ?? DEFAULT_SETTINGS.ttsVoice,
+  };
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -230,43 +257,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           }
         }
 
-        const { data: settings } = await supabase
-          .from("user_settings")
-          .select("*")
-          .eq("user_id", userId)
-          .maybeSingle();
-
-        if (settings) {
-          const mapped: Settings = {
-            uiLanguage: settings.ui_language ?? DEFAULT_SETTINGS.uiLanguage,
-            targetLanguage: settings.target_language ?? DEFAULT_SETTINGS.targetLanguage,
-            theme: settings.theme ?? DEFAULT_SETTINGS.theme,
-            dailyGoal: settings.daily_goal ?? DEFAULT_SETTINGS.dailyGoal,
-            notifications: settings.notifications ?? DEFAULT_SETTINGS.notifications,
-            reminderTime: settings.reminder_time ?? DEFAULT_SETTINGS.reminderTime,
-            autoModeSpeed: settings.auto_mode_speed ?? DEFAULT_SETTINGS.autoModeSpeed,
-            showTranslations: settings.show_translations ?? DEFAULT_SETTINGS.showTranslations,
-            ttsEnabled: settings.tts_enabled ?? DEFAULT_SETTINGS.ttsEnabled,
-            ttsVoice: settings.tts_voice ?? DEFAULT_SETTINGS.ttsVoice,
-          };
-          const resolvedSettings = await reconcileNotificationState(mapped);
-          set({
-            ...resolvedSettings,
-            loading: false,
-            initialized: true,
-            loadedForUserId: userId,
-            pendingLanguagePreferenceNotice: hasLanguagePairMismatch(guestSettings, resolvedSettings)
-              ? {
-                  uiLanguage: resolvedSettings.uiLanguage,
-                  targetLanguage: resolvedSettings.targetLanguage,
-                }
-              : null,
-          });
-          await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
-          await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
-          return;
-        }
-
         const cachedUserSettings = parseStoredSettings(cachedUserRaw);
         if (cachedUserSettings) {
           const resolvedSettings = await reconcileNotificationState(cachedUserSettings);
@@ -285,7 +275,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           });
 
           await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
-          await persistSettingsToSupabase(userId, resolvedSettings);
           await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           return;
         }
@@ -304,7 +293,29 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
           await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
-          await persistSettingsToSupabase(userId, resolvedSettings);
+          await persistSettingsToSupabase(userId, resolvedSettings).catch((error) => {
+            if (__DEV__) console.error("Error syncing guest settings to Supabase:", error);
+          });
+          return;
+        }
+
+        const { data: settings } = await supabase
+          .from("user_settings")
+          .select("*")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (settings) {
+          const resolvedSettings = await reconcileNotificationState(mapSupabaseSettings(settings));
+          set({
+            ...resolvedSettings,
+            loading: false,
+            initialized: true,
+            loadedForUserId: userId,
+            pendingLanguagePreferenceNotice: null,
+          });
+          await AsyncStorage.setItem(storageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
+          await AsyncStorage.setItem(guestStorageKey, JSON.stringify(toPersistedSettings(resolvedSettings)));
           return;
         }
 
