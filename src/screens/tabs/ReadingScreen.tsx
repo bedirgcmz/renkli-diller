@@ -23,6 +23,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useReadingStore } from "@/store/useReadingStore";
+import { useNetworkStore } from "@/store/useNetworkStore";
 import { KEYWORD_TEXT_COLORS, LANG_CODE } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
 import {
@@ -836,6 +837,7 @@ export default function ReadingScreen() {
   const { user } = useAuthStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
+  const isOnline = useNetworkStore((s) => s.isOnline);
   const navigation =
     useNavigation<
       CompositeNavigationProp<
@@ -1038,18 +1040,19 @@ export default function ReadingScreen() {
   }
 
   if (!currentText) {
+    const showOffline = isOnline === false;
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
         edges={["top"]}
       >
         <View style={styles.centered}>
-          <Text style={styles.emptyIcon}>🎉</Text>
+          <Text style={styles.emptyIcon}>{showOffline ? "📡" : "🎉"}</Text>
           <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            {t("reading.no_more_texts")}
+            {showOffline ? t("common.offline_title") : t("reading.no_more_texts")}
           </Text>
           <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
-            {t("reading.no_more_subtitle")}
+            {showOffline ? t("common.offline_body") : t("reading.no_more_subtitle")}
           </Text>
         </View>
       </SafeAreaView>

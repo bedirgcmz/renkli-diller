@@ -391,7 +391,9 @@
     "upgrade": "Uppgradera",
     "restart": "Starta om",
     "preview": "Förhandsvisning:",
-    "optional": "valfri"
+    "optional": "valfri",
+    "offline_title": "Ingen internetanslutning",
+    "offline_body": "Den här funktionen kräver en internetanslutning."
   },
   "languages": {
     "tr": "Türkçe",

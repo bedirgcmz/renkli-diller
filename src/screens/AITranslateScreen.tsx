@@ -29,6 +29,7 @@ import { parseKeywords } from "@/utils/keywords";
 import { MainStackParamList, Category } from "@/types";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { useOnboarding } from "@/providers/OnboardingProvider";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 interface HistoryItem {
   id: string;
@@ -290,8 +291,11 @@ export default function AITranslateScreen() {
 
   const handleTranslate = useCallback(async () => {
     if (!inputText.trim()) return;
-
     if (!hasAccess) return; // paywall banner handles this
+    if (!useNetworkStore.getState().isOnline) {
+      Alert.alert(t("common.offline_title"), t("common.offline_body"));
+      return;
+    }
 
     setLoading(true);
     try {

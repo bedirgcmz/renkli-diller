@@ -34,6 +34,7 @@ import {
   purchasePackage,
   restorePurchases,
 } from "@/services/revenueCat";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 interface PackageOption {
   pkg: PurchasesPackage;
@@ -192,6 +193,10 @@ export default function PaywallScreen() {
   }
 
   async function handleRestore() {
+    if (!useNetworkStore.getState().isOnline) {
+      Alert.alert(t("common.offline_title"), t("common.offline_body"));
+      return;
+    }
     setRestoring(true);
     try {
       const result = await restorePurchases();

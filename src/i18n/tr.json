@@ -391,7 +391,9 @@
     "upgrade": "Yükselt",
     "restart": "Yeniden Başlat",
     "preview": "Önizleme:",
-    "optional": "opsiyonel"
+    "optional": "opsiyonel",
+    "offline_title": "İnternet Bağlantısı Yok",
+    "offline_body": "Bu özellik için internet bağlantısı gerekiyor."
   },
   "languages": {
     "tr": "Türkçe",

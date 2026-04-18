@@ -23,6 +23,7 @@ import { KeywordText } from "@/components/KeywordText";
 import { TAG_OPTIONS } from "@/utils/constants";
 import { MainStackParamList, SentenceTag } from "@/types";
 import { useProgressStore } from "@/store/useProgressStore";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 
 export default function EditSentenceScreen() {
@@ -74,6 +75,13 @@ export default function EditSentenceScreen() {
   const handleSave = async () => {
     if (!sourceText.trim() || !targetText.trim()) {
       Alert.alert(t("common.error"), t("add_sentence.fill_both"));
+      return;
+    }
+
+    // Preset tag updates go through the offline queue — allow offline.
+    // Direct sentence edits require a network call.
+    if (!sentence.is_preset && !useNetworkStore.getState().isOnline) {
+      Alert.alert(t("common.offline_title"), t("common.offline_body"));
       return;
     }
 

@@ -391,7 +391,9 @@
     "upgrade": "Mejorar",
     "restart": "Reiniciar",
     "preview": "Vista previa:",
-    "optional": "opcional"
+    "optional": "opcional",
+    "offline_title": "Sin conexión a Internet",
+    "offline_body": "Esta función requiere conexión a Internet."
   },
   "languages": {
     "tr": "Turco",

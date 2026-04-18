@@ -19,6 +19,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useDialogStore, DialogDifficultyFilter } from "@/store/useDialogStore";
+import { useNetworkStore } from "@/store/useNetworkStore";
 import { DialogCategory, HomeStackParamList, MainStackParamList, DIALOG_LIMIT_FREE_TOTAL } from "@/types";
 import { SupportedLanguage } from "@/types";
 
@@ -87,6 +88,11 @@ export default function DialogSetupScreen() {
 
   const handleStart = async () => {
     if (!selectedCategory || !selectedDifficulty || !user) return;
+
+    if (!useNetworkStore.getState().isOnline) {
+      Alert.alert(t("common.offline_title"), t("common.offline_body"));
+      return;
+    }
 
     // Check limit before starting
     if (limitStatus && !limitStatus.canPlay) {

@@ -391,7 +391,9 @@
     "upgrade": "Atualizar",
     "restart": "Reiniciar",
     "preview": "Pré-visualização:",
-    "optional": "opcional"
+    "optional": "opcional",
+    "offline_title": "Sem conexão com a Internet",
+    "offline_body": "Este recurso requer conexão com a Internet."
   },
   "languages": {
     "tr": "Turco",

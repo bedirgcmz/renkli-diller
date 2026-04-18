@@ -24,6 +24,7 @@ import { FREE_USER_SENTENCE_LIMIT, TAG_OPTIONS } from "@/utils/constants";
 import { MainStackParamList, SentenceTag } from "@/types";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { useOnboarding } from "@/providers/OnboardingProvider";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 
 export default function AddSentenceScreen() {
@@ -66,6 +67,10 @@ export default function AddSentenceScreen() {
   const userSentenceCount = sentences.length;
 
   const handleSave = async () => {
+    if (!useNetworkStore.getState().isOnline) {
+      Alert.alert(t("common.offline_title"), t("common.offline_body"));
+      return;
+    }
     if (!sourceText.trim() || !targetText.trim()) {
       Alert.alert(t("common.error"), t("add_sentence.fill_both"));
       return;

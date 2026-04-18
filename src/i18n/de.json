@@ -391,7 +391,9 @@
     "upgrade": "Upgrade",
     "restart": "Neu starten",
     "preview": "Vorschau:",
-    "optional": "optional"
+    "optional": "optional",
+    "offline_title": "Keine Internetverbindung",
+    "offline_body": "Diese Funktion erfordert eine Internetverbindung."
   },
   "languages": {
     "tr": "Türkçe",

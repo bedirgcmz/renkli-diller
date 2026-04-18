@@ -17,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 type StrengthLevel = "weak" | "medium" | "strong";
 
@@ -79,6 +80,10 @@ export default function ChangePasswordScreen() {
 
   const handleSave = async () => {
     if (!canSubmit) return;
+    if (!useNetworkStore.getState().isOnline) {
+      Alert.alert(t("common.offline_title"), t("common.offline_body"));
+      return;
+    }
     if (!passwordsMatch) {
       Alert.alert(t("common.error"), t("profile.password_mismatch"));
       return;

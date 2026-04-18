@@ -391,7 +391,9 @@
     "upgrade": "Améliorer",
     "restart": "Recommencer",
     "preview": "Aperçu :",
-    "optional": "facultatif"
+    "optional": "facultatif",
+    "offline_title": "Pas de connexion Internet",
+    "offline_body": "Cette fonctionnalité nécessite une connexion Internet."
   },
   "languages": {
     "tr": "Turc",
