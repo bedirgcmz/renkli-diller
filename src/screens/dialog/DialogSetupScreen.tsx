@@ -51,6 +51,7 @@ export default function DialogSetupScreen() {
   const { user } = useAuthStore();
   const isPremium = user?.is_premium ?? false;
   const { uiLanguage } = useSettingsStore();
+  const isOnline = useNetworkStore((s) => s.isOnline);
 
   const {
     categories,
@@ -201,6 +202,16 @@ export default function DialogSetupScreen() {
 
         {loading ? (
           <ActivityIndicator color={ACCENT} style={{ marginTop: 24 }} />
+        ) : isOnline === false && categories.length === 0 ? (
+          <View style={styles.offlineBanner}>
+            <Text style={styles.offlineIcon}>📡</Text>
+            <Text style={[styles.offlineTitle, { color: colors.text }]}>
+              {t("common.offline_title")}
+            </Text>
+            <Text style={[styles.offlineBody, { color: colors.textSecondary }]}>
+              {t("common.offline_body")}
+            </Text>
+          </View>
         ) : (
           <View style={styles.categoryGrid}>
             {categories.map((cat) => {
@@ -491,6 +502,10 @@ const styles = StyleSheet.create({
   startBtn:        { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 16 },
   startBtnText:    { fontSize: 16, fontWeight: "700" },
 
+  offlineBanner:   { alignItems: "center", paddingVertical: 40, gap: 8 },
+  offlineIcon:     { fontSize: 40, marginBottom: 4 },
+  offlineTitle:    { fontSize: 16, fontWeight: "700", textAlign: "center" },
+  offlineBody:     { fontSize: 13, textAlign: "center", lineHeight: 19, paddingHorizontal: 16 },
   modalOverlay:    { flex: 1, backgroundColor: "#00000088", alignItems: "center", justifyContent: "center" },
   modalCard:       { width: "85%", borderRadius: 20, padding: 24, alignItems: "center" },
   modalEmoji:      { fontSize: 40, marginBottom: 12 },
