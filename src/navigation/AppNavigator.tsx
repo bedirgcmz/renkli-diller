@@ -8,7 +8,7 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useGameStore } from "@/store/useGameStore";
 import { useOfflineQueueStore } from "@/store/useOfflineQueueStore";
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Alert, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -193,19 +193,31 @@ export default function AppNavigator() {
         </Stack.Navigator>
       </NavigationContainer>
 
-      {/* Global offline pill — absolute, appears over all screens */}
-      {isOnline === false && (
-        <View style={[offlineStyles.pill, { top: insets.top + 8 }]}>
-          <Ionicons name="wifi-outline" size={13} color="#fff" />
-          <Text style={offlineStyles.pillText}>{t("common.offline_indicator")}</Text>
+      {/* Global offline pill — rendered inside a transparent Modal so it
+          appears above React Native Modal overlays (which use a separate
+          UIWindow layer on iOS). pointerEvents="none" ensures touch events
+          pass through to the content underneath. */}
+      <Modal
+        visible={isOnline === false}
+        transparent
+        animationType="none"
+        statusBarTranslucent
+        onRequestClose={() => {}}
+      >
+        <View pointerEvents="none" style={offlineStyles.pillHost}>
+          <View style={[offlineStyles.pill, { top: insets.top + 8 }]}>
+            <Ionicons name="wifi-outline" size={13} color="#fff" />
+            <Text style={offlineStyles.pillText}>{t("common.offline_indicator")}</Text>
+          </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 }
 
 const offlineStyles = StyleSheet.create({
   root: { flex: 1 },
+  pillHost: { flex: 1 },
   pill: {
     position: "absolute",
     alignSelf: "center",

@@ -171,7 +171,11 @@ export default function PaywallScreen() {
   }
 
   async function handlePurchase() {
-    if (!selectedPkg) return;
+    if (!selectedPkg) {
+      // Packages failed to load (offline or misconfigured) — tell the user why
+      Alert.alert(t("common.offline_title"), t(offeringsMessageKey));
+      return;
+    }
     setPurchasing(true);
     try {
       const result = await purchasePackage(selectedPkg);
@@ -193,7 +197,7 @@ export default function PaywallScreen() {
   }
 
   async function handleRestore() {
-    if (!useNetworkStore.getState().isOnline) {
+    if (useNetworkStore.getState().isOnline === false) {
       Alert.alert(t("common.offline_title"), t("common.offline_body"));
       return;
     }
@@ -312,9 +316,9 @@ export default function PaywallScreen() {
 
         {/* Satın al butonu */}
         <TouchableOpacity
-          style={[s.purchaseBtn, (packages.length === 0 || !selectedPkg || purchasing) && { opacity: 0.4 }]}
+          style={[s.purchaseBtn, (!selectedPkg || purchasing) && { opacity: 0.4 }]}
           onPress={handlePurchase}
-          disabled={packages.length === 0 || !selectedPkg || purchasing}
+          disabled={purchasing}
           activeOpacity={0.85}
         >
           <LinearGradient

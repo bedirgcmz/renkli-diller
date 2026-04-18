@@ -67,7 +67,7 @@ export default function AddSentenceScreen() {
   const userSentenceCount = sentences.length;
 
   const handleSave = async () => {
-    if (!useNetworkStore.getState().isOnline) {
+    if (useNetworkStore.getState().isOnline === false) {
       Alert.alert(t("common.offline_title"), t("common.offline_body"));
       return;
     }

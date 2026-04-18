@@ -80,7 +80,7 @@ export default function EditSentenceScreen() {
 
     // Preset tag updates go through the offline queue — allow offline.
     // Direct sentence edits require a network call.
-    if (!sentence.is_preset && !useNetworkStore.getState().isOnline) {
+    if (!sentence.is_preset && useNetworkStore.getState().isOnline === false) {
       Alert.alert(t("common.offline_title"), t("common.offline_body"));
       return;
     }

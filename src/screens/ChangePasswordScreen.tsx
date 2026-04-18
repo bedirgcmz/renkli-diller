@@ -80,7 +80,7 @@ export default function ChangePasswordScreen() {
 
   const handleSave = async () => {
     if (!canSubmit) return;
-    if (!useNetworkStore.getState().isOnline) {
+    if (useNetworkStore.getState().isOnline === false) {
       Alert.alert(t("common.offline_title"), t("common.offline_body"));
       return;
     }
