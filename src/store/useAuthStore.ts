@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
+import i18n from "@/i18n";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "../lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,6 +20,9 @@ import { useProgressStore } from "./useProgressStore";
 import { useReadingStore } from "./useReadingStore";
 import { useSentenceStore } from "./useSentenceStore";
 import { useSettingsStore } from "./useSettingsStore";
+import { clearUserCache, readCache } from "@/lib/offlineCache";
+import { useOfflineQueueStore } from "./useOfflineQueueStore";
+import type { Category } from "@/types";
 
 interface User {
   id: string;
@@ -102,6 +106,113 @@ function clearClientStores() {
   useReadingStore.getState().clear();
   useGameStore.getState().clear();
   useSettingsStore.getState().clear();
+}
+
+/**
+ * Pre-populate stores from AsyncStorage cache before the first screen renders.
+ *
+ * Called in `initialize()` immediately after session detection — before
+ * `initialized=true` — so that by the time the nav stack mounts, stores
+ * already have meaningful cached data from the previous session.
+ *
+ * Identity source: the userId passed in from the session (already resolved
+ * offline-safely via getSession in initialize()). No network calls here.
+ *
+ * Hydrates the full set of user-visible data:
+ *  - progress / progressMap / tagMap / stats (progress tab)
+ *  - game user stats (games tab)
+ *  - categories (public, used everywhere)
+ *  - user sentences (my sentences tab)
+ *  - favorite IDs (favorites screen)
+ *  - preset sentences (main learn tab) — located via user_preset_hint cache
+ *  - pending offline score queue (game submission retry)
+ */
+async function hydrateStoresFromCache(userId: string): Promise<void> {
+  await Promise.all([
+    // ── Progress map + stats ─────────────────────────────────────────────────
+    (async () => {
+      const cached = await readCache<{
+        progress: any[];
+        progressMap: Record<string, "learning" | "learned">;
+        tagMap: Record<string, any>;
+        stats: any;
+      }>(`progress:${userId}`);
+      if (cached && Object.keys(cached.progressMap ?? {}).length > 0) {
+        useProgressStore.setState({
+          progress: cached.progress ?? [],
+          progressMap: cached.progressMap,
+          tagMap: cached.tagMap ?? {},
+          stats: cached.stats,
+        });
+      }
+    })(),
+
+    // ── Game user stats ──────────────────────────────────────────────────────
+    (async () => {
+      const cached = await readCache<any>(`game_stats:${userId}`);
+      if (cached) {
+        useGameStore.setState({ userStats: cached });
+      }
+    })(),
+
+    // ── Categories (public — no user scope) ──────────────────────────────────
+    (async () => {
+      const cached = await readCache<Category[]>("categories");
+      if (cached && cached.length > 0) {
+        useSentenceStore.setState({ categories: cached });
+      }
+    })(),
+
+    // ── User sentences ───────────────────────────────────────────────────────
+    (async () => {
+      const cached = await readCache<any[]>(`user_sentences:${userId}`);
+      if (cached && cached.length > 0) {
+        useSentenceStore.setState({ sentences: cached });
+      }
+    })(),
+
+    // ── Favorite IDs ─────────────────────────────────────────────────────────
+    (async () => {
+      const cached = await readCache<string[]>(`favorites:${userId}`);
+      if (cached && cached.length > 0) {
+        useSentenceStore.setState({ favoriteIds: cached });
+      }
+    })(),
+
+    // ── Preset sentences (via stored hint) ───────────────────────────────────
+    // IMPORTANT: startup hydration must never trust a stale premium hint, or a
+    // user whose entitlement lapsed overnight could see premium-only cached
+    // presets while offline. We therefore hydrate only the conservative free
+    // cache on cold start. Premium users are upgraded later after live
+    // entitlement verification and normal screen-level revalidation.
+    //
+    // `user_preset_hint:{userId}` is still useful because it tells us which
+    // language pair to hydrate for the main learning flow.
+    (async () => {
+      const hint = await readCache<{
+        uiLanguage: string;
+        targetLanguage: string;
+        isPremium: boolean;
+      }>(`user_preset_hint:${userId}`);
+      if (hint) {
+        const presetKey = `preset_sentences:${hint.uiLanguage}_${hint.targetLanguage}:free`;
+        const cached = await readCache<any[]>(presetKey);
+        if (cached && cached.length > 0) {
+          useSentenceStore.setState({ presetSentences: cached });
+        }
+      }
+    })(),
+
+    // ── Pending offline score queue ──────────────────────────────────────────
+    (async () => {
+      await useGameStore.getState().loadPersistedPendingScores(userId);
+    })(),
+
+    // ── Offline action queue (progress / favorites / quiz / study) ───────────
+    (async () => {
+      await useOfflineQueueStore.getState().hydrateQueue(userId);
+    })(),
+  ]);
 }
 
 function extractAvatarStoragePath(avatarUrl: string | undefined, userId: string): string | null {
@@ -347,6 +458,32 @@ export const useAuthStore = create<AuthState>((set, get) => {
     if (rcListenerRemover) {
       rcListenerRemover();
       rcListenerRemover = null;
+    }
+
+    // Clear user-scoped offline caches before wiping the user reference so we
+    // still have the userId available for the key pattern.
+    const currentUserId = get().user?.id;
+    if (currentUserId) {
+      void clearUserCache(currentUserId);
+      // Also clear the offline action queue — queue uses its own prefix so
+      // clearUserCache doesn't reach it.
+      //
+      // This runs on three logout paths:
+      //  1. signOut() confirmed — user saw the pending-queue warning and chose
+      //     to proceed, so clearing is intentional and expected.
+      //  2. deleteAccount() — the account no longer exists server-side; any
+      //     queued user-bound writes would fail with FK violations anyway.
+      //  3. SIGNED_OUT auth event (JWT expiry / server-side session revoke) —
+      //     Phase 1 accepted behaviour: when the session is invalid, queued
+      //     writes cannot be synced (they would all fail with 401/403, which
+      //     isPermanentError() classifies as permanent → discard). Preserving
+      //     the queue indefinitely for an unauthenticated user has no practical
+      //     value in Phase 1.
+      //     Future phase: if re-auth + queue preservation is required (e.g.
+      //     the user re-logs into the same account), handle this path separately
+      //     by skipping clearAllItems() here and letting processQueue() drain on
+      //     the next successful sign-in.
+      await useOfflineQueueStore.getState().clearAllItems();
     }
 
     clearClientStores();
@@ -606,6 +743,33 @@ export const useAuthStore = create<AuthState>((set, get) => {
   },
 
   signOut: async () => {
+    // ── Pending queue warning ────────────────────────────────────────────────
+    // If there are offline actions waiting to be synced, warn the user before
+    // destroying their data. clearAllItems() runs inside clearAuthenticatedState()
+    // only after the user confirms they want to proceed.
+    const pendingCount = useOfflineQueueStore.getState().queue.length;
+    if (pendingCount > 0) {
+      const confirmed = await new Promise<boolean>((resolve) => {
+        Alert.alert(
+          i18n.t("profile.sign_out_pending_title"),
+          i18n.t("profile.sign_out_pending_body", { count: pendingCount }),
+          [
+            {
+              text: i18n.t("common.cancel"),
+              style: "cancel",
+              onPress: () => resolve(false),
+            },
+            {
+              text: i18n.t("profile.sign_out_anyway"),
+              style: "destructive",
+              onPress: () => resolve(true),
+            },
+          ]
+        );
+      });
+      if (!confirmed) return; // User chose to stay
+    }
+
     set({ loading: true });
     try {
       // Remove RC listener before signing out
@@ -946,6 +1110,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
       if (currentSession?.user) {
         console.log("[auth] initialize restored Supabase persisted session");
         primeAuthenticatedSession(currentSession);
+        // Pre-populate stores from cache so screens have data on first render.
+        await hydrateStoresFromCache(currentSession.user.id).catch((e) => {
+          console.error("[auth] hydrateStoresFromCache failed:", e);
+        });
         set({ initialized: true });
         scheduleHydration(currentSession, "initialize");
         return;
@@ -973,6 +1141,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
             } else {
               console.log("[auth] initialize restored session from legacy fallback");
               primeAuthenticatedSession(restoredData.session);
+              await hydrateStoresFromCache(restoredData.session.user.id).catch((e) => {
+                console.error("[auth] hydrateStoresFromCache (legacy) failed:", e);
+              });
               set({ initialized: true });
               scheduleHydration(restoredData.session, "legacy_restore");
               return;

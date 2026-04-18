@@ -32,8 +32,9 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
     set({ isLoaded: false, pendingToast: null });
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) {
         set({ unlockedIds: [], unlockedDates: {}, isLoaded: true });
         return;
@@ -71,8 +72,9 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
 
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) return;
 
       await supabase

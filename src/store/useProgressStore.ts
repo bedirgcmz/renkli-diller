@@ -2,6 +2,10 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { UserProgress, QuizResult, StudySession, SentenceTag } from "@/types";
 import { useAchievementStore } from "./useAchievementStore";
+import { readCache, writeCache } from "@/lib/offlineCache";
+import { useOfflineQueueStore, createQueueItem } from "./useOfflineQueueStore";
+import { generateQueueId } from "@/lib/offlineQueue";
+import { useNetworkStore } from "./useNetworkStore";
 
 // TODO: daily_stats tablosuna yazma — şu an streak user_progress.learned_at'tan hesaplanıyor.
 // daily_stats tablosu şu an kullanılmıyor; gerekirse her öğrenme/quiz sonrası güncellenebilir.
@@ -70,6 +74,18 @@ const DEFAULT_STATS: ProgressStats = {
   userLearnedDates: [],
 };
 
+// Cache shape saved to AsyncStorage
+interface ProgressCacheSnapshot {
+  progress: UserProgress[];
+  progressMap: Record<string, "learning" | "learned">;
+  tagMap: Record<string, SentenceTag | null>;
+  stats: ProgressStats;
+}
+
+function cacheKeyProgress(userId: string) {
+  return `progress:${userId}`;
+}
+
 export const useProgressStore = create<ProgressState>((set, get) => ({
   progress: [],
   progressMap: {},
@@ -79,16 +95,30 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   error: null,
 
   loadProgress: async () => {
-    set({ loading: true, error: null });
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // getSession() reads from AsyncStorage — no network, safe for offline cache reads.
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) {
         set({ loading: false });
         return;
       }
 
+      // 1. Hydrate from cache immediately — no spinner if we have cached data
+      const cached = await readCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id));
+      if (cached) {
+        set({
+          progress: cached.progress,
+          progressMap: cached.progressMap,
+          tagMap: cached.tagMap,
+          stats: cached.stats,
+        });
+        // Continue to background network refresh below
+      } else {
+        set({ loading: true, error: null });
+      }
+
+      // 2. Fetch from network
       const { data, error } = await supabase
         .from("user_progress")
         .select("*")
@@ -97,6 +127,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         .limit(1000);
 
       if (error) {
+        // Keep cached data visible; just clear loading
         set({ error: error.message, loading: false });
         return;
       }
@@ -115,6 +146,14 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
       set({ progress: data || [], progressMap, tagMap, loading: false });
       await get().loadStats();
+
+      // 3. Persist the fresh snapshot to cache
+      void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
+        progress: data || [],
+        progressMap,
+        tagMap,
+        stats: get().stats,
+      });
     } catch {
       set({ error: "Failed to load progress", loading: false });
     }
@@ -122,18 +161,27 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
 
   // Öğrenme listesine ekle: new → learning
   addToLearning: async (sentenceId: string) => {
-    // Optimistic update
+    // 1. Optimistic update
     set((state) => ({
       progressMap: { ...state.progressMap, [sentenceId]: "learning" },
     }));
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
+    if (!user) return;
 
-      await supabase.from("user_progress").upsert(
+    // 2. Write to cache immediately (before network) so offline reads are correct
+    void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
+      progress: get().progress,
+      progressMap: get().progressMap,
+      tagMap: get().tagMap,
+      stats: get().stats,
+    });
+
+    // 3. Try remote write; on failure queue for later
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = await supabase.from("user_progress").upsert(
         {
           user_id: user.id,
           sentence_id: sentenceId,
@@ -142,25 +190,50 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         },
         { onConflict: "user_id,sentence_id" }
       );
-    } catch {
-      if (__DEV__) console.error("addToLearning failed");
+      if (!error) return; // success — nothing to queue
     }
+
+    // Offline or remote failed → enqueue
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem("progress_add_learning", { sentenceId }, { dedupeKey: `progress:${sentenceId}` })
+    );
   },
 
   // Öğrenildi: learning → learned
   markAsLearned: async (sentenceId: string) => {
-    // Optimistic update so UI responds immediately
+    // 1. Optimistic update so UI responds immediately
     set((state) => ({
       progressMap: { ...state.progressMap, [sentenceId]: "learned" },
     }));
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
+    if (!user) return;
 
-      await supabase.from("user_progress").upsert(
+    // 2. Write to cache immediately — prevents loadProgress() or any other
+    //    cache reader from seeing stale pre-optimistic state.
+    void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
+      progress: get().progress,
+      progressMap: get().progressMap,
+      tagMap: get().tagMap,
+      stats: get().stats,
+    });
+
+    // 3. Fire achievement check against optimistic stats (good enough for Phase 1)
+    const { stats } = get();
+    void useAchievementStore.getState().checkProgressAchievements({
+      totalSentencesLearned: stats.totalSentencesLearned,
+      currentStreak: stats.currentStreak,
+      totalQuizQuestions: stats.totalQuizQuestions,
+      totalBuildSentences: stats.totalBuildSentences,
+    });
+
+    // 4. Try remote write; on failure queue for later.
+    //    NO loadProgress() here — aggregate stats refresh happens in the batch
+    //    refresh that AppNavigator runs after queue drain on reconnect.
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = await supabase.from("user_progress").upsert(
         {
           user_id: user.id,
           sentence_id: sentenceId,
@@ -169,67 +242,90 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         },
         { onConflict: "user_id,sentence_id" }
       );
-
-      // Refresh progress array + stats (streak, today's goal) after persistence
-      await get().loadProgress();
-
-      const { stats } = get();
-      await useAchievementStore.getState().checkProgressAchievements({
-        totalSentencesLearned: stats.totalSentencesLearned,
-        currentStreak: stats.currentStreak,
-        totalQuizQuestions: stats.totalQuizQuestions,
-        totalBuildSentences: stats.totalBuildSentences,
-      });
-    } catch {
-      if (__DEV__) console.error("markAsLearned failed");
+      if (!error) return; // success — nothing to queue
     }
+
+    // Offline or remote failed → enqueue
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem("progress_mark_learned", { sentenceId }, { dedupeKey: `progress:${sentenceId}` })
+    );
   },
 
   updatePresetTag: async (sentenceId: string, tag: SentenceTag | null) => {
+    // 1. Optimistic update
     set((state) => ({
       tagMap: { ...state.tagMap, [sentenceId]: tag },
     }));
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      await supabase
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
+    if (!user) return;
+
+    // 2. Write to cache immediately
+    void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
+      progress: get().progress,
+      progressMap: get().progressMap,
+      tagMap: get().tagMap,
+      stats: get().stats,
+    });
+
+    // 3. Try remote write; on failure queue for later
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = await supabase
         .from("user_progress")
         .update({ tag: tag ?? null })
         .eq("user_id", user.id)
         .eq("sentence_id", sentenceId);
-    } catch {
-      if (__DEV__) console.error("updatePresetTag failed");
+      if (!error) return;
     }
+
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem("preset_tag_update", { sentenceId, tag }, { dedupeKey: `tag:${sentenceId}` })
+    );
   },
 
   // Unuttum: learned/learning → new (sil)
   forgot: async (sentenceId: string) => {
+    // 1. Optimistic update
     set((state) => {
       const { [sentenceId]: _removed, ...rest } = state.progressMap;
-      return { progressMap: rest };
+      const { [sentenceId]: _tagRemoved, ...restTags } = state.tagMap;
+      return { progressMap: rest, tagMap: restTags };
     });
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
+    if (!user) return;
 
-      await supabase
+    // 2. Write to cache immediately
+    void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
+      progress: get().progress,
+      progressMap: get().progressMap,
+      tagMap: get().tagMap,
+      stats: get().stats,
+    });
+
+    // 3. Try remote write; on failure queue for later
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = await supabase
         .from("user_progress")
         .delete()
         .eq("user_id", user.id)
         .eq("sentence_id", sentenceId);
-    } catch {
-      if (__DEV__) console.error("forgot failed");
+      if (!error) return;
     }
+
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem("progress_forgot", { sentenceId }, { dedupeKey: `progress:${sentenceId}` })
+    );
   },
 
   loadStats: async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) return;
 
       const now = new Date();
@@ -364,25 +460,33 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       ).length;
       const userLearnedDates = (userLearnedRows || []).map((r) => r.learned_at as string);
 
-      set({
-        stats: {
-          totalSentencesStudied,
-          totalSentencesLearned,
-          currentStreak,
-          longestStreak,
-          quizAccuracy,
-          totalQuizQuestions,
-          totalBuildSentences,
-          correctQuizAnswers,
-          studyTimeToday: 0,
-          studyTimeThisWeek: 0,
-          studyTimeThisMonth: 0,
-          lastStudyDate,
-          quizByMode,
-          quizByCategory,
-          todayLearnedUserSentences,
-          userLearnedDates,
-        },
+      const stats: ProgressStats = {
+        totalSentencesStudied,
+        totalSentencesLearned,
+        currentStreak,
+        longestStreak,
+        quizAccuracy,
+        totalQuizQuestions,
+        totalBuildSentences,
+        correctQuizAnswers,
+        studyTimeToday: 0,
+        studyTimeThisWeek: 0,
+        studyTimeThisMonth: 0,
+        lastStudyDate,
+        quizByMode,
+        quizByCategory,
+        todayLearnedUserSentences,
+        userLearnedDates,
+      };
+
+      set({ stats });
+
+      // Update the progress cache with the freshly computed stats
+      void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
+        progress: get().progress,
+        progressMap: get().progressMap,
+        tagMap: get().tagMap,
+        stats,
       });
     } catch (error) {
       if (__DEV__) console.error("Error loading stats:", error);
@@ -390,67 +494,92 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
   },
 
   recordStudySession: async (session) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+    const user = authSession?.user ?? null;
+    if (!user) return;
 
-      await supabase
+    // Achievement check fires immediately against current stats (optimistic)
+    void useAchievementStore.getState().unlockAchievement("first_automode");
+    const { stats } = get();
+    void useAchievementStore.getState().checkProgressAchievements({
+      totalSentencesLearned: stats.totalSentencesLearned,
+      currentStreak: stats.currentStreak,
+      totalQuizQuestions: stats.totalQuizQuestions,
+      totalBuildSentences: stats.totalBuildSentences,
+    });
+
+    // Generate clientEventId for idempotent replay on reconnect
+    const clientEventId = generateQueueId();
+    const createdAt = new Date().toISOString();
+
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = await supabase
         .from("study_sessions")
-        .insert({ ...session, user_id: user.id, created_at: new Date().toISOString() })
-        .select()
-        .single();
-
-      await get().loadStats();
-
-      // first_automode achievement
-      await useAchievementStore.getState().unlockAchievement("first_automode");
-
-      const { stats } = get();
-      await useAchievementStore.getState().checkProgressAchievements({
-        totalSentencesLearned: stats.totalSentencesLearned,
-        currentStreak: stats.currentStreak,
-        totalQuizQuestions: stats.totalQuizQuestions,
-        totalBuildSentences: stats.totalBuildSentences,
-      });
-    } catch (error) {
-      if (__DEV__) console.error("Error recording study session:", error);
+        .insert({ ...session, user_id: user.id, created_at: createdAt, client_event_id: clientEventId });
+      if (!error) return; // success — nothing to queue
     }
+
+    // Offline or remote failed → enqueue.
+    // loadStats() is NOT called here — aggregate stats refresh happens in
+    // AppNavigator's batch refresh after queue drain on reconnect.
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem("study_session", {
+        sentenceId: session.sentence_id,
+        durationMinutes: session.duration_minutes,
+        completed: session.completed,
+        createdAt,
+      }, { clientEventId })
+    );
   },
 
   recordQuizResult: async (result) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+    const user = authSession?.user ?? null;
+    if (!user) return;
 
-      await supabase
+    // Achievement check fires immediately against current stats (optimistic)
+    const { stats } = get();
+    void useAchievementStore.getState().checkProgressAchievements({
+      totalSentencesLearned: stats.totalSentencesLearned,
+      currentStreak: stats.currentStreak,
+      totalQuizQuestions: stats.totalQuizQuestions,
+      totalBuildSentences: stats.totalBuildSentences,
+    });
+
+    // Generate clientEventId for idempotent replay on reconnect
+    const clientEventId = generateQueueId();
+    const answeredAt = new Date().toISOString();
+    const sentenceId = result.user_sentence_id ? null : result.sentence_id;
+
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = await supabase
         .from("quiz_results")
         .insert({
           user_id: user.id,
-          sentence_id: result.user_sentence_id ? null : result.sentence_id,
+          sentence_id: sentenceId,
           user_sentence_id: result.user_sentence_id ?? null,
           is_correct: result.is_correct,
           quiz_type: result.quiz_type,
-          answered_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      await get().loadStats();
-
-      const { stats } = get();
-      await useAchievementStore.getState().checkProgressAchievements({
-        totalSentencesLearned: stats.totalSentencesLearned,
-        currentStreak: stats.currentStreak,
-        totalQuizQuestions: stats.totalQuizQuestions,
-        totalBuildSentences: stats.totalBuildSentences,
-      });
-    } catch (error) {
-      if (__DEV__) console.error("Error recording quiz result:", error);
+          answered_at: answeredAt,
+          client_event_id: clientEventId,
+        });
+      if (!error) return; // success — nothing to queue
     }
+
+    // Offline or remote failed → enqueue.
+    // loadStats() is NOT called here — aggregate stats refresh happens in
+    // AppNavigator's batch refresh after queue drain on reconnect.
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem("quiz_result", {
+        sentenceId,
+        userSentenceId: result.user_sentence_id ?? null,
+        isCorrect: result.is_correct,
+        quizType: result.quiz_type,
+        answeredAt,
+      }, { clientEventId })
+    );
   },
 
   getTodayProgress: () => {

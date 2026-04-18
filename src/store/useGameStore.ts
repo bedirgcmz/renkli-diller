@@ -11,6 +11,8 @@ import {
   UserGameStats,
 } from "@/types/game";
 import { validateRawSessionStats } from "@/utils/gameScoring";
+import { readCache, writeCache } from "@/lib/offlineCache";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ----------------------------------------------------------------
 // State (persistent/meta only — no in-game state here)
@@ -49,13 +51,31 @@ interface GameStoreState {
   setDailyLimitReached: (gameType: GameType, value: boolean) => void;
   clearError: () => void;
   clear: () => void;
+  /** Load persisted pending scores from AsyncStorage (call on startup). */
+  loadPersistedPendingScores: (userId: string) => Promise<void>;
 }
 
 // Cache duration: 3 minutes for leaderboard
 const LEADERBOARD_CACHE_MS = 3 * 60 * 1000;
 
+function cacheKeyGameStats(userId: string) {
+  return `game_stats:${userId}`;
+}
+
+function pendingScoresStorageKey(userId: string) {
+  return `offline_cache:pending_scores:${userId}`;
+}
+
 function hasActiveLeaderboardLoads(loadingState: GameStoreState["leaderboardLoading"]): boolean {
   return Object.values(loadingState).some((periods) => periods.weekly || periods.alltime);
+}
+
+async function persistPendingScores(userId: string, scores: RawSessionStats[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(pendingScoresStorageKey(userId), JSON.stringify(scores));
+  } catch {
+    // Non-fatal
+  }
 }
 
 export const useGameStore = create<GameStoreState>((set, get) => ({
@@ -82,11 +102,38 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   submitLoading: false,
   error: null,
 
+  // ---- Load persisted pending scores from AsyncStorage ----
+  loadPersistedPendingScores: async (userId: string) => {
+    try {
+      const raw = await AsyncStorage.getItem(pendingScoresStorageKey(userId));
+      if (!raw) return;
+      const scores = JSON.parse(raw) as RawSessionStats[];
+      if (Array.isArray(scores) && scores.length > 0) {
+        set((state) => {
+          const existingIds = new Set(state.pendingScores.map((s) => s.sessionId));
+          const newOnes = scores.filter((s) => !existingIds.has(s.sessionId));
+          return { pendingScores: [...state.pendingScores, ...newOnes] };
+        });
+      }
+    } catch {
+      // Non-fatal
+    }
+  },
+
   // ---- Load user game stats ----
   loadUserStats: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    // getSession() reads from AsyncStorage — no network, safe for offline cache-first reads.
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) return;
 
+    // 1. Cache-first: show cached stats without loading spinner
+    const cached = await readCache<UserGameStats>(cacheKeyGameStats(user.id));
+    if (cached) {
+      set({ userStats: cached });
+    }
+
+    // 2. Background network fetch
     const { data, error } = await supabase
       .from("user_game_stats")
       .select("*")
@@ -100,31 +147,31 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
     if (!data) {
       // No row yet — default stats
-      set({
-        userStats: {
-          league: "bronze",
-          cumulativeScore: 0,
-          gamesPlayed: 0,
-          bestSpeedRound: 0,
-          bestWordRain: 0,
-          bestMemoryMatch: 0,
-          lastPlayedAt: null,
-        },
-      });
+      const defaultStats: UserGameStats = {
+        league: "bronze",
+        cumulativeScore: 0,
+        gamesPlayed: 0,
+        bestSpeedRound: 0,
+        bestWordRain: 0,
+        bestMemoryMatch: 0,
+        lastPlayedAt: null,
+      };
+      set({ userStats: defaultStats });
+      void writeCache(cacheKeyGameStats(user.id), defaultStats);
       return;
     }
 
-    set({
-      userStats: {
-        league: data.league,
-        cumulativeScore: data.cumulative_score,
-        gamesPlayed: data.games_played,
-        bestSpeedRound: data.best_speed_round,
-        bestWordRain: data.best_word_rain,
-        bestMemoryMatch: data.best_memory_match ?? 0,
-        lastPlayedAt: data.last_played_at,
-      },
-    });
+    const freshStats: UserGameStats = {
+      league: data.league,
+      cumulativeScore: data.cumulative_score,
+      gamesPlayed: data.games_played,
+      bestSpeedRound: data.best_speed_round,
+      bestWordRain: data.best_word_rain,
+      bestMemoryMatch: data.best_memory_match ?? 0,
+      lastPlayedAt: data.last_played_at,
+    };
+    set({ userStats: freshStats });
+    void writeCache(cacheKeyGameStats(user.id), freshStats);
   },
 
   // ---- Submit game score via RPC ----
@@ -136,6 +183,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       set({ submitLoading: false, error: validationError });
       return null;
     }
+
+    // Resolve userId once with getSession() (no network) so that all error/success
+    // branches — including the offline retry path — can persist the queue without
+    // making additional network-dependent auth calls.
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const currentUserId = currentSession?.user?.id ?? null;
 
     try {
       const { data, error } = await supabase.rpc("submit_game_score", {
@@ -154,24 +207,31 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       });
 
       if (error) {
-        // Network or server error → queue for retry
-        set((state) => ({
-          submitLoading: false,
-          error: "network",
-          pendingScores: state.pendingScores.some((queued) => queued.sessionId === stats.sessionId)
-            ? state.pendingScores
-            : [...state.pendingScores, stats],
-        }));
+        // Network or server error → queue for retry (persist to AsyncStorage)
+        set((state) => {
+          const alreadyQueued = state.pendingScores.some((q) => q.sessionId === stats.sessionId);
+          const updated = alreadyQueued ? state.pendingScores : [...state.pendingScores, stats];
+          if (currentUserId) void persistPendingScores(currentUserId, updated);
+          return {
+            submitLoading: false,
+            error: "network",
+            pendingScores: updated,
+          };
+        });
         return null;
       }
 
       if (data?.error) {
-        // RPC-level errors are terminal for this payload, so clear it from retry queue.
-        set((state) => ({
-          submitLoading: false,
-          error: data.error,
-          pendingScores: state.pendingScores.filter((queued) => queued.sessionId !== stats.sessionId),
-        }));
+        // RPC-level errors are terminal for this payload — clear from retry queue
+        set((state) => {
+          const updated = state.pendingScores.filter((q) => q.sessionId !== stats.sessionId);
+          if (currentUserId) void persistPendingScores(currentUserId, updated);
+          return {
+            submitLoading: false,
+            error: data.error,
+            pendingScores: updated,
+          };
+        });
         return null;
       }
 
@@ -187,11 +247,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         cumulativeScore:     data.cumulative_score,
       };
 
-      // Update local stats
-      set((state) => ({
-        submitLoading: false,
-        pendingScores: state.pendingScores.filter((queued) => queued.sessionId !== stats.sessionId),
-        userStats: state.userStats
+      // Update local stats and persist to cache
+      set((state) => {
+        const updatedPending = state.pendingScores.filter((q) => q.sessionId !== stats.sessionId);
+        if (currentUserId) void persistPendingScores(currentUserId, updatedPending);
+
+        const updatedStats = state.userStats
           ? {
               ...state.userStats,
               league:          result.league,
@@ -219,18 +280,29 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
               bestWordRain: stats.gameType === "word_rain" ? result.score : 0,
               bestMemoryMatch: stats.gameType === "memory_match" ? result.score : 0,
               lastPlayedAt: new Date().toISOString(),
-            },
-      }));
+            };
+
+        if (currentUserId) void writeCache(cacheKeyGameStats(currentUserId), updatedStats);
+
+        return {
+          submitLoading: false,
+          pendingScores: updatedPending,
+          userStats: updatedStats,
+        };
+      });
 
       return result;
     } catch {
-      set((state) => ({
-        submitLoading: false,
-        error: "network",
-        pendingScores: state.pendingScores.some((queued) => queued.sessionId === stats.sessionId)
-          ? state.pendingScores
-          : [...state.pendingScores, stats],
-      }));
+      set((state) => {
+        const alreadyQueued = state.pendingScores.some((q) => q.sessionId === stats.sessionId);
+        const updated = alreadyQueued ? state.pendingScores : [...state.pendingScores, stats];
+        if (currentUserId) void persistPendingScores(currentUserId, updated);
+        return {
+          submitLoading: false,
+          error: "network",
+          pendingScores: updated,
+        };
+      });
       return null;
     }
   },

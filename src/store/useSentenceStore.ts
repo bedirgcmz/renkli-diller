@@ -5,6 +5,9 @@ import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
 import { useAchievementStore } from "./useAchievementStore";
+import { readCache, writeCache } from "@/lib/offlineCache";
+import { useOfflineQueueStore, createQueueItem } from "./useOfflineQueueStore";
+import { useNetworkStore } from "./useNetworkStore";
 
 type DbRow = Record<string, unknown>;
 
@@ -79,6 +82,23 @@ interface SentenceState {
   clear: () => void;
 }
 
+// ─── Cache keys ────────────────────────────────────────────────────────────────
+const CACHE_CATEGORIES = "categories";
+/**
+ * Preset sentence cache key is scoped by language pair AND entitlement level.
+ * This prevents free users from reading premium-only cached data and vice versa.
+ * The `:premium` / `:free` suffix ensures separate storage for each tier.
+ */
+function cacheKeyPresets(uiLang: string, targetLang: string, isPremium: boolean) {
+  return `preset_sentences:${uiLang}_${targetLang}:${isPremium ? "premium" : "free"}`;
+}
+function cacheKeyUserSentences(userId: string) {
+  return `user_sentences:${userId}`;
+}
+function cacheKeyFavorites(userId: string) {
+  return `favorites:${userId}`;
+}
+
 export const useSentenceStore = create<SentenceState>((set, get) => ({
   sentences: [],
   presetSentences: [],
@@ -87,63 +107,121 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   loading: false,
   error: null,
 
+  // ─── Favorites ───────────────────────────────────────────────────────────────
+
   loadFavorites: async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // getSession() reads from AsyncStorage — safe offline, no network call.
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) {
       set({ favoriteIds: [] });
       return;
     }
+
+    // 1. Hydrate from cache immediately (no loading spinner for cache hits)
+    const cached = await readCache<string[]>(cacheKeyFavorites(user.id));
+    if (cached) {
+      set({ favoriteIds: cached });
+    }
+
+    // 2. Fetch from network; update cache on success
     const { data } = await supabase
       .from("sentence_favorites")
       .select("sentence_id")
       .eq("user_id", user.id);
     if (data) {
-      set({ favoriteIds: data.map((r: Record<string, unknown>) => r.sentence_id as string) });
+      const ids = data.map((r: Record<string, unknown>) => r.sentence_id as string);
+      set({ favoriteIds: ids });
+      void writeCache(cacheKeyFavorites(user.id), ids);
     }
   },
 
   toggleFavorite: async (id: string, isPreset: boolean) => {
-    const { favoriteIds } = get();
-    const isFav = favoriteIds.includes(id);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) return;
 
-    if (isFav) {
-      await supabase
-        .from("sentence_favorites")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("sentence_id", id);
-      set({ favoriteIds: favoriteIds.filter((fid) => fid !== id) });
-    } else {
-      await supabase.from("sentence_favorites").insert({
-        user_id: user.id,
-        sentence_id: id,
-        is_preset: isPreset,
-      });
-      set({ favoriteIds: [...favoriteIds, id] });
+    const { favoriteIds } = get();
+    const isFav = favoriteIds.includes(id);
+
+    // 1. Optimistic update
+    const updated = isFav
+      ? favoriteIds.filter((fid) => fid !== id)
+      : [...favoriteIds, id];
+    set({ favoriteIds: updated });
+
+    // 2. Write cache immediately (before network) so offline reads are correct
+    void writeCache(cacheKeyFavorites(user.id), updated);
+
+    // 3. Try remote write; on failure queue for later
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline) {
+      const { error } = isFav
+        ? await supabase
+            .from("sentence_favorites")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("sentence_id", id)
+        : await supabase.from("sentence_favorites").insert({
+            user_id: user.id,
+            sentence_id: id,
+            is_preset: isPreset,
+          });
+      if (!error) return; // success — nothing to queue
     }
+
+    // Offline or remote failed → enqueue (dedupeKey ensures last toggle wins)
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem(
+        isFav ? "favorite_remove" : "favorite_add",
+        isFav ? { sentenceId: id } : { sentenceId: id, isPreset },
+        { dedupeKey: `favorite:${id}` }
+      )
+    );
   },
 
+  // ─── Categories ──────────────────────────────────────────────────────────────
+
   loadCategories: async () => {
+    // 1. Cache-first: show cached categories immediately without spinner
+    const cached = await readCache<Category[]>(CACHE_CATEGORIES);
+    if (cached) {
+      set({ categories: cached });
+    }
+
+    // 2. Background network fetch; update state + cache on success
     const { data } = await supabase
       .from("categories")
       .select("*")
       .order("sort_order");
     if (data) {
       set({ categories: data as Category[] });
+      void writeCache(CACHE_CATEGORIES, data);
     }
   },
 
-  loadPresetSentences: async (categoryId?: number, isPremium: boolean = true) => {
-    set({ loading: true, error: null });
-    try {
-      const { uiLanguage, targetLanguage } = useSettingsStore.getState();
+  // ─── Preset sentences ─────────────────────────────────────────────────────
 
+  loadPresetSentences: async (categoryId?: number, isPremium: boolean = false) => {
+    const { uiLanguage, targetLanguage } = useSettingsStore.getState();
+    // Cache key includes entitlement scope — free and premium datasets never share storage.
+    const cacheKey = cacheKeyPresets(uiLanguage, targetLanguage, isPremium);
+
+    // 1. Hydrate from cache immediately; skip spinner if we have cached data
+    if (!categoryId) {
+      // Only use global cache for the full (unfiltered) list
+      const cached = await readCache<Sentence[]>(cacheKey);
+      if (cached) {
+        set({ presetSentences: cached });
+        // Don't return early — still revalidate in background
+      } else {
+        set({ loading: true, error: null });
+      }
+    } else {
+      set({ loading: true, error: null });
+    }
+
+    try {
       // Only fetch columns needed for the active language pair + fallback columns
       const sentenceCols = [...new Set([
         "id", "category_id", "sort_order", "difficulty",
@@ -164,11 +242,18 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         query = query.eq("category_id", categoryId);
       } else if (!isPremium) {
         // Free users: only load sentences from free categories
-        const { data: freeCats } = await supabase
+        const { data: freeCats, error: freeCatsError } = await supabase
           .from("categories")
           .select("id")
           .eq("is_free", true);
-        const freeCatIds = freeCats?.map((c: DbRow) => c.id) ?? [];
+
+        // Network failed — keep whatever cached data is already set and bail
+        if (freeCatsError) {
+          set({ loading: false });
+          return;
+        }
+
+        const freeCatIds = (freeCats ?? []).map((c: DbRow) => c.id);
         if (freeCatIds.length > 0) {
           query = query.in("category_id", freeCatIds);
         } else {
@@ -179,13 +264,14 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
 
       const { data, error } = await query;
       if (error) {
+        // Network error — keep showing cached data (already set above)
         set({ error: error.message, loading: false });
         return;
       }
 
       const rows = (data || []) as unknown as DbRow[];
 
-      // Fetch all generated visuals — table is small, avoids .in() URL length issues
+      // Fetch all generated visuals
       const visualMap: Record<string, string> = {};
       const { data: visuals, error: visualsError } = await supabase
         .from("sentence_visuals")
@@ -222,17 +308,61 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       }));
 
       set({ presetSentences: mapped, loading: false });
+
+      // Persist to cache only for full (unfiltered) list.
+      // Also write a per-user hint so offline startup hydration can locate the
+      // correct language-pair cache next cold start without re-reading settings
+      // from Supabase.
+      if (!categoryId) {
+        void writeCache(cacheKey, mapped);
+
+        // Production-safety rule:
+        // Even when a premium user fetched the full preset dataset online, we
+        // also persist a free-safe subset keyed as `:free`. Offline startup
+        // hydration only ever reads that conservative cache, which prevents a
+        // downgraded user from seeing stale premium-only content while offline.
+        if (isPremium) {
+          const categorySource =
+            get().categories.length > 0
+              ? get().categories
+              : ((await readCache<Category[]>(CACHE_CATEGORIES)) ?? []);
+          const freeCategoryIds = new Set(
+            categorySource
+              .filter((category) => category.is_free)
+              .map((category) => category.id),
+          );
+
+          if (freeCategoryIds.size > 0) {
+            const freeSubset = mapped.filter((sentence) =>
+              sentence.category_id ? freeCategoryIds.has(sentence.category_id) : false,
+            );
+            void writeCache(cacheKeyPresets(uiLanguage, targetLanguage, false), freeSubset);
+          }
+        }
+
+        void (async () => {
+          const { data: { session: hintSession } } = await supabase.auth.getSession();
+          if (hintSession?.user?.id) {
+            void writeCache(`user_preset_hint:${hintSession.user.id}`, {
+              uiLanguage,
+              targetLanguage,
+              isPremium,
+            });
+          }
+        })();
+      }
     } catch {
       set({ error: "Failed to load preset sentences", loading: false });
     }
   },
 
+  // ─── User sentences ───────────────────────────────────────────────────────
+
   loadSentences: async (filters: SentenceFilters = {}) => {
-    set({ loading: true, error: null });
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // getSession() reads locally — safe for offline cache-first phase.
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) {
         set({ sentences: [], loading: false });
         return;
@@ -240,6 +370,20 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
 
       const { uiLanguage, targetLanguage } = useSettingsStore.getState();
       const { categories } = get();
+
+      // 1. Cache-first (only for unfiltered fetch)
+      const hasFilters = filters.status || filters.category_id || filters.search;
+      if (!hasFilters) {
+        const cached = await readCache<Sentence[]>(cacheKeyUserSentences(user.id));
+        if (cached) {
+          set({ sentences: cached });
+          // Continue to background refresh
+        } else {
+          set({ loading: true, error: null });
+        }
+      } else {
+        set({ loading: true, error: null });
+      }
 
       let query = supabase
         .from("user_sentences")
@@ -287,6 +431,11 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       });
 
       set({ sentences: mapped, loading: false });
+
+      // Persist full unfiltered list to cache
+      if (!hasFilters) {
+        void writeCache(cacheKeyUserSentences(user.id), mapped);
+      }
     } catch {
       set({ error: "Failed to load sentences", loading: false });
     }
@@ -295,9 +444,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
   addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang, is_ai_generated, tag }) => {
     set({ loading: true, error: null });
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) {
         set({ loading: false });
         return { success: false, error: "User not authenticated" };
@@ -344,8 +492,9 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         created_at: data.created_at,
       };
 
-      const { sentences } = get();
-      set({ sentences: [newSentence, ...sentences], loading: false });
+      const updated = [newSentence, ...get().sentences];
+      set({ sentences: updated, loading: false });
+      void writeCache(cacheKeyUserSentences(user.id), updated);
       return { success: true };
     } catch {
       set({ loading: false });
@@ -388,6 +537,14 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       });
 
       set({ sentences: updatedSentences, loading: false });
+
+      // Update cache with latest data
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
+      if (user) {
+        void writeCache(cacheKeyUserSentences(user.id), updatedSentences);
+      }
+
       return { success: true };
     } catch {
       set({ loading: false });
@@ -408,8 +565,15 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         return { success: false, error: error.message };
       }
 
-      const { sentences } = get();
-      set({ sentences: sentences.filter((s) => s.id !== id), loading: false });
+      const updated = get().sentences.filter((s) => s.id !== id);
+      set({ sentences: updated, loading: false });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
+      if (user) {
+        void writeCache(cacheKeyUserSentences(user.id), updated);
+      }
+
       return { success: true };
     } catch {
       set({ loading: false });
@@ -444,9 +608,8 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       await get().updateSentence(id, { status: "learned" });
 
       // Write learned_at so this event counts toward streak (same as preset sentences)
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (user) {
         await supabase
           .from("user_sentences")
