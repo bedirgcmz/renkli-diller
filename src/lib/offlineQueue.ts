@@ -38,7 +38,8 @@ export type OfflineQueueItemType =
   | "favorite_add"
   | "favorite_remove"
   | "quiz_result"
-  | "study_session";
+  | "study_session"
+  | "reading_mark_completed";
 
 export interface OfflineQueueItem {
   id: string;

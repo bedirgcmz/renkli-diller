@@ -195,6 +195,26 @@ async function processItem(
         return { success: true, permanent: false };
       }
 
+      case "reading_mark_completed": {
+        const { textId, completedAt, shownAt } = item.payload as {
+          textId: string;
+          completedAt: string;
+          shownAt: string;
+        };
+        const { error } = await supabase.from("user_reading_progress").upsert(
+          {
+            user_id: userId,
+            reading_text_id: textId,
+            status: "completed",
+            completed_at: completedAt,
+            shown_at: shownAt,
+          },
+          { onConflict: "user_id,reading_text_id" }
+        );
+        if (error) return { success: false, permanent: isPermanentError(error) };
+        return { success: true, permanent: false };
+      }
+
       default:
         // Unknown item type — permanent failure, discard
         console.warn("[offlineQueue] unknown item type, discarding:", (item as OfflineQueueItem).type);

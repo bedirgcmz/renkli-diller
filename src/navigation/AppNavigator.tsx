@@ -8,6 +8,7 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useGameStore } from "@/store/useGameStore";
 import { useOfflineQueueStore } from "@/store/useOfflineQueueStore";
+import { useReadingStore } from "@/store/useReadingStore";
 import { View, Text, StyleSheet, ActivityIndicator, Alert, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -92,6 +93,8 @@ export default function AppNavigator() {
     void useGameStore.getState().loadUserStats();
     void useGameStore.getState().retryPendingScore();
     void useSentenceStore.getState().loadPresetSentences(undefined, is_premium);
+    void useReadingStore.getState().fetchProgress(user.id);
+    void useReadingStore.getState().fetchNextText(user.id, false, is_premium);
   }, [user?.id, settingsReadyForCurrentUser, isOnline]);
 
   // ── Reconnect: refresh stores when connectivity is restored ───────────────
@@ -126,12 +129,14 @@ export default function AppNavigator() {
       void useSentenceStore.getState().loadSentences();
       void useProgressStore.getState().loadProgress();
       void useGameStore.getState().loadUserStats();
+      void useReadingStore.getState().fetchProgress(user.id);
 
-      // Preset sentences depend on settings (lang pair) — only refresh if settings
-      // are ready so we use the correct cache key.
+      // Preset sentences and reading text depend on settings (lang pair / premium) —
+      // only refresh if settings are ready so we use the correct cache key.
       if (settingsReadyForCurrentUser) {
         const { is_premium } = useAuthStore.getState().user ?? { is_premium: false };
         void useSentenceStore.getState().loadPresetSentences(undefined, is_premium);
+        void useReadingStore.getState().fetchNextText(user.id, false, is_premium);
       }
     })();
   }, [reconnectCount, user?.id, settingsReadyForCurrentUser]);

@@ -1,3 +1,38 @@
+/**
+ * useReadingStore.ts
+ *
+ * Phase 2 offline-resilience additions
+ * ─────────────────────────────────────
+ * • fetchProgress: cache-first — hydrates from AsyncStorage immediately, then
+ *   refreshes from the network if online and writes a fresh snapshot back.
+ * • fetchNextText: offline guard — if offline, loads the last cached text and
+ *   keywords instead of attempting any network calls. Skips the server-side
+ *   "shown_at: today" assignment write entirely.
+ * • markAsCompleted: optimistic-first + queue-backed — updates local state
+ *   immediately, attempts the network upsert if online, and falls back to the
+ *   offline queue on failure so the completion is not lost.
+ *
+ * Accepted Phase 2 tradeoff — date/assignment divergence
+ * ────────────────────────────────────────────────────────
+ * When the app opens offline the server assignment write (upsert with
+ * status:"assigned", shown_at: today) is skipped. On the next online session,
+ * fetchNextText reconciles server-side. In the common case the user also
+ * completed the text offline: the queued markAsCompleted fires on reconnect
+ * with today's date, so fetchNextText step-2 (completed today) finds it and
+ * shows the same text — consistent behaviour. Edge cases (day-change while
+ * offline, multiple-day gap) may produce a one-off mismatch; this is accepted
+ * for Phase 2 and tracked for Phase 3.
+ *
+ * Cache keys (user-scoped, cleared by clearUserCache on logout)
+ * ──────────────────────────────────────────────────────────────
+ * reading_progress:{userId}    — UserReadingProgress[]
+ * reading_current:{userId}     — { text: ReadingText, keywords: ReadingTextKeyword[] }
+ *
+ * Note: cache keys are NOT language-pair-scoped because reading_texts rows
+ * contain content for all language pairs in a single row; the correct body_*
+ * and keyword_* fields are selected at render time by ReadingScreen.
+ */
+
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
 import {
@@ -6,6 +41,28 @@ import {
   UserReadingProgress,
   CompletedReadingEntry,
 } from "@/types";
+import { readCache, writeCache } from "@/lib/offlineCache";
+import { useNetworkStore } from "@/store/useNetworkStore";
+import { useOfflineQueueStore, createQueueItem } from "@/store/useOfflineQueueStore";
+
+// ── Cache keys ─────────────────────────────────────────────────────────────────
+
+function cacheKeyProgress(userId: string) {
+  return `reading_progress:${userId}`;
+}
+
+function cacheKeyCurrentText(userId: string) {
+  return `reading_current:${userId}`;
+}
+
+// ── Cache shapes ───────────────────────────────────────────────────────────────
+
+interface ReadingCurrentCache {
+  text: ReadingText;
+  keywords: ReadingTextKeyword[];
+}
+
+// ── Store interface ────────────────────────────────────────────────────────────
 
 interface ReadingState {
   currentText: ReadingText | null;
@@ -25,6 +82,8 @@ interface ReadingState {
   clear: () => void;
 }
 
+// ── Store ──────────────────────────────────────────────────────────────────────
+
 export const useReadingStore = create<ReadingState>((set, get) => ({
   currentText: null,
   keywords: [],
@@ -33,15 +92,47 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   error: null,
 
   fetchProgress: async (userId) => {
+    // 1. Hydrate from cache immediately — no spinner if we have cached data
+    const cached = await readCache<UserReadingProgress[]>(cacheKeyProgress(userId));
+    if (cached) {
+      set({ progress: cached });
+    }
+
+    // 2. If offline, stop here — cached state is all we have
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline === false) return;
+
+    // 3. Fetch from network
     const { data } = await supabase
       .from("user_reading_progress")
       .select("*")
       .eq("user_id", userId);
-    if (data) set({ progress: data as UserReadingProgress[] });
+
+    if (data) {
+      set({ progress: data as UserReadingProgress[] });
+      void writeCache(cacheKeyProgress(userId), data);
+    }
   },
 
   fetchNextText: async (userId, forceNew = false, isPremium = false) => {
     set({ loading: true, error: null });
+
+    // ── Offline path ─────────────────────────────────────────────────────────
+    // Skip all network calls (including the server-side assignment write).
+    // Load the last cached text so the user can still read offline.
+    // See module-level comment for the accepted date/assignment divergence tradeoff.
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline === false) {
+      const cached = await readCache<ReadingCurrentCache>(cacheKeyCurrentText(userId));
+      if (cached) {
+        set({ currentText: cached.text, keywords: cached.keywords, loading: false });
+      } else {
+        set({ currentText: null, keywords: [], loading: false });
+      }
+      return;
+    }
+
+    // ── Online path ──────────────────────────────────────────────────────────
     try {
       const today = new Date().toISOString().split("T")[0];
 
@@ -105,7 +196,7 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
         textId = nextText.id;
 
-        // 3. Assign this text for today
+        // Assign this text for today
         await supabase.from("user_reading_progress").upsert(
           {
             user_id: userId,
@@ -156,11 +247,15 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
         .eq("reading_text_id", textData.id)
         .order("position_index");
 
-      set({
-        currentText: textData as ReadingText,
-        keywords: (kwData ?? []) as ReadingTextKeyword[],
-        loading: false,
-      });
+      const text = textData as ReadingText;
+      const keywords = (kwData ?? []) as ReadingTextKeyword[];
+
+      set({ currentText: text, keywords, loading: false });
+
+      // 5. Write to cache — enables cold-start offline reading next session
+      void writeCache<ReadingCurrentCache>(cacheKeyCurrentText(userId), { text, keywords });
+      // Also persist the updated progress array
+      void writeCache(cacheKeyProgress(userId), get().progress);
     } catch (e: any) {
       set({ error: e.message, loading: false });
     }
@@ -169,39 +264,58 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
   markAsCompleted: async (userId, textId) => {
     const now = new Date().toISOString();
     const today = now.split("T")[0];
-    const { error } = await supabase.from("user_reading_progress").upsert(
-      {
-        user_id: userId,
-        reading_text_id: textId,
-        status: "completed",
-        completed_at: now,
-        shown_at: today,
-      },
-      { onConflict: "user_id,reading_text_id" }
-    );
-    if (error) throw error;
+
+    // 1. Optimistic update — UI responds immediately regardless of network state
     set((state) => {
       const exists = state.progress.some((p) => p.reading_text_id === textId);
-      return {
-        progress: exists
-          ? state.progress.map((p) =>
-              p.reading_text_id === textId
-                ? { ...p, status: "completed" as const, completed_at: now, shown_at: today }
-                : p
-            )
-          : [
-              ...state.progress,
-              {
-                id: "",
-                user_id: userId,
-                reading_text_id: textId,
-                status: "completed" as const,
-                completed_at: now,
-                shown_at: today,
-              },
-            ],
-      };
+      const updatedProgress = exists
+        ? state.progress.map((p) =>
+            p.reading_text_id === textId
+              ? { ...p, status: "completed" as const, completed_at: now, shown_at: today }
+              : p
+          )
+        : [
+            ...state.progress,
+            {
+              id: "",
+              user_id: userId,
+              reading_text_id: textId,
+              status: "completed" as const,
+              completed_at: now,
+              shown_at: today,
+            },
+          ];
+      return { progress: updatedProgress };
     });
+
+    // 2. Write optimistic progress to cache immediately so cold-start reads
+    //    the correct completion state even before a network round-trip
+    void writeCache(cacheKeyProgress(userId), get().progress);
+
+    // 3. Try network write if online
+    const isOnline = useNetworkStore.getState().isOnline;
+    if (isOnline !== false) {
+      const { error } = await supabase.from("user_reading_progress").upsert(
+        {
+          user_id: userId,
+          reading_text_id: textId,
+          status: "completed",
+          completed_at: now,
+          shown_at: today,
+        },
+        { onConflict: "user_id,reading_text_id" }
+      );
+      if (!error) return; // success — nothing to queue
+    }
+
+    // 4. Offline or network failed → enqueue for replay on reconnect
+    void useOfflineQueueStore.getState().addItem(
+      createQueueItem(
+        "reading_mark_completed",
+        { textId, completedAt: now, shownAt: today },
+        { dedupeKey: `reading_completed:${textId}` }
+      )
+    );
   },
 
   markAsUncompleted: async (userId, textId) => {
