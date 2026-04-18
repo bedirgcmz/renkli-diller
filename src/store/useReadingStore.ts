@@ -26,11 +26,13 @@
  * Cache keys (user-scoped, cleared by clearUserCache on logout)
  * ──────────────────────────────────────────────────────────────
  * reading_progress:{userId}    — UserReadingProgress[]
- * reading_current:{userId}     — { text: ReadingText, keywords: ReadingTextKeyword[] }
+ * reading_current:{userId}     — { text, keywords, uiLanguage, targetLanguage }
  *
- * Note: cache keys are NOT language-pair-scoped because reading_texts rows
- * contain content for all language pairs in a single row; the correct body_*
- * and keyword_* fields are selected at render time by ReadingScreen.
+ * The reading_current payload stores the active language pair alongside the
+ * text. On offline hydration, the stored pair is compared to the current
+ * settings: a mismatch (user changed language pair while offline) yields a
+ * cache miss so the user sees the 📡 offline banner instead of a text that
+ * was cached for a different language context.
  */
 
 import { create } from "zustand";
@@ -43,6 +45,7 @@ import {
 } from "@/types";
 import { readCache, writeCache } from "@/lib/offlineCache";
 import { useNetworkStore } from "@/store/useNetworkStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { useOfflineQueueStore, createQueueItem } from "@/store/useOfflineQueueStore";
 
 // ── Cache keys ─────────────────────────────────────────────────────────────────
@@ -60,6 +63,8 @@ function cacheKeyCurrentText(userId: string) {
 interface ReadingCurrentCache {
   text: ReadingText;
   keywords: ReadingTextKeyword[];
+  uiLanguage: string;
+  targetLanguage: string;
 }
 
 // ── Store interface ────────────────────────────────────────────────────────────
@@ -124,7 +129,15 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
     const isOnline = useNetworkStore.getState().isOnline;
     if (isOnline === false) {
       const cached = await readCache<ReadingCurrentCache>(cacheKeyCurrentText(userId));
-      if (cached) {
+      const { uiLanguage, targetLanguage } = useSettingsStore.getState();
+      // Only use the cache if the stored language pair matches the current
+      // settings. A mismatch means the user changed language pair since the
+      // cache was written — show the offline empty state instead.
+      if (
+        cached &&
+        cached.uiLanguage === uiLanguage &&
+        cached.targetLanguage === targetLanguage
+      ) {
         set({ currentText: cached.text, keywords: cached.keywords, loading: false });
       } else {
         set({ currentText: null, keywords: [], loading: false });
@@ -249,11 +262,18 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
 
       const text = textData as ReadingText;
       const keywords = (kwData ?? []) as ReadingTextKeyword[];
+      const { uiLanguage, targetLanguage } = useSettingsStore.getState();
 
       set({ currentText: text, keywords, loading: false });
 
-      // 5. Write to cache — enables cold-start offline reading next session
-      void writeCache<ReadingCurrentCache>(cacheKeyCurrentText(userId), { text, keywords });
+      // 5. Write to cache with the active language pair so offline hydration
+      //    can detect a language-pair change and skip a stale cache entry.
+      void writeCache<ReadingCurrentCache>(cacheKeyCurrentText(userId), {
+        text,
+        keywords,
+        uiLanguage,
+        targetLanguage,
+      });
       // Also persist the updated progress array
       void writeCache(cacheKeyProgress(userId), get().progress);
     } catch (e: any) {
