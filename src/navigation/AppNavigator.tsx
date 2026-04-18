@@ -8,7 +8,9 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useGameStore } from "@/store/useGameStore";
 import { useOfflineQueueStore } from "@/store/useOfflineQueueStore";
-import { View, ActivityIndicator, Alert } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 // Screens
@@ -22,6 +24,7 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { user, initialized, initialize, passwordRecoveryActive } = useAuthStore();
   const uiLanguage = useSettingsStore((s) => s.uiLanguage);
   const targetLanguage = useSettingsStore((s) => s.targetLanguage);
@@ -174,21 +177,50 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {passwordRecoveryActive ? (
-          <Stack.Screen name="PasswordRecovery" component={CompleteResetPasswordScreen} />
-        ) : user ? (
-          // User is authenticated - show main app
-          <Stack.Screen name="Main" component={MainNavigator} />
-        ) : (
-          // User is not authenticated - show auth flow
-          <>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="AuthFlow" component={AuthNavigator} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={offlineStyles.root}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {passwordRecoveryActive ? (
+            <Stack.Screen name="PasswordRecovery" component={CompleteResetPasswordScreen} />
+          ) : user ? (
+            <Stack.Screen name="Main" component={MainNavigator} />
+          ) : (
+            <>
+              <Stack.Screen name="Welcome" component={WelcomeScreen} />
+              <Stack.Screen name="AuthFlow" component={AuthNavigator} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+
+      {/* Global offline pill — absolute, appears over all screens */}
+      {isOnline === false && (
+        <View style={[offlineStyles.pill, { top: insets.top + 8 }]}>
+          <Ionicons name="wifi-outline" size={13} color="#fff" />
+          <Text style={offlineStyles.pillText}>{t("common.offline_indicator")}</Text>
+        </View>
+      )}
+    </View>
   );
 }
+
+const offlineStyles = StyleSheet.create({
+  root: { flex: 1 },
+  pill: {
+    position: "absolute",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    backgroundColor: "rgba(30,30,30,0.82)",
+  },
+  pillText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 0.2,
+  },
+});

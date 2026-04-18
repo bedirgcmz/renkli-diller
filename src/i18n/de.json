@@ -393,7 +393,8 @@
     "preview": "Vorschau:",
     "optional": "optional",
     "offline_title": "Keine Internetverbindung",
-    "offline_body": "Diese Funktion erfordert eine Internetverbindung."
+    "offline_body": "Diese Funktion erfordert eine Internetverbindung.",
+    "offline_indicator": "Offline"
   },
   "languages": {
     "tr": "Türkçe",

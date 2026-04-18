@@ -393,7 +393,8 @@
     "preview": "Önizleme:",
     "optional": "opsiyonel",
     "offline_title": "İnternet Bağlantısı Yok",
-    "offline_body": "Bu özellik için internet bağlantısı gerekiyor."
+    "offline_body": "Bu özellik için internet bağlantısı gerekiyor.",
+    "offline_indicator": "Çevrimdışı"
   },
   "languages": {
     "tr": "Türkçe",

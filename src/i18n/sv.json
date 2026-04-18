@@ -393,7 +393,8 @@
     "preview": "Förhandsvisning:",
     "optional": "valfri",
     "offline_title": "Ingen internetanslutning",
-    "offline_body": "Den här funktionen kräver en internetanslutning."
+    "offline_body": "Den här funktionen kräver en internetanslutning.",
+    "offline_indicator": "Offline"
   },
   "languages": {
     "tr": "Türkçe",
