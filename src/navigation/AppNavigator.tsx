@@ -131,12 +131,16 @@ export default function AppNavigator() {
       void useGameStore.getState().loadUserStats();
       void useReadingStore.getState().fetchProgress(user.id);
 
-      // Preset sentences and reading text depend on settings (lang pair / premium) —
+      // Preset sentences depend on settings (lang pair / premium) —
       // only refresh if settings are ready so we use the correct cache key.
       if (settingsReadyForCurrentUser) {
         const { is_premium } = useAuthStore.getState().user ?? { is_premium: false };
         void useSentenceStore.getState().loadPresetSentences(undefined, is_premium);
-        void useReadingStore.getState().fetchNextText(user.id, false, is_premium);
+        // NOTE: fetchNextText is intentionally NOT called here. Reconnect fires
+        // while the user may already be mid-read (currentText set from cache).
+        // Calling fetchNextText would overwrite the active text and show a spinner.
+        // fetchProgress above is sufficient for stats sync; the reading text
+        // refreshes naturally when the user navigates to the Reading tab.
       }
     })();
   }, [reconnectCount, user?.id, settingsReadyForCurrentUser]);
