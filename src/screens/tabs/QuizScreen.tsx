@@ -158,6 +158,34 @@ export default function QuizScreen() {
   const [quizMuted, setQuizMuted] = useState(false);
   const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+  const goToSentencesTab = () => navigation.getParent()?.navigate("Sentences" as never);
+
+  const renderEmptyActions = () => (
+    <View style={styles.emptyActions}>
+      <TouchableOpacity
+        style={[styles.emptyBtn, { backgroundColor: colors.primary }]}
+        onPress={goToSentencesTab}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="list-outline" size={16} color="#fff" />
+        <Text style={styles.emptyBtnText}>{t("quiz.go_to_sentences")}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.emptySecondaryBtn,
+          { backgroundColor: colors.cardBackground, borderColor: colors.border },
+        ]}
+        onPress={() => navigation.navigate("CategoryBrowser")}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="grid-outline" size={16} color={colors.primary} />
+        <Text style={[styles.emptySecondaryBtnText, { color: colors.text }]}>
+          {t("home.card_explore_title")}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // perfect_quiz: 100% accuracy in a main session (no wrong answers → no retry phase)
@@ -395,14 +423,7 @@ export default function QuizScreen() {
             <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
               {t("quiz.empty_hint")}
             </Text>
-            <TouchableOpacity
-              style={[styles.emptyBtn, { backgroundColor: colors.primary }]}
-              onPress={() => navigation.getParent()?.navigate("Sentences" as never)}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="list-outline" size={16} color="#fff" />
-              <Text style={styles.emptyBtnText}>{t("quiz.go_to_sentences")}</Text>
-            </TouchableOpacity>
+            {renderEmptyActions()}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -494,6 +515,7 @@ export default function QuizScreen() {
             <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
               {t("quiz.no_keywords")}
             </Text>
+            {renderEmptyActions()}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -527,6 +549,7 @@ export default function QuizScreen() {
             <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
               {t("quiz.empty_hint")}
             </Text>
+            {renderEmptyActions()}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -1281,14 +1304,33 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { fontSize: 17, fontWeight: "700", textAlign: "center" },
   emptyHint: { fontSize: 14, textAlign: "center", lineHeight: 20, paddingHorizontal: 8 },
+  emptyActions: {
+    width: "100%",
+    gap: 10,
+    marginTop: 8,
+  },
   emptyBtn: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 6,
-    marginTop: 8,
     paddingHorizontal: 20,
     paddingVertical: 11,
     borderRadius: 12,
   },
   emptyBtnText: { color: "#fff", fontSize: 14, fontWeight: "600" },
+  emptySecondaryBtn: {
+    minHeight: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 18,
+  },
+  emptySecondaryBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });

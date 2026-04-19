@@ -846,7 +846,13 @@ export default function LearnScreen() {
               <ActivityIndicator size="large" color={colors.primary} />
             </View>
           ) : total === 0 ? (
-            <EmptyState tab="learning" colors={colors} t={t} />
+            <EmptyState
+              tab="learning"
+              colors={colors}
+              t={t}
+              onPrimary={() => navigation.getParent()?.navigate("Sentences" as never)}
+              onSecondary={() => navigation.navigate("CategoryBrowser")}
+            />
           ) : (
             <>
               <GestureDetector gesture={swipeGesture}>
@@ -918,7 +924,13 @@ export default function LearnScreen() {
               <ActivityIndicator size="large" color={colors.primary} />
             </View>
           ) : listenTotal === 0 ? (
-            <EmptyState tab="listening" colors={colors} t={t} />
+            <EmptyState
+              tab="listening"
+              colors={colors}
+              t={t}
+              onPrimary={() => navigation.getParent()?.navigate("Sentences" as never)}
+              onSecondary={() => navigation.navigate("CategoryBrowser")}
+            />
           ) : (
             <>
               <GestureDetector gesture={listenSwipeGesture}>
@@ -976,18 +988,51 @@ function EmptyState({
   tab,
   colors,
   t,
+  onPrimary,
+  onSecondary,
 }: {
   tab: TabKey;
   colors: ThemeColors;
   t: (k: string) => string;
+  onPrimary: () => void;
+  onSecondary: () => void;
 }) {
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>{tab === "listening" ? "🎧" : "📚"}</Text>
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>{t("learn.no_sentences")}</Text>
-      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-        {tab === "listening" ? t("learn.no_listen_sentences") : t("learn.start_hint")}
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>
+        {tab === "listening"
+          ? t("learn.empty_listening_title")
+          : t("learn.empty_learning_title")}
       </Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+        {tab === "listening"
+          ? t("learn.empty_listening_desc")
+          : t("learn.empty_learning_desc")}
+      </Text>
+      <View style={styles.emptyActions}>
+        <TouchableOpacity
+          style={[styles.emptyPrimaryButton, { backgroundColor: colors.primary }]}
+          onPress={onPrimary}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="list-outline" size={16} color="#FFFFFF" />
+          <Text style={styles.emptyPrimaryButtonText}>{t("quiz.go_to_sentences")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.emptySecondaryButton,
+            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+          ]}
+          onPress={onSecondary}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="grid-outline" size={16} color={colors.primary} />
+          <Text style={[styles.emptySecondaryButtonText, { color: colors.text }]}>
+            {t("home.card_explore_title")}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -1186,6 +1231,39 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 52 },
   emptyTitle: { fontSize: 18, fontWeight: "600", textAlign: "center" },
   emptySubtitle: { fontSize: 14, textAlign: "center", lineHeight: 20 },
+  emptyActions: {
+    width: "100%",
+    gap: 10,
+    marginTop: 4,
+  },
+  emptyPrimaryButton: {
+    minHeight: 46,
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  emptyPrimaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  emptySecondaryButton: {
+    minHeight: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  emptySecondaryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
   progressRow: {
     flexDirection: "row",
     alignItems: "center",

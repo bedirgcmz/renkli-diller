@@ -57,7 +57,11 @@
     "listen_select": "Doğru anlamı seçin:",
     "tap_to_reveal": "Görmek için göze dokun",
     "replay": "Tekrar Dinle",
-    "no_listen_sentences": "Dinleme pratiği yapmak için öğrenme listene cümle ekle."
+    "no_listen_sentences": "Dinleme pratiği yapmak için öğrenme listene cümle ekle.",
+    "empty_learning_title": "Çalışmaya başlamadan önce öğrenme listenizi oluşturun",
+    "empty_learning_desc": "Çalış modu öğrenme listenizdeki cümleleri kullanır. Önce birkaç cümle ekleyin, sonra buraya geri dönün.",
+    "empty_listening_title": "Dinleme çalışması için önce cümle ekleyin",
+    "empty_listening_desc": "Dinleme modu öğrenme listenizdeki cümlelerle çalışır. Önce birkaç cümle ekleyin, sonra burada pratik yapın."
   },
   "quiz": {
     "title": "Quiz",
@@ -82,9 +86,9 @@
     "reviewing_wrong": "{{count}} yanlış cevap tekrar ediliyor",
     "first_round": "İlk Tur",
     "retry_round": "Tekrar Turu",
-    "empty_title": "Öğrenme listesi boş",
-    "empty_hint": "Cümleler ekranından öğrenme listenize cümle ekleyerek quiz başlatabilirsiniz.",
-    "go_to_sentences": "Cümlelere Git",
+    "empty_title": "Quiz başlamadan önce öğrenme listenizi oluşturun",
+    "empty_hint": "Quiz soruları öğrenme listenizdeki cümlelerden hazırlanır. Önce birkaç cümle ekleyin, sonra buraya geri dönün.",
+    "go_to_sentences": "Cümlelerime Git",
     "no_keywords_title": "Boşluk doldurma için cümle yok",
     "build_sentence": "Cümle Kur"
   },
@@ -663,8 +667,8 @@
   },
   "build_sentence": {
     "title": "Cümle Kur",
-    "empty_title": "Öğrenme listesi boş",
-    "empty_desc": "Cümleleri öğrenme listene ekle, sonra buraya gelip sırala.",
+    "empty_title": "Cümle kurmaya başlamadan önce cümle ekleyin",
+    "empty_desc": "Cümle Kur modu öğrenme listenizdeki cümleleri kullanır. Önce birkaç cümle ekleyin, sonra burada sıralayın.",
     "source_label": "Şunu çevir:",
     "drop_hint": "Kelimelere dokunarak cümle kur",
     "validate": "Doğrula",

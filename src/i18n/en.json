@@ -57,7 +57,11 @@
     "listen_select": "Select the correct meaning:",
     "tap_to_reveal": "Tap eye to reveal",
     "replay": "Replay",
-    "no_listen_sentences": "Add sentences to your learning list to start listening practice."
+    "no_listen_sentences": "Add sentences to your learning list to start listening practice.",
+    "empty_learning_title": "Build your learning list before you study",
+    "empty_learning_desc": "Study mode works with the sentences in your learning list. Add a few sentences first, then come back here.",
+    "empty_listening_title": "Add sentences before you start listening practice",
+    "empty_listening_desc": "Listening mode uses the sentences in your learning list. Add a few, then return here to practice."
   },
   "quiz": {
     "title": "Quiz",
@@ -82,9 +86,9 @@
     "reviewing_wrong": "Reviewing {{count}} wrong answers",
     "first_round": "First Round",
     "retry_round": "Retry Round",
-    "empty_title": "Learning list is empty",
-    "empty_hint": "Add sentences to your learning list from the Sentences screen to start a quiz.",
-    "go_to_sentences": "Go to Sentences",
+    "empty_title": "Build your learning list before you start a quiz",
+    "empty_hint": "Quiz questions are generated from the sentences in your learning list. Add a few sentences first, then come back here.",
+    "go_to_sentences": "Go to My Sentences",
     "no_keywords_title": "No sentences for fill-in-the-blank",
     "build_sentence": "Build Sentence"
   },
@@ -663,8 +667,8 @@
   },
   "build_sentence": {
     "title": "Build Sentence",
-    "empty_title": "Learning list is empty",
-    "empty_desc": "Add sentences to your learning list, then come back to practice here.",
+    "empty_title": "Add sentences before you start building",
+    "empty_desc": "Build mode uses the sentences in your learning list. Add a few sentences first, then come back here to arrange them.",
     "source_label": "Translate this:",
     "drop_hint": "Tap words to build the sentence",
     "validate": "Check",

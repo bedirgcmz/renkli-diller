@@ -174,16 +174,45 @@ function EmptyState({
   title,
   desc,
   colors,
+  t,
+  onPrimary,
+  onSecondary,
 }: {
   title: string;
   desc: string;
   colors: ReturnType<typeof useTheme>["colors"];
+  t: (k: string) => string;
+  onPrimary: () => void;
+  onSecondary: () => void;
 }) {
   return (
     <View style={emptyStyles.container}>
       <Text style={emptyStyles.emoji}>📚</Text>
       <Text style={[emptyStyles.title, { color: colors.text }]}>{title}</Text>
       <Text style={[emptyStyles.desc, { color: colors.textSecondary }]}>{desc}</Text>
+      <View style={emptyStyles.actions}>
+        <TouchableOpacity
+          style={[emptyStyles.primaryButton, { backgroundColor: colors.primary }]}
+          onPress={onPrimary}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="list-outline" size={16} color="#FFFFFF" />
+          <Text style={emptyStyles.primaryButtonText}>{t("quiz.go_to_sentences")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            emptyStyles.secondaryButton,
+            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+          ]}
+          onPress={onSecondary}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="grid-outline" size={16} color={colors.primary} />
+          <Text style={[emptyStyles.secondaryButtonText, { color: colors.text }]}>
+            {t("home.card_explore_title")}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -199,6 +228,39 @@ const emptyStyles = StyleSheet.create({
   emoji: { fontSize: 48 },
   title: { fontSize: 18, fontWeight: "700", textAlign: "center" },
   desc: { fontSize: 14, textAlign: "center", lineHeight: 20 },
+  actions: {
+    width: "100%",
+    marginTop: 4,
+    gap: 10,
+  },
+  primaryButton: {
+    minHeight: 46,
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  secondaryButton: {
+    minHeight: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
@@ -419,6 +481,9 @@ export default function BuildSentenceScreen() {
           title={t("build_sentence.empty_title")}
           desc={t("build_sentence.empty_desc")}
           colors={colors}
+          t={t}
+          onPrimary={() => navigation.getParent()?.navigate("Sentences" as never)}
+          onSecondary={() => navigation.navigate("CategoryBrowser")}
         />
       </SafeAreaView>
     );
