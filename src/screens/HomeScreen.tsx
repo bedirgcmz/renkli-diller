@@ -31,6 +31,7 @@ type Nav = CompositeNavigationProp<
 >;
 
 const CARD_GAP = 12;
+const DASHBOARD_CARD_WIDTH_TRIM = 8;
 
 interface ActivityCard {
   id: string;
@@ -69,7 +70,9 @@ export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const cardWidth = Math.floor((screenWidth - 32 - CARD_GAP) / 2);
-  const dashboardCardWidth = Math.floor((screenWidth - 32 - 36 - CARD_GAP) / 2);
+  const dashboardCardWidth = Math.floor(
+    (screenWidth - 32 - 36 - CARD_GAP - DASHBOARD_CARD_WIDTH_TRIM) / 2
+  );
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const { sentences, presetSentences, categories, loadCategories, loadSentences, loadPresetSentences } =
