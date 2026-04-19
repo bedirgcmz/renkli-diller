@@ -17,7 +17,6 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
 import { HeroHeader } from "@/components/HeroHeader";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
-import { GradientView } from "@/components/GradientView";
 import { HomeStackParamList, MainStackParamList } from "@/types";
 import { CoachMarksOverlay, CoachMarkStep } from "@/components/CoachMarksOverlay";
 import { useOnboarding } from "@/providers/OnboardingProvider";
@@ -344,9 +343,9 @@ export default function HomeScreen() {
             styles.card,
             {
               width,
-              backgroundColor: isDark ? colors.cardBackground : "#FFFFFF",
-              borderColor: isDark ? "rgba(255,255,255,0.10)" : "#E5DBCF",
-              shadowColor: isDark ? "#000000" : "#C7B49C",
+              backgroundColor: isDark ? colors.cardBackground : "#FFFDFC",
+              borderColor: isDark ? "rgba(255,255,255,0.10)" : "#E3D7C8",
+              shadowColor: isDark ? "#000000" : "#B99E82",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -384,7 +383,6 @@ export default function HomeScreen() {
     [renderCard]
   );
 
-  const dashboardGradient = isDark ? ["#1A2540", "#1B2D4A"] : ["#FFF5E7", "#EEF5FF"];
   const dashboardAccent = hasLearningList ? colors.success : colors.primary;
 
   return (
@@ -407,21 +405,17 @@ export default function HomeScreen() {
             styles.dashboardOuter,
             {
               borderColor: colors.border,
-              backgroundColor: isDark ? "#1A2540" : "#FFF5E7",
-              shadowColor: isDark ? "#8B5CF6" : "#4DA3FF",
+              backgroundColor: isDark ? "#182235" : "#FFF7EE",
+              shadowColor: isDark ? "#000000" : "#C7B49C",
             },
           ]}
         >
-          <View style={styles.dashboardInner}>
-            <View style={styles.dashboardBackgroundLayer}>
-              <GradientView
-                colors={dashboardGradient}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              />
-            </View>
-
+          <View
+            style={[
+              styles.dashboardInner,
+              { backgroundColor: isDark ? "#182235" : "#FFF7EE" },
+            ]}
+          >
             <View
               style={[
                 styles.badge,
@@ -637,20 +631,14 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     marginBottom: 18,
-    shadowOffset: { width: 0, height: 5 },
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.12,
-    shadowRadius: 18,
-    elevation: 4,
+    shadowRadius: 20,
+    elevation: 6,
   },
   dashboardInner: {
     borderRadius: 23,
     padding: 18,
-    position: "relative",
-  },
-  dashboardBackgroundLayer: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 23,
-    overflow: "hidden",
   },
   badge: {
     alignSelf: "flex-start",
@@ -783,9 +771,9 @@ const styles = StyleSheet.create({
     padding: 16,
     height: 152,
     borderWidth: 1,
-    shadowOpacity: 0.16,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 14,
+    shadowOpacity: 0.14,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 18,
     elevation: 10,
   },
   cardInner: {
