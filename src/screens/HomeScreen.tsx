@@ -351,9 +351,9 @@ export default function HomeScreen() {
             },
           ]}
         >
-          <View style={styles.cardContent}>
+          <View style={styles.cardInner}>
             <View style={[styles.iconCircle, { backgroundColor: `${card.iconColor}1A` }]}>
-              <Ionicons name={card.icon} size={24} color={card.iconColor} />
+              <Ionicons name={card.icon} size={28} color={card.iconColor} />
             </View>
             <Text style={[styles.cardTitle, { color: colors.text }]}>{t(card.titleKey)}</Text>
             <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{t(card.descKey)}</Text>
@@ -772,38 +772,37 @@ const styles = StyleSheet.create({
     marginBottom: CARD_GAP,
   },
   card: {
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    height: 164,
+    borderRadius: 16,
+    padding: 16,
+    height: 152,
     borderWidth: 1,
-    shadowOpacity: 0.09,
+    shadowOpacity: 0.12,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 10,
-    elevation: 6,
+    elevation: 8,
   },
-  cardContent: {
+  cardInner: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   iconCircle: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 14,
+    marginBottom: 12,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 6,
+    fontWeight: "600",
+    marginBottom: 4,
     textAlign: "center",
   },
   cardDesc: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 16,
     textAlign: "center",
     maxWidth: "100%",
   },
