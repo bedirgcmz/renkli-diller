@@ -9,7 +9,7 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useGameStore } from "@/store/useGameStore";
 import { useOfflineQueueStore } from "@/store/useOfflineQueueStore";
 import { useReadingStore } from "@/store/useReadingStore";
-import { View, Text, StyleSheet, ActivityIndicator, Alert, Modal } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -86,15 +86,25 @@ export default function AppNavigator() {
 
     const { is_premium } = useAuthStore.getState().user ?? { is_premium: false };
 
-    void useSentenceStore.getState().loadCategories();
-    void useSentenceStore.getState().loadFavorites();
-    void useSentenceStore.getState().loadSentences();
-    void useProgressStore.getState().loadProgress();
-    void useGameStore.getState().loadUserStats();
-    void useGameStore.getState().retryPendingScore();
-    void useSentenceStore.getState().loadPresetSentences(undefined, is_premium);
-    void useReadingStore.getState().fetchProgress(user.id);
-    void useReadingStore.getState().fetchNextText(user.id, false, is_premium);
+    // ── Queue-first startup drain ─────────────────────────────────────────────
+    // processQueue() is only triggered in the reconnect handler, which fires
+    // when isOnline goes false → true. When the app starts with internet already
+    // available (null → true), reconnectCount never increments and processQueue
+    // is never called. Draining here before store refreshes mirrors the reconnect
+    // handler's queue-first order and covers the startup-online scenario.
+    void (async () => {
+      await useOfflineQueueStore.getState().processQueue();
+      await useGameStore.getState().retryPendingScore();
+
+      void useSentenceStore.getState().loadCategories();
+      void useSentenceStore.getState().loadFavorites();
+      void useSentenceStore.getState().loadSentences();
+      void useProgressStore.getState().loadProgress();
+      void useGameStore.getState().loadUserStats();
+      void useSentenceStore.getState().loadPresetSentences(undefined, is_premium);
+      void useReadingStore.getState().fetchProgress(user.id);
+      void useReadingStore.getState().fetchNextText(user.id, false, is_premium);
+    })();
   }, [user?.id, settingsReadyForCurrentUser, isOnline]);
 
   // ── Reconnect: refresh stores when connectivity is restored ───────────────
@@ -202,31 +212,26 @@ export default function AppNavigator() {
         </Stack.Navigator>
       </NavigationContainer>
 
-      {/* Global offline pill — rendered inside a transparent Modal so it
-          appears above React Native Modal overlays (which use a separate
-          UIWindow layer on iOS). pointerEvents="none" ensures touch events
-          pass through to the content underneath. */}
-      <Modal
-        visible={isOnline === false}
-        transparent
-        animationType="none"
-        statusBarTranslucent
-        onRequestClose={() => {}}
-      >
+      {/* Global offline pill — absolutely positioned with pointerEvents="none"
+          so touches pass through to the content underneath.
+          Trade-off: won't appear above React Native Modal overlays (separate
+          UIWindow layer on iOS), but this is acceptable — the pill must never
+          block navigation. */}
+      {isOnline === false && (
         <View pointerEvents="none" style={offlineStyles.pillHost}>
           <View style={[offlineStyles.pill, { top: insets.top + 8 }]}>
             <Ionicons name="wifi-outline" size={13} color="#fff" />
             <Text style={offlineStyles.pillText}>{t("common.offline_indicator")}</Text>
           </View>
         </View>
-      </Modal>
+      )}
     </View>
   );
 }
 
 const offlineStyles = StyleSheet.create({
   root: { flex: 1 },
-  pillHost: { flex: 1 },
+  pillHost: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
   pill: {
     position: "absolute",
     alignSelf: "center",

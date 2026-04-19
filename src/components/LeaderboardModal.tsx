@@ -192,7 +192,7 @@ export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props)
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const isPremium = user?.is_premium ?? false;
-  const { entries, myEntry, loading, loadLeaderboard } = useLeaderboardStore();
+  const { entries, myEntry, loading, error, loadLeaderboard } = useLeaderboardStore();
 
   const [activeTab, setActiveTab] = useState<Tab>("learned");
 
@@ -311,6 +311,16 @@ export default function LeaderboardModal({ visible, onClose, onUpgrade }: Props)
           {loading ? (
             <View style={styles.center}>
               <ActivityIndicator color={colors.primary} />
+            </View>
+          ) : error !== null ? (
+            <View style={styles.center}>
+              <Text style={styles.emptyEmoji}>📡</Text>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                {t("common.offline_title")}
+              </Text>
+              <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
+                {t("common.offline_body")}
+              </Text>
             </View>
           ) : entries.length === 0 ? (
             <View style={styles.center}>

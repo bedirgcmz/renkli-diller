@@ -250,6 +250,14 @@ export default function DialogSetupScreen() {
 
       {/* Sticky bottom start button */}
       <View style={[styles.bottomBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+        {isOnline === false && categories.length > 0 && (
+          <View style={[styles.offlineNotice, { backgroundColor: colors.border + "55" }]}>
+            <Ionicons name="wifi-outline" size={13} color={colors.textSecondary} />
+            <Text style={[styles.offlineNoticeText, { color: colors.textSecondary }]}>
+              {t("common.offline_body")}
+            </Text>
+          </View>
+        )}
         {selectedCategory && selectedDifficulty && poolStatus && (
           <View
             style={[
@@ -501,6 +509,9 @@ const styles = StyleSheet.create({
   poolBadgeText:   { fontSize: 13, fontWeight: "600", flex: 1 },
   startBtn:        { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15, borderRadius: 16 },
   startBtnText:    { fontSize: 16, fontWeight: "700" },
+
+  offlineNotice:   { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, marginBottom: 10 },
+  offlineNoticeText: { fontSize: 12, flex: 1 },
 
   offlineBanner:   { alignItems: "center", paddingVertical: 40, gap: 8 },
   offlineIcon:     { fontSize: 40, marginBottom: 4 },
