@@ -344,9 +344,9 @@ export default function HomeScreen() {
             styles.card,
             {
               width,
-              backgroundColor: colors.cardBackground,
-              borderColor: colors.borderLight,
-              shadowColor: isDark ? "#0F172A" : "#C9BCA6",
+              backgroundColor: isDark ? "#1F2A43" : "#FFFDFC",
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : "#EADFD1",
+              shadowColor: isDark ? "#000000" : "#CDB79E",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -361,7 +361,27 @@ export default function HomeScreen() {
         </Pressable>
       );
     },
-    [cardIndexById, colors.cardBackground, colors.text, colors.textSecondary, navigation, t]
+    [cardIndexById, colors.text, colors.textSecondary, isDark, navigation, t]
+  );
+
+  const renderCardGrid = useCallback(
+    (cards: ActivityCard[], width: number) => {
+      const rows: ActivityCard[][] = [];
+      for (let index = 0; index < cards.length; index += 2) {
+        rows.push(cards.slice(index, index + 2));
+      }
+
+      return rows.map((row, rowIndex) => (
+        <View
+          key={`${row[0]?.id ?? "row"}-${rowIndex}`}
+          style={[styles.cardRow, rowIndex < rows.length - 1 && styles.cardRowGap]}
+        >
+          {row.map((card) => renderCard(card, width))}
+          {row.length === 1 ? <View style={{ width }} /> : null}
+        </View>
+      ));
+    },
+    [renderCard]
   );
 
   const dashboardGradient = isDark ? ["#1A2540", "#1B2D4A"] : ["#FFF5E7", "#EEF5FF"];
@@ -446,7 +466,7 @@ export default function HomeScreen() {
 
             {hasLearningList ? (
               <View style={styles.dashboardPracticeGrid}>
-                {practiceCards.map((card) => renderCard(card, dashboardCardWidth))}
+                {renderCardGrid(practiceCards, dashboardCardWidth)}
               </View>
             ) : (
               <View style={styles.primaryActions}>
@@ -566,7 +586,7 @@ export default function HomeScreen() {
               description={t(practiceDescriptionKey)}
               colors={colors}
             />
-            <View style={styles.grid}>{practiceCards.map((card) => renderCard(card, cardWidth))}</View>
+            <View style={styles.grid}>{renderCardGrid(practiceCards, cardWidth)}</View>
           </View>
         )}
 
@@ -576,7 +596,7 @@ export default function HomeScreen() {
             description={t("home.explore_section_desc")}
             colors={colors}
           />
-          <View style={styles.grid}>{exploreCards.map((card) => renderCard(card, cardWidth))}</View>
+          <View style={styles.grid}>{renderCardGrid(exploreCards, cardWidth)}</View>
         </View>
       </ScrollView>
 
@@ -661,10 +681,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   dashboardPracticeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    rowGap: CARD_GAP,
     marginTop: 18,
   },
   primaryActions: {
@@ -744,21 +760,25 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   grid: {
+  },
+  cardRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     justifyContent: "space-between",
-    rowGap: CARD_GAP,
+    alignItems: "stretch",
+  },
+  cardRowGap: {
+    marginBottom: CARD_GAP,
   },
   card: {
     borderRadius: 18,
     padding: 16,
-    minHeight: 152,
+    height: 156,
     borderWidth: 1,
     shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.16,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 18,
+    elevation: 10,
   },
   cardContent: {
     flex: 1,
