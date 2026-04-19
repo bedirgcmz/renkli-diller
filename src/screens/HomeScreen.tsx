@@ -344,9 +344,9 @@ export default function HomeScreen() {
             styles.card,
             {
               width,
-              backgroundColor: isDark ? "#1F2A43" : "#FFFDFC",
-              borderColor: isDark ? "rgba(255,255,255,0.08)" : "#EADFD1",
-              shadowColor: isDark ? "#000000" : "#CDB79E",
+              backgroundColor: colors.cardBackground,
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : colors.border,
+              shadowColor: "#000000",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -361,7 +361,7 @@ export default function HomeScreen() {
         </Pressable>
       );
     },
-    [cardIndexById, colors.text, colors.textSecondary, isDark, navigation, t]
+    [cardIndexById, colors.border, colors.cardBackground, colors.text, colors.textSecondary, isDark, navigation, t]
   );
 
   const renderCardGrid = useCallback(
@@ -760,25 +760,27 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   grid: {
+    width: "100%",
   },
   cardRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "stretch",
+    width: "100%",
   },
   cardRowGap: {
     marginBottom: CARD_GAP,
   },
   card: {
     borderRadius: 18,
-    padding: 16,
-    height: 156,
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    height: 164,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOpacity: 0.16,
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 18,
-    elevation: 10,
+    shadowOpacity: 0.09,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 6,
   },
   cardContent: {
     flex: 1,
@@ -803,5 +805,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     textAlign: "center",
+    maxWidth: "100%",
   },
 });
