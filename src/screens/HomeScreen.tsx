@@ -70,6 +70,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const cardWidth = (screenWidth - 32 - CARD_GAP) / 2;
+  const dashboardCardWidth = (screenWidth - 32 - 36 - CARD_GAP) / 2;
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const { sentences, presetSentences, categories, loadCategories, loadSentences, loadPresetSentences } =
@@ -327,10 +328,10 @@ export default function HomeScreen() {
   }, [markHintShown]);
 
   const renderCard = useCallback(
-    (card: ActivityCard) => {
+    (card: ActivityCard, width: number) => {
       const cardIndex = cardIndexById[card.id];
       return (
-        <TouchableOpacity
+        <Pressable
           key={card.id}
           ref={(ref) => {
             cardRefs.current[cardIndex] = ref;
@@ -338,22 +339,27 @@ export default function HomeScreen() {
           onLayout={(e) => {
             cardLayoutYs.current[cardIndex] = e.nativeEvent.layout.y;
           }}
-          style={[styles.card, { width: cardWidth, backgroundColor: colors.cardBackground }]}
           onPress={() => card.onPress(navigation)}
-          activeOpacity={0.78}
+          style={({ pressed }) => [
+            styles.card,
+            {
+              width,
+              backgroundColor: colors.cardBackground,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
         >
-          <View style={styles.cardTopRow}>
+          <View style={styles.cardContent}>
             <View style={[styles.iconCircle, { backgroundColor: `${card.iconColor}1A` }]}>
               <Ionicons name={card.icon} size={24} color={card.iconColor} />
             </View>
-            <Ionicons name="arrow-forward" size={16} color={colors.textTertiary} />
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{t(card.titleKey)}</Text>
+            <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{t(card.descKey)}</Text>
           </View>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>{t(card.titleKey)}</Text>
-          <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{t(card.descKey)}</Text>
-        </TouchableOpacity>
+        </Pressable>
       );
     },
-    [cardIndexById, cardWidth, colors.cardBackground, colors.text, colors.textSecondary, colors.textTertiary, navigation, t]
+    [cardIndexById, colors.cardBackground, colors.text, colors.textSecondary, navigation, t]
   );
 
   const dashboardGradient = isDark ? ["#1A2540", "#1B2D4A"] : ["#FFF5E7", "#EEF5FF"];
@@ -420,22 +426,13 @@ export default function HomeScreen() {
                 : t("home.dashboard_empty_body")}
             </Text>
 
-            <View style={styles.dashboardMetaRow}>
+            {!hasLearningList && (
               <View
                 style={[
                   styles.metaPill,
-                  { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.7)" },
-                ]}
-              >
-                <Ionicons name="albums-outline" size={14} color={colors.textSecondary} />
-                <Text style={[styles.metaPillText, { color: colors.textSecondary }]}>
-                  {t("home.learning_list_count", { count: learningListCount })}
-                </Text>
-              </View>
-              <View
-                style={[
-                  styles.metaPill,
-                  { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.7)" },
+                  {
+                    backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.7)",
+                  },
                 ]}
               >
                 <Ionicons name="grid-outline" size={14} color={colors.textSecondary} />
@@ -443,69 +440,77 @@ export default function HomeScreen() {
                   {t("home.categories_count", { count: categories.length })}
                 </Text>
               </View>
-            </View>
+            )}
 
-            <View style={styles.primaryActions}>
+            {hasLearningList ? (
+              <View style={styles.dashboardPracticeGrid}>
+                {practiceCards.map((card) => renderCard(card, dashboardCardWidth))}
+              </View>
+            ) : (
+              <View style={styles.primaryActions}>
+                <Pressable
+                  onPress={() =>
+                    hasLearningList
+                      ? navigation.navigate("Learn", { initialTab: "study" })
+                      : navigation.navigate("CategoryBrowser")
+                  }
+                  style={({ pressed }) => [
+                    styles.primaryButton,
+                    {
+                      backgroundColor: dashboardAccent,
+                      opacity: pressed ? 0.9 : 1,
+                      transform: [{ scale: pressed ? 0.98 : 1 }],
+                    },
+                  ]}
+                >
+                  <Text style={styles.primaryButtonText}>
+                    {hasLearningList
+                      ? t("home.dashboard_ready_primary")
+                      : t("home.dashboard_empty_primary")}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() =>
+                    hasLearningList
+                      ? navigation.navigate("Learn", { initialTab: "listening" })
+                      : navigation.navigate("AITranslator")
+                  }
+                  style={({ pressed }) => [
+                    styles.secondaryButton,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: pressed
+                        ? colors.backgroundSecondary
+                        : colors.cardBackground,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.secondaryButtonText, { color: colors.text }]}>
+                    {hasLearningList
+                      ? t("home.dashboard_ready_secondary")
+                      : t("home.dashboard_empty_secondary")}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            {!hasLearningList && (
               <Pressable
-                onPress={() =>
-                  hasLearningList
-                    ? navigation.navigate("Learn", { initialTab: "study" })
-                    : navigation.navigate("CategoryBrowser")
-                }
+                onPress={hasLearningList ? goToSentencesTab : () => navigation.navigate("AddSentence")}
                 style={({ pressed }) => [
-                  styles.primaryButton,
-                  {
-                    backgroundColor: dashboardAccent,
-                    opacity: pressed ? 0.9 : 1,
-                    transform: [{ scale: pressed ? 0.98 : 1 }],
-                  },
+                  styles.tertiaryAction,
+                  { opacity: pressed ? 0.68 : 1 },
                 ]}
               >
-                <Text style={styles.primaryButtonText}>
+                <Text style={[styles.tertiaryActionText, { color: colors.primary }]}>
                   {hasLearningList
-                    ? t("home.dashboard_ready_primary")
-                    : t("home.dashboard_empty_primary")}
+                    ? t("home.dashboard_ready_tertiary")
+                    : t("home.dashboard_empty_tertiary")}
                 </Text>
+                <Ionicons name="arrow-forward" size={14} color={colors.primary} />
               </Pressable>
-
-              <Pressable
-                onPress={() =>
-                  hasLearningList
-                    ? navigation.navigate("Learn", { initialTab: "listening" })
-                    : navigation.navigate("AITranslator")
-                }
-                style={({ pressed }) => [
-                  styles.secondaryButton,
-                  {
-                    borderColor: colors.border,
-                    backgroundColor: pressed
-                      ? colors.backgroundSecondary
-                      : colors.cardBackground,
-                  },
-                ]}
-              >
-                <Text style={[styles.secondaryButtonText, { color: colors.text }]}>
-                  {hasLearningList
-                    ? t("home.dashboard_ready_secondary")
-                    : t("home.dashboard_empty_secondary")}
-                </Text>
-              </Pressable>
-            </View>
-
-            <Pressable
-              onPress={hasLearningList ? goToSentencesTab : () => navigation.navigate("AddSentence")}
-              style={({ pressed }) => [
-                styles.tertiaryAction,
-                { opacity: pressed ? 0.68 : 1 },
-              ]}
-            >
-              <Text style={[styles.tertiaryActionText, { color: colors.primary }]}>
-                {hasLearningList
-                  ? t("home.dashboard_ready_tertiary")
-                  : t("home.dashboard_empty_tertiary")}
-              </Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.primary} />
-            </Pressable>
+            )}
           </View>
         </View>
 
@@ -552,14 +557,16 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={styles.section}>
-          <SectionHeader
-            title={t("home.practice_section_title")}
-            description={t(practiceDescriptionKey)}
-            colors={colors}
-          />
-          <View style={styles.grid}>{practiceCards.map(renderCard)}</View>
-        </View>
+        {!hasLearningList && (
+          <View style={styles.section}>
+            <SectionHeader
+              title={t("home.practice_section_title")}
+              description={t(practiceDescriptionKey)}
+              colors={colors}
+            />
+            <View style={styles.grid}>{practiceCards.map((card) => renderCard(card, cardWidth))}</View>
+          </View>
+        )}
 
         <View style={styles.section}>
           <SectionHeader
@@ -567,7 +574,7 @@ export default function HomeScreen() {
             description={t("home.explore_section_desc")}
             colors={colors}
           />
-          <View style={styles.grid}>{exploreCards.map(renderCard)}</View>
+          <View style={styles.grid}>{exploreCards.map((card) => renderCard(card, cardWidth))}</View>
         </View>
       </ScrollView>
 
@@ -628,20 +635,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   dashboardTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800",
-    lineHeight: 30,
+    lineHeight: 28,
   },
   dashboardBody: {
     marginTop: 8,
     fontSize: 14,
     lineHeight: 21,
-  },
-  dashboardMetaRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 14,
   },
   metaPill: {
     flexDirection: "row",
@@ -650,10 +651,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 999,
+    marginTop: 14,
+    alignSelf: "flex-start",
   },
   metaPillText: {
     fontSize: 12,
     fontWeight: "600",
+  },
+  dashboardPracticeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: CARD_GAP,
+    marginTop: 18,
   },
   primaryActions: {
     gap: 10,
@@ -746,11 +755,10 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  cardTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  cardContent: {
+    flex: 1,
     alignItems: "center",
-    marginBottom: 14,
+    justifyContent: "center",
   },
   iconCircle: {
     width: 48,
@@ -758,14 +766,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 14,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 6,
+    textAlign: "center",
   },
   cardDesc: {
     fontSize: 13,
     lineHeight: 18,
+    textAlign: "center",
   },
 });
