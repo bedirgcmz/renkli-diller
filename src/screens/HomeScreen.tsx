@@ -330,7 +330,7 @@ export default function HomeScreen() {
     (card: ActivityCard, width: number) => {
       const cardIndex = cardIndexById[card.id];
       return (
-        <Pressable
+        <TouchableOpacity
           key={card.id}
           ref={(ref) => {
             cardRefs.current[cardIndex] = ref;
@@ -338,47 +338,26 @@ export default function HomeScreen() {
           onLayout={(e) => {
             cardLayoutYs.current[cardIndex] = e.nativeEvent.layout.y;
           }}
+          style={[styles.card, { width, backgroundColor: colors.cardBackground }]}
           onPress={() => card.onPress(navigation)}
-          style={({ pressed }) => [
-            styles.card,
-            {
-              width,
-              backgroundColor: isDark ? colors.cardBackground : "#FFFDFC",
-              borderColor: isDark ? "rgba(255,255,255,0.10)" : "#E3D7C8",
-              shadowColor: isDark ? "#000000" : "#B99E82",
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-            },
-          ]}
+          activeOpacity={0.75}
         >
           <View style={styles.cardInner}>
             <View style={[styles.iconCircle, { backgroundColor: `${card.iconColor}1A` }]}>
               <Ionicons name={card.icon} size={28} color={card.iconColor} />
             </View>
             <Text style={[styles.cardTitle, { color: colors.text }]}>{t(card.titleKey)}</Text>
-            <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{t(card.descKey)}</Text>
+            <Text style={[styles.cardDesc, { color: colors.textTertiary }]}>{t(card.descKey)}</Text>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       );
     },
-    [cardIndexById, colors.cardBackground, colors.text, colors.textSecondary, isDark, navigation, t]
+    [cardIndexById, colors.cardBackground, colors.text, colors.textTertiary, navigation, t]
   );
 
   const renderCardGrid = useCallback(
     (cards: ActivityCard[], width: number) => {
-      const rows: ActivityCard[][] = [];
-      for (let index = 0; index < cards.length; index += 2) {
-        rows.push(cards.slice(index, index + 2));
-      }
-
-      return rows.map((row, rowIndex) => (
-        <View
-          key={`${row[0]?.id ?? "row"}-${rowIndex}`}
-          style={[styles.cardRow, rowIndex < rows.length - 1 && styles.cardRowGap]}
-        >
-          {row.map((card) => renderCard(card, width))}
-          {row.length === 1 ? <View style={{ width }} /> : null}
-        </View>
-      ));
+      return <View style={styles.cardGrid}>{cards.map((card) => renderCard(card, width))}</View>;
     },
     [renderCard]
   );
@@ -462,7 +441,7 @@ export default function HomeScreen() {
 
             {hasLearningList ? (
               <View style={styles.dashboardPracticeGrid}>
-                {renderCardGrid(practiceCards, dashboardCardWidth)}
+                <View style={styles.cardDeck}>{renderCardGrid(practiceCards, dashboardCardWidth)}</View>
               </View>
             ) : (
               <View style={styles.primaryActions}>
@@ -582,7 +561,7 @@ export default function HomeScreen() {
               description={t(practiceDescriptionKey)}
               colors={colors}
             />
-            <View style={styles.grid}>{renderCardGrid(practiceCards, cardWidth)}</View>
+            <View style={styles.cardDeck}>{renderCardGrid(practiceCards, cardWidth)}</View>
           </View>
         )}
 
@@ -592,7 +571,7 @@ export default function HomeScreen() {
             description={t("home.explore_section_desc")}
             colors={colors}
           />
-          <View style={styles.grid}>{renderCardGrid(exploreCards, cardWidth)}</View>
+          <View style={styles.cardDeck}>{renderCardGrid(exploreCards, cardWidth)}</View>
         </View>
       </ScrollView>
 
@@ -678,6 +657,9 @@ const styles = StyleSheet.create({
   dashboardPracticeGrid: {
     marginTop: 18,
   },
+  cardDeck: {
+    borderRadius: 20,
+  },
   primaryActions: {
     gap: 10,
     marginTop: 16,
@@ -754,32 +736,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     flexShrink: 1,
   },
-  grid: {
-    width: "100%",
-  },
-  cardRow: {
+  cardGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "stretch",
-    width: "100%",
-  },
-  cardRowGap: {
-    marginBottom: CARD_GAP,
+    flexWrap: "wrap",
+    gap: CARD_GAP,
   },
   card: {
     borderRadius: 16,
     padding: 16,
-    height: 152,
-    borderWidth: 1,
-    shadowOpacity: 0.14,
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 18,
-    elevation: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 8,
   },
   cardInner: {
-    flex: 1,
     alignItems: "center",
-    justifyContent: "center",
   },
   iconCircle: {
     width: 52,
@@ -799,6 +771,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     textAlign: "center",
-    maxWidth: "100%",
   },
 });
