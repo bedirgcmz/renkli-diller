@@ -32,6 +32,7 @@ type Nav = CompositeNavigationProp<
 
 const CARD_GAP = 12;
 const DASHBOARD_CARD_WIDTH_TRIM = 8;
+const COMPACT_HOME_BREAKPOINT = 350;
 
 interface ActivityCard {
   id: string;
@@ -48,15 +49,31 @@ function SectionHeader({
   title,
   description,
   colors,
+  compact = false,
 }: {
   title: string;
   description: string;
   colors: ReturnType<typeof useTheme>["colors"];
+  compact?: boolean;
 }) {
   return (
     <View style={styles.sectionHeader}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
-      <Text style={[styles.sectionDescription, { color: colors.textSecondary }]}>
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: colors.text },
+          compact && { fontSize: 17, marginBottom: 3 },
+        ]}
+      >
+        {title}
+      </Text>
+      <Text
+        style={[
+          styles.sectionDescription,
+          { color: colors.textSecondary },
+          compact && { fontSize: 12, lineHeight: 17 },
+        ]}
+      >
         {description}
       </Text>
     </View>
@@ -69,9 +86,23 @@ export default function HomeScreen() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
-  const cardWidth = Math.floor((screenWidth - 32 - CARD_GAP) / 2);
+  const isCompactHome = screenWidth <= COMPACT_HOME_BREAKPOINT;
+  const horizontalPadding = isCompactHome ? 14 : 16;
+  const dashboardInnerPadding = isCompactHome ? 16 : 18;
+  const compactCardWidthTrim = isCompactHome ? 4 : 0;
+  const dashboardCardWidthTrim =
+    DASHBOARD_CARD_WIDTH_TRIM + (isCompactHome ? 10 : 0);
+  const cardWidth = Math.floor(
+    (screenWidth - horizontalPadding * 2 - CARD_GAP - compactCardWidthTrim) / 2
+  );
   const dashboardCardWidth = Math.floor(
-    (screenWidth - 32 - 36 - CARD_GAP - DASHBOARD_CARD_WIDTH_TRIM) / 2
+    (
+      screenWidth -
+      horizontalPadding * 2 -
+      dashboardInnerPadding * 2 -
+      CARD_GAP -
+      dashboardCardWidthTrim
+    ) / 2
   );
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
@@ -341,21 +372,50 @@ export default function HomeScreen() {
           onLayout={(e) => {
             cardLayoutYs.current[cardIndex] = e.nativeEvent.layout.y;
           }}
-          style={[styles.card, { width, backgroundColor: colors.cardBackground }]}
+          style={[
+            styles.card,
+            {
+              width,
+              backgroundColor: colors.cardBackground,
+              padding: isCompactHome ? 14 : 16,
+            },
+          ]}
           onPress={() => card.onPress(navigation)}
           activeOpacity={0.75}
         >
           <View style={styles.cardInner}>
-            <View style={[styles.iconCircle, { backgroundColor: `${card.iconColor}1A` }]}>
-              <Ionicons name={card.icon} size={28} color={card.iconColor} />
+            <View
+              style={[
+                styles.iconCircle,
+                isCompactHome && styles.iconCircleCompact,
+                { backgroundColor: `${card.iconColor}1A` },
+              ]}
+            >
+              <Ionicons name={card.icon} size={isCompactHome ? 25 : 28} color={card.iconColor} />
             </View>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>{t(card.titleKey)}</Text>
-            <Text style={[styles.cardDesc, { color: colors.textTertiary }]}>{t(card.descKey)}</Text>
+            <Text
+              style={[
+                styles.cardTitle,
+                { color: colors.text },
+                isCompactHome && { fontSize: 15, marginBottom: 3 },
+              ]}
+            >
+              {t(card.titleKey)}
+            </Text>
+            <Text
+              style={[
+                styles.cardDesc,
+                { color: colors.textTertiary },
+                isCompactHome && { fontSize: 11, lineHeight: 14 },
+              ]}
+            >
+              {t(card.descKey)}
+            </Text>
           </View>
         </TouchableOpacity>
       );
     },
-    [cardIndexById, colors.cardBackground, colors.text, colors.textTertiary, navigation, t]
+    [cardIndexById, colors.cardBackground, colors.text, colors.textTertiary, isCompactHome, navigation, t]
   );
 
   const renderCardGrid = useCallback(
@@ -374,11 +434,26 @@ export default function HomeScreen() {
     >
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[
+          styles.scroll,
+          {
+            paddingHorizontal: horizontalPadding,
+            paddingTop: isCompactHome ? 6 : 8,
+            paddingBottom: isCompactHome ? 28 : 32,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
         scrollEnabled={!coachVisible}
       >
-        <Text style={[styles.title, { color: colors.text }]}>{t("app_name")}</Text>
+        <Text
+          style={[
+            styles.title,
+            { color: colors.text },
+            isCompactHome && { fontSize: 22, marginBottom: 14 },
+          ]}
+        >
+          {t("app_name")}
+        </Text>
 
         <HeroHeader />
 
@@ -395,7 +470,10 @@ export default function HomeScreen() {
           <View
             style={[
               styles.dashboardInner,
-              { backgroundColor: isDark ? "#182235" : "#FFF7EE" },
+              {
+                backgroundColor: isDark ? "#182235" : "#FFF7EE",
+                padding: dashboardInnerPadding,
+              },
             ]}
           >
             <View
@@ -408,19 +486,37 @@ export default function HomeScreen() {
                 },
               ]}
             >
-              <Text style={[styles.badgeText, { color: dashboardAccent }]}>
+              <Text
+                style={[
+                  styles.badgeText,
+                  { color: dashboardAccent },
+                  isCompactHome && { fontSize: 11 },
+                ]}
+              >
                 {hasLearningList
                   ? t("home.dashboard_ready_badge", { count: learningListCount })
                   : t("home.dashboard_empty_badge")}
               </Text>
             </View>
 
-            <Text style={[styles.dashboardTitle, { color: colors.text }]}>
+            <Text
+              style={[
+                styles.dashboardTitle,
+                { color: colors.text },
+                isCompactHome && { fontSize: 20, lineHeight: 25 },
+              ]}
+            >
               {hasLearningList
                 ? t("home.dashboard_ready_title")
                 : t("home.dashboard_empty_title")}
             </Text>
-            <Text style={[styles.dashboardBody, { color: colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.dashboardBody,
+                { color: colors.textSecondary },
+                isCompactHome && { fontSize: 13, lineHeight: 19, marginTop: 6 },
+              ]}
+            >
               {hasLearningList
                 ? t("home.dashboard_ready_body")
                 : t("home.dashboard_empty_body")}
@@ -443,7 +539,12 @@ export default function HomeScreen() {
             )}
 
             {hasLearningList ? (
-              <View style={styles.dashboardPracticeGrid}>
+              <View
+                style={[
+                  styles.dashboardPracticeGrid,
+                  isCompactHome && { marginTop: 16 },
+                ]}
+              >
                 <View style={styles.cardDeck}>{renderCardGrid(practiceCards, dashboardCardWidth)}</View>
               </View>
             ) : (
@@ -515,11 +616,18 @@ export default function HomeScreen() {
         </View>
 
         {!hasLearningList && (
-          <View style={[styles.setupStrip, { backgroundColor: colors.surfaceSecondary }]}>
+          <View
+            style={[
+              styles.setupStrip,
+              { backgroundColor: colors.surfaceSecondary },
+              isCompactHome && { padding: 14, marginBottom: 16 },
+            ]}
+          >
             <SectionHeader
               title={t("home.setup_section_title")}
               description={t("home.setup_section_desc")}
               colors={colors}
+              compact={isCompactHome}
             />
             <View style={styles.setupActionsRow}>
               <Pressable
@@ -558,21 +666,23 @@ export default function HomeScreen() {
         )}
 
         {!hasLearningList && (
-          <View style={styles.section}>
+          <View style={[styles.section, isCompactHome && { marginBottom: 16 }]}>
             <SectionHeader
               title={t("home.practice_section_title")}
               description={t(practiceDescriptionKey)}
               colors={colors}
+              compact={isCompactHome}
             />
             <View style={styles.cardDeck}>{renderCardGrid(practiceCards, cardWidth)}</View>
           </View>
         )}
 
-        <View style={styles.section}>
+        <View style={[styles.section, isCompactHome && { marginBottom: 16 }]}>
           <SectionHeader
             title={t("home.explore_section_title")}
             description={t("home.explore_section_desc")}
             colors={colors}
+            compact={isCompactHome}
           />
           <View style={styles.cardDeck}>{renderCardGrid(exploreCards, cardWidth)}</View>
         </View>
@@ -763,6 +873,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
+  },
+  iconCircleCompact: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    marginBottom: 10,
   },
   cardTitle: {
     fontSize: 16,
