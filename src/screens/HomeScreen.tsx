@@ -345,6 +345,8 @@ export default function HomeScreen() {
             {
               width,
               backgroundColor: colors.cardBackground,
+              borderColor: colors.borderLight,
+              shadowColor: isDark ? "#0F172A" : "#C9BCA6",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -661,7 +663,8 @@ const styles = StyleSheet.create({
   dashboardPracticeGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: CARD_GAP,
+    justifyContent: "space-between",
+    rowGap: CARD_GAP,
     marginTop: 18,
   },
   primaryActions: {
@@ -743,17 +746,19 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: CARD_GAP,
+    justifyContent: "space-between",
+    rowGap: CARD_GAP,
   },
   card: {
     borderRadius: 18,
     padding: 16,
     minHeight: 152,
+    borderWidth: 1,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 16,
+    elevation: 8,
   },
   cardContent: {
     flex: 1,
