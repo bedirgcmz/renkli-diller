@@ -68,8 +68,8 @@ export default function HomeScreen() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
-  const cardWidth = (screenWidth - 32 - CARD_GAP) / 2;
-  const dashboardCardWidth = (screenWidth - 32 - 36 - CARD_GAP) / 2;
+  const cardWidth = Math.floor((screenWidth - 32 - CARD_GAP) / 2);
+  const dashboardCardWidth = Math.floor((screenWidth - 32 - 36 - CARD_GAP) / 2);
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const { sentences, presetSentences, categories, loadCategories, loadSentences, loadPresetSentences } =
