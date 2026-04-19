@@ -344,9 +344,9 @@ export default function HomeScreen() {
             styles.card,
             {
               width,
-              backgroundColor: colors.cardBackground,
-              borderColor: isDark ? "rgba(255,255,255,0.08)" : colors.border,
-              shadowColor: "#000000",
+              backgroundColor: isDark ? colors.cardBackground : "#FFFFFF",
+              borderColor: isDark ? "rgba(255,255,255,0.10)" : "#E5DBCF",
+              shadowColor: isDark ? "#000000" : "#C7B49C",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -361,7 +361,7 @@ export default function HomeScreen() {
         </Pressable>
       );
     },
-    [cardIndexById, colors.border, colors.cardBackground, colors.text, colors.textSecondary, isDark, navigation, t]
+    [cardIndexById, colors.cardBackground, colors.text, colors.textSecondary, isDark, navigation, t]
   );
 
   const renderCardGrid = useCallback(
@@ -413,12 +413,14 @@ export default function HomeScreen() {
           ]}
         >
           <View style={styles.dashboardInner}>
-            <GradientView
-              colors={dashboardGradient}
-              style={StyleSheet.absoluteFill}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            />
+            <View style={styles.dashboardBackgroundLayer}>
+              <GradientView
+                colors={dashboardGradient}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              />
+            </View>
 
             <View
               style={[
@@ -641,9 +643,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   dashboardInner: {
-    overflow: "hidden",
     borderRadius: 23,
     padding: 18,
+    position: "relative",
+  },
+  dashboardBackgroundLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 23,
+    overflow: "hidden",
   },
   badge: {
     alignSelf: "flex-start",
@@ -776,10 +783,10 @@ const styles = StyleSheet.create({
     padding: 16,
     height: 152,
     borderWidth: 1,
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOpacity: 0.16,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 14,
+    elevation: 10,
   },
   cardInner: {
     flex: 1,
