@@ -56,3 +56,6 @@ HIGH_PRIORITY_FIXES.md
 MEDIUM_RISK_BACKLOG.md
 LOW_RISK_BACKLOG.md
 /dialog-seeds
+
+# Offline MVP handoff doc (local reference, not for repo)
+docs/offline_mvp_handoff.md

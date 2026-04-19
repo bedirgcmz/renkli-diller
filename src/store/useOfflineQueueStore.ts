@@ -53,6 +53,7 @@ function isPermanentError(error: { status?: number; code?: string } | null | und
   if (status === 401 || status === 403) return true;
   const code = error.code;
   if (code === "23503") return true; // foreign_key_violation
+  if (code === "23514") return true; // check_violation — data violates a constraint, retrying won't help
   if (code === "42501") return true; // insufficient_privilege
   if (code === "PGRST301") return true; // JWT expired
   return false;
