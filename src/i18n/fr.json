@@ -57,7 +57,11 @@
     "listen_select": "Sélectionnez la bonne signification :",
     "tap_to_reveal": "Appuyez sur l'œil pour révéler",
     "replay": "Rejouer",
-    "no_listen_sentences": "Ajoutez des phrases à votre liste d'apprentissage pour commencer la pratique d'écoute."
+    "no_listen_sentences": "Ajoutez des phrases à votre liste d'apprentissage pour commencer la pratique d'écoute.",
+    "empty_learning_title": "Construis ta liste d'apprentissage avant de commencer à étudier",
+    "empty_learning_desc": "Le mode Étudier fonctionne avec les phrases de ta liste d'apprentissage. Ajoute d'abord quelques phrases, puis reviens ici.",
+    "empty_listening_title": "Ajoute des phrases avant de commencer la pratique d'écoute",
+    "empty_listening_desc": "Le mode Écouter utilise les phrases de ta liste d'apprentissage. Ajoute-en quelques-unes, puis reviens ici pour t'entraîner."
   },
   "quiz": {
     "title": "Quiz",
@@ -81,8 +85,8 @@
     "reviewing_wrong": "Révision de {{count}} mauvaises réponses",
     "first_round": "Premier tour",
     "retry_round": "Tour de révision",
-    "empty_title": "Liste d'apprentissage vide",
-    "empty_hint": "Ajoute des phrases à ta liste d'apprentissage pour démarrer un quiz.",
+    "empty_title": "Construis ta liste d'apprentissage avant de commencer un quiz",
+    "empty_hint": "Les questions du quiz sont générées à partir des phrases de ta liste d'apprentissage. Ajoute d'abord quelques phrases, puis reviens ici.",
     "go_to_sentences": "Voir toutes les phrases",
     "no_keywords_title": "Aucune phrase à compléter",
     "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode.",
@@ -158,7 +162,7 @@
     "thinking_time": "Temps de réflexion...",
     "session_limit": "Limite de session gratuite atteinte",
     "sentences_completed": "phrases complétées",
-    "no_sentences": "Aucune phrase dans votre liste.",
+    "no_sentences": "Aucune phrase dans ta liste d'apprentissage.",
     "info_title": "Comment fonctionne cet écran ?",
     "info_body": "Seules les phrases que vous avez ajoutées à votre liste sont lues ici. Pour travailler avec plus de phrases, allez dans l'écran Phrases et appuyez sur 'Ajouter à ma liste'."
   },
@@ -490,7 +494,7 @@
     "dashboard_empty_cta_body": "Tu peux créer une phrase avec l'IA, explorer des catégories prêtes à l'emploi ou ajouter tout de suite ta propre phrase.",
     "dashboard_empty_primary": "Explorer les catégories",
     "dashboard_empty_secondary": "Créer une phrase avec l'IA",
-    "dashboard_empty_tertiary": "Ajouter ma propre phrase",
+    "dashboard_empty_tertiary": "Ajouter ta propre phrase",
     "dashboard_ready_badge": "{{count}} phrase(s) dans ta liste d'apprentissage",
     "dashboard_ready_title": "Comment veux-tu pratiquer aujourd'hui avec ta liste d'apprentissage ?",
     "dashboard_ready_body": "Étudie tes phrases comme des cartes, passe à l'écoute ou lance-toi avec le quiz et la construction.",
@@ -639,8 +643,8 @@
   },
   "build_sentence": {
     "title": "Construire une phrase",
-    "empty_title": "Liste d'apprentissage vide",
-    "empty_desc": "Ajoute des phrases à ta liste d'apprentissage et reviens ici.",
+    "empty_title": "Ajoute des phrases avant de commencer à construire",
+    "empty_desc": "Le mode Construire utilise les phrases de ta liste d'apprentissage. Ajoute d'abord quelques phrases, puis reviens ici pour les remettre en ordre.",
     "source_label": "Traduis ceci :",
     "drop_hint": "Appuie sur les mots pour construire la phrase",
     "validate": "Vérifier",

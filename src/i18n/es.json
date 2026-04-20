@@ -57,7 +57,11 @@
     "listen_select": "Selecciona el significado correcto:",
     "tap_to_reveal": "Toca el ojo para revelar",
     "replay": "Repetir",
-    "no_listen_sentences": "Agrega frases a tu lista de aprendizaje para comenzar la práctica de escucha."
+    "no_listen_sentences": "Agrega frases a tu lista de aprendizaje para comenzar la práctica de escucha.",
+    "empty_learning_title": "Prepara tu lista de aprendizaje antes de empezar a estudiar",
+    "empty_learning_desc": "El modo Estudiar funciona con las frases de tu lista de aprendizaje. Añade primero algunas frases y luego vuelve aquí.",
+    "empty_listening_title": "Añade frases antes de empezar la práctica de escucha",
+    "empty_listening_desc": "El modo Escuchar usa las frases de tu lista de aprendizaje. Añade algunas y luego vuelve aquí para practicar."
   },
   "quiz": {
     "title": "Quiz",
@@ -81,8 +85,8 @@
     "reviewing_wrong": "Repasando {{count}} respuestas incorrectas",
     "first_round": "Primera ronda",
     "retry_round": "Ronda de repaso",
-    "empty_title": "Lista de aprendizaje vacía",
-    "empty_hint": "Añade frases a tu lista de aprendizaje para iniciar un quiz.",
+    "empty_title": "Prepara tu lista de aprendizaje antes de empezar un quiz",
+    "empty_hint": "Las preguntas del quiz se generan con las frases de tu lista de aprendizaje. Añade primero algunas frases y luego vuelve aquí.",
     "go_to_sentences": "Ver todas las frases",
     "no_keywords_title": "Sin frases para completar",
     "no_keywords": "No se encontraron oraciones con marcadores de palabras clave.\nAgrega **marcadores** a tus oraciones para usar este modo.",
@@ -158,7 +162,7 @@
     "thinking_time": "Tiempo de pensar...",
     "session_limit": "Límite de sesión gratuita alcanzado",
     "sentences_completed": "frases completadas",
-    "no_sentences": "No hay frases en tu lista.",
+    "no_sentences": "No hay frases en tu lista de aprendizaje.",
     "info_title": "¿Cómo funciona esta pantalla?",
     "info_body": "Aquí se reproducen solo las frases que hayas añadido a tu lista. Para trabajar con más frases ve a la pantalla de Frases y pulsa 'Añadir a mi lista'."
   },
@@ -490,7 +494,7 @@
     "dashboard_empty_cta_body": "Puedes crear una frase con IA, explorar categorías preparadas o añadir tu propia frase ahora mismo.",
     "dashboard_empty_primary": "Explorar categorías",
     "dashboard_empty_secondary": "Crear una frase con IA",
-    "dashboard_empty_tertiary": "Añadir mi propia frase",
+    "dashboard_empty_tertiary": "Añadir tu propia frase",
     "dashboard_ready_badge": "{{count}} frase(s) en tu lista de aprendizaje",
     "dashboard_ready_title": "¿Cómo quieres practicar hoy con tu lista de aprendizaje?",
     "dashboard_ready_body": "Estudia tus frases como tarjetas, pasa a escuchar o desafíate con quiz y construir.",
@@ -639,8 +643,8 @@
   },
   "build_sentence": {
     "title": "Construir oración",
-    "empty_title": "Lista de aprendizaje vacía",
-    "empty_desc": "Agrega oraciones a tu lista de aprendizaje y regresa aquí.",
+    "empty_title": "Añade frases antes de empezar a construir",
+    "empty_desc": "El modo Construir usa las frases de tu lista de aprendizaje. Añade primero algunas frases y vuelve aquí para ordenarlas.",
     "source_label": "Traduce esto:",
     "drop_hint": "Toca palabras para construir la oración",
     "validate": "Comprobar",

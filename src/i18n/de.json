@@ -57,7 +57,11 @@
     "listen_select": "Wähle die richtige Bedeutung:",
     "tap_to_reveal": "Auge tippen zum Anzeigen",
     "replay": "Wiederholen",
-    "no_listen_sentences": "Füge Sätze zu deiner Lernliste hinzu, um Hörübungen zu beginnen."
+    "no_listen_sentences": "Füge Sätze zu deiner Lernliste hinzu, um Hörübungen zu beginnen.",
+    "empty_learning_title": "Baue deine Lernliste auf, bevor du mit dem Lernen beginnst",
+    "empty_learning_desc": "Der Lernmodus arbeitet mit den Sätzen in deiner Lernliste. Füge zuerst ein paar Sätze hinzu und komm dann hierher zurück.",
+    "empty_listening_title": "Füge Sätze hinzu, bevor du mit dem Hörtraining beginnst",
+    "empty_listening_desc": "Der Hörmodus nutzt die Sätze in deiner Lernliste. Füge ein paar hinzu und komm dann zum Üben zurück."
   },
   "quiz": {
     "title": "Quiz",
@@ -81,8 +85,8 @@
     "reviewing_wrong": "{{count}} falsche Antworten werden wiederholt",
     "first_round": "Erste Runde",
     "retry_round": "Wiederholungsrunde",
-    "empty_title": "Lernliste ist leer",
-    "empty_hint": "Füge Sätze zu deiner Lernliste hinzu, um ein Quiz zu starten.",
+    "empty_title": "Baue deine Lernliste auf, bevor du mit einem Quiz beginnst",
+    "empty_hint": "Die Quizfragen werden aus den Sätzen in deiner Lernliste erstellt. Füge zuerst ein paar Sätze hinzu und komm dann hierher zurück.",
     "go_to_sentences": "Alle Sätze ansehen",
     "no_keywords_title": "Keine Sätze für Lückentext",
     "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen.",
@@ -158,7 +162,7 @@
     "thinking_time": "Denkzeit...",
     "session_limit": "Kostenloses Sitzungs-Limit erreicht",
     "sentences_completed": "Sätze abgeschlossen",
-    "no_sentences": "Keine Sätze in Ihrer Lernliste.",
+    "no_sentences": "Keine Sätze in deiner Lernliste.",
     "info_title": "Wie funktioniert dieser Bildschirm?",
     "info_body": "Hier werden nur Sätze abgespielt, die du zu deiner Lernliste hinzugefügt hast. Um mit mehr Sätzen zu üben, gehe zum Sätze-Bildschirm und füge sie mit der Schaltfläche \"Zu meiner Lernliste hinzufügen\" hinzu."
   },
@@ -490,7 +494,7 @@
     "dashboard_empty_cta_body": "Erstelle einen Satz mit KI, entdecke vorbereitete Kategorien oder füge direkt deinen eigenen Satz hinzu.",
     "dashboard_empty_primary": "Kategorien entdecken",
     "dashboard_empty_secondary": "Satz mit KI erstellen",
-    "dashboard_empty_tertiary": "Eigenen Satz hinzufügen",
+    "dashboard_empty_tertiary": "Deinen eigenen Satz hinzufügen",
     "dashboard_ready_badge": "{{count}} Satz/Sätze in deiner Lernliste",
     "dashboard_ready_title": "Wie möchtest du heute mit deiner Lernliste üben?",
     "dashboard_ready_body": "Lerne deine Sätze als Karten, wechsle zum Hören oder fordere dich mit Quiz und Bauen heraus.",
@@ -639,8 +643,8 @@
   },
   "build_sentence": {
     "title": "Satz bauen",
-    "empty_title": "Lernliste ist leer",
-    "empty_desc": "Füge Sätze zur Lernliste hinzu und komm dann zurück.",
+    "empty_title": "Füge Sätze hinzu, bevor du mit dem Bauen beginnst",
+    "empty_desc": "Der Bau-Modus nutzt die Sätze in deiner Lernliste. Füge zuerst ein paar Sätze hinzu und komm dann hierher zurück, um sie anzuordnen.",
     "source_label": "Übersetze das:",
     "drop_hint": "Tippe auf Wörter, um den Satz zu bauen",
     "validate": "Prüfen",

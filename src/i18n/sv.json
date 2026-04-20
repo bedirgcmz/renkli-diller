@@ -57,7 +57,11 @@
     "listen_select": "Välj rätt betydelse:",
     "tap_to_reveal": "Tryck på ögat för att visa",
     "replay": "Spela igen",
-    "no_listen_sentences": "Lägg till meningar i din inlärningslista för att börja lyssningsövning."
+    "no_listen_sentences": "Lägg till meningar i din inlärningslista för att börja lyssningsövning.",
+    "empty_learning_title": "Bygg upp din inlärningslista innan du börjar studera",
+    "empty_learning_desc": "Studera-läget arbetar med meningarna i din inlärningslista. Lägg först till några meningar och kom sedan tillbaka hit.",
+    "empty_listening_title": "Lägg till meningar innan du börjar lyssningsövningen",
+    "empty_listening_desc": "Lyssna-läget använder meningarna i din inlärningslista. Lägg till några och kom sedan tillbaka hit för att öva."
   },
   "quiz": {
     "title": "Quiz",
@@ -81,8 +85,8 @@
     "reviewing_wrong": "Granskar {{count}} felaktiga svar",
     "first_round": "Första omgången",
     "retry_round": "Repetitionsomgång",
-    "empty_title": "Inlärningslistan är tom",
-    "empty_hint": "Lägg till meningar i din inlärningslista för att starta ett quiz.",
+    "empty_title": "Bygg upp din inlärningslista innan du startar ett quiz",
+    "empty_hint": "Quizfrågorna skapas från meningarna i din inlärningslista. Lägg först till några meningar och kom sedan tillbaka hit.",
     "go_to_sentences": "Se alla meningar",
     "no_keywords_title": "Inga meningar för ifyllnad",
     "no_keywords": "Inga meningar med nyckelordsmärken hittades.\nLägg till **märken** i dina meningar för att använda det här läget.",
@@ -490,7 +494,7 @@
     "dashboard_empty_cta_body": "Du kan skapa en mening med AI, utforska färdiga kategorier eller lägga till din egen mening direkt.",
     "dashboard_empty_primary": "Utforska kategorier",
     "dashboard_empty_secondary": "Skapa en mening med AI",
-    "dashboard_empty_tertiary": "Lägg till min egen mening",
+    "dashboard_empty_tertiary": "Lägg till din egen mening",
     "dashboard_ready_badge": "{{count}} mening(ar) i din inlärningslista",
     "dashboard_ready_title": "Hur vill du öva idag med din inlärningslista?",
     "dashboard_ready_body": "Studera dina meningar som kort, gå till lyssning eller utmana dig själv med quiz och bygg.",
@@ -639,8 +643,8 @@
   },
   "build_sentence": {
     "title": "Bygg mening",
-    "empty_title": "Inlärningslistan är tom",
-    "empty_desc": "Lägg till meningar i din inlärningslista och kom tillbaka.",
+    "empty_title": "Lägg till meningar innan du börjar bygga",
+    "empty_desc": "Bygg-läget använder meningarna i din inlärningslista. Lägg först till några meningar och kom sedan tillbaka hit för att ordna dem.",
     "source_label": "Översätt detta:",
     "drop_hint": "Tryck på ord för att bygga meningen",
     "validate": "Kontrollera",
