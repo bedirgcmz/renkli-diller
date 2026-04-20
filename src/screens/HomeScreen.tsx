@@ -549,13 +549,17 @@ export default function HomeScreen() {
                       {
                         backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
                         borderColor: colors.border,
+                        shadowColor: isDark ? "#000000" : "#D7C5AE",
+                        transform: [{ scale: pressed ? 0.9 : 1 }],
                       },
                     ]}
                   >
-                    <Ionicons name="sparkles" size={16} color={colors.primary} />
-                    <Text style={[styles.setupChipText, { color: colors.text }]}>
-                      {t("home.dashboard_empty_secondary")}
-                    </Text>
+                    <View style={styles.setupChipContent}>
+                      <Ionicons name="sparkles" size={16} color={colors.primary} />
+                      <Text style={[styles.setupChipText, { color: colors.text }]}>
+                        {t("home.dashboard_empty_secondary")}
+                      </Text>
+                    </View>
                   </Pressable>
 
                   <Pressable
@@ -565,13 +569,17 @@ export default function HomeScreen() {
                       {
                         backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
                         borderColor: colors.border,
+                        shadowColor: isDark ? "#000000" : "#D7C5AE",
+                        transform: [{ scale: pressed ? 0.9 : 1 }],
                       },
                     ]}
                   >
-                    <Ionicons name="grid-outline" size={16} color={colors.primary} />
-                    <Text style={[styles.setupChipText, { color: colors.text }]}>
-                      {t("home.dashboard_empty_primary")}
-                    </Text>
+                    <View style={styles.setupChipContent}>
+                      <Ionicons name="grid-outline" size={16} color={colors.primary} />
+                      <Text style={[styles.setupChipText, { color: colors.text }]}>
+                        {t("home.dashboard_empty_primary")}
+                      </Text>
+                    </View>
                   </Pressable>
 
                   <Pressable
@@ -581,13 +589,17 @@ export default function HomeScreen() {
                       {
                         backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
                         borderColor: colors.border,
+                        shadowColor: isDark ? "#000000" : "#D7C5AE",
+                        transform: [{ scale: pressed ? 0.9 : 1 }],
                       },
                     ]}
                   >
-                    <Ionicons name="add-circle-outline" size={16} color={colors.primary} />
-                    <Text style={[styles.setupChipText, { color: colors.text }]}>
-                      {t("home.dashboard_empty_tertiary")}
-                    </Text>
+                    <View style={styles.setupChipContent}>
+                      <Ionicons name="add-circle-outline" size={16} color={colors.primary} />
+                      <Text style={[styles.setupChipText, { color: colors.text }]}>
+                        {t("home.dashboard_empty_tertiary")}
+                      </Text>
+                    </View>
                   </Pressable>
                 </View>
 
@@ -750,9 +762,19 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  setupChipContent: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-start",
     gap: 8,
+    width: "100%",
   },
   setupChipText: {
     fontSize: 14,
