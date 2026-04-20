@@ -10,6 +10,8 @@ import {
   Platform,
   UIManager,
   useWindowDimensions,
+  Modal,
+  Pressable,
 } from "react-native";
 
 // Enable LayoutAnimation on Android
@@ -286,6 +288,12 @@ export default function BuildSentenceScreen() {
   const [dropZone, setDropZone] = useState<WordChip[]>([]);
   const [correctOrder, setCorrectOrder] = useState<string[]>([]);
 
+  // Selection state for select/swap/replace interaction
+  const [selectedDropChipId, setSelectedDropChipId] = useState<string | null>(null);
+
+  // Info modal
+  const [infoVisible, setInfoVisible] = useState(false);
+
   // Validate / feedback state
   type Phase = "arranging" | "correct" | "wrong";
   const [phase, setPhase] = useState<Phase>("arranging");
@@ -356,20 +364,69 @@ export default function BuildSentenceScreen() {
     setWordBank(chips);
     setDropZone([]);
     setCorrectOrder(order);
+    setSelectedDropChipId(null);
   }, [currentSentence?.id]);
 
   const handleBankChipPress = useCallback((chip: WordChip) => {
     if (phase !== "arranging") return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setWordBank((prev) => prev.filter((c) => c.id !== chip.id));
-    setDropZone((prev) => [...prev, chip]);
-  }, [phase]);
+    if (selectedDropChipId !== null) {
+      // Replace: bank chip takes selected's position, selected goes back to bank
+      const selectedChip = dropZone.find((c) => c.id === selectedDropChipId);
+      setDropZone((prev) => prev.map((c) => (c.id === selectedDropChipId ? chip : c)));
+      setWordBank((prev) => [
+        ...prev.filter((c) => c.id !== chip.id),
+        ...(selectedChip ? [selectedChip] : []),
+      ]);
+      setSelectedDropChipId(null);
+    } else {
+      // No selection — normal append
+      setWordBank((prev) => prev.filter((c) => c.id !== chip.id));
+      setDropZone((prev) => [...prev, chip]);
+    }
+  }, [phase, selectedDropChipId, dropZone]);
 
-  const handleDropChipPress = useCallback((chip: WordChip) => {
+  const handleLongPressDropChip = useCallback((chip: WordChip) => {
     if (phase !== "arranging") return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setDropZone((prev) => prev.filter((c) => c.id !== chip.id));
     setWordBank((prev) => [...prev, chip]);
+    setSelectedDropChipId((prev) => (prev === chip.id ? null : prev));
+  }, [phase]);
+
+  const handleUndo = useCallback(() => {
+    if (phase !== "arranging" || dropZone.length === 0) return;
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const lastChip = dropZone[dropZone.length - 1];
+    setDropZone((prev) => prev.slice(0, -1));
+    setWordBank((prev) => [...prev, lastChip]);
+    setSelectedDropChipId((prev) => (prev === lastChip.id ? null : prev));
+  }, [phase, dropZone]);
+
+  const handleDropChipPress = useCallback((chip: WordChip) => {
+    if (phase !== "arranging") return;
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSelectedDropChipId((selectedId) => {
+      if (selectedId === null) {
+        // 1) No selection → select this chip
+        return chip.id;
+      }
+      if (selectedId === chip.id) {
+        // 2) Same chip tapped → deselect
+        return null;
+      }
+      // 3) Different chip selected → swap positions
+      setDropZone((prev) => {
+        const next = [...prev];
+        const idxA = next.findIndex((c) => c.id === selectedId);
+        const idxB = next.findIndex((c) => c.id === chip.id);
+        if (idxA !== -1 && idxB !== -1) {
+          [next[idxA], next[idxB]] = [next[idxB], next[idxA]];
+        }
+        return next;
+      });
+      return null; // clear selection after swap
+    });
   }, [phase]);
 
   const handleValidate = useCallback(() => {
@@ -544,7 +601,7 @@ export default function BuildSentenceScreen() {
             {accuracy}%
           </Text>
           <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+            style={[styles.primaryBtn, styles.completeBtn, { backgroundColor: colors.primary }]}
             onPress={handleRestart}
             activeOpacity={0.8}
           >
@@ -591,10 +648,30 @@ export default function BuildSentenceScreen() {
         />
 
         {/* ── Drop zone ── */}
+        {/* Drop zone header row: helper text + undo button */}
+        <View style={styles.dropZoneHeader}>
+          <Text style={[styles.dropZoneHelperText, { color: selectedDropChipId ? colors.primary : colors.textTertiary }]}>
+            {selectedDropChipId
+              ? t("build_sentence.helper_selected")
+              : dropZone.length > 0
+                ? t("build_sentence.helper_default")
+                : ""}
+          </Text>
+          <View style={styles.dropZoneActions}>
+            {phase === "arranging" && dropZone.length > 0 && (
+              <TouchableOpacity onPress={handleUndo} hitSlop={10} style={styles.undoBtn}>
+                <Ionicons name="arrow-undo-outline" size={16} color={colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={() => setInfoVisible(true)} hitSlop={10} style={styles.infoBtn}>
+              <Ionicons name="information-circle-outline" size={16} color={colors.textTertiary} />
+            </TouchableOpacity>
+          </View>
+        </View>
         <View
           style={[
             styles.dropZone,
-            isSmallScreen && { marginTop: 10, minHeight: 72 },
+            isSmallScreen && { marginTop: 4, minHeight: 72 },
             {
               backgroundColor: colors.surface ?? colors.backgroundSecondary,
               borderColor: dropZoneBorderColor,
@@ -609,12 +686,15 @@ export default function BuildSentenceScreen() {
           ) : (
             <View style={styles.chipRow}>
               {dropZone.map((chip) => {
+                const isSelected = phase === "arranging" && chip.id === selectedDropChipId;
                 const chipBg =
                   phase === "correct"
                     ? QUIZ_CORRECT_COLOR + "22"
                     : phase === "wrong"
                       ? QUIZ_WRONG_COLOR + "22"
-                      : colors.primary + "18";
+                      : isSelected
+                        ? colors.primary + "33"
+                        : colors.primary + "18";
                 const chipBorder =
                   phase === "correct"
                     ? QUIZ_CORRECT_COLOR
@@ -631,11 +711,20 @@ export default function BuildSentenceScreen() {
                   <TouchableOpacity
                     key={chip.id}
                     onPress={() => handleDropChipPress(chip)}
+                    onLongPress={() => handleLongPressDropChip(chip)}
+                    delayLongPress={350}
                     activeOpacity={phase === "arranging" ? 0.7 : 1}
                     disabled={phase !== "arranging"}
-                    style={[styles.chip, styles.chipPlaced, { backgroundColor: chipBg, borderColor: chipBorder }]}
+                    style={[
+                      styles.chip,
+                      styles.chipPlaced,
+                      { backgroundColor: chipBg, borderColor: chipBorder },
+                      isSelected && styles.chipSelected,
+                    ]}
                   >
-                    <Text style={[styles.chipText, { color: chipTextColor }]}>{chip.display}</Text>
+                    <Text style={[styles.chipText, { color: chipTextColor, fontWeight: isSelected ? "700" : "500" }]}>
+                      {chip.display}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -743,6 +832,49 @@ export default function BuildSentenceScreen() {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* ── Info Modal ── */}
+      <Modal
+        visible={infoVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setInfoVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setInfoVisible(false)}>
+          <Pressable style={[styles.modalCard, { backgroundColor: colors.cardBackground }]} onPress={() => {}}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {t("build_sentence.info_title")}
+            </Text>
+
+            {[
+              { icon: "add-circle-outline" as const, key: "build_sentence.info_add" },
+              { icon: "swap-horizontal-outline" as const, key: "build_sentence.info_replace" },
+              { icon: "repeat-outline" as const, key: "build_sentence.info_swap" },
+              { icon: "backspace-outline" as const, key: "build_sentence.info_remove" },
+            ].map(({ icon, key }) => (
+              <View key={key} style={styles.modalRow}>
+                <Ionicons name={icon} size={18} color={colors.primary} style={styles.modalRowIcon} />
+                <Text style={[styles.modalRowText, { color: colors.text }]}>{t(key)}</Text>
+              </View>
+            ))}
+
+            <View style={[styles.modalNote, { backgroundColor: colors.backgroundSecondary }]}>
+              <Ionicons name="bulb-outline" size={14} color={colors.textSecondary} style={{ marginTop: 1 }} />
+              <Text style={[styles.modalNoteText, { color: colors.textSecondary }]}>
+                {t("build_sentence.info_note")}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.modalClose, { backgroundColor: colors.primary }]}
+              onPress={() => setInfoVisible(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalCloseText}>{t("common.got_it")}</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -752,9 +884,34 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 32 },
-  dropZone: {
+  dropZoneHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginHorizontal: 16,
     marginTop: 16,
+    marginBottom: 4,
+    minHeight: 20,
+  },
+  dropZoneHelperText: {
+    fontSize: 11,
+    fontWeight: "500",
+    flex: 1,
+  },
+  dropZoneActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  undoBtn: {
+    padding: 4,
+  },
+  infoBtn: {
+    padding: 4,
+  },
+  dropZone: {
+    marginHorizontal: 16,
+    marginTop: 0,
     minHeight: 88,
     borderWidth: 1.5,
     borderStyle: "dashed",
@@ -788,6 +945,13 @@ const styles = StyleSheet.create({
   },
   chipPlaced: {
     borderStyle: "solid",
+  },
+  chipSelected: {
+    borderWidth: 2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
   },
   chipDisabled: {
     opacity: 0.4,
@@ -836,6 +1000,7 @@ const styles = StyleSheet.create({
   completeTitle: { fontSize: 22, fontWeight: "800", marginBottom: 6, textAlign: "center" },
   completeScore: { fontSize: 16, marginBottom: 4 },
   completeAccuracy: { fontSize: 42, fontWeight: "800", marginBottom: 24 },
+  completeBtn: { alignSelf: "stretch", marginHorizontal: 32 },
   limitDesc: {
     fontSize: 14,
     textAlign: "center",
@@ -847,5 +1012,63 @@ const styles = StyleSheet.create({
   premiumBtn: {
     width: 200,
     backgroundColor: "#7C5CF6",
+  },
+  // ── Info Modal ──
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 24,
+    gap: 14,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  modalRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  modalRowIcon: {
+    marginTop: 1,
+    width: 20,
+  },
+  modalRowText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  modalNote: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 2,
+  },
+  modalNoteText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  modalClose: {
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+  },
+  modalCloseText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
