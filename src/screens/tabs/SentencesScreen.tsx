@@ -45,12 +45,6 @@ const STATUS_FILTERS: Array<{ key: StatusFilter; labelKey: string }> = [
   { key: "learned", labelKey: "sentences.filter_learned" },
 ];
 
-const STATUS_BAR_COLOR: Record<SentenceStatus, string> = {
-  new: "#E53E3E",
-  learning: "#3B8BD4",
-  learned: "#2ECC71",
-};
-
 interface SentenceItemProps {
   sentence: Sentence & { effectiveStatus: SentenceStatus };
   isUserSentence: boolean;
@@ -99,100 +93,118 @@ function SentenceItem({
       ],
     );
   };
-  const barColor = STATUS_BAR_COLOR[sentence.effectiveStatus];
-  const keywordsText = sentence.keywords.filter(Boolean).join(", ");
+  const statusMeta = {
+    new: {
+      label: t("sentences.status_new"),
+      color: colors.textTertiary,
+    },
+    learning: {
+      label: t("sentences.status_learning"),
+      color: "#3B8BD4",
+    },
+    learned: {
+      label: t("sentences.status_learned"),
+      color: "#2ECC71",
+    },
+  }[sentence.effectiveStatus];
 
   return (
-    <View style={[itemStyles.card, { backgroundColor: colors.cardBackground }]}>
-      <View style={[itemStyles.statusBar, { backgroundColor: barColor }]} />
+    <View
+      style={[
+        itemStyles.card,
+        {
+          backgroundColor: colors.cardBackground,
+          borderColor: colors.border,
+        },
+      ]}
+    >
       <View style={itemStyles.body}>
-        <View style={itemStyles.iconRow}>
-          {sentence.is_ai_generated && (
-            <View style={[itemStyles.aiBadge, { backgroundColor: colors.primary + "18" }]}>
-              <Ionicons name="sparkles" size={11} color={colors.primary} />
-            </View>
-          )}
-          {hasMismatch && (
-            <Pressable
-              onPress={handleMismatchPress}
-              hitSlop={HIT}
-              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
-            >
-              <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
-            </Pressable>
-          )}
-          <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
-          {onEdit && (
-            <Pressable
-              onPress={onEdit}
-              hitSlop={HIT}
-              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
-            >
-              <Ionicons name="create-outline" size={18} color={colors.primary} />
-            </Pressable>
-          )}
-          {isUserSentence && (
-            <Pressable
-              onPress={onDelete}
-              hitSlop={HIT}
-              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
-            >
-              <Ionicons name="trash-outline" size={18} color={colors.error} />
-            </Pressable>
-          )}
+        <View style={itemStyles.topRow}>
+          <View style={itemStyles.topRowLeft}>
+            {sentence.is_ai_generated && (
+              <View style={[itemStyles.aiBadge, { backgroundColor: colors.primary + "14" }]}>
+                <Ionicons name="sparkles" size={11} color={colors.primary} />
+              </View>
+            )}
+            {hasMismatch && (
+              <Pressable
+                onPress={handleMismatchPress}
+                hitSlop={HIT}
+                style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+              >
+                <Ionicons name="warning-outline" size={15} color={colors.warning ?? "#F59E0B"} />
+              </Pressable>
+            )}
+            {onEdit && (
+              <Pressable
+                onPress={onEdit}
+                hitSlop={HIT}
+                style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+              >
+                <Ionicons name="create-outline" size={15} color={colors.textTertiary} />
+              </Pressable>
+            )}
+            {isUserSentence && (
+              <Pressable
+                onPress={onDelete}
+                hitSlop={HIT}
+                style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+              >
+                <Ionicons name="trash-outline" size={15} color={colors.textTertiary} />
+              </Pressable>
+            )}
+          </View>
+
+          <View style={itemStyles.topRowRight}>
+            {sentence.category_name ? (
+              <View
+                style={[
+                  itemStyles.categoryChip,
+                  {
+                    backgroundColor: colors.backgroundSecondary,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={[itemStyles.categoryText, { color: colors.textSecondary }]}
+                >
+                  {sentence.category_name}
+                </Text>
+              </View>
+            ) : null}
+            <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
+          </View>
         </View>
 
-        <KeywordText
-          text={sentence.source_text}
-          baseColor={colors.text}
-          fontSize={15}
-          colorSeed={String(sentence.id)}
-        />
-        <View style={itemStyles.targetRow}>
+        <View style={itemStyles.copyBlock}>
           <KeywordText
             text={sentence.target_text}
-            baseColor={colors.textSecondary}
-            fontSize={13}
+            baseColor={colors.text}
+            fontSize={16}
             colorSeed={String(sentence.id)}
           />
+          <View style={itemStyles.targetRow}>
+            <KeywordText
+              text={sentence.source_text}
+              baseColor={colors.textSecondary}
+              fontSize={14}
+              colorSeed={String(sentence.id)}
+            />
+          </View>
         </View>
 
-        {keywordsText ? (
-          <View style={itemStyles.keywordsRow}>
-            <Ionicons name="key-outline" size={11} color={colors.textTertiary} />
-            <Text style={[itemStyles.keywords, { color: colors.textTertiary }]}>
-              {keywordsText}
-            </Text>
-          </View>
-        ) : null}
-
-        {sentence.category_name ? (
-          <View style={[itemStyles.categoryChip, { backgroundColor: colors.backgroundTertiary }]}>
-            <Text style={[itemStyles.categoryText, { color: colors.textSecondary }]}>
-              {sentence.category_name}
-            </Text>
-          </View>
-        ) : null}
-
         <View style={itemStyles.actionRow}>
-          {sentence.effectiveStatus === "new" && (
-            <Text style={{ color: colors.textTertiary, fontSize: 12 }}>
-              {t("sentences.status_new")}
+          <View style={itemStyles.statusMeta}>
+            <Text style={[itemStyles.statusText, { color: statusMeta.color }]}>
+              {statusMeta.label}
             </Text>
-          )}
-          {sentence.effectiveStatus === "learning" && (
-            <Text style={{ color: "#3B8BD4", fontSize: 12, fontWeight: "500" }}>
-              {t("sentences.status_learning")}
-            </Text>
-          )}
-          {sentence.effectiveStatus === "learned" && (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-              <Text style={{ color: "#2ECC71", fontSize: 12, fontWeight: "500" }}>
-                {t("sentences.status_learned")}
-              </Text>
-              <Feather name="check" size={13} color="#2ECC71" />
-            </View>
-          )}
+            {sentence.effectiveStatus === "learned" ? (
+              <Feather name="check" size={12} color={statusMeta.color} />
+            ) : null}
+          </View>
 
           {sentence.effectiveStatus === "new" && (
             <Pressable onPress={onLearn}>
@@ -203,13 +215,13 @@ function SentenceItem({
                     {
                       borderColor: colors.border,
                       backgroundColor: pressed
-                        ? colors.backgroundTertiary
+                        ? colors.backgroundSecondary
                         : colors.backgroundSecondary,
-                      transform: [{ scale: pressed ? 0.95 : 1 }],
+                      transform: [{ scale: pressed ? 0.97 : 1 }],
                     },
                   ]}
                 >
-                  <Ionicons name="add-circle-outline" size={15} color={colors.textSecondary} />
+                  <Ionicons name="add-circle-outline" size={14} color={colors.textSecondary} />
                   <Text
                     numberOfLines={1}
                     style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}
@@ -230,15 +242,15 @@ function SentenceItem({
                     {
                       borderColor: colors.border,
                       backgroundColor: pressed
-                        ? colors.backgroundTertiary
+                        ? colors.backgroundSecondary
                         : colors.backgroundSecondary,
-                      transform: [{ scale: pressed ? 0.95 : 1 }],
+                      transform: [{ scale: pressed ? 0.97 : 1 }],
                     },
                   ]}
                 >
                   <Ionicons
                     name="checkmark-circle-outline"
-                    size={15}
+                    size={14}
                     color={colors.textSecondary}
                   />
                   <Text
@@ -261,13 +273,13 @@ function SentenceItem({
                     {
                       borderColor: colors.border,
                       backgroundColor: pressed
-                        ? colors.backgroundTertiary
+                        ? colors.backgroundSecondary
                         : colors.backgroundSecondary,
-                      transform: [{ scale: pressed ? 0.95 : 1 }],
+                      transform: [{ scale: pressed ? 0.97 : 1 }],
                     },
                   ]}
                 >
-                  <Ionicons name="refresh-outline" size={15} color={colors.textSecondary} />
+                  <Ionicons name="refresh-outline" size={14} color={colors.textSecondary} />
                   <Text
                     numberOfLines={1}
                     style={[itemStyles.actionBtnText, { color: colors.textSecondary }]}
@@ -289,69 +301,97 @@ const HIT = { top: 8, bottom: 8, left: 8, right: 8 };
 const itemStyles = StyleSheet.create({
   card: {
     borderRadius: 12,
-    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
-    marginBottom: 16,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.09,
+    shadowRadius: 12,
+    elevation: 2,
+    marginBottom: 14,
+    borderWidth: 1,
   },
-  statusBar: { height: 0, width: "100%" },
-  body: { padding: 6, paddingHorizontal: 12 },
-  iconRow: {
+  body: {
+    paddingHorizontal: 14,
+    paddingTop: 2,
+    paddingBottom: 12,
+  },
+  topRow: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
-    marginBottom: 4,
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 2,
+    minHeight: 16,
+  },
+  topRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexShrink: 1,
+  },
+  topRowRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 1,
+    marginLeft: 8,
+    minWidth: 0,
+  },
+  copyBlock: {
+    gap: 6,
   },
   targetRow: {
-    marginTop: 4,
-    paddingTop: 4,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(0,0,0,0.06)",
+    marginTop: 0,
   },
-  keywordsRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 6 },
-  keywords: { fontSize: 12 },
   categoryChip: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 7,
+    maxWidth: 112,
+    minWidth: 0,
+    paddingHorizontal: 4,
     paddingVertical: 2,
-    borderRadius: 5,
-    marginTop: 6,
+    borderRadius: 2,
+    borderWidth: 1,
   },
-  categoryText: { fontSize: 11 },
+  categoryText: {
+    fontSize: 9,
+    fontWeight: "500",
+  },
   actionRow: {
     flexDirection: "row",
     marginTop: 10,
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 10,
+  },
+  statusMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    flexShrink: 1,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: "600",
   },
   actionBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-start",
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    gap: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 0,
+    gap: 4,
+    minHeight: 22,
+    flexShrink: 0,
   },
   aiBadge: {
     width: 20,
     height: 20,
-    borderRadius: 6,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   actionBtnText: {
-    fontSize: 13,
+    fontSize: 10,
     fontWeight: "600",
   },
 });
@@ -507,7 +547,10 @@ function FilterModal({
                   activeOpacity={0.8}
                 >
                   <Text
-                    style={[filterStyles.chipText, { color: chipTextColor(difficultyFilter === f.key) }]}
+                    style={[
+                      filterStyles.chipText,
+                      { color: chipTextColor(difficultyFilter === f.key) },
+                    ]}
                   >
                     {t(f.labelKey)}
                   </Text>
@@ -641,7 +684,12 @@ export default function SentencesScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadPresetSentences(undefined, isPremium), loadSentences(), loadProgress(), loadFavorites()]);
+    await Promise.all([
+      loadPresetSentences(undefined, isPremium),
+      loadSentences(),
+      loadProgress(),
+      loadFavorites(),
+    ]);
     setRefreshing(false);
   };
 
@@ -657,7 +705,10 @@ export default function SentencesScreen() {
     return sourceList
       .filter((s) => statusFilter === "all" || s.effectiveStatus === statusFilter)
       .filter((s) => categoryFilter === "all" || s.category_id === categoryFilter)
-      .filter((s) => activeTab === "mine" || difficultyFilter === "all" || s.difficulty === difficultyFilter)
+      .filter(
+        (s) =>
+          activeTab === "mine" || difficultyFilter === "all" || s.difficulty === difficultyFilter,
+      )
       .filter(
         (s) =>
           !searchText ||
@@ -703,7 +754,15 @@ export default function SentencesScreen() {
       preset: applyFilters(presetSentences, true),
       mine: applyFilters(sentences, false),
     };
-  }, [presetSentences, sentences, progressMap, statusFilter, categoryFilter, difficultyFilter, searchText]);
+  }, [
+    presetSentences,
+    sentences,
+    progressMap,
+    statusFilter,
+    categoryFilter,
+    difficultyFilter,
+    searchText,
+  ]);
 
   const handleDelete = (sentence: Sentence) => {
     Alert.alert(t("sentences.delete"), t("sentences.delete_confirm"), [
@@ -832,8 +891,21 @@ export default function SentencesScreen() {
         style={styles.list}
         ListHeaderComponent={
           activeTab === "mine" && mismatchedCount > 0 ? (
-            <View style={[bannerStyles.banner, { backgroundColor: colors.warning ? colors.warning + "18" : "#F59E0B18", borderColor: colors.warning ?? "#F59E0B" }]}>
-              <Ionicons name="information-circle-outline" size={16} color={colors.warning ?? "#F59E0B"} style={{ marginTop: 1 }} />
+            <View
+              style={[
+                bannerStyles.banner,
+                {
+                  backgroundColor: colors.warning ? colors.warning + "18" : "#F59E0B18",
+                  borderColor: colors.warning ?? "#F59E0B",
+                },
+              ]}
+            >
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color={colors.warning ?? "#F59E0B"}
+                style={{ marginTop: 1 }}
+              />
               <Text style={[bannerStyles.bannerText, { color: colors.textSecondary }]}>
                 {t("sentences.lang_change_info")}
               </Text>
