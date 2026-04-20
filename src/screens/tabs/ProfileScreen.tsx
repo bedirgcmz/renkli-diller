@@ -344,6 +344,12 @@ export default function ProfileScreen() {
             <Text style={[styles.quizCardTitle, { color: colors.text }]}>
               {t("profile.quiz_breakdown")}
             </Text>
+            <Text style={[styles.quizAccuracySummary, { color: colors.textSecondary }]}>
+              {t("profile.quiz_correct_summary", {
+                correct: stats.correctQuizAnswers,
+                total: stats.totalQuizQuestions,
+              })}
+            </Text>
 
             {/* Mode rows */}
             {(["multiple_choice", "fill_blank", "build_sentence"] as const).map((mode) => {
@@ -612,6 +618,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   quizCardTitle: { fontSize: 13, fontWeight: "700", marginBottom: 2 },
+  quizAccuracySummary: { fontSize: 12, marginBottom: 4 },
   quizRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   quizRowLabel: { fontSize: 12, width: 110 },
   quizBar: { flex: 1, height: 5, borderRadius: 3, overflow: "hidden" },

@@ -1,0 +1,135 @@
+import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "@/hooks/useTheme";
+import { useSentenceStore } from "@/store/useSentenceStore";
+import { useProgressStore } from "@/store/useProgressStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { LearningListCard } from "@/components/LearningListCard";
+import { MainStackParamList } from "@/types";
+
+export default function LearningListScreen() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
+  const { progressMap, markAsLearned: markPresetLearned, loadProgress } = useProgressStore();
+  const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
+
+  useEffect(() => {
+    loadSentences();
+    loadProgress();
+    loadPresetSentences(undefined, isPremium);
+  }, [isPremium]);
+
+  const seenIds = new Set<string>();
+  const learningList = [...sentences, ...presetSentences]
+    .filter((s) => {
+      if (seenIds.has(s.id)) return false;
+      seenIds.add(s.id);
+      return true;
+    })
+    .filter((s) => (s.is_preset ? progressMap[s.id] === "learning" : s.status === "learning"));
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      {/* Header */}
+      <View style={[styles.header, { borderBottomColor: colors.divider }]}>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t("profile.learning_list")}
+        </Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={12}>
+          <Ionicons name="close" size={24} color={colors.text} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Count badge */}
+      {learningList.length > 0 && (
+        <View style={[styles.countRow, { backgroundColor: colors.backgroundSecondary }]}>
+          <Ionicons name="trending-up-outline" size={16} color="#3B82F6" />
+          <Text style={[styles.countText, { color: colors.textSecondary }]}>
+            {learningList.length} {t("learn.sentences_to_learn")}
+          </Text>
+        </View>
+      )}
+
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {learningList.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>📚</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              {t("learn.no_learning_sentences")}
+            </Text>
+          </View>
+        ) : (
+          learningList.map((sentence) => (
+            <LearningListCard
+              key={sentence.id}
+              sentence={sentence}
+              onMarkLearned={async () => {
+                if (sentence.is_preset) {
+                  await markPresetLearned(sentence.id);
+                } else {
+                  await useSentenceStore.getState().markAsLearned(sentence.id);
+                  loadSentences();
+                }
+                loadProgress();
+              }}
+              onRemove={async () => {
+                await useSentenceStore.getState().removeFromLearningList(sentence.id);
+                if (!sentence.is_preset) loadSentences();
+                loadProgress();
+              }}
+              colors={colors}
+              t={t}
+            />
+          ))
+        )}
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  title: { fontSize: 20, fontWeight: "700" },
+  countRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  countText: { fontSize: 13, fontWeight: "500" },
+  scroll: { padding: 16 },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    gap: 12,
+  },
+  emptyIcon: { fontSize: 48 },
+  emptyText: { fontSize: 15, textAlign: "center", paddingHorizontal: 32 },
+});

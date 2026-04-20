@@ -110,7 +110,7 @@ export type PaywallSource =
 export type HomeStackParamList = {
   HomeMain: undefined;
   Learn: { initialTab?: "study" | "listening" } | undefined;
-  Quiz: undefined;
+  Quiz: { initialMode?: "fill_blank" } | undefined;
   Reading: undefined;
   BuildSentence: undefined;
   GameHub: undefined;
@@ -137,6 +137,7 @@ export type MainStackParamList = {
   ChangeEmail: undefined;
   ChangePassword: undefined;
   LearnedSentences: undefined;
+  LearningList: undefined;
   FavoriteSentences: undefined;
   Achievements: undefined;
   AITranslator: undefined;

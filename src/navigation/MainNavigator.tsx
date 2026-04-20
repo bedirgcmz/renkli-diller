@@ -11,6 +11,7 @@ import AutoModeScreen from "@/screens/AutoModeScreen";
 import ChangeEmailScreen from "@/screens/ChangeEmailScreen";
 import ChangePasswordScreen from "@/screens/ChangePasswordScreen";
 import LearnedSentencesScreen from "@/screens/LearnedSentencesScreen";
+import LearningListScreen from "@/screens/LearningListScreen";
 import FavoriteSentencesScreen from "@/screens/FavoriteSentencesScreen";
 import AchievementsScreen from "@/screens/AchievementsScreen";
 import AITranslateScreen from "@/screens/AITranslateScreen";
@@ -65,6 +66,11 @@ export default function MainNavigator() {
       <Stack.Screen
         name="LearnedSentences"
         component={LearnedSentencesScreen}
+        options={{ presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="LearningList"
+        component={LearningListScreen}
         options={{ presentation: "modal" }}
       />
       <Stack.Screen
