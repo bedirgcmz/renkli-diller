@@ -845,7 +845,7 @@ export default function SpeedRoundScreen() {
           <Text style={[styles.timerText, { color: timerColor }]}>{timeLeft}s</Text>
         </View>
 
-        {/* Audio toggles (right slot) */}
+        {/* Audio toggles + combo badge (right slot) */}
         <View style={styles.audioIcons}>
           <TouchableOpacity onPress={() => setBgMusicEnabled(!bgMusicEnabled)} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
             <Ionicons
@@ -861,14 +861,12 @@ export default function SpeedRoundScreen() {
               color={sfxEnabled ? colors.primary : colors.textTertiary}
             />
           </TouchableOpacity>
+          {comboLabel && (
+            <View style={styles.comboBadge}>
+              <Text style={[styles.comboText, { color: "#F59E0B" }]}>{comboLabel}</Text>
+            </View>
+          )}
         </View>
-
-        {/* Combo badge (absolute overlay) */}
-        {comboLabel && (
-          <View style={[styles.comboBadgeOverlay, { backgroundColor: "#F59E0B20" }]}>
-            <Text style={[styles.comboText, { color: "#F59E0B" }]}>{comboLabel}</Text>
-          </View>
-        )}
       </View>
 
       {/* Progress bar (questions) */}
@@ -1026,8 +1024,7 @@ const styles = StyleSheet.create({
   gameHeader:         { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 10 },
   timerContainer:     { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 16 },
   timerText:          { fontSize: 16, fontWeight: "700" },
-  comboBadge:         { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  comboBadgeOverlay:  { position: "absolute", alignSelf: "center", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  comboBadge:         { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, backgroundColor: "#F59E0B20" },
   comboText:          { fontSize: 13, fontWeight: "700" },
   audioIcons:         { flexDirection: "row", alignItems: "center", gap: 10 },
   readyAudioRow:      { flexDirection: "row", gap: 8, marginTop: 16 },

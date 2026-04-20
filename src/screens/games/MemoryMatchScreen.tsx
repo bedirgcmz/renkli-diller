@@ -49,6 +49,10 @@ interface MemoryCard {
   text: string;
 }
 
+function normalizeCardText(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
 function generateUUID(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -80,13 +84,13 @@ function buildCards(items: GameVocabularyItem[]): MemoryCard[] {
         id: `${item.id}_source`,
         pairId: item.id,
         side: "source" as const,
-        text: item.sourceText,
+        text: normalizeCardText(item.sourceText),
       },
       {
         id: `${item.id}_target`,
         pairId: item.id,
         side: "target" as const,
-        text: item.targetText,
+        text: normalizeCardText(item.targetText),
       },
     ])
   );
@@ -1110,19 +1114,20 @@ export default function MemoryMatchScreen() {
                 <Text style={[styles.cardLang, { color: colors.textSecondary }]}>
                   {card.side === "source" ? uiLanguage.toUpperCase() : targetLanguage.toUpperCase()}
                 </Text>
-                <Text
-                  style={[
-                    styles.cardText,
-                    { color: textColor },
-                    isSmallScreen && { fontSize: 13 },
-                    isCompactBoard && styles.cardTextCompact,
-                  ]}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.78}
-                  numberOfLines={3}
-                >
-                  {card.text}
-                </Text>
+                <View style={styles.cardTextWrap}>
+                  <Text
+                    style={[
+                      styles.cardText,
+                      { color: textColor },
+                      isSmallScreen && { fontSize: 13 },
+                      isCompactBoard && styles.cardTextCompact,
+                    ]}
+                    numberOfLines={3}
+                    ellipsizeMode="tail"
+                  >
+                    {card.text}
+                  </Text>
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -1329,21 +1334,35 @@ const styles = StyleSheet.create({
   },
   board: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignSelf: "center" },
   card: {
-    minHeight: 78,
+    minHeight: 84,
     borderRadius: 16,
     borderWidth: 1.5,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: 8,
+    overflow: "hidden",
   },
   cardCompact: {
-    minHeight: 72,
+    minHeight: 78,
     borderRadius: 14,
     paddingHorizontal: 8,
     paddingVertical: 8,
+    gap: 6,
   },
   cardLang: { fontSize: 10, fontWeight: "700", letterSpacing: 0.5 },
-  cardText: { fontSize: 14, fontWeight: "700", lineHeight: 18 },
+  cardTextWrap: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+  },
+  cardText: {
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 18,
+    textAlign: "center",
+    flexShrink: 1,
+  },
   cardTextCompact: { fontSize: 12, lineHeight: 16 },
   scoreRow: {
     flexDirection: "row",

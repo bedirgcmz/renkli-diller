@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { useNavigation, useIsFocused, useRoute, RouteProp } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
@@ -129,13 +129,16 @@ export default function QuizScreen() {
         NativeStackNavigationProp<MainStackParamList>
       >
     >();
+  const route = useRoute<RouteProp<HomeStackParamList, "Quiz">>();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
   const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const isFocused = useIsFocused();
 
-  const [mode, setMode] = useState<QuizMode>("multiple_choice");
+  const [mode, setMode] = useState<QuizMode>(
+    route.params?.initialMode === "fill_blank" ? "fill_blank" : "multiple_choice"
+  );
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -432,10 +435,12 @@ export default function QuizScreen() {
           }
         >
           <View style={[styles.emptyCard, { backgroundColor: colors.cardBackground }]}>
-            <Text style={styles.emptyIcon}>📚</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t("quiz.empty_title")}</Text>
+            <Text style={styles.emptyIcon}>{route.params?.initialMode === "fill_blank" ? "✏️" : "📚"}</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {t(route.params?.initialMode === "fill_blank" ? "quiz.dictation_empty_title" : "quiz.empty_title")}
+            </Text>
             <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
-              {t("quiz.empty_hint")}
+              {t(route.params?.initialMode === "fill_blank" ? "quiz.dictation_empty_hint" : "quiz.empty_hint")}
             </Text>
             {renderEmptyActions()}
           </View>

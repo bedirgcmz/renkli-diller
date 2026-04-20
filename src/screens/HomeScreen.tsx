@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   useWindowDimensions,
-  Pressable,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -199,14 +198,14 @@ export default function HomeScreen() {
       onPress: (nav) => nav.navigate("Quiz"),
     },
     {
-      id: "build",
-      icon: "extension-puzzle-outline",
-      iconColor: "#10B981",
-      titleKey: "home.card_build_title",
-      descKey: "home.card_build_desc",
-      coachTitleKey: "coach_marks.build_title",
-      coachDescKey: "coach_marks.build_desc",
-      onPress: (nav) => nav.navigate("BuildSentence"),
+      id: "dictation",
+      icon: "create-outline",
+      iconColor: "#EC4899",
+      titleKey: "home.card_dictation_title",
+      descKey: "home.card_dictation_desc",
+      coachTitleKey: "coach_marks.dictation_title",
+      coachDescKey: "coach_marks.dictation_desc",
+      onPress: (nav) => nav.navigate("Quiz", { initialMode: "fill_blank" }),
     },
     {
       id: "auto",
@@ -217,6 +216,16 @@ export default function HomeScreen() {
       coachTitleKey: "coach_marks.auto_title",
       coachDescKey: "coach_marks.auto_desc",
       onPress: (nav) => nav.navigate("AutoMode"),
+    },
+    {
+      id: "build",
+      icon: "extension-puzzle-outline",
+      iconColor: "#10B981",
+      titleKey: "home.card_build_title",
+      descKey: "home.card_build_desc",
+      coachTitleKey: "coach_marks.build_title",
+      coachDescKey: "coach_marks.build_desc",
+      onPress: (nav) => nav.navigate("BuildSentence"),
     },
   ];
 
@@ -270,6 +279,16 @@ export default function HomeScreen() {
       coachTitleKey: "coach_marks.ai_title",
       coachDescKey: "coach_marks.ai_desc",
       onPress: (nav) => nav.navigate("AITranslator"),
+    },
+    {
+      id: "add_sentence",
+      icon: "add-circle-outline",
+      iconColor: "#0EA5E9",
+      titleKey: "home.card_add_sentence_title",
+      descKey: "home.card_add_sentence_desc",
+      coachTitleKey: "coach_marks.add_sentence_title",
+      coachDescKey: "coach_marks.add_sentence_desc",
+      onPress: (nav) => nav.navigate("AddSentence"),
     },
   ];
 
@@ -333,11 +352,7 @@ export default function HomeScreen() {
     void loadProgress();
   }, [isPremium, loadCategories, loadPresetSentences, loadProgress, loadSentences, refreshProfile]);
 
-  const goToSentencesTab = useCallback(() => {
-    navigation.getParent()?.navigate("Sentences" as never);
-  }, [navigation]);
-
-  const startCoachMarks = useCallback(() => {
+const startCoachMarks = useCallback(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
 
     const cardSteps: CoachMarkStep[] = visibleCards.map((card) => ({
@@ -647,20 +662,6 @@ export default function HomeScreen() {
               </View>
             )}
 
-            {hasLearningList && (
-              <Pressable
-                onPress={goToSentencesTab}
-                style={({ pressed }) => [
-                  styles.tertiaryAction,
-                  { opacity: pressed ? 0.68 : 1 },
-                ]}
-              >
-                <Text style={[styles.tertiaryActionText, { color: colors.primary }]}>
-                  {t("home.dashboard_ready_tertiary")}
-                </Text>
-                <Ionicons name="arrow-forward" size={14} color={colors.primary} />
-              </Pressable>
-            )}
           </View>
         </View>
 
