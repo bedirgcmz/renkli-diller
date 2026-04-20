@@ -50,6 +50,7 @@ interface SentenceItemProps {
   isUserSentence: boolean;
   uiLanguage: string;
   targetLanguage: string;
+  isDark: boolean;
   onLearn: () => void;
   onMarkLearned: () => void;
   onForgot: () => void;
@@ -64,6 +65,7 @@ function SentenceItem({
   isUserSentence,
   uiLanguage,
   targetLanguage,
+  isDark,
   onLearn,
   onMarkLearned,
   onForgot,
@@ -186,7 +188,14 @@ function SentenceItem({
             fontSize={16}
             colorSeed={String(sentence.id)}
           />
-          <View style={itemStyles.targetRow}>
+          <View
+            style={[
+              itemStyles.targetRow,
+              {
+                borderTopColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)",
+              },
+            ]}
+          >
             <KeywordText
               text={sentence.source_text}
               baseColor={colors.textSecondary}
@@ -318,7 +327,7 @@ const itemStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 2,
+    marginBottom: 8,
     minHeight: 16,
   },
   topRowLeft: {
@@ -339,7 +348,9 @@ const itemStyles = StyleSheet.create({
     gap: 6,
   },
   targetRow: {
-    marginTop: 0,
+    marginTop: 2,
+    marginBottom: 4,
+    borderTopWidth: 1,
   },
   categoryChip: {
     maxWidth: 112,
@@ -946,6 +957,7 @@ export default function SentencesScreen() {
             onDelete={() => handleDelete(item)}
             uiLanguage={uiLanguage}
             targetLanguage={targetLanguage}
+            isDark={isDark}
             colors={colors}
             t={t}
           />
