@@ -80,6 +80,52 @@ function SectionHeader({
   );
 }
 
+function SetupActionButton({
+  icon,
+  label,
+  iconColor,
+  iconBackgroundColor,
+  textColor,
+  chevronColor,
+  backgroundColor,
+  borderColor,
+  shadowColor,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  iconColor: string;
+  iconBackgroundColor: string;
+  textColor: string;
+  chevronColor: string;
+  backgroundColor: string;
+  borderColor: string;
+  shadowColor: string;
+  onPress: () => void;
+}) {
+  // Shadow must live on the same element as backgroundColor — iOS ignores
+  // shadow* props on transparent Views, so Animated.View + inner Pressable
+  // split never shows a shadow. TouchableOpacity with all props merged fixes this.
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.72}
+      style={[
+        styles.setupChip,
+        { backgroundColor, borderColor, shadowColor },
+      ]}
+    >
+      <View style={styles.setupChipContent}>
+        <View style={[styles.setupChipIconWrap, { backgroundColor: iconBackgroundColor }]}>
+          <Ionicons name={icon} size={16} color={iconColor} />
+        </View>
+        <Text style={[styles.setupChipText, { color: textColor }]}>{label}</Text>
+        <Ionicons name="chevron-forward" size={16} color={chevronColor} style={styles.setupChipChevron} />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
@@ -422,9 +468,9 @@ export default function HomeScreen() {
   );
 
   const dashboardAccent = hasLearningList ? colors.success : colors.primary;
-  const emptyCtaBackground = isDark ? colors.cardBackground : "#FFFDFC";
-  const emptyCtaPressedBackground = isDark ? colors.backgroundTertiary : "#F8EEDF";
-  const emptyCtaBorder = isDark ? colors.border : "#E4D6C3";
+  const emptyCtaBackground = colors.cardBackground;
+  const emptyCtaBorder = colors.border;
+  const emptyCtaShadowColor = "#000000";
 
   return (
     <SafeAreaView
@@ -545,77 +591,47 @@ export default function HomeScreen() {
                 </Text>
 
                 <View style={styles.setupActionsRow}>
-                  <Pressable
+                  <SetupActionButton
+                    icon="sparkles"
+                    label={t("home.dashboard_empty_secondary")}
+                    iconColor={colors.primary}
+                    iconBackgroundColor={`${colors.primary}14`}
+                    textColor={colors.text}
+                    chevronColor={colors.textTertiary}
+                    backgroundColor={emptyCtaBackground}
+
+                    borderColor={emptyCtaBorder}
+                    shadowColor={emptyCtaShadowColor}
                     onPress={() => navigation.navigate("AITranslator")}
-                    style={({ pressed }) => [
-                      styles.setupChip,
-                      {
-                        backgroundColor: pressed ? emptyCtaPressedBackground : emptyCtaBackground,
-                        borderColor: emptyCtaBorder,
-                        shadowColor: isDark ? "#000000" : "#D7C5AE",
-                        shadowOpacity: pressed ? 0.06 : 0.14,
-                        shadowRadius: pressed ? 6 : 12,
-                        shadowOffset: { width: 0, height: pressed ? 2 : 5 },
-                        elevation: pressed ? 2 : 6,
-                        transform: [{ scale: pressed ? 0.9 : 1 }],
-                      },
-                    ]}
-                  >
-                    <View style={styles.setupChipContent}>
-                      <Ionicons name="sparkles" size={16} color={colors.primary} />
-                      <Text style={[styles.setupChipText, { color: colors.text }]}>
-                        {t("home.dashboard_empty_secondary")}
-                      </Text>
-                    </View>
-                  </Pressable>
+                  />
 
-                  <Pressable
+                  <SetupActionButton
+                    icon="grid-outline"
+                    label={t("home.dashboard_empty_primary")}
+                    iconColor={colors.primary}
+                    iconBackgroundColor={`${colors.primary}14`}
+                    textColor={colors.text}
+                    chevronColor={colors.textTertiary}
+                    backgroundColor={emptyCtaBackground}
+
+                    borderColor={emptyCtaBorder}
+                    shadowColor={emptyCtaShadowColor}
                     onPress={() => navigation.navigate("CategoryBrowser")}
-                    style={({ pressed }) => [
-                      styles.setupChip,
-                      {
-                        backgroundColor: pressed ? emptyCtaPressedBackground : emptyCtaBackground,
-                        borderColor: emptyCtaBorder,
-                        shadowColor: isDark ? "#000000" : "#D7C5AE",
-                        shadowOpacity: pressed ? 0.06 : 0.14,
-                        shadowRadius: pressed ? 6 : 12,
-                        shadowOffset: { width: 0, height: pressed ? 2 : 5 },
-                        elevation: pressed ? 2 : 6,
-                        transform: [{ scale: pressed ? 0.9 : 1 }],
-                      },
-                    ]}
-                  >
-                    <View style={styles.setupChipContent}>
-                      <Ionicons name="grid-outline" size={16} color={colors.primary} />
-                      <Text style={[styles.setupChipText, { color: colors.text }]}>
-                        {t("home.dashboard_empty_primary")}
-                      </Text>
-                    </View>
-                  </Pressable>
+                  />
 
-                  <Pressable
+                  <SetupActionButton
+                    icon="add-circle-outline"
+                    label={t("home.dashboard_empty_tertiary")}
+                    iconColor={colors.primary}
+                    iconBackgroundColor={`${colors.primary}14`}
+                    textColor={colors.text}
+                    chevronColor={colors.textTertiary}
+                    backgroundColor={emptyCtaBackground}
+
+                    borderColor={emptyCtaBorder}
+                    shadowColor={emptyCtaShadowColor}
                     onPress={() => navigation.navigate("AddSentence")}
-                    style={({ pressed }) => [
-                      styles.setupChip,
-                      {
-                        backgroundColor: pressed ? emptyCtaPressedBackground : emptyCtaBackground,
-                        borderColor: emptyCtaBorder,
-                        shadowColor: isDark ? "#000000" : "#D7C5AE",
-                        shadowOpacity: pressed ? 0.06 : 0.14,
-                        shadowRadius: pressed ? 6 : 12,
-                        shadowOffset: { width: 0, height: pressed ? 2 : 5 },
-                        elevation: pressed ? 2 : 6,
-                        transform: [{ scale: pressed ? 0.9 : 1 }],
-                      },
-                    ]}
-                  >
-                    <View style={styles.setupChipContent}>
-                      <Ionicons name="add-circle-outline" size={16} color={colors.primary} />
-                      <Text style={[styles.setupChipText, { color: colors.text }]}>
-                        {t("home.dashboard_empty_tertiary")}
-                      </Text>
-                    </View>
-                  </Pressable>
+                  />
                 </View>
 
                 <View
@@ -773,29 +789,41 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   setupChip: {
-    minHeight: 46,
+    minHeight: 54,
     borderRadius: 14,
     borderWidth: 1,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
     alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 6,
   },
   setupChipContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    gap: 8,
+    gap: 10,
     width: "100%",
+  },
+  setupChipIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
   },
   setupChipText: {
     fontSize: 14,
-    fontWeight: "600",
-    flexShrink: 1,
+    fontWeight: "700",
+    flex: 1,
+  },
+  setupChipChevron: {
+    flexShrink: 0,
   },
   cardGrid: {
     flexDirection: "row",
