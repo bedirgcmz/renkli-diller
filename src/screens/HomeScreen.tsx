@@ -422,6 +422,9 @@ export default function HomeScreen() {
   );
 
   const dashboardAccent = hasLearningList ? colors.success : colors.primary;
+  const emptyCtaBackground = isDark ? colors.cardBackground : "#FFFDFC";
+  const emptyCtaPressedBackground = isDark ? colors.backgroundTertiary : "#F8EEDF";
+  const emptyCtaBorder = isDark ? colors.border : "#E4D6C3";
 
   return (
     <SafeAreaView
@@ -547,9 +550,13 @@ export default function HomeScreen() {
                     style={({ pressed }) => [
                       styles.setupChip,
                       {
-                        backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
-                        borderColor: colors.border,
+                        backgroundColor: pressed ? emptyCtaPressedBackground : emptyCtaBackground,
+                        borderColor: emptyCtaBorder,
                         shadowColor: isDark ? "#000000" : "#D7C5AE",
+                        shadowOpacity: pressed ? 0.06 : 0.14,
+                        shadowRadius: pressed ? 6 : 12,
+                        shadowOffset: { width: 0, height: pressed ? 2 : 5 },
+                        elevation: pressed ? 2 : 6,
                         transform: [{ scale: pressed ? 0.9 : 1 }],
                       },
                     ]}
@@ -567,9 +574,13 @@ export default function HomeScreen() {
                     style={({ pressed }) => [
                       styles.setupChip,
                       {
-                        backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
-                        borderColor: colors.border,
+                        backgroundColor: pressed ? emptyCtaPressedBackground : emptyCtaBackground,
+                        borderColor: emptyCtaBorder,
                         shadowColor: isDark ? "#000000" : "#D7C5AE",
+                        shadowOpacity: pressed ? 0.06 : 0.14,
+                        shadowRadius: pressed ? 6 : 12,
+                        shadowOffset: { width: 0, height: pressed ? 2 : 5 },
+                        elevation: pressed ? 2 : 6,
                         transform: [{ scale: pressed ? 0.9 : 1 }],
                       },
                     ]}
@@ -587,9 +598,13 @@ export default function HomeScreen() {
                     style={({ pressed }) => [
                       styles.setupChip,
                       {
-                        backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
-                        borderColor: colors.border,
+                        backgroundColor: pressed ? emptyCtaPressedBackground : emptyCtaBackground,
+                        borderColor: emptyCtaBorder,
                         shadowColor: isDark ? "#000000" : "#D7C5AE",
+                        shadowOpacity: pressed ? 0.06 : 0.14,
+                        shadowRadius: pressed ? 6 : 12,
+                        shadowOffset: { width: 0, height: pressed ? 2 : 5 },
+                        elevation: pressed ? 2 : 6,
                         transform: [{ scale: pressed ? 0.9 : 1 }],
                       },
                     ]}
@@ -762,6 +777,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     paddingHorizontal: 14,
+    alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
     shadowOpacity: 0.1,
