@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
-import { Sentence, SentenceDifficulty, SentenceStatus, SentenceTag, Category, SupportedLanguage } from "@/types";
+import { Sentence, SentenceDifficulty, SentenceStatus, Category, SupportedLanguage } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
 import { useSettingsStore } from "./useSettingsStore";
 import { useProgressStore } from "./useProgressStore";
@@ -58,7 +58,6 @@ interface SentenceState {
     source_lang?: string;
     target_lang?: string;
     is_ai_generated?: boolean;
-    tag?: SentenceTag | null;
   }) => Promise<{ success: boolean; error?: string }>;
   updateSentence: (
     id: string,
@@ -68,7 +67,6 @@ interface SentenceState {
       keywords?: string[];
       category_id?: number;
       status?: SentenceStatus;
-      tag?: SentenceTag | null;
     }
   ) => Promise<{ success: boolean; error?: string }>;
   deleteSentence: (id: string) => Promise<{ success: boolean; error?: string }>;
@@ -422,7 +420,6 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           status: ((row.state as string) || "new") as SentenceStatus,
           is_preset: false,
           is_ai_generated: (row.is_ai_generated as boolean) ?? false,
-          tag: (row.tag as SentenceTag | null) ?? null,
           source_lang: (row.source_lang as SupportedLanguage | undefined) ?? uiLanguage,
           target_lang: (row.target_lang as SupportedLanguage | undefined) ?? targetLanguage,
           created_at: row.created_at as string | undefined,
@@ -441,7 +438,7 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
     }
   },
 
-  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang, is_ai_generated, tag }) => {
+  addSentence: async ({ source_text, target_text, keywords, category_id, source_lang, target_lang, is_ai_generated }) => {
     set({ loading: true, error: null });
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -463,7 +460,6 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
           source_lang: source_lang ?? null,
           target_lang: target_lang ?? null,
           is_ai_generated: is_ai_generated ?? false,
-          tag: tag ?? null,
         })
         .select()
         .single();
@@ -486,7 +482,6 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
         category_name: cat ? getCategoryName(cat, uiLanguage) : "",
         status: "learning",
         is_preset: false,
-        tag: tag ?? null,
         source_lang: source_lang as Sentence["source_lang"],
         target_lang: target_lang as Sentence["target_lang"],
         created_at: data.created_at,
@@ -511,7 +506,6 @@ export const useSentenceStore = create<SentenceState>((set, get) => ({
       if (updates.keywords !== undefined) dbUpdates.keywords = updates.keywords;
       if (updates.category_id !== undefined) dbUpdates.category_id = updates.category_id;
       if (updates.status !== undefined) dbUpdates.state = updates.status;
-      if ("tag" in updates) dbUpdates.tag = updates.tag ?? null;
 
       const { error } = await supabase
         .from("user_sentences")

@@ -108,20 +108,6 @@ async function processItem(
         return { success: true, permanent: false };
       }
 
-      case "preset_tag_update": {
-        const { sentenceId, tag } = item.payload as {
-          sentenceId: string;
-          tag: string | null;
-        };
-        const { error } = await supabase
-          .from("user_progress")
-          .update({ tag: tag ?? null })
-          .eq("user_id", userId)
-          .eq("sentence_id", sentenceId);
-        if (error) return { success: false, permanent: isPermanentError(error) };
-        return { success: true, permanent: false };
-      }
-
       case "favorite_add": {
         const { sentenceId, isPreset } = item.payload as {
           sentenceId: string;

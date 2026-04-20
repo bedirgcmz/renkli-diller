@@ -33,9 +33,7 @@ import {
   MainStackParamList,
   PillSegment,
   Sentence,
-  SentenceTag,
 } from "@/types";
-import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
 import { speak, stopSpeaking } from "@/services/tts";
 import { useAchievementStore } from "@/store/useAchievementStore";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
@@ -132,7 +130,7 @@ export default function QuizScreen() {
       >
     >();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, tagMap, loadProgress, recordQuizResult } = useProgressStore();
+  const { progressMap, loadProgress, recordQuizResult } = useProgressStore();
   const { uiLanguage, targetLanguage, ttsEnabled } = useSettingsStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const isFocused = useIsFocused();
@@ -156,10 +154,15 @@ export default function QuizScreen() {
   const [hintQuizVisible, setHintQuizVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [quizMuted, setQuizMuted] = useState(false);
-  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const goToSentencesTab = () => navigation.getParent()?.navigate("Sentences" as never);
+  const goBackFromEmptyState = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    navigation.getParent()?.navigate("Home" as never);
+  };
 
   const renderEmptyActions = () => (
     <View style={styles.emptyActions}>
@@ -178,12 +181,12 @@ export default function QuizScreen() {
         ]}
         onPress={() => navigation.navigate("CategoryBrowser")}
         activeOpacity={0.85}
-      >
-        <Ionicons name="grid-outline" size={16} color={colors.primary} />
-        <Text style={[styles.emptySecondaryBtnText, { color: colors.text }]}>
-          {t("common.explore_categories")}
-        </Text>
-      </TouchableOpacity>
+        >
+          <Ionicons name="grid-outline" size={16} color={colors.primary} />
+          <Text style={[styles.emptySecondaryBtnText, { color: colors.text }]}>
+            {t("common.explore_categories")}
+          </Text>
+        </TouchableOpacity>
     </View>
   );
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -279,13 +282,7 @@ export default function QuizScreen() {
     (s) => s.status === "learning" || progressMap[s.id] === "learning",
   );
 
-  const filteredLearningSentences =
-    activeTagFilters.length === 0
-      ? learningSentences
-      : learningSentences.filter((s) => {
-          const tag = s.is_preset ? tagMap[s.id] : s.tag;
-          return tag != null && activeTagFilters.includes(tag);
-        });
+  const filteredLearningSentences = learningSentences;
 
   const sessionSize = isPremium ? 20 : FREE_QUIZ_DAILY_LIMIT;
   const dailyLimitReached = !isPremium && dailyCount >= FREE_QUIZ_DAILY_LIMIT;
@@ -308,7 +305,7 @@ export default function QuizScreen() {
 
   useEffect(() => {
     if (filteredLearningSentences.length > 0) startSession();
-  }, [mode, sentences.length, presetSentences.length, initialized, activeTagFilters]);
+  }, [mode, sentences.length, presetSentences.length, initialized]);
 
   const currentQ = questions[currentIdx];
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
@@ -403,7 +400,24 @@ export default function QuizScreen() {
         edges={["top"]}
       >
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("quiz.title")}</Text>
+          <TouchableOpacity
+            style={styles.headerBackButton}
+            onPress={goBackFromEmptyState}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <Text
+            style={[
+              styles.headerTitle,
+              styles.headerTitleCentered,
+              isSmallScreen && { fontSize: 18 },
+              { color: colors.text },
+            ]}
+          >
+            {t("quiz.title")}
+          </Text>
+          <View style={styles.headerSideSpacer} />
         </View>
         <ScrollView
           contentContainerStyle={styles.emptyScroll}
@@ -434,33 +448,31 @@ export default function QuizScreen() {
   const renderHeader = () => (
     <>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("quiz.title")}</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <TouchableOpacity
+          style={styles.headerBackButton}
+          onPress={goBackFromEmptyState}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="chevron-back" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <Text
+          style={[
+            styles.headerTitle,
+            styles.headerTitleCentered,
+            isSmallScreen && { fontSize: 18 },
+            { color: colors.text },
+          ]}
+        >
+          {t("quiz.title")}
+        </Text>
+        <View style={styles.headerRightControls}>
           <View style={[styles.scoreBadge, { backgroundColor: colors.primary + "18" }]}>
             <Text style={[styles.scoreText, { color: colors.primary }]}>
               ✓ {score.correct}/{score.total}
             </Text>
           </View>
-          <FilterButton
-            activeCount={activeTagFilters.length}
-            onPress={() => setFilterModalVisible(true)}
-          />
         </View>
       </View>
-      <TagFilterModal
-        visible={filterModalVisible}
-        onClose={() => setFilterModalVisible(false)}
-        selectedTags={activeTagFilters}
-        onApply={setActiveTagFilters}
-        getMatchCount={(draft) =>
-          draft.length === 0
-            ? learningSentences.length
-            : learningSentences.filter((s) => {
-                const tag = s.is_preset ? tagMap[s.id] : s.tag;
-                return tag != null && draft.includes(tag);
-              }).length
-        }
-      />
 
       <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundSecondary }]}>
         {(["multiple_choice", "fill_blank"] as QuizMode[]).map((m) => (
@@ -1032,8 +1044,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 10,
+    position: "relative",
+    minHeight: 44,
   },
   headerTitle: { fontSize: 22, fontWeight: "700" },
+  headerTitleCentered: {
+    position: "absolute",
+    left: 72,
+    right: 72,
+    textAlign: "center",
+  },
+  headerBackButton: {
+    width: 36,
+    height: 36,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  headerRightControls: {
+    marginLeft: "auto",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    zIndex: 2,
+  },
+  headerSideSpacer: {
+    width: 36,
+    height: 36,
+  },
   scoreBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
   scoreText: { fontSize: 13, fontWeight: "700" },
   segmentContainer: {

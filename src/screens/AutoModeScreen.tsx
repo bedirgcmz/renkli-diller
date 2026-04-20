@@ -20,8 +20,7 @@ import {
   POST_READ_DELAY_MS,
   LANG_CODE,
 } from "@/utils/constants";
-import { MainStackParamList, SentenceTag } from "@/types";
-import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
+import { MainStackParamList } from "@/types";
 
 type Phase = "idle" | "source" | "waiting" | "target" | "post" | "done";
 type Speed = 0.5 | 1 | 1.5 | 2;
@@ -37,7 +36,7 @@ export default function AutoModeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { uiLanguage, targetLanguage, autoModeSpeed } = useSettingsStore();
   const { sentences, presetSentences, loadSentences, loadPresetSentences } = useSentenceStore();
-  const { progressMap, tagMap, loadProgress, recordStudySession } = useProgressStore();
+  const { progressMap, loadProgress, recordStudySession } = useProgressStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [speed, setSpeed] = useState<Speed>((autoModeSpeed as Speed) ?? 1);
@@ -47,8 +46,6 @@ export default function AutoModeScreen() {
   const [showTarget, setShowTarget] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speedRef = useRef<Speed>(speed);
@@ -58,17 +55,6 @@ export default function AutoModeScreen() {
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
-
-  // Reset session when tag filter changes
-  useEffect(() => {
-    try {
-      Speech.stop();
-    } catch {}
-    setIsPlaying(false);
-    setPhase("idle");
-    setCurrentIndex(0);
-    setShowTarget(false);
-  }, [activeTagFilters]);
 
   useEffect(() => {
     setInitialized(false);
@@ -94,13 +80,7 @@ export default function AutoModeScreen() {
     ...presetSentences.filter((s) => progressMap[s.id] === "learning"),
   ];
 
-  const filteredLearning =
-    activeTagFilters.length === 0
-      ? allLearning
-      : allLearning.filter((s) => {
-          const tag = s.is_preset ? tagMap[s.id] : s.tag;
-          return tag != null && activeTagFilters.includes(tag);
-        });
+  const filteredLearning = allLearning;
 
   const sessionSentences = isPremium
     ? filteredLearning
@@ -258,12 +238,7 @@ export default function AutoModeScreen() {
     >
       {/* Header */}
       <View style={styles.topBar}>
-        <View style={{ opacity: isPlaying ? 0.4 : 1 }} pointerEvents={isPlaying ? "none" : "auto"}>
-          <FilterButton
-            activeCount={activeTagFilters.length}
-            onPress={() => setFilterModalVisible(true)}
-          />
-        </View>
+        <View style={styles.topBarSpacer} />
         <Text style={[styles.title, { color: colors.text }]}>{t("auto_mode.title")}</Text>
         <TouchableOpacity
           onPress={() => {
@@ -277,20 +252,6 @@ export default function AutoModeScreen() {
           <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
-      <TagFilterModal
-        visible={filterModalVisible}
-        onClose={() => setFilterModalVisible(false)}
-        selectedTags={activeTagFilters}
-        onApply={setActiveTagFilters}
-        getMatchCount={(draft) =>
-          draft.length === 0
-            ? allLearning.length
-            : allLearning.filter((s) => {
-                const tag = s.is_preset ? tagMap[s.id] : s.tag;
-                return tag != null && draft.includes(tag);
-              }).length
-        }
-      />
 
       {/* Progress bar */}
       <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
@@ -549,6 +510,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   title: { fontSize: 17, fontWeight: "600" },
+  topBarSpacer: {
+    width: 24,
+    height: 24,
+  },
   progressTrack: {
     height: 3,
     marginHorizontal: 20,

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
-import { UserProgress, QuizResult, StudySession, SentenceTag } from "@/types";
+import { UserProgress, QuizResult, StudySession } from "@/types";
 import { useAchievementStore } from "./useAchievementStore";
 import { readCache, writeCache } from "@/lib/offlineCache";
 import { useOfflineQueueStore, createQueueItem } from "./useOfflineQueueStore";
@@ -33,7 +33,6 @@ interface ProgressStats {
 interface ProgressState {
   progress: UserProgress[];
   progressMap: Record<string, "learning" | "learned">;
-  tagMap: Record<string, SentenceTag | null>;
   stats: ProgressStats;
   loading: boolean;
   error: string | null;
@@ -44,7 +43,6 @@ interface ProgressState {
   addToLearning: (sentenceId: string) => Promise<void>;
   markAsLearned: (sentenceId: string) => Promise<void>;
   forgot: (sentenceId: string) => Promise<void>;
-  updatePresetTag: (sentenceId: string, tag: SentenceTag | null) => Promise<void>;
   // Legacy quiz tracking
   recordStudySession: (session: Omit<StudySession, "id" | "created_at">) => Promise<void>;
   recordQuizResult: (result: Omit<QuizResult, "id" | "answered_at">) => Promise<void>;
@@ -78,7 +76,6 @@ const DEFAULT_STATS: ProgressStats = {
 interface ProgressCacheSnapshot {
   progress: UserProgress[];
   progressMap: Record<string, "learning" | "learned">;
-  tagMap: Record<string, SentenceTag | null>;
   stats: ProgressStats;
 }
 
@@ -89,7 +86,6 @@ function cacheKeyProgress(userId: string) {
 export const useProgressStore = create<ProgressState>((set, get) => ({
   progress: [],
   progressMap: {},
-  tagMap: {},
   stats: DEFAULT_STATS,
   loading: false,
   error: null,
@@ -110,7 +106,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         set({
           progress: cached.progress,
           progressMap: cached.progressMap,
-          tagMap: cached.tagMap,
           stats: cached.stats,
         });
         // Continue to background network refresh below
@@ -132,26 +127,21 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         return;
       }
 
-      // Build progressMap and tagMap from rows
+      // Build progressMap from rows
       const progressMap: Record<string, "learning" | "learned"> = {};
-      const tagMap: Record<string, SentenceTag | null> = {};
       for (const row of data || []) {
         if (row.state === "learning" || row.state === "learned") {
           progressMap[String(row.sentence_id)] = row.state;
         }
-        if (row.tag) {
-          tagMap[String(row.sentence_id)] = row.tag as SentenceTag;
-        }
       }
 
-      set({ progress: data || [], progressMap, tagMap, loading: false });
+      set({ progress: data || [], progressMap, loading: false });
       await get().loadStats();
 
       // 3. Persist the fresh snapshot to cache
       void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
         progress: data || [],
         progressMap,
-        tagMap,
         stats: get().stats,
       });
     } catch {
@@ -174,7 +164,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
       progress: get().progress,
       progressMap: get().progressMap,
-      tagMap: get().tagMap,
       stats: get().stats,
     });
 
@@ -215,7 +204,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
       progress: get().progress,
       progressMap: get().progressMap,
-      tagMap: get().tagMap,
       stats: get().stats,
     });
 
@@ -251,47 +239,12 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     );
   },
 
-  updatePresetTag: async (sentenceId: string, tag: SentenceTag | null) => {
-    // 1. Optimistic update
-    set((state) => ({
-      tagMap: { ...state.tagMap, [sentenceId]: tag },
-    }));
-
-    const { data: { session } } = await supabase.auth.getSession();
-    const user = session?.user ?? null;
-    if (!user) return;
-
-    // 2. Write to cache immediately
-    void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
-      progress: get().progress,
-      progressMap: get().progressMap,
-      tagMap: get().tagMap,
-      stats: get().stats,
-    });
-
-    // 3. Try remote write; on failure queue for later
-    const isOnline = useNetworkStore.getState().isOnline;
-    if (isOnline) {
-      const { error } = await supabase
-        .from("user_progress")
-        .update({ tag: tag ?? null })
-        .eq("user_id", user.id)
-        .eq("sentence_id", sentenceId);
-      if (!error) return;
-    }
-
-    void useOfflineQueueStore.getState().addItem(
-      createQueueItem("preset_tag_update", { sentenceId, tag }, { dedupeKey: `tag:${sentenceId}` })
-    );
-  },
-
   // Unuttum: learned/learning → new (sil)
   forgot: async (sentenceId: string) => {
     // 1. Optimistic update
     set((state) => {
       const { [sentenceId]: _removed, ...rest } = state.progressMap;
-      const { [sentenceId]: _tagRemoved, ...restTags } = state.tagMap;
-      return { progressMap: rest, tagMap: restTags };
+      return { progressMap: rest };
     });
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -302,7 +255,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
       progress: get().progress,
       progressMap: get().progressMap,
-      tagMap: get().tagMap,
       stats: get().stats,
     });
 
@@ -485,7 +437,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       void writeCache<ProgressCacheSnapshot>(cacheKeyProgress(user.id), {
         progress: get().progress,
         progressMap: get().progressMap,
-        tagMap: get().tagMap,
         stats,
       });
     } catch (error) {
@@ -608,7 +559,6 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     set({
       progress: [],
       progressMap: {},
-      tagMap: {},
       stats: DEFAULT_STATS,
       loading: false,
       error: null,

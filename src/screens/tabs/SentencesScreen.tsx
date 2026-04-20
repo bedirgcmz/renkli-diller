@@ -25,7 +25,6 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { QuickTagButton } from "@/components/QuickTagButton";
 import { Sentence, SentenceDifficulty, SentenceStatus, MainStackParamList } from "@/types";
 
 type StatusFilter = "all" | SentenceStatus;
@@ -60,7 +59,7 @@ interface SentenceItemProps {
   onLearn: () => void;
   onMarkLearned: () => void;
   onForgot: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
   onDelete: () => void;
   colors: ThemeColors;
   t: (k: string, opts?: Record<string, string>) => string;
@@ -122,19 +121,16 @@ function SentenceItem({
               <Ionicons name="warning-outline" size={18} color={colors.warning ?? "#F59E0B"} />
             </Pressable>
           )}
-          <QuickTagButton
-            sentenceId={sentence.id}
-            isPreset={sentence.is_preset ?? false}
-            status={sentence.effectiveStatus}
-          />
           <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
-          <Pressable
-            onPress={onEdit}
-            hitSlop={HIT}
-            style={({ pressed }) => [pressed && { opacity: 0.6 }]}
-          >
-            <Ionicons name="create-outline" size={18} color={colors.primary} />
-          </Pressable>
+          {onEdit && (
+            <Pressable
+              onPress={onEdit}
+              hitSlop={HIT}
+              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+            >
+              <Ionicons name="create-outline" size={18} color={colors.primary} />
+            </Pressable>
+          )}
           {isUserSentence && (
             <Pressable
               onPress={onDelete}
@@ -866,11 +862,14 @@ export default function SentencesScreen() {
             onLearn={() => addToLearningList(item.id)}
             onMarkLearned={() => markAsLearned(item.id)}
             onForgot={() => markAsUnlearned(item.id)}
-            onEdit={() =>
-              navigation.navigate("EditSentence", {
-                sentenceId: item.id,
-                isPreset: item.is_preset,
-              })
+            onEdit={
+              item.is_preset
+                ? undefined
+                : () =>
+                    navigation.navigate("EditSentence", {
+                      sentenceId: item.id,
+                      isPreset: item.is_preset,
+                    })
             }
             onDelete={() => handleDelete(item)}
             uiLanguage={uiLanguage}

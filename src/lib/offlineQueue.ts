@@ -9,7 +9,7 @@
  *   `offline_cache:` prefix so that `clearUserCache()` never wipes the queue.
  *   The queue is only cleared on confirmed sign-out or account deletion.
  *
- * • dedupeKey: required for toggle/state operations (progress, favorites, tags).
+ * • dedupeKey: required for toggle/state operations (progress, favorites).
  *   When a new item shares a dedupeKey with an existing item, the old one is
  *   replaced (last-write-wins). Append-only events (quiz_result, study_session)
  *   never carry a dedupeKey.
@@ -34,7 +34,6 @@ export type OfflineQueueItemType =
   | "progress_add_learning"
   | "progress_mark_learned"
   | "progress_forgot"
-  | "preset_tag_update"
   | "favorite_add"
   | "favorite_remove"
   | "quiz_result"
@@ -46,10 +45,10 @@ export interface OfflineQueueItem {
   type: OfflineQueueItemType;
   payload: unknown;
   /**
-   * Required for state-toggle operations (progress, favorites, tags).
+   * Required for state-toggle operations (progress, favorites).
    * Last write wins: enqueueing an item replaces any existing item with the
    * same dedupeKey.
-   * Patterns: "progress:{sentenceId}", "favorite:{sentenceId}", "tag:{sentenceId}"
+   * Patterns: "progress:{sentenceId}", "favorite:{sentenceId}"
    */
   dedupeKey?: string;
   /**

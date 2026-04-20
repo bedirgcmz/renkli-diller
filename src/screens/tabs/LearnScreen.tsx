@@ -32,8 +32,7 @@ import { stripMarkers } from "@/utils/keywords";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
-import { Sentence, SentenceTag, HomeStackParamList, MainStackParamList } from "@/types";
-import { TagFilterModal, FilterButton } from "@/components/TagFilterModal";
+import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
 import * as Haptics from "expo-haptics";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -313,17 +312,23 @@ export default function LearnScreen() {
     loadSentences,
     loadPresetSentences,
   } = useSentenceStore();
-  const { progressMap, tagMap, loadProgress, addToLearning } = useProgressStore();
+  const { progressMap, loadProgress, addToLearning } = useProgressStore();
   const { isHintShown, markHintShown } = useOnboarding();
   const [hintLearnedVisible, setHintLearnedVisible] = useState(false);
   const [hintRemoveVisible, setHintRemoveVisible] = useState(false);
+
+  const goBackFromLearn = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    navigation.getParent()?.navigate("Home" as never);
+  }, [navigation]);
 
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTagFilters, setActiveTagFilters] = useState<SentenceTag[]>([]);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   // ── Listening state ──────────────────────────────────────────────────────────
   const [listenIdx, setListenIdx] = useState(0);
@@ -377,23 +382,17 @@ export default function LearnScreen() {
     ...presetSentences.filter((s) => progressMap[s.id] === "learned"),
   ];
 
-  const filteredLearningList: Sentence[] =
-    activeTagFilters.length === 0
-      ? learningList
-      : learningList.filter((s) => {
-          const tag = s.is_preset ? tagMap[s.id] : s.tag;
-          return tag != null && activeTagFilters.includes(tag);
-        });
+  const filteredLearningList: Sentence[] = learningList;
 
   const total = filteredLearningList.length;
   const listenTotal = filteredLearningList.length;
   const currentSentence = filteredLearningList[currentIndex] ?? null;
 
-  // Reset card index when filter changes
+  // Reset card index when the learning pool changes
   useEffect(() => {
     setCurrentIndex(0);
     setListenIdx(0);
-  }, [activeTagFilters]);
+  }, [learningList.length]);
 
   // index guard
   useEffect(() => {
@@ -689,8 +688,24 @@ export default function LearnScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         {/* Header */}
         <View style={[styles.header, isSmallScreen && { paddingBottom: 8, paddingTop: 4 }]}>
-          <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("learn.title")}</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <TouchableOpacity
+            style={styles.headerBackButton}
+            onPress={goBackFromLearn}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <Text
+            style={[
+              styles.headerTitle,
+              styles.headerTitleCentered,
+              isSmallScreen && { fontSize: 18 },
+              { color: colors.text },
+            ]}
+          >
+            {t("learn.title")}
+          </Text>
+          <View style={styles.headerRightControls}>
             {activeTab === "learning" && total > 0 && (
               <View style={[styles.counterBadge, { backgroundColor: colors.primary + "18" }]}>
                 <Text style={[styles.counterText, { color: colors.primary }]}>
@@ -705,28 +720,8 @@ export default function LearnScreen() {
                 </Text>
               </View>
             )}
-            {learningList.length > 0 && (
-              <FilterButton
-                activeCount={activeTagFilters.length}
-                onPress={() => setFilterModalVisible(true)}
-              />
-            )}
           </View>
         </View>
-        <TagFilterModal
-          visible={filterModalVisible}
-          onClose={() => setFilterModalVisible(false)}
-          selectedTags={activeTagFilters}
-          onApply={setActiveTagFilters}
-          getMatchCount={(draft) =>
-            draft.length === 0
-              ? learningList.length
-              : learningList.filter((s) => {
-                  const tag = s.is_preset ? tagMap[s.id] : s.tag;
-                  return tag != null && draft.includes(tag);
-                }).length
-          }
-        />
 
         {/* AI Translator card */}
         <TouchableOpacity
@@ -1128,8 +1123,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
+    position: "relative",
+    minHeight: 44,
   },
   headerTitle: { fontSize: 22, fontWeight: "700" },
+  headerTitleCentered: {
+    position: "absolute",
+    left: 72,
+    right: 72,
+    textAlign: "center",
+  },
+  headerBackButton: {
+    width: 36,
+    height: 36,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  headerRightControls: {
+    marginLeft: "auto",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    zIndex: 2,
+  },
   counterBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   counterText: { fontSize: 13, fontWeight: "600" },
   segmentContainer: {

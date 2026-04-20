@@ -9,7 +9,6 @@ import { stripMarkers } from "@/utils/keywords";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { QuickTagButton } from "@/components/QuickTagButton";
 import { VisualBadge } from "@/components/VisualBadge";
 import { Sentence, SupportedLanguage } from "@/types";
 
@@ -139,7 +138,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           end={{ x: 0.8, y: 1 }}
         />
 
-        {/* Top-right: QuickTagButton + FavoriteButton */}
+        {/* Top-right: FavoriteButton */}
         <View
           style={{
             position: "absolute",
@@ -151,11 +150,6 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
             gap: 4,
           }}
         >
-          <QuickTagButton
-            sentenceId={sentence.id}
-            isPreset={sentence.is_preset ?? false}
-            status={state}
-          />
           <FavoriteButton
             sentenceId={sentence.id}
             isPreset={sentence.is_preset ?? false}

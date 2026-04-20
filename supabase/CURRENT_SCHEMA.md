@@ -89,7 +89,6 @@ Sentences added by users themselves.
 | state | text | NO | 'learning' |
 | source_lang | text | YES | null |
 | target_lang | text | YES | null |
-| tag | text | YES | null |
 | is_ai_generated | boolean | YES | false |
 | learned_at | timestamptz | YES | null |
 | created_at | timestamptz | NO | now() |
@@ -105,7 +104,6 @@ Per-user learning state for **preset** sentences.
 | user_id | uuid | NO | — |
 | sentence_id | integer | NO | — |
 | state | text | NO | 'learning' |
-| tag | text | YES | null |
 | learned_at | timestamptz | YES | null |
 | created_at | timestamptz | NO | now() |
 

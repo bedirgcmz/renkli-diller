@@ -119,7 +119,7 @@ function clearClientStores() {
  * offline-safely via getSession in initialize()). No network calls here.
  *
  * Hydrates the full set of user-visible data:
- *  - progress / progressMap / tagMap / stats (progress tab)
+ *  - progress / progressMap / stats (progress tab)
  *  - game user stats (games tab)
  *  - categories (public, used everywhere)
  *  - user sentences (my sentences tab)
@@ -134,14 +134,12 @@ async function hydrateStoresFromCache(userId: string): Promise<void> {
       const cached = await readCache<{
         progress: any[];
         progressMap: Record<string, "learning" | "learned">;
-        tagMap: Record<string, any>;
         stats: any;
       }>(`progress:${userId}`);
       if (cached && Object.keys(cached.progressMap ?? {}).length > 0) {
         useProgressStore.setState({
           progress: cached.progress ?? [],
           progressMap: cached.progressMap,
-          tagMap: cached.tagMap ?? {},
           stats: cached.stats,
         });
       }
