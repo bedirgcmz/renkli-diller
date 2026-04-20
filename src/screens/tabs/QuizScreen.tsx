@@ -181,7 +181,7 @@ export default function QuizScreen() {
       >
         <Ionicons name="grid-outline" size={16} color={colors.primary} />
         <Text style={[styles.emptySecondaryBtnText, { color: colors.text }]}>
-          {t("home.card_explore_title")}
+          {t("common.explore_categories")}
         </Text>
       </TouchableOpacity>
     </View>

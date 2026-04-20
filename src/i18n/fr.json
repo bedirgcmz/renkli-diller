@@ -83,7 +83,7 @@
     "retry_round": "Tour de révision",
     "empty_title": "Liste d'apprentissage vide",
     "empty_hint": "Ajoute des phrases à ta liste d'apprentissage pour démarrer un quiz.",
-    "go_to_sentences": "Voir les phrases",
+    "go_to_sentences": "Voir toutes les phrases",
     "no_keywords_title": "Aucune phrase à compléter",
     "no_keywords": "Aucune phrase avec des marqueurs de mots-clés trouvée.\nAjoutez des **marqueurs** à vos phrases pour utiliser ce mode.",
     "build_sentence": "Construire"
@@ -394,7 +394,8 @@
     "optional": "facultatif",
     "offline_title": "Pas de connexion Internet",
     "offline_body": "Cette fonctionnalité nécessite une connexion Internet.",
-    "offline_indicator": "Hors ligne"
+    "offline_indicator": "Hors ligne",
+    "explore_categories": "Explorer les catégories"
   },
   "languages": {
     "tr": "Turc",
@@ -481,7 +482,30 @@
     "goal_hint": "Complète ton objectif du jour",
     "goal_done": "Objectif atteint aujourd'hui 🎉",
     "card_build_title": "Construire",
-    "card_build_desc": "Ordonne les mots"
+    "card_build_desc": "Ordonne les mots",
+    "dashboard_empty_badge": "Ta liste d'apprentissage est vide",
+    "dashboard_empty_title": "Commence par remplir ta liste d'apprentissage",
+    "dashboard_empty_body": "Dès que ta liste contient quelques phrases, Étudier, Écouter, Quiz et Construire fonctionneront avec ton propre contenu.",
+    "dashboard_empty_cta_title": "Ajoute quelques phrases et lance ton parcours de pratique",
+    "dashboard_empty_cta_body": "Tu peux créer une phrase avec l'IA, explorer des catégories prêtes à l'emploi ou ajouter tout de suite ta propre phrase.",
+    "dashboard_empty_primary": "Explorer les catégories",
+    "dashboard_empty_secondary": "Créer une phrase avec l'IA",
+    "dashboard_empty_tertiary": "Ajouter ma propre phrase",
+    "dashboard_ready_badge": "{{count}} phrase(s) dans ta liste d'apprentissage",
+    "dashboard_ready_title": "Comment veux-tu pratiquer aujourd'hui avec ta liste d'apprentissage ?",
+    "dashboard_ready_body": "Étudie tes phrases comme des cartes, passe à l'écoute ou lance-toi avec le quiz et la construction.",
+    "dashboard_ready_primary": "Commencer à étudier",
+    "dashboard_ready_secondary": "Ouvrir l'écoute",
+    "dashboard_ready_tertiary": "Gérer ma liste d'apprentissage",
+    "learning_list_count": "{{count}} dans ta liste",
+    "categories_count": "{{count}} catégories à explorer",
+    "setup_section_title": "De bonnes façons de commencer",
+    "setup_section_desc": "Les moyens les plus rapides d'ajouter des phrases à ta liste d'apprentissage.",
+    "practice_section_title": "Pratique avec ta liste d'apprentissage",
+    "practice_section_desc_ready": "Ces modes utilisent les phrases de ta liste d'apprentissage.",
+    "practice_section_desc_empty": "Ajoute d'abord quelques phrases à ta liste d'apprentissage, puis ces modes se rempliront avec ton propre contenu.",
+    "explore_section_title": "Explorer plus",
+    "explore_section_desc": "Nouvelles sources de phrases, lecture, dialogues et jeux t'attendent ici."
   },
   "achievements": {
     "title": "Succès",

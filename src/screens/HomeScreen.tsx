@@ -263,10 +263,6 @@ export default function HomeScreen() {
 
   const hasLearningList = learningListCount > 0;
 
-  const practiceDescriptionKey = hasLearningList
-    ? "home.practice_section_desc_ready"
-    : "home.practice_section_desc_empty";
-
   const TAB_BAR_H = 56;
   const tabBarHeight = TAB_BAR_H + insets.bottom;
   const TAB_W = screenWidth / 4;
@@ -522,22 +518,6 @@ export default function HomeScreen() {
                 : t("home.dashboard_empty_body")}
             </Text>
 
-            {!hasLearningList && (
-              <View
-                style={[
-                  styles.metaPill,
-                  {
-                    backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.7)",
-                  },
-                ]}
-              >
-                <Ionicons name="grid-outline" size={14} color={colors.textSecondary} />
-                <Text style={[styles.metaPillText, { color: colors.textSecondary }]}>
-                  {t("home.categories_count", { count: categories.length })}
-                </Text>
-              </View>
-            )}
-
             {hasLearningList ? (
               <View
                 style={[
@@ -548,134 +528,98 @@ export default function HomeScreen() {
                 <View style={styles.cardDeck}>{renderCardGrid(practiceCards, dashboardCardWidth)}</View>
               </View>
             ) : (
-              <View style={styles.primaryActions}>
-                <Pressable
-                  onPress={() =>
-                    hasLearningList
-                      ? navigation.navigate("Learn", { initialTab: "study" })
-                      : navigation.navigate("CategoryBrowser")
-                  }
-                  style={({ pressed }) => [
-                    styles.primaryButton,
-                    {
-                      backgroundColor: dashboardAccent,
-                      opacity: pressed ? 0.9 : 1,
-                      transform: [{ scale: pressed ? 0.98 : 1 }],
-                    },
-                  ]}
-                >
-                  <Text style={styles.primaryButtonText}>
-                    {hasLearningList
-                      ? t("home.dashboard_ready_primary")
-                      : t("home.dashboard_empty_primary")}
-                  </Text>
-                </Pressable>
+              <View
+                style={[
+                  styles.emptyCtaSection,
+                  isCompactHome && { marginTop: 14 },
+                ]}
+              >
+                <Text style={[styles.emptyCtaTitle, { color: colors.text }]}>
+                  {t("home.dashboard_empty_cta_title")}
+                </Text>
+                <Text style={[styles.emptyCtaBody, { color: colors.textSecondary }]}>
+                  {t("home.dashboard_empty_cta_body")}
+                </Text>
 
-                <Pressable
-                  onPress={() =>
-                    hasLearningList
-                      ? navigation.navigate("Learn", { initialTab: "listening" })
-                      : navigation.navigate("AITranslator")
-                  }
-                  style={({ pressed }) => [
-                    styles.secondaryButton,
-                    {
-                      borderColor: colors.border,
-                      backgroundColor: pressed
-                        ? colors.backgroundSecondary
-                        : colors.cardBackground,
-                    },
+                <View style={styles.setupActionsRow}>
+                  <Pressable
+                    onPress={() => navigation.navigate("AITranslator")}
+                    style={({ pressed }) => [
+                      styles.setupChip,
+                      {
+                        backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <Ionicons name="sparkles" size={16} color={colors.primary} />
+                    <Text style={[styles.setupChipText, { color: colors.text }]}>
+                      {t("home.dashboard_empty_secondary")}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => navigation.navigate("CategoryBrowser")}
+                    style={({ pressed }) => [
+                      styles.setupChip,
+                      {
+                        backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <Ionicons name="grid-outline" size={16} color={colors.primary} />
+                    <Text style={[styles.setupChipText, { color: colors.text }]}>
+                      {t("home.dashboard_empty_primary")}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => navigation.navigate("AddSentence")}
+                    style={({ pressed }) => [
+                      styles.setupChip,
+                      {
+                        backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <Ionicons name="add-circle-outline" size={16} color={colors.primary} />
+                    <Text style={[styles.setupChipText, { color: colors.text }]}>
+                      {t("home.dashboard_empty_tertiary")}
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <View
+                  style={[
+                    styles.dashboardPracticeGrid,
+                    isCompactHome && { marginTop: 16 },
                   ]}
                 >
-                  <Text style={[styles.secondaryButtonText, { color: colors.text }]}>
-                    {hasLearningList
-                      ? t("home.dashboard_ready_secondary")
-                      : t("home.dashboard_empty_secondary")}
-                  </Text>
-                </Pressable>
+                  <View style={styles.cardDeck}>
+                    {renderCardGrid(practiceCards, dashboardCardWidth)}
+                  </View>
+                </View>
               </View>
             )}
 
-            {!hasLearningList && (
+            {hasLearningList && (
               <Pressable
-                onPress={hasLearningList ? goToSentencesTab : () => navigation.navigate("AddSentence")}
+                onPress={goToSentencesTab}
                 style={({ pressed }) => [
                   styles.tertiaryAction,
                   { opacity: pressed ? 0.68 : 1 },
                 ]}
               >
                 <Text style={[styles.tertiaryActionText, { color: colors.primary }]}>
-                  {hasLearningList
-                    ? t("home.dashboard_ready_tertiary")
-                    : t("home.dashboard_empty_tertiary")}
+                  {t("home.dashboard_ready_tertiary")}
                 </Text>
                 <Ionicons name="arrow-forward" size={14} color={colors.primary} />
               </Pressable>
             )}
           </View>
         </View>
-
-        {!hasLearningList && (
-          <View
-            style={[
-              styles.setupStrip,
-              { backgroundColor: colors.surfaceSecondary },
-              isCompactHome && { padding: 14, marginBottom: 16 },
-            ]}
-          >
-            <SectionHeader
-              title={t("home.setup_section_title")}
-              description={t("home.setup_section_desc")}
-              colors={colors}
-              compact={isCompactHome}
-            />
-            <View style={styles.setupActionsRow}>
-              <Pressable
-                onPress={() => navigation.navigate("CategoryBrowser")}
-                style={({ pressed }) => [
-                  styles.setupChip,
-                  {
-                    backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
-                    borderColor: colors.border,
-                  },
-                ]}
-              >
-                <Ionicons name="grid-outline" size={16} color={colors.primary} />
-                <Text style={[styles.setupChipText, { color: colors.text }]}>
-                  {t("home.dashboard_empty_primary")}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => navigation.navigate("AddSentence")}
-                style={({ pressed }) => [
-                  styles.setupChip,
-                  {
-                    backgroundColor: pressed ? colors.backgroundTertiary : colors.cardBackground,
-                    borderColor: colors.border,
-                  },
-                ]}
-              >
-                <Ionicons name="add-circle-outline" size={16} color={colors.primary} />
-                <Text style={[styles.setupChipText, { color: colors.text }]}>
-                  {t("home.dashboard_empty_tertiary")}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
-
-        {!hasLearningList && (
-          <View style={[styles.section, isCompactHome && { marginBottom: 16 }]}>
-            <SectionHeader
-              title={t("home.practice_section_title")}
-              description={t(practiceDescriptionKey)}
-              colors={colors}
-              compact={isCompactHome}
-            />
-            <View style={styles.cardDeck}>{renderCardGrid(practiceCards, cardWidth)}</View>
-          </View>
-        )}
 
         <View style={[styles.section, isCompactHome && { marginBottom: 16 }]}>
           <SectionHeader
@@ -753,53 +697,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
   },
-  metaPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 999,
-    marginTop: 14,
-    alignSelf: "flex-start",
-  },
-  metaPillText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
   dashboardPracticeGrid: {
     marginTop: 18,
   },
-  cardDeck: {
-    borderRadius: 20,
+  emptyCtaSection: {
+    marginTop: 18,
   },
-  primaryActions: {
-    gap: 10,
-    marginTop: 16,
-  },
-  primaryButton: {
-    minHeight: 48,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
+  emptyCtaTitle: {
     fontSize: 15,
     fontWeight: "700",
+    marginBottom: 6,
   },
-  secondaryButton: {
-    minHeight: 46,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
+  emptyCtaBody: {
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 12,
   },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+  cardDeck: {
+    borderRadius: 20,
   },
   tertiaryAction: {
     marginTop: 12,
@@ -811,11 +726,6 @@ const styles = StyleSheet.create({
   tertiaryActionText: {
     fontSize: 13,
     fontWeight: "700",
-  },
-  setupStrip: {
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 18,
   },
   section: {
     marginBottom: 18,

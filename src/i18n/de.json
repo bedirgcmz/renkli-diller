@@ -83,7 +83,7 @@
     "retry_round": "Wiederholungsrunde",
     "empty_title": "Lernliste ist leer",
     "empty_hint": "Füge Sätze zu deiner Lernliste hinzu, um ein Quiz zu starten.",
-    "go_to_sentences": "Zu Sätzen",
+    "go_to_sentences": "Alle Sätze ansehen",
     "no_keywords_title": "Keine Sätze für Lückentext",
     "no_keywords": "Keine Sätze mit Schlüsselwort-Markierungen gefunden.\nFüge **Markierungen** zu deinen Sätzen hinzu, um diesen Modus zu nutzen.",
     "build_sentence": "Satz bauen"
@@ -394,7 +394,8 @@
     "optional": "optional",
     "offline_title": "Keine Internetverbindung",
     "offline_body": "Diese Funktion erfordert eine Internetverbindung.",
-    "offline_indicator": "Offline"
+    "offline_indicator": "Offline",
+    "explore_categories": "Kategorien entdecken"
   },
   "languages": {
     "tr": "Türkçe",
@@ -481,7 +482,30 @@
     "goal_hint": "Erreich dein heutiges Ziel",
     "goal_done": "Tagesziel erreicht 🎉",
     "card_build_title": "Bauen",
-    "card_build_desc": "Wörter in Reihenfolge"
+    "card_build_desc": "Wörter in Reihenfolge",
+    "dashboard_empty_badge": "Deine Lernliste ist noch leer",
+    "dashboard_empty_title": "Beginne damit, deine Lernliste zu füllen",
+    "dashboard_empty_body": "Sobald ein paar Sätze in deiner Lernliste sind, arbeiten Lernen, Hören, Quiz und Bauen mit deinen eigenen Inhalten.",
+    "dashboard_empty_cta_title": "Füge ein paar Sätze hinzu und öffne deinen Übungsfluss",
+    "dashboard_empty_cta_body": "Erstelle einen Satz mit KI, entdecke vorbereitete Kategorien oder füge direkt deinen eigenen Satz hinzu.",
+    "dashboard_empty_primary": "Kategorien entdecken",
+    "dashboard_empty_secondary": "Satz mit KI erstellen",
+    "dashboard_empty_tertiary": "Eigenen Satz hinzufügen",
+    "dashboard_ready_badge": "{{count}} Satz/Sätze in deiner Lernliste",
+    "dashboard_ready_title": "Wie möchtest du heute mit deiner Lernliste üben?",
+    "dashboard_ready_body": "Lerne deine Sätze als Karten, wechsle zum Hören oder fordere dich mit Quiz und Bauen heraus.",
+    "dashboard_ready_primary": "Lernen starten",
+    "dashboard_ready_secondary": "Hören öffnen",
+    "dashboard_ready_tertiary": "Meine Lernliste verwalten",
+    "learning_list_count": "{{count}} in deiner Liste",
+    "categories_count": "{{count}} Kategorien zum Entdecken",
+    "setup_section_title": "Gute Wege zum Start",
+    "setup_section_desc": "Die schnellsten Wege, Sätze zu deiner Lernliste hinzuzufügen.",
+    "practice_section_title": "Mit deiner Lernliste üben",
+    "practice_section_desc_ready": "Diese Bereiche arbeiten mit den Sätzen in deiner Lernliste.",
+    "practice_section_desc_empty": "Füge zuerst ein paar Sätze zu deiner Lernliste hinzu, dann füllen sich diese Bereiche mit deinen Inhalten.",
+    "explore_section_title": "Mehr entdecken",
+    "explore_section_desc": "Neue Satzquellen, Lesen, Dialoge und Spiele findest du hier."
   },
   "achievements": {
     "title": "Erfolge",

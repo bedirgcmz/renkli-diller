@@ -83,7 +83,7 @@
     "retry_round": "Ronda de repaso",
     "empty_title": "Lista de aprendizaje vacía",
     "empty_hint": "Añade frases a tu lista de aprendizaje para iniciar un quiz.",
-    "go_to_sentences": "Ir a Frases",
+    "go_to_sentences": "Ver todas las frases",
     "no_keywords_title": "Sin frases para completar",
     "no_keywords": "No se encontraron oraciones con marcadores de palabras clave.\nAgrega **marcadores** a tus oraciones para usar este modo.",
     "build_sentence": "Construir"
@@ -394,7 +394,8 @@
     "optional": "opcional",
     "offline_title": "Sin conexión a Internet",
     "offline_body": "Esta función requiere conexión a Internet.",
-    "offline_indicator": "Sin conexión"
+    "offline_indicator": "Sin conexión",
+    "explore_categories": "Explorar categorías"
   },
   "languages": {
     "tr": "Turco",
@@ -481,7 +482,30 @@
     "goal_hint": "Completa tu meta de hoy",
     "goal_done": "Meta alcanzada hoy 🎉",
     "card_build_title": "Construir",
-    "card_build_desc": "Ordena las palabras"
+    "card_build_desc": "Ordena las palabras",
+    "dashboard_empty_badge": "Tu lista de aprendizaje está vacía",
+    "dashboard_empty_title": "Empieza llenando tu lista de aprendizaje",
+    "dashboard_empty_body": "Cuando tu lista tenga algunas frases, Estudiar, Escuchar, Quiz y Construir empezarán a funcionar con tu propio contenido.",
+    "dashboard_empty_cta_title": "Añade algunas frases y activa tu flujo de práctica",
+    "dashboard_empty_cta_body": "Puedes crear una frase con IA, explorar categorías preparadas o añadir tu propia frase ahora mismo.",
+    "dashboard_empty_primary": "Explorar categorías",
+    "dashboard_empty_secondary": "Crear una frase con IA",
+    "dashboard_empty_tertiary": "Añadir mi propia frase",
+    "dashboard_ready_badge": "{{count}} frase(s) en tu lista de aprendizaje",
+    "dashboard_ready_title": "¿Cómo quieres practicar hoy con tu lista de aprendizaje?",
+    "dashboard_ready_body": "Estudia tus frases como tarjetas, pasa a escuchar o desafíate con quiz y construir.",
+    "dashboard_ready_primary": "Empezar a estudiar",
+    "dashboard_ready_secondary": "Abrir escuchar",
+    "dashboard_ready_tertiary": "Gestionar mi lista de aprendizaje",
+    "learning_list_count": "{{count}} en tu lista",
+    "categories_count": "{{count}} categorías por explorar",
+    "setup_section_title": "Buenas formas de empezar",
+    "setup_section_desc": "Las formas más rápidas de añadir frases a tu lista de aprendizaje.",
+    "practice_section_title": "Practica con tu lista de aprendizaje",
+    "practice_section_desc_ready": "Estas áreas usan las frases de tu lista de aprendizaje.",
+    "practice_section_desc_empty": "Añade primero algunas frases a tu lista de aprendizaje y luego estas áreas se llenarán con tu contenido.",
+    "explore_section_title": "Explora más",
+    "explore_section_desc": "Aquí encontrarás nuevas fuentes de frases, lectura, diálogos y juegos."
   },
   "achievements": {
     "title": "Logros",

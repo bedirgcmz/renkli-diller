@@ -88,7 +88,7 @@
     "retry_round": "Tekrar Turu",
     "empty_title": "Quiz başlamadan önce öğrenme listenizi oluşturun",
     "empty_hint": "Quiz soruları öğrenme listenizdeki cümlelerden hazırlanır. Önce birkaç cümle ekleyin, sonra buraya geri dönün.",
-    "go_to_sentences": "Cümlelerime Git",
+    "go_to_sentences": "Tüm cümleleri gör",
     "no_keywords_title": "Boşluk doldurma için cümle yok",
     "build_sentence": "Cümle Kur"
   },
@@ -398,7 +398,8 @@
     "optional": "opsiyonel",
     "offline_title": "İnternet Bağlantısı Yok",
     "offline_body": "Bu özellik için internet bağlantısı gerekiyor.",
-    "offline_indicator": "Çevrimdışı"
+    "offline_indicator": "Çevrimdışı",
+    "explore_categories": "Kategorilerde keşfet"
   },
   "languages": {
     "tr": "Türkçe",
@@ -487,9 +488,11 @@
     "card_build_title": "Cümle Kur",
     "card_build_desc": "Kelimeleri doğru sırala",
     "dashboard_empty_badge": "Öğrenme listeniz henüz boş",
-    "dashboard_empty_title": "Öğrenme listenizi oluşturarak başlayın",
-    "dashboard_empty_body": "Kendi cümlelerinizi ekleyin ya da öğrenmek istediğiniz cümleleri seçin. Öğrenme listeniz oluşunca Çalış, Dinleme, Quiz ve Cümle Kur ekranları sizin cümlelerinizle çalışır.",
-    "dashboard_empty_primary": "Öğrenme listeme cümle ekle",
+    "dashboard_empty_title": "Öğrenme listenizi doldurarak başlayın",
+    "dashboard_empty_body": "Öğrenme listenize birkaç cümle eklediğinizde Çalış, Dinleme, Quiz ve Cümle Kur ekranları sizin içeriğinizle çalışmaya başlar.",
+    "dashboard_empty_cta_title": "Birkaç cümle ekleyin, çalışma akışınız açılsın",
+    "dashboard_empty_cta_body": "İsterseniz AI ile bir cümle oluşturun, hazır kategorilerde dolaşın ya da kendi cümlenizi hemen ekleyin.",
+    "dashboard_empty_primary": "Kategorilerde keşfet",
     "dashboard_empty_secondary": "AI ile cümle oluştur",
     "dashboard_empty_tertiary": "Kendim cümle ekle",
     "dashboard_ready_badge": "Öğrenme listenizde {{count}} cümle var",

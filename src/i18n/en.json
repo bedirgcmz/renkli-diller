@@ -88,7 +88,7 @@
     "retry_round": "Retry Round",
     "empty_title": "Build your learning list before you start a quiz",
     "empty_hint": "Quiz questions are generated from the sentences in your learning list. Add a few sentences first, then come back here.",
-    "go_to_sentences": "Go to My Sentences",
+    "go_to_sentences": "See all sentences",
     "no_keywords_title": "No sentences for fill-in-the-blank",
     "build_sentence": "Build Sentence"
   },
@@ -398,7 +398,8 @@
     "optional": "optional",
     "offline_title": "No Internet Connection",
     "offline_body": "This feature requires an internet connection.",
-    "offline_indicator": "Offline"
+    "offline_indicator": "Offline",
+    "explore_categories": "Explore categories"
   },
   "languages": {
     "tr": "Türkçe",
@@ -487,9 +488,11 @@
     "card_build_title": "Build",
     "card_build_desc": "Arrange words in order",
     "dashboard_empty_badge": "Your learning list is empty",
-    "dashboard_empty_title": "Start by building your learning list",
-    "dashboard_empty_body": "Add your own sentences or choose sentences to learn. Once your learning list grows, Study, Listening, Quiz, and Build will start working with your own content.",
-    "dashboard_empty_primary": "Add sentences to my learning list",
+    "dashboard_empty_title": "Start by filling your learning list",
+    "dashboard_empty_body": "Once your learning list has a few sentences, Study, Listening, Quiz, and Build will begin working with your own content.",
+    "dashboard_empty_cta_title": "Add a few sentences and unlock your practice flow",
+    "dashboard_empty_cta_body": "You can create one with AI, explore preset categories, or add your own sentence right away.",
+    "dashboard_empty_primary": "Explore categories",
     "dashboard_empty_secondary": "Create a sentence with AI",
     "dashboard_empty_tertiary": "Add my own sentence",
     "dashboard_ready_badge": "{{count}} sentence(s) in your learning list",

@@ -83,7 +83,7 @@
     "retry_round": "Repetitionsomgång",
     "empty_title": "Inlärningslistan är tom",
     "empty_hint": "Lägg till meningar i din inlärningslista för att starta ett quiz.",
-    "go_to_sentences": "Gå till Meningar",
+    "go_to_sentences": "Se alla meningar",
     "no_keywords_title": "Inga meningar för ifyllnad",
     "no_keywords": "Inga meningar med nyckelordsmärken hittades.\nLägg till **märken** i dina meningar för att använda det här läget.",
     "build_sentence": "Bygg mening"
@@ -394,7 +394,8 @@
     "optional": "valfri",
     "offline_title": "Ingen internetanslutning",
     "offline_body": "Den här funktionen kräver en internetanslutning.",
-    "offline_indicator": "Offline"
+    "offline_indicator": "Offline",
+    "explore_categories": "Utforska kategorier"
   },
   "languages": {
     "tr": "Türkçe",
@@ -481,7 +482,30 @@
     "goal_hint": "Slutför ditt mål för idag",
     "goal_done": "Mål nått idag 🎉",
     "card_build_title": "Bygg",
-    "card_build_desc": "Sortera ord i ordning"
+    "card_build_desc": "Sortera ord i ordning",
+    "dashboard_empty_badge": "Din inlärningslista är tom",
+    "dashboard_empty_title": "Börja med att fylla din inlärningslista",
+    "dashboard_empty_body": "När din lista har några meningar börjar Studera, Lyssna, Quiz och Bygg att fungera med ditt eget innehåll.",
+    "dashboard_empty_cta_title": "Lägg till några meningar och öppna ditt övningsflöde",
+    "dashboard_empty_cta_body": "Du kan skapa en mening med AI, utforska färdiga kategorier eller lägga till din egen mening direkt.",
+    "dashboard_empty_primary": "Utforska kategorier",
+    "dashboard_empty_secondary": "Skapa en mening med AI",
+    "dashboard_empty_tertiary": "Lägg till min egen mening",
+    "dashboard_ready_badge": "{{count}} mening(ar) i din inlärningslista",
+    "dashboard_ready_title": "Hur vill du öva idag med din inlärningslista?",
+    "dashboard_ready_body": "Studera dina meningar som kort, gå till lyssning eller utmana dig själv med quiz och bygg.",
+    "dashboard_ready_primary": "Börja studera",
+    "dashboard_ready_secondary": "Öppna lyssning",
+    "dashboard_ready_tertiary": "Hantera min inlärningslista",
+    "learning_list_count": "{{count}} i din lista",
+    "categories_count": "{{count}} kategorier att utforska",
+    "setup_section_title": "Bra sätt att komma igång",
+    "setup_section_desc": "De snabbaste sätten att lägga till meningar i din inlärningslista.",
+    "practice_section_title": "Öva med din inlärningslista",
+    "practice_section_desc_ready": "Dessa lägen använder meningarna i din inlärningslista.",
+    "practice_section_desc_empty": "Lägg först till några meningar i din inlärningslista, sedan fylls dessa lägen med ditt innehåll.",
+    "explore_section_title": "Utforska mer",
+    "explore_section_desc": "Nya meningskällor, läsning, dialoger och spel finns här."
   },
   "achievements": {
     "title": "Prestationer",

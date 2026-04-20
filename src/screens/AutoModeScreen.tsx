@@ -370,6 +370,29 @@ export default function AutoModeScreen() {
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {t("auto_mode.no_sentences")}
             </Text>
+            <View style={styles.emptyActions}>
+              <TouchableOpacity
+                style={[styles.emptyPrimaryBtn, { backgroundColor: colors.primary }]}
+                onPress={() => navigation.getParent()?.navigate("Sentences" as never)}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="list-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.emptyPrimaryBtnText}>{t("quiz.go_to_sentences")}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.emptySecondaryBtn,
+                  { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                ]}
+                onPress={() => navigation.navigate("CategoryBrowser")}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="grid-outline" size={16} color={colors.primary} />
+                <Text style={[styles.emptySecondaryBtnText, { color: colors.text }]}>
+                  {t("common.explore_categories")}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : phase === "done" ? (
           <View style={[styles.doneCard, { backgroundColor: colors.cardBackground }]}>
@@ -575,6 +598,39 @@ const styles = StyleSheet.create({
   },
   emptyIcon: { fontSize: 48 },
   emptyText: { fontSize: 16, textAlign: "center" },
+  emptyActions: {
+    width: "100%",
+    gap: 10,
+    marginTop: 8,
+  },
+  emptyPrimaryBtn: {
+    minHeight: 46,
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  emptyPrimaryBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  emptySecondaryBtn: {
+    minHeight: 46,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  emptySecondaryBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
   doneCard: {
     borderRadius: 18,
     padding: 32,
