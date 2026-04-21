@@ -14,6 +14,7 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 interface SignInProps {
   onSwitchToSignUp?: () => void;
@@ -25,6 +26,7 @@ export default function SignInScreen({ onSwitchToSignUp, onForgotPassword }: Sig
   const { colors } = useTheme();
   const signIn = useAuthStore((s) => s.signIn);
   const loading = useAuthStore((s) => s.loading);
+  const isOnline = useNetworkStore((s) => s.isOnline);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,13 +45,32 @@ export default function SignInScreen({ onSwitchToSignUp, onForgotPassword }: Sig
     return true;
   };
 
+  const isOfflineAuthError = (message?: string) => {
+    const normalized = message?.toLowerCase() ?? "";
+    return (
+      normalized.includes("network request failed") ||
+      normalized.includes("failed to fetch") ||
+      normalized.includes("network error") ||
+      normalized.includes("internet") ||
+      normalized.includes("offline")
+    );
+  };
+
   const handleSignIn = async () => {
     setError(null);
     if (!validate()) return;
+    if (isOnline === false) {
+      setError(t("onboarding.offline_sign_in"));
+      return;
+    }
 
     const { success, error: signInError } = await signIn(email.trim(), password);
     if (!success) {
-      setError(signInError || t("common.error"));
+      setError(
+        isOfflineAuthError(signInError)
+          ? t("onboarding.offline_sign_in")
+          : signInError || t("common.error"),
+      );
     }
   };
 
@@ -116,9 +137,17 @@ export default function SignInScreen({ onSwitchToSignUp, onForgotPassword }: Sig
         <TouchableOpacity
           style={[styles.secondaryButton, { borderColor: colors.accent }]}
           onPress={async () => {
+            if (isOnline === false) {
+              setError(t("onboarding.offline_social_sign_in"));
+              return;
+            }
             const { success, error: message } = await useAuthStore.getState().signInWithGoogle();
             if (!success) {
-              setError(message || t("common.error"));
+              setError(
+                isOfflineAuthError(message)
+                  ? t("onboarding.offline_social_sign_in")
+                  : message || t("common.error"),
+              );
             }
           }}
           activeOpacity={0.8}
@@ -136,8 +165,18 @@ export default function SignInScreen({ onSwitchToSignUp, onForgotPassword }: Sig
             cornerRadius={14}
             style={styles.appleBtn}
             onPress={async () => {
+              if (isOnline === false) {
+                setError(t("onboarding.offline_social_sign_in"));
+                return;
+              }
               const { success, error: message } = await useAuthStore.getState().signInWithApple();
-              if (!success && message) setError(message);
+              if (!success && message) {
+                setError(
+                  isOfflineAuthError(message)
+                    ? t("onboarding.offline_social_sign_in")
+                    : message,
+                );
+              }
             }}
           />
         )}

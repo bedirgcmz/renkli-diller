@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -97,6 +97,14 @@ export default function WelcomeScreen() {
     useState<SupportedLanguage>(targetLanguage);
   const [warning, setWarning] = useState<string | null>(null);
 
+  useEffect(() => {
+    setSelectedUiLanguage(uiLanguage);
+  }, [uiLanguage]);
+
+  useEffect(() => {
+    setSelectedTargetLanguage(targetLanguage);
+  }, [targetLanguage]);
+
   const appName = useMemo(() => {
     const letters = "Parlio".split("");
     const palette = [
@@ -127,12 +135,7 @@ export default function WelcomeScreen() {
 
   const handleStart = () => {
     if (selectedUiLanguage === selectedTargetLanguage) {
-      setWarning(
-        t("onboarding.select_target_language") +
-          " - " +
-          t("onboarding.select_ui_language") +
-          " farklı olmalıdır.",
-      );
+      setWarning(t("onboarding.language_must_differ"));
       return;
     }
     navigation.navigate("AuthFlow");

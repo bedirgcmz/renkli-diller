@@ -16,6 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "@/types";
 import { useTheme } from "@/hooks/useTheme";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation();
@@ -24,10 +25,22 @@ export default function ResetPasswordScreen() {
   const { colors } = useTheme();
   const resetPassword = useAuthStore((s) => s.resetPassword);
   const loading = useAuthStore((s) => s.loading);
+  const isOnline = useNetworkStore((s) => s.isOnline);
 
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const isOfflineAuthError = (value?: string) => {
+    const normalized = value?.toLowerCase() ?? "";
+    return (
+      normalized.includes("network request failed") ||
+      normalized.includes("failed to fetch") ||
+      normalized.includes("network error") ||
+      normalized.includes("internet") ||
+      normalized.includes("offline")
+    );
+  };
 
   const handleReset = async () => {
     setError(null);
@@ -37,10 +50,18 @@ export default function ResetPasswordScreen() {
       setError(t("onboarding.email") + " " + t("common.error"));
       return;
     }
+    if (isOnline === false) {
+      setError(t("onboarding.offline_reset_password"));
+      return;
+    }
 
     const { success, error: resetError } = await resetPassword(email.trim());
     if (!success) {
-      setError(resetError || t("common.error"));
+      setError(
+        isOfflineAuthError(resetError)
+          ? t("onboarding.offline_reset_password")
+          : resetError || t("common.error"),
+      );
       return;
     }
 

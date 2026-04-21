@@ -15,6 +15,7 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 interface SignUpProps {
   onSwitchToSignIn?: () => void;
@@ -25,6 +26,7 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
   const { colors } = useTheme();
   const signUp = useAuthStore((s) => s.signUp);
   const loading = useAuthStore((s) => s.loading);
+  const isOnline = useNetworkStore((s) => s.isOnline);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,13 +52,32 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
     return true;
   };
 
+  const isOfflineAuthError = (message?: string) => {
+    const normalized = message?.toLowerCase() ?? "";
+    return (
+      normalized.includes("network request failed") ||
+      normalized.includes("failed to fetch") ||
+      normalized.includes("network error") ||
+      normalized.includes("internet") ||
+      normalized.includes("offline")
+    );
+  };
+
   const handleSignUp = async () => {
     setError(null);
     if (!validate()) return;
+    if (isOnline === false) {
+      setError(t("onboarding.offline_sign_up"));
+      return;
+    }
 
     const { success, error: signUpError } = await signUp(email.trim(), password, fullName);
     if (!success) {
-      setError(signUpError || t("common.error"));
+      setError(
+        isOfflineAuthError(signUpError)
+          ? t("onboarding.offline_sign_up")
+          : signUpError || t("common.error"),
+      );
       return;
     }
 
@@ -185,8 +206,18 @@ export default function SignUpScreen({ onSwitchToSignIn }: SignUpProps) {
             cornerRadius={14}
             style={styles.appleBtn}
             onPress={async () => {
+              if (isOnline === false) {
+                setError(t("onboarding.offline_social_sign_in"));
+                return;
+              }
               const { success, error: message } = await useAuthStore.getState().signInWithApple();
-              if (!success && message) setError(message);
+              if (!success && message) {
+                setError(
+                  isOfflineAuthError(message)
+                    ? t("onboarding.offline_social_sign_in")
+                    : message,
+                );
+              }
             }}
           />
         )}
