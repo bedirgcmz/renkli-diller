@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { Linking } from "react-native";
+import { ActivityIndicator, Linking, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -21,13 +21,65 @@ import { AchievementToast } from "@/components/AchievementToast";
 import { NotificationSyncBridge } from "@/components/NotificationSyncBridge";
 import { useAchievementStore } from "@/store/useAchievementStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
+import i18n from "@/i18n";
+import type { SupportedLanguage } from "@/types";
+
+const SUPPORTED_LANGUAGES: SupportedLanguage[] = ["tr", "en", "sv", "de", "es", "fr", "pt"];
+
+function resolveSystemLanguage(): SupportedLanguage {
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale?.toLowerCase() ?? "en";
+  const baseLanguage = locale.split("-")[0] as SupportedLanguage;
+  return SUPPORTED_LANGUAGES.includes(baseLanguage) ? baseLanguage : "en";
+}
 
 export default function App() {
+  const systemColorScheme = useColorScheme();
   const loadAchievements = useAchievementStore((s) => s.loadAchievements);
   const clearAchievements = useAchievementStore((s) => s.clear);
   const activatePasswordRecovery = useAuthStore((s) => s.activatePasswordRecovery);
   const clearPasswordRecovery = useAuthStore((s) => s.clearPasswordRecovery);
   const userId = useAuthStore((s) => s.user?.id ?? null);
+  const bootstrapped = useSettingsStore((s) => s.bootstrapped);
+  const bootstrapSettings = useSettingsStore((s) => s.bootstrap);
+  const [startupReady, setStartupReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (bootstrapped) {
+      setStartupReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setStartupReady(false);
+
+    void (async () => {
+      try {
+        await bootstrapSettings({
+          systemLanguage: resolveSystemLanguage(),
+          systemTheme: systemColorScheme === "dark" ? "dark" : "light",
+        });
+
+        const bootstrappedLanguage = useSettingsStore.getState().uiLanguage;
+        if (bootstrappedLanguage && i18n.language !== bootstrappedLanguage) {
+          await i18n.changeLanguage(bootstrappedLanguage);
+        }
+      } catch (error) {
+        console.error("[App] settings bootstrap error:", error);
+      } finally {
+        if (!cancelled) {
+          setStartupReady(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [bootstrapped, bootstrapSettings, systemColorScheme]);
 
   useEffect(() => {
     if (!userId) {
@@ -76,6 +128,23 @@ export default function App() {
 
     return () => subscription.remove();
   }, []);
+
+  if (!startupReady || !bootstrapped) {
+    const backgroundColor = systemColorScheme === "dark" ? "#0B1020" : "#FAF8F4";
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor,
+        }}
+      >
+        <ActivityIndicator size="small" color="#4DA3FF" />
+      </View>
+    );
+  }
 
   return (
     <ErrorBoundary>

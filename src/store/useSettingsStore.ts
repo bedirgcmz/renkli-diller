@@ -18,6 +18,7 @@ interface Settings {
 }
 
 interface SettingsState extends Settings {
+  bootstrapped: boolean;
   loading: boolean;
   initialized: boolean;
   loadedForUserId: string | null;
@@ -37,6 +38,10 @@ interface SettingsState extends Settings {
   setShowTranslations: (show: boolean) => Promise<void>;
   setTTSEnabled: (enabled: boolean) => Promise<void>;
   setTTSVoice: (voice: string) => Promise<void>;
+  bootstrap: (input: {
+    systemLanguage: SupportedLanguage;
+    systemTheme: "light" | "dark";
+  }) => Promise<void>;
   loadSettings: (force?: boolean) => Promise<void>;
   saveSettings: (settings: Partial<Settings>) => Promise<void>;
   resetToDefaults: () => Promise<void>;
@@ -61,6 +66,18 @@ const LEGACY_STORAGE_KEY = "user_settings";
 
 function getSettingsStorageKey(userId: string | null): string {
   return userId ? `user_settings:${userId}` : "user_settings:guest";
+}
+
+function createSystemDefaults(
+  systemLanguage: SupportedLanguage,
+  systemTheme: "light" | "dark",
+): Settings {
+  return {
+    ...DEFAULT_SETTINGS,
+    uiLanguage: systemLanguage,
+    targetLanguage: "en",
+    theme: systemTheme,
+  };
 }
 
 async function persistSettingsToSupabase(userId: string, settings: Settings): Promise<void> {
@@ -147,18 +164,7 @@ async function getCurrentUserId(): Promise<string | null> {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (session?.user?.id) {
-    return session.user.id;
-  }
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user?.id ?? null;
-  } catch {
-    return null;
-  }
+  return session?.user?.id ?? null;
 }
 
 function mapSupabaseSettings(settings: any): Settings {
@@ -178,6 +184,7 @@ function mapSupabaseSettings(settings: any): Settings {
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...DEFAULT_SETTINGS,
+  bootstrapped: false,
   loading: false,
   initialized: false,
   loadedForUserId: null,
@@ -233,6 +240,73 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await get().saveSettings({ ttsVoice: voice });
   },
 
+  bootstrap: async ({ systemLanguage, systemTheme }) => {
+    if (get().bootstrapped) return;
+
+    try {
+      const userId = await getCurrentUserId();
+      const userStorageKey = getSettingsStorageKey(userId);
+      const guestStorageKey = getSettingsStorageKey(null);
+      const systemDefaults = createSystemDefaults(systemLanguage, systemTheme);
+
+      const readLegacyInto = async (storageKey: string): Promise<string | null> => {
+        let stored = await AsyncStorage.getItem(storageKey);
+        if (!stored) {
+          const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
+          if (legacy) {
+            stored = legacy;
+            await AsyncStorage.setItem(storageKey, legacy).catch(() => {});
+            await AsyncStorage.removeItem(LEGACY_STORAGE_KEY).catch(() => {});
+          }
+        }
+        return stored;
+      };
+
+      if (userId) {
+        const cachedUser = parseStoredSettings(await readLegacyInto(userStorageKey));
+        if (cachedUser) {
+          set((state) => ({
+            ...state,
+            ...cachedUser,
+            bootstrapped: true,
+          }));
+          return;
+        }
+
+        const guestSettings = parseStoredSettings(await AsyncStorage.getItem(guestStorageKey));
+        if (guestSettings) {
+          set((state) => ({
+            ...state,
+            ...guestSettings,
+            bootstrapped: true,
+          }));
+          return;
+        }
+
+        set((state) => ({
+          ...state,
+          ...systemDefaults,
+          bootstrapped: true,
+        }));
+        return;
+      }
+
+      const guestSettings = parseStoredSettings(await readLegacyInto(guestStorageKey));
+      set((state) => ({
+        ...state,
+        ...(guestSettings ?? systemDefaults),
+        bootstrapped: true,
+      }));
+    } catch (error) {
+      if (__DEV__) console.error("Error bootstrapping settings:", error);
+      set((state) => ({
+        ...state,
+        ...createSystemDefaults(systemLanguage, systemTheme),
+        bootstrapped: true,
+      }));
+    }
+  },
+
   loadSettings: async (force = false) => {
     set({ loading: true });
     try {
@@ -263,6 +337,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
           set({
             ...resolvedSettings,
+            bootstrapped: true,
             loading: false,
             initialized: true,
             loadedForUserId: userId,
@@ -285,6 +360,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
           set({
             ...resolvedSettings,
+            bootstrapped: true,
             loading: false,
             initialized: true,
             loadedForUserId: userId,
@@ -309,6 +385,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           const resolvedSettings = await reconcileNotificationState(mapSupabaseSettings(settings));
           set({
             ...resolvedSettings,
+            bootstrapped: true,
             loading: false,
             initialized: true,
             loadedForUserId: userId,
@@ -322,6 +399,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
         set({
           ...resolvedDefaults,
+          bootstrapped: true,
           loading: false,
           initialized: true,
           loadedForUserId: userId,
@@ -348,6 +426,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         const resolvedSettings = await reconcileNotificationState(guestResolved);
         set({
           ...resolvedSettings,
+          bootstrapped: true,
           loading: false,
           initialized: true,
           loadedForUserId: null,
@@ -360,6 +439,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
       set({
         ...resolvedDefaults,
+        bootstrapped: true,
         loading: false,
         initialized: true,
         loadedForUserId: userId,
@@ -370,6 +450,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       if (__DEV__) console.error("Error loading settings:", error);
       set({
         ...DEFAULT_SETTINGS,
+        bootstrapped: true,
         loading: false,
         initialized: true,
         loadedForUserId: null,
@@ -401,6 +482,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
       set({
         ...resolvedSettings,
+        bootstrapped: true,
         loadedForUserId: userId,
         pendingLanguagePreferenceNotice: null,
       });
@@ -422,6 +504,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   resetToDefaults: async () => {
     set((state) => ({
       ...DEFAULT_SETTINGS,
+      bootstrapped: true,
       loading: false,
       initialized: true,
       loadedForUserId: state.loadedForUserId,
@@ -438,6 +521,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   clear: () =>
     set({
       ...DEFAULT_SETTINGS,
+      bootstrapped: false,
       loading: false,
       initialized: false,
       loadedForUserId: null,

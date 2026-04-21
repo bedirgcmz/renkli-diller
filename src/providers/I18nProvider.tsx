@@ -25,18 +25,6 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
   const { uiLanguage, setUILanguage } = useSettingsStore();
 
   useEffect(() => {
-    // Initialize i18n with saved language
-    const initializeI18n = async () => {
-      await i18n.init();
-      if (uiLanguage && uiLanguage !== i18n.language) {
-        await i18n.changeLanguage(uiLanguage);
-      }
-    };
-
-    initializeI18n().catch((e) => console.error("[I18nProvider] init failed:", e));
-  }, []);
-
-  useEffect(() => {
     // Update i18n when uiLanguage changes
     if (uiLanguage && uiLanguage !== i18n.language) {
       i18n.changeLanguage(uiLanguage);
