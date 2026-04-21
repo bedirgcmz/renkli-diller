@@ -180,6 +180,7 @@ export default function AppNavigator() {
   // Track eager load per user so we don't repeat it on every render
   const eagerLoadedForUser = useRef<string | null>(null);
   const rememberedShellUserId = useRef<string | null>(null);
+  const shownLanguageNoticeKey = useRef<string | null>(null);
   const [welcomeBackToast, setWelcomeBackToast] = useState<string | null>(null);
 
   // ── Auth initialisation ───────────────────────────────────────────────────
@@ -298,17 +299,35 @@ export default function AppNavigator() {
     if (!settingsReadyForCurrentUser || settingsLoading) return;
     if (i18n.language !== pendingLanguagePreferenceNotice.uiLanguage) return;
 
+    const noticeKey = [
+      user.id,
+      pendingLanguagePreferenceNotice.uiLanguage,
+      pendingLanguagePreferenceNotice.targetLanguage,
+      uiLanguage,
+      targetLanguage,
+    ].join(":");
+
+    if (shownLanguageNoticeKey.current === noticeKey) return;
+    shownLanguageNoticeKey.current = noticeKey;
+
+    const moreTabLabel = t("tabs.more", { defaultValue: "More" });
+    const settingsLabel = t("common.settings", { defaultValue: t("settings.title") });
+
+    clearPendingLanguagePreferenceNotice();
+
     Alert.alert(
       t("onboarding.saved_language_settings_title"),
       t("onboarding.saved_language_settings_body", {
         pair: `${uiLanguage.toUpperCase()}-${targetLanguage.toUpperCase()}`,
-        moreTab: t("tabs.more"),
-        settingsLabel: t("common.settings"),
+        moreTab: moreTabLabel,
+        settingsLabel,
       }),
       [
         {
           text: t("common.ok"),
-          onPress: clearPendingLanguagePreferenceNotice,
+          onPress: () => {
+            shownLanguageNoticeKey.current = null;
+          },
         },
       ],
     );
@@ -322,6 +341,11 @@ export default function AppNavigator() {
     uiLanguage,
     user,
   ]);
+
+  useEffect(() => {
+    if (pendingLanguagePreferenceNotice) return;
+    shownLanguageNoticeKey.current = null;
+  }, [pendingLanguagePreferenceNotice, user?.id]);
 
   const hasRestorableSession = !!session?.user || !!user;
   const showingRememberedShell =

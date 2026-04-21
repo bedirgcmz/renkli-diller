@@ -81,6 +81,15 @@ export default function SettingsScreen() {
   } = useSettingsStore();
   const { user, signOut, deleteAccount, updateProfile } = useAuthStore();
 
+  const handleClose = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate("Tabs");
+  };
+
   const handleLeaderboardVisibleToggle = async (value: boolean) => {
     await updateProfile({ leaderboard_visible: value } as never);
   };
@@ -178,7 +187,7 @@ export default function SettingsScreen() {
       <View style={[styles.header, { borderBottomColor: colors.divider }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t("settings.title")}</Text>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={handleClose}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="close" size={24} color={colors.text} />
