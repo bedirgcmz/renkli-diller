@@ -16,6 +16,7 @@ import type { RootStackParamList, SupportedLanguage } from "@/types";
 import { useI18n } from "@/providers/I18nProvider";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 const LANGUAGE_OPTIONS: Array<{ label: string; value: SupportedLanguage; emoji: string }> = [
   { label: "Türkçe", value: "tr", emoji: "🇹🇷" },
@@ -91,6 +92,7 @@ export default function WelcomeScreen() {
   const { colors } = useTheme();
   const { uiLanguage, targetLanguage, setTargetLanguage } = useSettingsStore();
   const { changeLanguage } = useI18n();
+  const isOnline = useNetworkStore((s) => s.isOnline);
 
   const [selectedUiLanguage, setSelectedUiLanguage] = useState<SupportedLanguage>(uiLanguage);
   const [selectedTargetLanguage, setSelectedTargetLanguage] =
@@ -183,6 +185,22 @@ export default function WelcomeScreen() {
             >
               <Text style={styles.startButtonText}>{t("onboarding.get_started")}</Text>
             </TouchableOpacity>
+
+            {isOnline === false ? (
+              <View
+                style={[
+                  styles.offlineHint,
+                  {
+                    backgroundColor: colors.warning + "12",
+                    borderColor: colors.warning + "2E",
+                  },
+                ]}
+              >
+                <Text style={[styles.offlineHintText, { color: colors.text }]}>
+                  {t("onboarding.offline_welcome_hint")}
+                </Text>
+              </View>
+            ) : null}
 
             <View
               style={[
@@ -301,6 +319,18 @@ const styles = StyleSheet.create({
   warning: {
     marginTop: 6,
     fontSize: 13,
+  },
+  offlineHint: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  offlineHintText: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
   },
   startButton: {
     borderRadius: 14,

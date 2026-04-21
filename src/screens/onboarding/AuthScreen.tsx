@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "@/types";
 import { useTheme } from "@/hooks/useTheme";
+import { useNetworkStore } from "@/store/useNetworkStore";
 
 import SignInScreen from "@/screens/auth/SignInScreen";
 import SignUpScreen from "@/screens/auth/SignUpScreen";
@@ -14,6 +15,7 @@ export default function AuthScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList, "Auth">>();
   const { colors } = useTheme();
+  const isOnline = useNetworkStore((s) => s.isOnline);
   const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
 
   const activeStyle = (active: boolean) => ({
@@ -23,6 +25,22 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+      {isOnline === false ? (
+        <View
+          style={[
+            styles.offlineBanner,
+            {
+              backgroundColor: colors.warning + "14",
+              borderColor: colors.warning + "32",
+            },
+          ]}
+        >
+          <Text style={[styles.offlineBannerText, { color: colors.text }]}>
+            {t("onboarding.offline_auth_banner")}
+          </Text>
+        </View>
+      ) : null}
+
       <View
         style={[
           styles.tabBar,
@@ -66,6 +84,20 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
+  },
+  offlineBanner: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  offlineBannerText: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
   },
   tabBar: {
     flexDirection: "row",

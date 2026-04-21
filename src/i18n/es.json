@@ -28,6 +28,8 @@
     "offline_sign_up": "Ahora mismo estás sin conexión, así que no se puede crear la cuenta.",
     "offline_social_sign_in": "El acceso social necesita conexión a internet.",
     "offline_reset_password": "Restablecer la contraseña necesita conexión a internet.",
+    "offline_auth_banner": "Ahora mismo estás sin conexión. Puedes revisar esta pantalla, pero iniciar sesión y las acciones de cuenta necesitan internet.",
+    "offline_welcome_hint": "Puedes elegir ahora el idioma de la interfaz y el idioma que aprendes. El inicio de sesión funcionará cuando vuelvas a tener conexión.",
     "remembered_title": "Parlio te recordó",
     "remembered_body": "Se están cargando tu tema, tu par de idiomas y los detalles de tu sesión.",
     "startup_preparing_body": "Estamos preparando tu inicio.",

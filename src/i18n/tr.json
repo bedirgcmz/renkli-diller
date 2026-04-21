@@ -28,6 +28,8 @@
     "offline_sign_up": "Şu anda çevrimdışısınız, bu yüzden hesap oluşturulamıyor.",
     "offline_social_sign_in": "Sosyal giriş için internet bağlantısı gerekiyor.",
     "offline_reset_password": "Şifre sıfırlamak için internet bağlantısı gerekiyor.",
+    "offline_auth_banner": "Şu anda çevrimdışısınız. Bu ekranı inceleyebilirsiniz ama giriş ve hesap işlemleri için internet gerekir.",
+    "offline_welcome_hint": "Arayüz dilinizi ve öğrenme dilinizi şimdi seçebilirsiniz. Giriş, yeniden çevrimiçi olduğunuzda çalışacaktır.",
     "remembered_title": "Parlio seni hatırladı",
     "remembered_body": "Teman, dil çiftin ve oturum ayrıntıların yükleniyor.",
     "startup_preparing_body": "Başlangıç deneyimin hazırlanıyor.",

@@ -74,6 +74,22 @@ export default function ResetPasswordScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {isOnline === false ? (
+          <View
+            style={[
+              styles.offlineBanner,
+              {
+                backgroundColor: colors.warning + "14",
+                borderColor: colors.warning + "32",
+              },
+            ]}
+          >
+            <Text style={[styles.offlineBannerText, { color: colors.text }]}>
+              {t("onboarding.offline_reset_password")}
+            </Text>
+          </View>
+        ) : null}
+
         <Text style={[styles.title, { color: colors.text }]}>
           {t("onboarding.forgot_password")}
         </Text>
@@ -129,6 +145,18 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 24,
+  },
+  offlineBanner: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 18,
+  },
+  offlineBannerText: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
   },
   input: {
     height: 48,
