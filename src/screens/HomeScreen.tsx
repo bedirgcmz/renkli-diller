@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   ScrollView,
   useWindowDimensions,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
@@ -17,7 +17,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { HeroHeader } from "@/components/HeroHeader";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { HomeStackParamList, MainStackParamList } from "@/types";
-import { CoachMarksOverlay, CoachMarkStep } from "@/components/CoachMarksOverlay";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSentenceStore } from "@/store/useSentenceStore";
@@ -39,8 +38,6 @@ interface ActivityCard {
   iconColor: string;
   titleKey: string;
   descKey: string;
-  coachTitleKey: string;
-  coachDescKey: string;
   onPress: (nav: Nav) => void;
 }
 
@@ -128,9 +125,8 @@ function SetupActionButton({
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth } = useWindowDimensions();
   const navigation = useNavigation<Nav>();
-  const insets = useSafeAreaInsets();
   const isCompactHome = screenWidth <= COMPACT_HOME_BREAKPOINT;
   const horizontalPadding = isCompactHome ? 14 : 16;
   const dashboardInnerPadding = isCompactHome ? 16 : 18;
@@ -151,19 +147,12 @@ export default function HomeScreen() {
   );
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
-  const { sentences, presetSentences, categories, loadCategories, loadSentences, loadPresetSentences } =
+  const { sentences, presetSentences, loadCategories, loadSentences, loadPresetSentences } =
     useSentenceStore();
   const { progressMap, loadProgress } = useProgressStore();
   const { uiLanguage, targetLanguage } = useSettingsStore();
-  const { isCoachMarksDone, isReady, markCoachMarksDone, isHintShown, markHintShown } =
-    useOnboarding();
+  const { isReady, isHintShown, markHintShown } = useOnboarding();
 
-  const scrollRef = useRef<ScrollView>(null);
-  const cardRefs = useRef<(View | null)[]>([]);
-  const cardLayoutYs = useRef<number[]>([]);
-
-  const [coachVisible, setCoachVisible] = useState(false);
-  const [coachSteps, setCoachSteps] = useState<CoachMarkStep[]>([]);
   const [premiumHintVisible, setPremiumHintVisible] = useState(false);
 
   const practiceCards: ActivityCard[] = [
@@ -173,8 +162,6 @@ export default function HomeScreen() {
       iconColor: "#4DA3FF",
       titleKey: "home.card_learn_title",
       descKey: "home.card_learn_desc",
-      coachTitleKey: "coach_marks.learn_title",
-      coachDescKey: "coach_marks.learn_desc",
       onPress: (nav) => nav.navigate("Learn", { initialTab: "study" }),
     },
     {
@@ -183,8 +170,6 @@ export default function HomeScreen() {
       iconColor: "#49C98A",
       titleKey: "home.card_listen_title",
       descKey: "home.card_listen_desc",
-      coachTitleKey: "coach_marks.listen_title",
-      coachDescKey: "coach_marks.listen_desc",
       onPress: (nav) => nav.navigate("Learn", { initialTab: "listening" }),
     },
     {
@@ -193,8 +178,6 @@ export default function HomeScreen() {
       iconColor: "#F59E0B",
       titleKey: "home.card_quiz_title",
       descKey: "home.card_quiz_desc",
-      coachTitleKey: "coach_marks.quiz_title",
-      coachDescKey: "coach_marks.quiz_desc",
       onPress: (nav) => nav.navigate("Quiz"),
     },
     {
@@ -203,8 +186,6 @@ export default function HomeScreen() {
       iconColor: "#EC4899",
       titleKey: "home.card_dictation_title",
       descKey: "home.card_dictation_desc",
-      coachTitleKey: "coach_marks.dictation_title",
-      coachDescKey: "coach_marks.dictation_desc",
       onPress: (nav) => nav.navigate("Quiz", { initialMode: "fill_blank" }),
     },
     {
@@ -213,8 +194,6 @@ export default function HomeScreen() {
       iconColor: "#8B5CF6",
       titleKey: "home.card_auto_title",
       descKey: "home.card_auto_desc",
-      coachTitleKey: "coach_marks.auto_title",
-      coachDescKey: "coach_marks.auto_desc",
       onPress: (nav) => nav.navigate("AutoMode"),
     },
     {
@@ -223,8 +202,6 @@ export default function HomeScreen() {
       iconColor: "#10B981",
       titleKey: "home.card_build_title",
       descKey: "home.card_build_desc",
-      coachTitleKey: "coach_marks.build_title",
-      coachDescKey: "coach_marks.build_desc",
       onPress: (nav) => nav.navigate("BuildSentence"),
     },
   ];
@@ -236,8 +213,6 @@ export default function HomeScreen() {
       iconColor: "#F97316",
       titleKey: "home.card_explore_title",
       descKey: "home.card_explore_desc",
-      coachTitleKey: "coach_marks.explore_title",
-      coachDescKey: "coach_marks.explore_desc",
       onPress: (nav) => nav.navigate("CategoryBrowser"),
     },
     {
@@ -246,8 +221,6 @@ export default function HomeScreen() {
       iconColor: "#E85D5D",
       titleKey: "home.card_read_title",
       descKey: "home.card_read_desc",
-      coachTitleKey: "coach_marks.read_title",
-      coachDescKey: "coach_marks.read_desc",
       onPress: (nav) => nav.navigate("Reading"),
     },
     {
@@ -256,8 +229,6 @@ export default function HomeScreen() {
       iconColor: "#06B6D4",
       titleKey: "dialog.home_card_title",
       descKey: "dialog.home_card_subtitle",
-      coachTitleKey: "dialog.home_card_title",
-      coachDescKey: "dialog.home_card_subtitle",
       onPress: (nav) => nav.navigate("DialogSetup"),
     },
     {
@@ -266,8 +237,6 @@ export default function HomeScreen() {
       iconColor: "#EC4899",
       titleKey: "games.hub.title",
       descKey: "games.hub.subtitle",
-      coachTitleKey: "games.hub.title",
-      coachDescKey: "games.hub.subtitle",
       onPress: (nav) => nav.navigate("GameHub"),
     },
     {
@@ -276,8 +245,6 @@ export default function HomeScreen() {
       iconColor: "#7C5CF6",
       titleKey: "ai_translator.card_title",
       descKey: "ai_translator.card_desc",
-      coachTitleKey: "coach_marks.ai_title",
-      coachDescKey: "coach_marks.ai_desc",
       onPress: (nav) => nav.navigate("AITranslator"),
     },
     {
@@ -286,25 +253,9 @@ export default function HomeScreen() {
       iconColor: "#0EA5E9",
       titleKey: "home.card_add_sentence_title",
       descKey: "home.card_add_sentence_desc",
-      coachTitleKey: "coach_marks.add_sentence_title",
-      coachDescKey: "coach_marks.add_sentence_desc",
       onPress: (nav) => nav.navigate("AddSentence"),
     },
   ];
-
-  const visibleCards = useMemo(
-    () => [...practiceCards, ...exploreCards],
-    [practiceCards, exploreCards]
-  );
-
-  const cardIndexById = useMemo(
-    () =>
-      visibleCards.reduce<Record<string, number>>((acc, card, index) => {
-        acc[card.id] = index;
-        return acc;
-      }, {}),
-    [visibleCards]
-  );
 
   const currentPairUserSentences = useMemo(
     () =>
@@ -328,22 +279,6 @@ export default function HomeScreen() {
 
   const hasLearningList = learningListCount > 0;
 
-  const TAB_BAR_H = 56;
-  const tabBarHeight = TAB_BAR_H + insets.bottom;
-  const TAB_W = screenWidth / 4;
-  const tabLayouts = [1, 2, 3].map((i) => ({
-    x: i * TAB_W,
-    y: screenHeight - tabBarHeight,
-    width: TAB_W,
-    height: tabBarHeight,
-  }));
-
-  const tabCoachKeys = [
-    { titleKey: "coach_marks.tab_sentences_title", descKey: "coach_marks.tab_sentences_desc" },
-    { titleKey: "coach_marks.tab_me_title", descKey: "coach_marks.tab_me_desc" },
-    { titleKey: "coach_marks.tab_more_title", descKey: "coach_marks.tab_more_desc" },
-  ];
-
   const syncHomeData = useCallback(() => {
     void refreshProfile();
     void loadCategories();
@@ -352,65 +287,20 @@ export default function HomeScreen() {
     void loadProgress();
   }, [isPremium, loadCategories, loadPresetSentences, loadProgress, loadSentences, refreshProfile]);
 
-const startCoachMarks = useCallback(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-
-    const cardSteps: CoachMarkStep[] = visibleCards.map((card) => ({
-      ref: { current: cardRefs.current[cardIndexById[card.id]] } as React.RefObject<View>,
-      title: t(card.coachTitleKey),
-      description: t(card.coachDescKey),
-    }));
-
-    const tabSteps: CoachMarkStep[] = tabLayouts.map((layout, i) => ({
-      layout,
-      title: t(tabCoachKeys[i].titleKey),
-      description: t(tabCoachKeys[i].descKey),
-    }));
-
-    setCoachSteps([...cardSteps, ...tabSteps]);
-    setCoachVisible(true);
-  }, [cardIndexById, screenHeight, screenWidth, t, tabLayouts, visibleCards]);
-
-  const hasAutoStarted = useRef(false);
   React.useEffect(() => {
-    if (isReady && !isCoachMarksDone && !hasAutoStarted.current) {
-      hasAutoStarted.current = true;
-      const timer = setTimeout(startCoachMarks, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [isReady, isCoachMarksDone, startCoachMarks]);
-
-  React.useEffect(() => {
-    if (!isReady || !isCoachMarksDone || coachVisible || isPremium || isHintShown("premiumIntro")) {
+    if (!isReady || isPremium || isHintShown("premiumIntro")) {
       return;
     }
 
     const timer = setTimeout(() => setPremiumHintVisible(true), 700);
     return () => clearTimeout(timer);
-  }, [coachVisible, isCoachMarksDone, isHintShown, isPremium, isReady]);
+  }, [isHintShown, isPremium, isReady]);
 
   useFocusEffect(
     useCallback(() => {
       syncHomeData();
     }, [syncHomeData])
   );
-
-  const handleCoachDone = useCallback(() => {
-    setCoachVisible(false);
-    markCoachMarksDone();
-  }, [markCoachMarksDone]);
-
-  const handleCoachSkip = useCallback(() => {
-    setCoachVisible(false);
-    markCoachMarksDone();
-  }, [markCoachMarksDone]);
-
-  const scrollToCard = useCallback((index: number) => {
-    const y = cardLayoutYs.current[index];
-    if (y != null) {
-      scrollRef.current?.scrollTo({ y: Math.max(0, y - 100), animated: false });
-    }
-  }, []);
 
   const closePremiumHint = useCallback(() => {
     setPremiumHintVisible(false);
@@ -419,16 +309,9 @@ const startCoachMarks = useCallback(() => {
 
   const renderCard = useCallback(
     (card: ActivityCard, width: number) => {
-      const cardIndex = cardIndexById[card.id];
       return (
         <TouchableOpacity
           key={card.id}
-          ref={(ref) => {
-            cardRefs.current[cardIndex] = ref;
-          }}
-          onLayout={(e) => {
-            cardLayoutYs.current[cardIndex] = e.nativeEvent.layout.y;
-          }}
           style={[
             styles.card,
             {
@@ -472,7 +355,7 @@ const startCoachMarks = useCallback(() => {
         </TouchableOpacity>
       );
     },
-    [cardIndexById, colors.cardBackground, colors.text, colors.textTertiary, isCompactHome, navigation, t]
+    [colors.cardBackground, colors.text, colors.textTertiary, isCompactHome, navigation, t]
   );
 
   const renderCardGrid = useCallback(
@@ -493,7 +376,6 @@ const startCoachMarks = useCallback(() => {
       edges={["top"]}
     >
       <ScrollView
-        ref={scrollRef}
         contentContainerStyle={[
           styles.scroll,
           {
@@ -503,7 +385,6 @@ const startCoachMarks = useCallback(() => {
           },
         ]}
         showsVerticalScrollIndicator={false}
-        scrollEnabled={!coachVisible}
       >
         <Text
           style={[
@@ -675,16 +556,6 @@ const startCoachMarks = useCallback(() => {
           <View style={styles.cardDeck}>{renderCardGrid(exploreCards, cardWidth)}</View>
         </View>
       </ScrollView>
-
-      <CoachMarksOverlay
-        steps={coachSteps}
-        visible={coachVisible}
-        onDone={handleCoachDone}
-        onSkip={handleCoachSkip}
-        onBeforeStep={(index) => {
-          if (index < visibleCards.length) scrollToCard(index);
-        }}
-      />
       <HintBottomSheet
         visible={premiumHintVisible}
         title={t("hints.premium_intro_title")}
