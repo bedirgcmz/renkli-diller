@@ -266,6 +266,9 @@ export default function AppNavigator() {
     void (async () => {
       await useOfflineQueueStore.getState().processQueue();
       await useGameStore.getState().retryPendingScore();
+      await loadSettings(true).catch((error) => {
+        console.error("[AppNavigator] reconnect settings reconcile failed:", error);
+      });
 
       // Parallel store refreshes — cache-first, no spinner if data already visible
       void useSentenceStore.getState().loadCategories();
@@ -287,7 +290,7 @@ export default function AppNavigator() {
         // refreshes naturally when the user navigates to the Reading tab.
       }
     })();
-  }, [reconnectCount, user?.id, settingsReadyForCurrentUser]);
+  }, [loadSettings, reconnectCount, user?.id, settingsReadyForCurrentUser]);
 
   // ── Language preference alert ──────────────────────────────────────────────
   useEffect(() => {
