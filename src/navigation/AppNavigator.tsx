@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Screens
 import AuthNavigator from "./AuthNavigator";
@@ -23,6 +24,7 @@ import CompleteResetPasswordScreen from "@/screens/auth/CompleteResetPasswordScr
 import i18n from "@/i18n";
 
 const Stack = createNativeStackNavigator();
+const WELCOME_BACK_TOAST_SESSION_KEY = "welcome_back_toast_session_key";
 
 function StartupLoadingScreen({
   title,
@@ -361,9 +363,25 @@ export default function AppNavigator() {
     if (!user?.id || settingsLoading || !initialized || !settingsReadyForCurrentUser) return;
     if (rememberedShellUserId.current !== user.id) return;
 
-    rememberedShellUserId.current = null;
-    setWelcomeBackToast(t("onboarding.welcome_back_toast"));
-  }, [initialized, settingsLoading, settingsReadyForCurrentUser, t, user?.id]);
+    const activeSessionKey = `${user.id}:${session?.refresh_token ?? session?.access_token ?? "session"}`;
+
+    void (async () => {
+      try {
+        const lastShownSessionKey = await AsyncStorage.getItem(WELCOME_BACK_TOAST_SESSION_KEY);
+        rememberedShellUserId.current = null;
+
+        if (lastShownSessionKey === activeSessionKey) {
+          return;
+        }
+
+        await AsyncStorage.setItem(WELCOME_BACK_TOAST_SESSION_KEY, activeSessionKey);
+        setWelcomeBackToast(t("onboarding.welcome_back_toast"));
+      } catch {
+        rememberedShellUserId.current = null;
+        setWelcomeBackToast(t("onboarding.welcome_back_toast"));
+      }
+    })();
+  }, [initialized, session?.access_token, session?.refresh_token, settingsLoading, settingsReadyForCurrentUser, t, user?.id]);
 
   // Show loading while initialising
   if (showingRememberedShell) {

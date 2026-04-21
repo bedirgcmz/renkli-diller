@@ -29,7 +29,7 @@ import { parseKeywords } from "@/utils/keywords";
 import { MainStackParamList, Category } from "@/types";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { useOnboarding } from "@/providers/OnboardingProvider";
-import { useNetworkStore } from "@/store/useNetworkStore";
+import { isNetworkError, useNetworkStore } from "@/store/useNetworkStore";
 
 interface HistoryItem {
   id: string;
@@ -318,6 +318,7 @@ export default function AITranslateScreen() {
       });
     } catch (err) {
       console.error("[AI Translate] error:", err);
+      useNetworkStore.getState().reportRequestError(err);
       if (err instanceof Error && err.message === "trial_expired") {
         setHasAccess(false);
         setTrialDaysLeft(0);
@@ -327,6 +328,8 @@ export default function AITranslateScreen() {
         setDailyLimitReached(true);
         setHasAccess(false);
         setDailyCount(TRIAL_DAILY_LIMIT);
+      } else if (isNetworkError(err)) {
+        Alert.alert(t("common.offline_title"), t("common.offline_body"));
       } else {
         Alert.alert(t("common.error"), t("ai_translator.translate_error"));
       }

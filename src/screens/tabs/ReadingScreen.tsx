@@ -983,6 +983,15 @@ export default function ReadingScreen() {
     fetchNextText(userId, true, isPremium); // forceNew: skip today's completed text, pick next
   };
 
+  const handleBackToHome = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate("HomeMain");
+  }, [navigation]);
+
   // ── Derived values ────────────────────────────────────────────────────────
 
   const title =
@@ -1046,6 +1055,13 @@ export default function ReadingScreen() {
         style={[styles.container, { backgroundColor: colors.background }]}
         edges={["top"]}
       >
+        {showOffline && (
+          <View style={styles.emptyHeader}>
+            <TouchableOpacity style={styles.emptyBackButton} onPress={handleBackToHome} activeOpacity={0.75}>
+              <Ionicons name="chevron-back" size={18} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.centered}>
           <Text style={styles.emptyIcon}>{showOffline ? "📡" : "🎉"}</Text>
           <Text style={[styles.emptyTitle, { color: colors.text }]}>
@@ -1461,6 +1477,14 @@ export default function ReadingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  emptyHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  emptyBackButton: {
+    alignSelf: "flex-start",
+    alignItems: "center",
+  },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 32 },
   emptyIcon: { fontSize: 52 },
   emptyTitle: { fontSize: 18, fontWeight: "700", textAlign: "center" },

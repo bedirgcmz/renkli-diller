@@ -44,7 +44,7 @@ import {
   CompletedReadingEntry,
 } from "@/types";
 import { readCache, writeCache } from "@/lib/offlineCache";
-import { useNetworkStore } from "@/store/useNetworkStore";
+import { isNetworkError, useNetworkStore } from "@/store/useNetworkStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useOfflineQueueStore, createQueueItem } from "@/store/useOfflineQueueStore";
 
@@ -277,6 +277,13 @@ export const useReadingStore = create<ReadingState>((set, get) => ({
       // Also persist the updated progress array
       void writeCache(cacheKeyProgress(userId), get().progress);
     } catch (e: any) {
+      useNetworkStore.getState().reportRequestError(e);
+
+      if (isNetworkError(e)) {
+        set({ currentText: null, keywords: [], error: e.message, loading: false });
+        return;
+      }
+
       set({ error: e.message, loading: false });
     }
   },

@@ -19,7 +19,7 @@ import { AppState, AppStateStatus } from "react-native";
 import { supabase } from "@/lib/supabase";
 
 /** Returns true when the error looks like a pure network failure. */
-function isNetworkError(error: unknown): boolean {
+export function isNetworkError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const msg = (error as { message?: string }).message ?? "";
   return (
@@ -43,6 +43,8 @@ interface NetworkState {
 
   /** Run a lightweight connectivity check against Supabase. */
   probe: () => Promise<boolean>;
+  /** Mark the app offline immediately when a request fails with a network error. */
+  reportRequestError: (error: unknown) => void;
   /** Start AppState listener + initial probe. Returns a cleanup fn. */
   initialize: () => () => void;
 }
@@ -50,12 +52,13 @@ interface NetworkState {
 export const useNetworkStore = create<NetworkState>((set, get) => {
   // Polling interval reference lives outside Zustand state (not serializable).
   let pollIntervalId: ReturnType<typeof setInterval> | null = null;
+  const ACTIVE_POLL_MS = 12_000;
 
   function startPolling() {
     if (pollIntervalId !== null) return;
     pollIntervalId = setInterval(() => {
       void get().probe();
-    }, 30_000);
+    }, ACTIVE_POLL_MS);
   }
 
   function stopPolling() {
@@ -82,23 +85,22 @@ export const useNetworkStore = create<NetworkState>((set, get) => {
         return { isOnline: nowOnline, reconnectCount };
       });
 
-      if (nowOnline) {
-        stopPolling();
-      } else {
-        startPolling();
-      }
-
       return nowOnline;
     } catch {
       set({ isOnline: false });
-      startPolling();
       return false;
     }
+  };
+
+  const reportRequestError = (error: unknown) => {
+    if (!isNetworkError(error)) return;
+    set({ isOnline: false });
   };
 
   const initialize = (): (() => void) => {
     const handleAppStateChange = (nextState: AppStateStatus) => {
       if (nextState === "active") {
+        startPolling();
         void probe();
       } else {
         // App went background — stop polling to save battery.
@@ -109,6 +111,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => {
     const subscription = AppState.addEventListener("change", handleAppStateChange);
 
     // Fire an initial probe so the store has a real value immediately.
+    startPolling();
     void probe();
 
     return () => {
@@ -121,6 +124,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => {
     isOnline: null,
     reconnectCount: 0,
     probe,
+    reportRequestError,
     initialize,
   };
 });
