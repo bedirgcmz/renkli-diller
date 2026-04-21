@@ -23,6 +23,10 @@
     "forgot_password": "Passwort vergessen",
     "show_password": "Zeigen",
     "hide_password": "Verbergen",
+    "remembered_title": "Parlio hat dich wiedererkannt",
+    "remembered_body": "Dein Design, dein Sprachpaar und deine Sitzungsdaten werden geladen.",
+    "startup_preparing_body": "Dein Start wird vorbereitet.",
+    "welcome_back_toast": "Willkommen zurück. Deine Einstellungen sind bereit.",
     "why_premium_title": "Warum Nutzer auf Premium upgraden",
     "why_premium_body": "Premium entfernt kleine Tageslimits und macht es leichter, eine echte Sprachlern-Routine aufzubauen."
   },

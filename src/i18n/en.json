@@ -23,6 +23,10 @@
     "forgot_password": "Forgot password",
     "show_password": "Show",
     "hide_password": "Hide",
+    "remembered_title": "Parlio remembered you",
+    "remembered_body": "Loading your theme, language pair, and session details.",
+    "startup_preparing_body": "Preparing your startup experience.",
+    "welcome_back_toast": "Welcome back. Your setup is ready.",
     "why_premium_title": "Why users upgrade to Premium",
     "why_premium_body": "Premium removes the small daily caps and opens the fastest path to a real language habit."
   },

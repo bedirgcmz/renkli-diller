@@ -23,6 +23,10 @@
     "forgot_password": "Glömt lösenord",
     "show_password": "Visa",
     "hide_password": "Dölj",
+    "remembered_title": "Parlio kände igen dig",
+    "remembered_body": "Ditt tema, språkpar och dina sessionsdetaljer laddas.",
+    "startup_preparing_body": "Förbereder din startupplevelse.",
+    "welcome_back_toast": "Välkommen tillbaka. Dina inställningar är klara.",
     "why_premium_title": "Varför användare uppgraderar till Premium",
     "why_premium_body": "Premium tar bort små dagliga gränser och gör det lättare att bygga en riktig språkrutin."
   },

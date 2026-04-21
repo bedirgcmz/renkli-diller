@@ -23,6 +23,10 @@
     "forgot_password": "Mot de passe oublié",
     "show_password": "Afficher",
     "hide_password": "Masquer",
+    "remembered_title": "Parlio s'est souvenu de vous",
+    "remembered_body": "Votre thème, votre paire de langues et votre session sont en cours de chargement.",
+    "startup_preparing_body": "Préparation de votre démarrage.",
+    "welcome_back_toast": "Bon retour. Vos réglages sont prêts.",
     "why_premium_title": "Pourquoi les utilisateurs passent à Premium",
     "why_premium_body": "Premium enlève les petites limites quotidiennes et ouvre la voie la plus simple vers une vraie routine d'apprentissage."
   },

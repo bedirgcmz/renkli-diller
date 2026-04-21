@@ -23,6 +23,10 @@
     "forgot_password": "Esqueci minha senha",
     "show_password": "Mostrar",
     "hide_password": "Ocultar",
+    "remembered_title": "O Parlio lembrou de você",
+    "remembered_body": "Seu tema, seu par de idiomas e os detalhes da sessão estão sendo carregados.",
+    "startup_preparing_body": "Preparando sua experiência inicial.",
+    "welcome_back_toast": "Que bom ver você de novo. Suas configurações estão prontas.",
     "why_premium_title": "Por que os usuários fazem upgrade para o Premium",
     "why_premium_body": "O Premium remove pequenos limites diários e abre o caminho mais fluido para criar um hábito real com o idioma."
   },

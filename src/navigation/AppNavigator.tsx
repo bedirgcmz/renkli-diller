@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -9,10 +9,11 @@ import { useProgressStore } from "@/store/useProgressStore";
 import { useGameStore } from "@/store/useGameStore";
 import { useOfflineQueueStore } from "@/store/useOfflineQueueStore";
 import { useReadingStore } from "@/store/useReadingStore";
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Alert, Animated } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@/hooks/useTheme";
 
 // Screens
 import AuthNavigator from "./AuthNavigator";
@@ -23,10 +24,141 @@ import i18n from "@/i18n";
 
 const Stack = createNativeStackNavigator();
 
+function StartupLoadingScreen({
+  title,
+  body,
+}: {
+  title: string;
+  body: string;
+}) {
+  const { colors } = useTheme();
+
+  return (
+    <View style={[startupStyles.root, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          startupStyles.card,
+          {
+            backgroundColor: colors.cardBackground,
+            borderColor: colors.border,
+            shadowColor: colors.text,
+          },
+        ]}
+      >
+        <View
+          style={[
+            startupStyles.badge,
+            {
+              backgroundColor: colors.accent + "16",
+              borderColor: colors.accent + "22",
+            },
+          ]}
+        >
+          <Ionicons name="sparkles-outline" size={14} color={colors.accent} />
+          <Text style={[startupStyles.badgeText, { color: colors.accent }]}>Parlio</Text>
+        </View>
+
+        <Text style={[startupStyles.title, { color: colors.text }]}>{title}</Text>
+        <Text style={[startupStyles.body, { color: colors.textSecondary }]}>{body}</Text>
+
+        <View
+          style={[
+            startupStyles.loadingPill,
+            {
+              backgroundColor: colors.surfaceSecondary,
+              borderColor: colors.borderLight,
+            },
+          ]}
+        >
+          <ActivityIndicator size="small" color={colors.accent} />
+          <Text style={[startupStyles.loadingPillText, { color: colors.textSecondary }]}>
+            {body}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function WelcomeBackToast({
+  message,
+  onDone,
+}: {
+  message: string | null;
+  onDone: () => void;
+}) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const translateY = useRef(new Animated.Value(-80)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!message) {
+      translateY.setValue(-80);
+      opacity.setValue(0);
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    const timer = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(translateY, {
+          toValue: -80,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+      ]).start(onDone);
+    }, 2300);
+
+    return () => clearTimeout(timer);
+  }, [message, onDone, opacity, translateY]);
+
+  if (!message) return null;
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        startupStyles.toast,
+        {
+          top: insets.top + 10,
+          backgroundColor: colors.cardBackground,
+          borderColor: colors.border,
+          shadowColor: colors.text,
+          opacity,
+          transform: [{ translateY }],
+        },
+      ]}
+    >
+      <View style={[startupStyles.toastIconWrap, { backgroundColor: colors.success + "18" }]}>
+        <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+      </View>
+      <Text style={[startupStyles.toastText, { color: colors.text }]}>{message}</Text>
+    </Animated.View>
+  );
+}
+
 export default function AppNavigator() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { user, initialized, initialize, passwordRecoveryActive } = useAuthStore();
+  const { user, initialized, initialize, passwordRecoveryActive, session } = useAuthStore();
   const uiLanguage = useSettingsStore((s) => s.uiLanguage);
   const targetLanguage = useSettingsStore((s) => s.targetLanguage);
   const settingsInitialized = useSettingsStore((s) => s.initialized);
@@ -47,6 +179,8 @@ export default function AppNavigator() {
   const handledReconnectCount = useRef(0);
   // Track eager load per user so we don't repeat it on every render
   const eagerLoadedForUser = useRef<string | null>(null);
+  const rememberedShellUserId = useRef<string | null>(null);
+  const [welcomeBackToast, setWelcomeBackToast] = useState<string | null>(null);
 
   // ── Auth initialisation ───────────────────────────────────────────────────
   useEffect(() => {
@@ -186,12 +320,40 @@ export default function AppNavigator() {
     user,
   ]);
 
+  const hasRestorableSession = !!session?.user || !!user;
+  const showingRememberedShell =
+    hasRestorableSession && (!initialized || !settingsReadyForCurrentUser || settingsLoading);
+
+  useEffect(() => {
+    if (showingRememberedShell && user?.id) {
+      rememberedShellUserId.current = user.id;
+    }
+  }, [showingRememberedShell, user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || settingsLoading || !initialized || !settingsReadyForCurrentUser) return;
+    if (rememberedShellUserId.current !== user.id) return;
+
+    rememberedShellUserId.current = null;
+    setWelcomeBackToast(t("onboarding.welcome_back_toast"));
+  }, [initialized, settingsLoading, settingsReadyForCurrentUser, t, user?.id]);
+
   // Show loading while initialising
+  if (showingRememberedShell) {
+    return (
+      <StartupLoadingScreen
+        title={t("onboarding.remembered_title")}
+        body={t("onboarding.remembered_body")}
+      />
+    );
+  }
+
   if (!initialized || !settingsReadyForCurrentUser || settingsLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
+      <StartupLoadingScreen
+        title={t("common.loading")}
+        body={t("onboarding.startup_preparing_body")}
+      />
     );
   }
 
@@ -225,9 +387,100 @@ export default function AppNavigator() {
           </View>
         </View>
       )}
+
+      <WelcomeBackToast message={welcomeBackToast} onDone={() => setWelcomeBackToast(null)} />
     </View>
   );
 }
+
+const startupStyles = StyleSheet.create({
+  root: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    borderWidth: 1,
+    borderRadius: 28,
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.12,
+    shadowRadius: 28,
+    elevation: 10,
+  },
+  badge: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 16,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "800",
+    lineHeight: 30,
+    marginBottom: 8,
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 18,
+  },
+  loadingPill: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  loadingPillText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  toast: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  toastIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toastText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+});
 
 const offlineStyles = StyleSheet.create({
   root: { flex: 1 },

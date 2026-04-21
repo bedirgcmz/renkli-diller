@@ -23,6 +23,10 @@
     "forgot_password": "Şifremi unuttum",
     "show_password": "Göster",
     "hide_password": "Gizle",
+    "remembered_title": "Parlio seni hatırladı",
+    "remembered_body": "Teman, dil çiftin ve oturum ayrıntıların yükleniyor.",
+    "startup_preparing_body": "Başlangıç deneyimin hazırlanıyor.",
+    "welcome_back_toast": "Tekrar hoş geldin. Ayarların hazır.",
     "why_premium_title": "Kullanıcılar neden Premium'a geçiyor?",
     "why_premium_body": "Premium küçük günlük sınırları kaldırır ve gerçek bir dil rutini kurmanın en hızlı yolunu açar."
   },
