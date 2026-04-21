@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
+import { useNetworkStore } from "./useNetworkStore";
 import {
   DialogCategory,
   DialogScenario,
@@ -172,6 +173,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
       if (error) throw error;
       set({ categories: (data ?? []) as DialogCategory[], loading: false });
     } catch (e: any) {
+      useNetworkStore.getState().reportRequestError(e);
       set({ error: e.message, loading: false });
     }
   },
@@ -222,6 +224,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         },
       });
     } catch (e: any) {
+      useNetworkStore.getState().reportRequestError(e);
       set({ error: e.message });
     }
   },
@@ -246,6 +249,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         },
       });
     } catch (e: any) {
+      useNetworkStore.getState().reportRequestError(e);
       set({ error: e.message, poolStatus: null });
     }
   },
@@ -361,6 +365,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
 
       return true;
     } catch (e: any) {
+      useNetworkStore.getState().reportRequestError(e);
       set({ error: e.message, loading: false });
       return false;
     }

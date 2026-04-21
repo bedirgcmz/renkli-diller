@@ -138,18 +138,26 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
           end={{ x: 0.8, y: 1 }}
         />
 
-        {/* Top-right: FavoriteButton */}
-        <View
-          style={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            zIndex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
+        {/* Top-right actions: TTS + favorite */}
+        <View style={styles.topRightActions}>
+          {showTarget && (
+            <Pressable
+              onPress={handleAudio}
+              style={({ pressed }) => [
+                styles.topRightIconButton,
+                {
+                  backgroundColor: pressed ? colors.primary + "28" : colors.primary + "10",
+                  transform: [{ scale: pressed ? 0.9 : 1 }],
+                },
+              ]}
+            >
+              <Ionicons
+                name={speaking ? "stop-circle" : "volume-high-outline"}
+                size={19}
+                color={isDark ? colors.primary + "CC" : colors.primary}
+              />
+            </Pressable>
+          )}
           <FavoriteButton
             sentenceId={sentence.id}
             isPreset={sentence.is_preset ?? false}
@@ -158,7 +166,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
         </View>
 
         <View style={styles.body}>
-          {/* Source row: badge + text */}
+          {/* Primary row: badge + target language */}
           <View style={styles.sourceRow}>
             <VisualBadge
               imageUrl={sentence.visual_image_url}
@@ -172,7 +180,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
 
             <View style={styles.sourceText}>
               <KeywordText
-                text={sentence.source_text}
+                text={sentence.target_text}
                 baseColor={colors.text}
                 fontSize={18}
                 lineHeight={27}
@@ -182,35 +190,18 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
             </View>
           </View>
 
-          {/* Target + TTS */}
+          {/* Secondary row: source language */}
           {showTarget && (
             <View style={[styles.targetRow, { borderTopColor: dividerColor }]}>
               <View style={styles.targetText}>
                 <KeywordText
-                  text={sentence.target_text}
+                  text={sentence.source_text}
                   baseColor={colors.textSecondary}
                   fontSize={15}
                   lineHeight={22}
                   colorSeed={String(sentence.id)}
                 />
               </View>
-              {/* ✅ v2: softer icon opacity */}
-              <Pressable
-                onPress={handleAudio}
-                style={({ pressed }) => [
-                  styles.ttsBtn,
-                  {
-                    backgroundColor: pressed ? colors.primary + "28" : colors.primary + "10",
-                    transform: [{ scale: pressed ? 0.9 : 1 }],
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={speaking ? "stop-circle" : "volume-high-outline"}
-                  size={19}
-                  color={isDark ? colors.primary + "CC" : colors.primary}
-                />
-              </Pressable>
             </View>
           )}
 
@@ -329,6 +320,22 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     overflow: "hidden",
   },
+  topRightActions: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    zIndex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  topRightIconButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   sourceRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -351,14 +358,6 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   targetText: { flex: 1 },
-  ttsBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 1,
-  },
   categoryChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 8,

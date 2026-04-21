@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Screens
 import AuthNavigator from "./AuthNavigator";
@@ -23,6 +24,7 @@ import CompleteResetPasswordScreen from "@/screens/auth/CompleteResetPasswordScr
 import i18n from "@/i18n";
 
 const Stack = createNativeStackNavigator();
+const WELCOME_BACK_TOAST_SESSION_KEY = "welcome_back_toast_session_key";
 
 function StartupLoadingScreen({
   title,
@@ -180,6 +182,7 @@ export default function AppNavigator() {
   // Track eager load per user so we don't repeat it on every render
   const eagerLoadedForUser = useRef<string | null>(null);
   const rememberedShellUserId = useRef<string | null>(null);
+  const shownLanguageNoticeKey = useRef<string | null>(null);
   const [welcomeBackToast, setWelcomeBackToast] = useState<string | null>(null);
 
   // ── Auth initialisation ───────────────────────────────────────────────────
@@ -266,6 +269,9 @@ export default function AppNavigator() {
     void (async () => {
       await useOfflineQueueStore.getState().processQueue();
       await useGameStore.getState().retryPendingScore();
+      await loadSettings(true).catch((error) => {
+        console.error("[AppNavigator] reconnect settings reconcile failed:", error);
+      });
 
       // Parallel store refreshes — cache-first, no spinner if data already visible
       void useSentenceStore.getState().loadCategories();
@@ -287,7 +293,7 @@ export default function AppNavigator() {
         // refreshes naturally when the user navigates to the Reading tab.
       }
     })();
-  }, [reconnectCount, user?.id, settingsReadyForCurrentUser]);
+  }, [loadSettings, reconnectCount, user?.id, settingsReadyForCurrentUser]);
 
   // ── Language preference alert ──────────────────────────────────────────────
   useEffect(() => {
@@ -295,17 +301,35 @@ export default function AppNavigator() {
     if (!settingsReadyForCurrentUser || settingsLoading) return;
     if (i18n.language !== pendingLanguagePreferenceNotice.uiLanguage) return;
 
+    const noticeKey = [
+      user.id,
+      pendingLanguagePreferenceNotice.uiLanguage,
+      pendingLanguagePreferenceNotice.targetLanguage,
+      uiLanguage,
+      targetLanguage,
+    ].join(":");
+
+    if (shownLanguageNoticeKey.current === noticeKey) return;
+    shownLanguageNoticeKey.current = noticeKey;
+
+    const moreTabLabel = t("tabs.more", { defaultValue: "More" });
+    const settingsLabel = t("common.settings", { defaultValue: t("settings.title") });
+
+    clearPendingLanguagePreferenceNotice();
+
     Alert.alert(
       t("onboarding.saved_language_settings_title"),
       t("onboarding.saved_language_settings_body", {
         pair: `${uiLanguage.toUpperCase()}-${targetLanguage.toUpperCase()}`,
-        moreTab: t("tabs.more"),
-        settingsLabel: t("common.settings"),
+        moreTab: moreTabLabel,
+        settingsLabel,
       }),
       [
         {
           text: t("common.ok"),
-          onPress: clearPendingLanguagePreferenceNotice,
+          onPress: () => {
+            shownLanguageNoticeKey.current = null;
+          },
         },
       ],
     );
@@ -319,6 +343,11 @@ export default function AppNavigator() {
     uiLanguage,
     user,
   ]);
+
+  useEffect(() => {
+    if (pendingLanguagePreferenceNotice) return;
+    shownLanguageNoticeKey.current = null;
+  }, [pendingLanguagePreferenceNotice, user?.id]);
 
   const hasRestorableSession = !!session?.user || !!user;
   const showingRememberedShell =
@@ -334,9 +363,25 @@ export default function AppNavigator() {
     if (!user?.id || settingsLoading || !initialized || !settingsReadyForCurrentUser) return;
     if (rememberedShellUserId.current !== user.id) return;
 
-    rememberedShellUserId.current = null;
-    setWelcomeBackToast(t("onboarding.welcome_back_toast"));
-  }, [initialized, settingsLoading, settingsReadyForCurrentUser, t, user?.id]);
+    const activeSessionKey = `${user.id}:${session?.refresh_token ?? session?.access_token ?? "session"}`;
+
+    void (async () => {
+      try {
+        const lastShownSessionKey = await AsyncStorage.getItem(WELCOME_BACK_TOAST_SESSION_KEY);
+        rememberedShellUserId.current = null;
+
+        if (lastShownSessionKey === activeSessionKey) {
+          return;
+        }
+
+        await AsyncStorage.setItem(WELCOME_BACK_TOAST_SESSION_KEY, activeSessionKey);
+        setWelcomeBackToast(t("onboarding.welcome_back_toast"));
+      } catch {
+        rememberedShellUserId.current = null;
+        setWelcomeBackToast(t("onboarding.welcome_back_toast"));
+      }
+    })();
+  }, [initialized, session?.access_token, session?.refresh_token, settingsLoading, settingsReadyForCurrentUser, t, user?.id]);
 
   // Show loading while initialising
   if (showingRememberedShell) {
