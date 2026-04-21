@@ -37,6 +37,34 @@
     "why_premium_title": "Warum Nutzer auf Premium upgraden",
     "why_premium_body": "Premium entfernt kleine Tageslimits und macht es leichter, eine echte Sprachlern-Routine aufzubauen."
   },
+  "report": {
+    "title": "Inhaltsproblem melden",
+    "subtitle_generic": "Sag uns kurz, was nicht stimmt. Wir prüfen es.",
+    "subtitle_sentence": "Sag uns, was an diesem Satz nicht stimmt.",
+    "subtitle_reading": "Sag uns, was an diesem Lesetext nicht stimmt.",
+    "subtitle_dialog": "Sag uns, was an dieser Dialogrunde nicht stimmt.",
+    "reason_label": "Was wirkt falsch?",
+    "note_label": "Optionale Notiz",
+    "note_placeholder": "Füge gern eine kurze Notiz hinzu.",
+    "submit": "Melden",
+    "sending": "Wird gesendet...",
+    "success_title": "Danke",
+    "success_body": "Deine Meldung wurde gesendet.",
+    "duplicate_title": "Bereits gemeldet",
+    "duplicate_body": "Du hast für diesen Inhalt schon eine ähnliche Meldung gesendet.",
+    "rate_limited_title": "Bitte einen Moment",
+    "rate_limited_body": "Warte bitte kurz, bevor du eine weitere Meldung sendest.",
+    "validation_error_title": "Meldung konnte nicht gesendet werden",
+    "validation_error_body": "Bitte versuche es gleich noch einmal.",
+    "reasons": {
+      "typo": "Schreibfehler",
+      "translation": "Übersetzungsproblem",
+      "unnatural": "Klingt unnatürlich",
+      "keyword": "Keyword- / Hervorhebungsproblem",
+      "tts": "Audio- / Ausspracheproblem",
+      "other": "Andere"
+    }
+  },
   "tabs": {
     "learn": "Lernen",
     "quiz": "Quiz",

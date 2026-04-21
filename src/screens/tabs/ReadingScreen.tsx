@@ -24,6 +24,10 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useReadingStore } from "@/store/useReadingStore";
 import { useNetworkStore } from "@/store/useNetworkStore";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { buildReadingTextReportInput } from "@/lib/contentReportSnapshot";
+import { submitContentReport } from "@/services/contentReports";
 import { KEYWORD_TEXT_COLORS, LANG_CODE } from "@/utils/constants";
 import { parseKeywords, stripMarkers } from "@/utils/keywords";
 import {
@@ -32,6 +36,7 @@ import {
   HomeStackParamList,
   MainStackParamList,
 } from "@/types";
+import type { ContentReportReason } from "@/types/contentReports";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -866,6 +871,8 @@ export default function ReadingScreen() {
   const [upsellDismissed, setUpsellDismissed] = useState(false);
   const [sourceVisible, setSourceVisible] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   // Derive completion state from store (persists across navigation)
   const isCompleted =
@@ -1033,6 +1040,35 @@ export default function ReadingScreen() {
     ? Math.ceil(currentText.estimated_reading_seconds / 60)
     : null;
 
+  const handleSubmitReport = async (reason: ContentReportReason, note: string) => {
+    if (!currentText) return;
+
+    setReportSubmitting(true);
+    try {
+      const baseInput = buildReadingTextReportInput({
+        readingText: currentText,
+        keywords,
+        sourceLang: uiLanguage,
+        targetLang: targetLanguage,
+        visibleTitle: title,
+        visibleSourceBody: sourceBody,
+        visibleTargetBody: targetBody,
+        screenContext: "reading",
+      });
+
+      const result = await submitContentReport({
+        ...baseInput,
+        reportReason: reason,
+        userNote: note,
+      });
+
+      setReportVisible(false);
+      showContentReportAlert(t, result);
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -1084,13 +1120,20 @@ export default function ReadingScreen() {
       <View style={styles.header}>
         <Text style={[styles.headerTitle, isSmallScreen && { fontSize: 18 }, { color: colors.text }]}>{t("reading.title")}</Text>
         <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={[styles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
+            onPress={() => setReportVisible(true)}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="flag-outline" size={14} color={colors.textSecondary} />
+          </TouchableOpacity>
           {/* Share */}
           <TouchableOpacity
             style={[styles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}
             onPress={handleShare}
             activeOpacity={0.75}
           >
-            <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
+            <Ionicons name="share-outline" size={14} color={colors.textSecondary} />
           </TouchableOpacity>
           {/* Keyword preview */}
           {keywords.length > 0 && (
@@ -1099,7 +1142,7 @@ export default function ReadingScreen() {
               onPress={() => setKwModalVisible(true)}
               activeOpacity={0.75}
             >
-              <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
+              <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
           {/* Vocab quiz gate / feature entry */}
@@ -1109,7 +1152,7 @@ export default function ReadingScreen() {
               onPress={handleQuizPress}
               activeOpacity={0.75}
             >
-              <Ionicons name="help-circle-outline" size={20} color={colors.textSecondary} />
+              <Ionicons name="help-circle-outline" size={14} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
@@ -1469,6 +1512,13 @@ export default function ReadingScreen() {
         colors={colors}
         t={t}
       />
+      <ContentReportSheet
+        visible={reportVisible}
+        loading={reportSubmitting}
+        contentType="reading_text"
+        onClose={() => !reportSubmitting && setReportVisible(false)}
+        onSubmit={handleSubmitReport}
+      />
     </SafeAreaView>
   );
 }
@@ -1499,11 +1549,11 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   headerTitle: { fontSize: 22, fontWeight: "700", flexShrink: 1 },
-  headerActions: { flexDirection: "row", gap: 6 },
+  headerActions: { flexDirection: "row", gap: 3 },
   iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },

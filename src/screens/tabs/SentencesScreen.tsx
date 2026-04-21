@@ -25,7 +25,13 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { buildPresetSentenceReportInput } from "@/lib/contentReportSnapshot";
+import { submitContentReport } from "@/services/contentReports";
 import { Sentence, SentenceDifficulty, SentenceStatus, MainStackParamList } from "@/types";
+import type { ContentReportReason } from "@/types/contentReports";
 
 type StatusFilter = "all" | SentenceStatus;
 type DifficultyFilter = "all" | SentenceDifficulty;
@@ -56,6 +62,7 @@ interface SentenceItemProps {
   onForgot: () => void;
   onEdit?: () => void;
   onDelete: () => void;
+  onReportPress?: () => void;
   colors: ThemeColors;
   t: (k: string, opts?: Record<string, string>) => string;
 }
@@ -71,6 +78,7 @@ function SentenceItem({
   onForgot,
   onEdit,
   onDelete,
+  onReportPress,
   colors,
   t,
 }: SentenceItemProps) {
@@ -176,6 +184,9 @@ function SentenceItem({
                   {sentence.category_name}
                 </Text>
               </View>
+            ) : null}
+            {!isUserSentence && onReportPress ? (
+              <ReportIconButton onPress={onReportPress} size={24} iconSize={16} />
             ) : null}
             <FavoriteButton sentenceId={sentence.id} isPreset={sentence.is_preset} />
           </View>
@@ -676,6 +687,8 @@ export default function SentencesScreen() {
   const [searchText, setSearchText] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
+  const [reportTarget, setReportTarget] = useState<Sentence | null>(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const activeFilterCount =
     (statusFilter !== "all" ? 1 : 0) +
@@ -784,6 +797,31 @@ export default function SentencesScreen() {
         onPress: () => deleteSentence(sentence.id),
       },
     ]);
+  };
+
+  const handleSubmitSentenceReport = async (reason: ContentReportReason, note: string) => {
+    if (!reportTarget) return;
+
+    setReportSubmitting(true);
+    try {
+      const baseInput = buildPresetSentenceReportInput({
+        sentence: reportTarget,
+        sourceLang: uiLanguage,
+        targetLang: targetLanguage,
+        screenContext: "sentences_preset",
+      });
+
+      const result = await submitContentReport({
+        ...baseInput,
+        reportReason: reason,
+        userNote: note,
+      });
+
+      setReportTarget(null);
+      showContentReportAlert(t, result);
+    } finally {
+      setReportSubmitting(false);
+    }
   };
 
   return (
@@ -955,6 +993,11 @@ export default function SentencesScreen() {
                     })
             }
             onDelete={() => handleDelete(item)}
+            onReportPress={
+              item.is_preset
+                ? () => setReportTarget(item)
+                : undefined
+            }
             uiLanguage={uiLanguage}
             targetLanguage={targetLanguage}
             isDark={isDark}
@@ -990,6 +1033,13 @@ export default function SentencesScreen() {
         isDark={isDark}
         t={t}
         activeFilterCount={activeFilterCount}
+      />
+      <ContentReportSheet
+        visible={!!reportTarget}
+        loading={reportSubmitting}
+        contentType="preset_sentence"
+        onClose={() => !reportSubmitting && setReportTarget(null)}
+        onSubmit={handleSubmitSentenceReport}
       />
     </SafeAreaView>
   );

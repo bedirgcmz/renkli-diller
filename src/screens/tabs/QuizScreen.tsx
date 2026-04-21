@@ -27,13 +27,19 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { parseKeywords, getKeywordColor, splitWords, stripMarkers } from "@/utils/keywords";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
 import { FREE_QUIZ_DAILY_LIMIT } from "@/utils/constants";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { buildPresetSentenceReportInput } from "@/lib/contentReportSnapshot";
+import { submitContentReport } from "@/services/contentReports";
 import {
   HomeStackParamList,
   MainStackParamList,
   PillSegment,
   Sentence,
 } from "@/types";
+import type { ContentReportReason } from "@/types/contentReports";
 import { speak, stopSpeaking } from "@/services/tts";
 import { useAchievementStore } from "@/store/useAchievementStore";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
@@ -157,6 +163,8 @@ export default function QuizScreen() {
   const [hintQuizVisible, setHintQuizVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [quizMuted, setQuizMuted] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const goToSentencesTab = () => navigation.getParent()?.navigate("Sentences" as never);
   const goBackFromEmptyState = () => {
@@ -313,6 +321,31 @@ export default function QuizScreen() {
   const currentQ = questions[currentIdx];
   const fbQ = currentQ?.type === "fill_blank" ? (currentQ as FBQuestion) : null;
   const mcQ = currentQ?.type === "multiple_choice" ? (currentQ as MCQuestion) : null;
+
+  const handleSubmitReport = async (reason: ContentReportReason, note: string) => {
+    if (!currentQ || !currentQ.sentence.is_preset) return;
+
+    setReportSubmitting(true);
+    try {
+      const baseInput = buildPresetSentenceReportInput({
+        sentence: currentQ.sentence,
+        sourceLang: uiLanguage,
+        targetLang: targetLanguage,
+        screenContext: mode === "fill_blank" ? "quiz_fill_blank" : "quiz_multiple_choice",
+      });
+
+      const result = await submitContentReport({
+        ...baseInput,
+        reportReason: reason,
+        userNote: note,
+      });
+
+      setReportVisible(false);
+      showContentReportAlert(t, result);
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
 
   // Per-keyword correctness after result reveal
   const kwCorrectness =
@@ -699,6 +732,9 @@ export default function QuizScreen() {
                   {currentIdx + 1}/{questions.length}
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  {currentQ.sentence.is_preset ? (
+                    <ReportIconButton onPress={() => setReportVisible(true)} size={24} iconSize={16} />
+                  ) : null}
                   <FavoriteButton
                     sentenceId={currentQ.sentence.id}
                     isPreset={currentQ.sentence.is_preset ?? false}
@@ -1032,6 +1068,13 @@ export default function QuizScreen() {
         title={t("hints.quiz_done_title")}
         body={t("hints.quiz_done_body")}
         onClose={() => setHintQuizVisible(false)}
+      />
+      <ContentReportSheet
+        visible={reportVisible}
+        loading={reportSubmitting}
+        contentType="preset_sentence"
+        onClose={() => !reportSubmitting && setReportVisible(false)}
+        onSubmit={handleSubmitReport}
       />
     </SafeAreaView>
   );

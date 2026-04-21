@@ -37,6 +37,34 @@
     "why_premium_title": "Pourquoi les utilisateurs passent à Premium",
     "why_premium_body": "Premium enlève les petites limites quotidiennes et ouvre la voie la plus simple vers une vraie routine d'apprentissage."
   },
+  "report": {
+    "title": "Signaler un problème de contenu",
+    "subtitle_generic": "Dites-nous ce qui semble incorrect. Nous allons vérifier.",
+    "subtitle_sentence": "Dites-nous ce qui semble incorrect dans cette phrase.",
+    "subtitle_reading": "Dites-nous ce qui semble incorrect dans ce texte.",
+    "subtitle_dialog": "Dites-nous ce qui semble incorrect dans ce tour de dialogue.",
+    "reason_label": "Qu'est-ce qui semble incorrect ?",
+    "note_label": "Note facultative",
+    "note_placeholder": "Ajoutez une courte note si besoin.",
+    "submit": "Envoyer le signalement",
+    "sending": "Envoi...",
+    "success_title": "Merci",
+    "success_body": "Votre signalement a été envoyé.",
+    "duplicate_title": "Déjà signalé",
+    "duplicate_body": "Vous avez déjà envoyé un signalement similaire pour ce contenu.",
+    "rate_limited_title": "Un petit instant",
+    "rate_limited_body": "Attendez un peu avant d'envoyer un autre signalement.",
+    "validation_error_title": "Impossible d'envoyer le signalement",
+    "validation_error_body": "Veuillez réessayer dans un instant.",
+    "reasons": {
+      "typo": "Faute d'orthographe",
+      "translation": "Problème de traduction",
+      "unnatural": "Ce n'est pas naturel",
+      "keyword": "Problème de mot-clé / surlignage",
+      "tts": "Problème audio / prononciation",
+      "other": "Autre"
+    }
+  },
   "tabs": {
     "learn": "Apprendre",
     "quiz": "Quiz",

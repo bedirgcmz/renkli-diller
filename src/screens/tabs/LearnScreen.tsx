@@ -24,15 +24,21 @@ import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { SentenceCard } from "@/components/SentenceCard";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { buildPresetSentenceReportInput } from "@/lib/contentReportSnapshot";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { submitContentReport } from "@/services/contentReports";
 import { speak, stopSpeaking } from "@/services/tts";
 import { stripMarkers } from "@/utils/keywords";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 import { QUIZ_CORRECT_COLOR, QUIZ_WRONG_COLOR } from "@/utils/constants";
 import { Sentence, HomeStackParamList, MainStackParamList } from "@/types";
+import type { ContentReportReason } from "@/types/contentReports";
 import * as Haptics from "expo-haptics";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -68,6 +74,7 @@ function ListenCard({
   onReplaySlow,
   colors,
   t,
+  onReportPress,
 }: {
   sentence: Sentence;
   showTarget: boolean;
@@ -79,6 +86,7 @@ function ListenCard({
   onReplaySlow: () => void;
   colors: ThemeColors;
   t: (k: string) => string;
+  onReportPress?: () => void;
 }) {
   return (
     <View style={[listenStyles.card, { backgroundColor: colors.cardBackground }]}>
@@ -116,6 +124,11 @@ function ListenCard({
         >
           <MaterialIcons name="slow-motion-video" size={18} color={colors.primary} />
         </TouchableOpacity>
+        {sentence.is_preset && onReportPress ? (
+          <View style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}>
+            <ReportIconButton onPress={onReportPress} size={34} iconSize={18} />
+          </View>
+        ) : null}
         <View style={[listenStyles.iconBtn, { backgroundColor: colors.backgroundSecondary }]}>
           <FavoriteButton
             sentenceId={sentence.id}
@@ -316,6 +329,11 @@ export default function LearnScreen() {
   const { isHintShown, markHintShown } = useOnboarding();
   const [hintLearnedVisible, setHintLearnedVisible] = useState(false);
   const [hintRemoveVisible, setHintRemoveVisible] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{
+    sentence: Sentence;
+    screenContext: "learn_study" | "learn_listening";
+  } | null>(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const goBackFromLearn = useCallback(() => {
     if (navigation.canGoBack()) {
@@ -439,6 +457,34 @@ export default function LearnScreen() {
     if (s.is_preset) return progressMap[s.id] ?? "new";
     return s.status as "new" | "learning" | "learned";
   };
+
+  const handleSubmitSentenceReport = useCallback(
+    async (reason: ContentReportReason, note: string) => {
+      if (!reportTarget) return;
+
+      setReportSubmitting(true);
+      try {
+        const baseInput = buildPresetSentenceReportInput({
+          sentence: reportTarget.sentence,
+          sourceLang: uiLanguage,
+          targetLang: targetLanguage,
+          screenContext: reportTarget.screenContext,
+        });
+
+        const result = await submitContentReport({
+          ...baseInput,
+          reportReason: reason,
+          userNote: note,
+        });
+
+        setReportTarget(null);
+        showContentReportAlert(t, result);
+      } finally {
+        setReportSubmitting(false);
+      }
+    },
+    [reportTarget, t, targetLanguage, uiLanguage],
+  );
 
   // ── Shared animation ─────────────────────────────────────────────────────────
 
@@ -882,6 +928,12 @@ export default function LearnScreen() {
                           isPreset: currentSentence.is_preset,
                         })
                       }
+                      onReportPress={() =>
+                        setReportTarget({
+                          sentence: currentSentence,
+                          screenContext: "learn_study",
+                        })
+                      }
                     />
                   )}
                   {/* Success overlay */}
@@ -946,6 +998,12 @@ export default function LearnScreen() {
                     onSelectOption={handleListenOption}
                     onReplay={handleReplay}
                     onReplaySlow={handleReplaySlow}
+                    onReportPress={() =>
+                      setReportTarget({
+                        sentence: filteredLearningList[listenIdx],
+                        screenContext: "learn_listening",
+                      })
+                    }
                     colors={colors}
                     t={t}
                   />
@@ -972,6 +1030,13 @@ export default function LearnScreen() {
         title={t("hints.remove_learning_title")}
         body={t("hints.remove_learning_body")}
         onClose={() => setHintRemoveVisible(false)}
+      />
+      <ContentReportSheet
+        visible={!!reportTarget}
+        loading={reportSubmitting}
+        contentType="preset_sentence"
+        onClose={() => !reportSubmitting && setReportTarget(null)}
+        onSubmit={handleSubmitSentenceReport}
       />
     </View>
   );

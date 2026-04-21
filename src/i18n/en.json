@@ -37,6 +37,34 @@
     "why_premium_title": "Why users upgrade to Premium",
     "why_premium_body": "Premium removes the small daily caps and opens the fastest path to a real language habit."
   },
+  "report": {
+    "title": "Report a content issue",
+    "subtitle_generic": "Let us know what looks off. We'll review it.",
+    "subtitle_sentence": "Tell us what looks wrong in this sentence.",
+    "subtitle_reading": "Tell us what looks wrong in this reading text.",
+    "subtitle_dialog": "Tell us what looks wrong in this dialog turn.",
+    "reason_label": "What seems off?",
+    "note_label": "Optional note",
+    "note_placeholder": "Add a short note if it helps.",
+    "submit": "Send report",
+    "sending": "Sending...",
+    "success_title": "Thanks",
+    "success_body": "Your report was sent.",
+    "duplicate_title": "Already reported",
+    "duplicate_body": "You already sent a similar report for this item.",
+    "rate_limited_title": "Slow down a little",
+    "rate_limited_body": "Please wait a bit before sending another report.",
+    "validation_error_title": "Couldn't send report",
+    "validation_error_body": "Please try again in a moment.",
+    "reasons": {
+      "typo": "Spelling mistake",
+      "translation": "Translation issue",
+      "unnatural": "Doesn't sound natural",
+      "keyword": "Keyword / highlight issue",
+      "tts": "Audio / pronunciation issue",
+      "other": "Other"
+    }
+  },
   "tabs": {
     "learn": "Learn",
     "quiz": "Quiz",

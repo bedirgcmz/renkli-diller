@@ -37,6 +37,34 @@
     "why_premium_title": "Varför användare uppgraderar till Premium",
     "why_premium_body": "Premium tar bort små dagliga gränser och gör det lättare att bygga en riktig språkrutin."
   },
+  "report": {
+    "title": "Rapportera innehållsproblem",
+    "subtitle_generic": "Berätta vad som verkar fel så tittar vi på det.",
+    "subtitle_sentence": "Berätta vad som verkar fel i den här meningen.",
+    "subtitle_reading": "Berätta vad som verkar fel i den här texten.",
+    "subtitle_dialog": "Berätta vad som verkar fel i den här dialogturen.",
+    "reason_label": "Vad verkar fel?",
+    "note_label": "Valfri anteckning",
+    "note_placeholder": "Lägg gärna till en kort anteckning.",
+    "submit": "Skicka rapport",
+    "sending": "Skickar...",
+    "success_title": "Tack",
+    "success_body": "Din rapport skickades.",
+    "duplicate_title": "Redan rapporterat",
+    "duplicate_body": "Du har redan skickat en liknande rapport för det här innehållet.",
+    "rate_limited_title": "Ta det lite lugnt",
+    "rate_limited_body": "Vänta en stund innan du skickar en ny rapport.",
+    "validation_error_title": "Rapporten kunde inte skickas",
+    "validation_error_body": "Försök igen om en liten stund.",
+    "reasons": {
+      "typo": "Stavfel",
+      "translation": "Översättningsproblem",
+      "unnatural": "Låter inte naturligt",
+      "keyword": "Problem med nyckelord / markering",
+      "tts": "Ljud- / uttalsproblem",
+      "other": "Annat"
+    }
+  },
   "tabs": {
     "learn": "Lär",
     "quiz": "Quiz",

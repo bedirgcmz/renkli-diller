@@ -28,7 +28,13 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSentenceStore } from "@/store/useSentenceStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { buildPresetSentenceReportInput } from "@/lib/contentReportSnapshot";
+import { submitContentReport } from "@/services/contentReports";
 import { HomeStackParamList, MainStackParamList, Sentence } from "@/types";
+import type { ContentReportReason } from "@/types/contentReports";
 import { buildWordChips, WordChip } from "@/utils/buildSentence";
 import { stripMarkers } from "@/utils/keywords";
 import { VisualBadge } from "@/components/VisualBadge";
@@ -52,12 +58,14 @@ function Header({
   total,
   onBack,
   colors,
+  rightAccessory,
 }: {
   title: string;
   current: number;
   total: number;
   onBack: () => void;
   colors: ReturnType<typeof useTheme>["colors"];
+  rightAccessory?: React.ReactNode;
 }) {
   return (
     <View style={[headerStyles.row, { borderBottomColor: colors.border }]}>
@@ -67,13 +75,16 @@ function Header({
       <Text style={[headerStyles.title, { color: colors.text }]} numberOfLines={1}>
         {title}
       </Text>
-      {total > 0 ? (
-        <Text style={[headerStyles.counter, { color: colors.textSecondary }]}>
-          {current + 1} / {total}
-        </Text>
-      ) : (
-        <View style={headerStyles.counterPlaceholder} />
-      )}
+      <View style={headerStyles.rightArea}>
+        {rightAccessory}
+        {total > 0 ? (
+          <Text style={[headerStyles.counter, { color: colors.textSecondary }]}>
+            {current + 1} / {total}
+          </Text>
+        ) : (
+          <View style={headerStyles.counterPlaceholder} />
+        )}
+      </View>
     </View>
   );
 }
@@ -102,6 +113,13 @@ const headerStyles = StyleSheet.create({
     textAlign: "right",
     fontSize: 13,
     fontWeight: "500",
+  },
+  rightArea: {
+    minWidth: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 8,
   },
   counterPlaceholder: {
     width: 48,
@@ -293,6 +311,8 @@ export default function BuildSentenceScreen() {
 
   // Info modal
   const [infoVisible, setInfoVisible] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   // Validate / feedback state
   type Phase = "arranging" | "correct" | "wrong";
@@ -352,6 +372,34 @@ export default function BuildSentenceScreen() {
 
   const total = learningSentences.length;
   const currentSentence = learningSentences[currentIndex] ?? null;
+
+  const handleSubmitReport = useCallback(
+    async (reason: ContentReportReason, note: string) => {
+      if (!currentSentence || !currentSentence.is_preset) return;
+
+      setReportSubmitting(true);
+      try {
+        const baseInput = buildPresetSentenceReportInput({
+          sentence: currentSentence,
+          sourceLang: uiLanguage,
+          targetLang: targetLanguage,
+          screenContext: "build_sentence",
+        });
+
+        const result = await submitContentReport({
+          ...baseInput,
+          reportReason: reason,
+          userNote: note,
+        });
+
+        setReportVisible(false);
+        showContentReportAlert(t, result);
+      } finally {
+        setReportSubmitting(false);
+      }
+    },
+    [currentSentence, t, targetLanguage, uiLanguage],
+  );
 
   // Rebuild word chips whenever the current sentence changes
   useEffect(() => {
@@ -632,6 +680,11 @@ export default function BuildSentenceScreen() {
         total={total}
         onBack={() => navigation.goBack()}
         colors={colors}
+        rightAccessory={
+          currentSentence?.is_preset ? (
+            <ReportIconButton onPress={() => setReportVisible(true)} size={28} iconSize={17} />
+          ) : undefined
+        }
       />
 
       <ScrollView
@@ -797,6 +850,14 @@ export default function BuildSentenceScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <ContentReportSheet
+        visible={reportVisible}
+        loading={reportSubmitting}
+        contentType="preset_sentence"
+        onClose={() => !reportSubmitting && setReportVisible(false)}
+        onSubmit={handleSubmitReport}
+      />
 
       {/* ── Bottom action button ── */}
       <View style={[styles.bottomBar, isSmallScreen && { paddingVertical: 8 }, { borderTopColor: colors.border, backgroundColor: colors.background }]}>

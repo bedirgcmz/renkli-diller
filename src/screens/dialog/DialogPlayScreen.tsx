@@ -14,15 +14,21 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/hooks/useTheme";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useDialogStore } from "@/store/useDialogStore";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { buildDialogTurnReportInput } from "@/lib/contentReportSnapshot";
+import { submitContentReport } from "@/services/contentReports";
 import {
   HomeStackParamList,
   SupportedLanguage,
   DialogTurn,
   DialogTurnOption,
 } from "@/types";
+import type { ContentReportReason } from "@/types/contentReports";
 
 type Nav = NativeStackNavigationProp<HomeStackParamList>;
 
@@ -68,7 +74,7 @@ export default function DialogPlayScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const { user } = useAuthStore();
-  const { targetLanguage } = useSettingsStore();
+  const { uiLanguage, targetLanguage } = useSettingsStore();
   const lang = (targetLanguage as SupportedLanguage) ?? "en";
 
   const {
@@ -92,6 +98,8 @@ export default function DialogPlayScreen() {
   const [sessionDone, setSessionDone] = useState(false);
   // Finishing (calling completeSession) in progress
   const [finishing, setFinishing] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const currentTurn = turns[currentTurnIndex] ?? null;
   const isLastTurn  = currentTurnIndex === turns.length - 1;
@@ -188,6 +196,49 @@ export default function DialogPlayScreen() {
   const scenarioTitle = getLangKey(activeScenario as any, "title", lang, "title_en");
   const totalTurns    = turns.length;
 
+  const handleSubmitReport = async (reason: ContentReportReason, note: string) => {
+    if (!activeScenario || !currentTurn) return;
+
+    setReportSubmitting(true);
+    try {
+      const lastHistoryEntry = history[history.length - 1] ?? null;
+      const baseInput = buildDialogTurnReportInput({
+        scenario: activeScenario,
+        turn: currentTurn,
+        sourceLang: uiLanguage,
+        targetLang: targetLanguage,
+        visibleScenarioTitle: scenarioTitle,
+        visibleMessage: getMessage(currentTurn, lang),
+        visibleOptions: (currentTurn.options ?? []).map((option) => ({
+          id: option.id,
+          optionIndex: option.option_index,
+          isCorrect: option.is_correct,
+          visibleText: getOptionText(option, lang),
+        })),
+        screenContext: "dialog_play",
+        previousContext: lastHistoryEntry
+          ? {
+              turnId: lastHistoryEntry.turn.id,
+              turnIndex: lastHistoryEntry.turn.turn_index,
+              message: getMessage(lastHistoryEntry.turn, lang),
+              chosenOption: getOptionText(lastHistoryEntry.chosenOption, lang),
+            }
+          : null,
+      });
+
+      const result = await submitContentReport({
+        ...baseInput,
+        reportReason: reason,
+        userNote: note,
+      });
+
+      setReportVisible(false);
+      showContentReportAlert(t, result);
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       {/* ── Header ── */}
@@ -209,10 +260,13 @@ export default function DialogPlayScreen() {
           </Text>
         </View>
 
-        <View style={[styles.turnPill, { backgroundColor: ACCENT + "22" }]}>
-          <Text style={[styles.turnPillText, { color: ACCENT }]}>
-            {Math.min(history.length + (sessionDone ? 0 : 1), totalTurns)}/{totalTurns}
-          </Text>
+        <View style={styles.headerRight}>
+          <ReportIconButton onPress={() => setReportVisible(true)} size={32} iconSize={17} />
+          <View style={[styles.turnPill, { backgroundColor: ACCENT + "22" }]}>
+            <Text style={[styles.turnPillText, { color: ACCENT }]}>
+              {Math.min(history.length + (sessionDone ? 0 : 1), totalTurns)}/{totalTurns}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -326,6 +380,14 @@ export default function DialogPlayScreen() {
         <View style={{ height: sessionDone ? 100 : 32 }} />
       </ScrollView>
 
+      <ContentReportSheet
+        visible={reportVisible}
+        loading={reportSubmitting}
+        contentType="dialog_turn"
+        onClose={() => !reportSubmitting && setReportVisible(false)}
+        onSubmit={handleSubmitReport}
+      />
+
       {/* ── Finish button (only after last correct answer) ── */}
       {sessionDone && (
         <View style={[styles.bottomBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
@@ -406,6 +468,7 @@ const styles = StyleSheet.create({
   headerCenter:        { flex: 1 },
   headerTitle:         { fontSize: 15, fontWeight: "700", lineHeight: 20 },
   headerSub:           { fontSize: 12, lineHeight: 16 },
+  headerRight:         { flexDirection: "row", alignItems: "center", gap: 8 },
   turnPill:            { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   turnPillText:        { fontSize: 13, fontWeight: "700" },
 

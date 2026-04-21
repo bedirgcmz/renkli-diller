@@ -37,6 +37,34 @@
     "why_premium_title": "Por que os usuários fazem upgrade para o Premium",
     "why_premium_body": "O Premium remove pequenos limites diários e abre o caminho mais fluido para criar um hábito real com o idioma."
   },
+  "report": {
+    "title": "Reportar problema de conteúdo",
+    "subtitle_generic": "Conte para nós o que parece errado. Vamos revisar.",
+    "subtitle_sentence": "Conte para nós o que parece errado nesta frase.",
+    "subtitle_reading": "Conte para nós o que parece errado neste texto.",
+    "subtitle_dialog": "Conte para nós o que parece errado neste turno do diálogo.",
+    "reason_label": "O que parece errado?",
+    "note_label": "Nota opcional",
+    "note_placeholder": "Se quiser, adicione uma nota curta.",
+    "submit": "Enviar relato",
+    "sending": "Enviando...",
+    "success_title": "Obrigado",
+    "success_body": "Seu relato foi enviado.",
+    "duplicate_title": "Já foi relatado",
+    "duplicate_body": "Você já enviou um relato parecido para este conteúdo.",
+    "rate_limited_title": "Mais devagar",
+    "rate_limited_body": "Espere um pouco antes de enviar outro relato.",
+    "validation_error_title": "Não foi possível enviar o relato",
+    "validation_error_body": "Tente novamente daqui a pouco.",
+    "reasons": {
+      "typo": "Erro de ortografia",
+      "translation": "Problema de tradução",
+      "unnatural": "Não soa natural",
+      "keyword": "Problema de palavra-chave / destaque",
+      "tts": "Problema de áudio / pronúncia",
+      "other": "Outro"
+    }
+  },
   "tabs": {
     "learn": "Aprender",
     "quiz": "Quiz",

@@ -19,10 +19,16 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { Category, MainStackParamList } from "@/types";
+import { ContentReportSheet } from "@/components/report/ContentReportSheet";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
+import { Category, MainStackParamList, Sentence } from "@/types";
 import { getCategoryName } from "@/utils/categoryHelpers";
 import { HintBottomSheet } from "@/components/HintBottomSheet";
 import { useOnboarding } from "@/providers/OnboardingProvider";
+import { buildPresetSentenceReportInput } from "@/lib/contentReportSnapshot";
+import { showContentReportAlert } from "@/lib/contentReportAlerts";
+import { submitContentReport } from "@/services/contentReports";
+import type { ContentReportReason } from "@/types/contentReports";
 
 export default function CategoryBrowserScreen() {
   const { t } = useTranslation();
@@ -30,13 +36,15 @@ export default function CategoryBrowserScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { categories, presetSentences, loading, loadCategories, loadPresetSentences, addToLearningList, removeFromLearningList } = useSentenceStore();
   const { progressMap } = useProgressStore();
-  const { uiLanguage } = useSettingsStore();
+  const { uiLanguage, targetLanguage } = useSettingsStore();
   const isPremium = useAuthStore((s) => s.user?.is_premium ?? false);
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [initialized, setInitialized] = useState(false);
   const { isHintShown, markHintShown } = useOnboarding();
   const [hintVisible, setHintVisible] = useState(false);
+  const [reportTarget, setReportTarget] = useState<Sentence | null>(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   useEffect(() => {
     loadCategories().finally(() => setInitialized(true));
@@ -51,6 +59,31 @@ export default function CategoryBrowserScreen() {
     }
     setSelectedCategory(cat);
     loadPresetSentences(cat.id);
+  };
+
+  const handleSubmitSentenceReport = async (reason: ContentReportReason, note: string) => {
+    if (!reportTarget) return;
+
+    setReportSubmitting(true);
+    try {
+      const baseInput = buildPresetSentenceReportInput({
+        sentence: reportTarget,
+        sourceLang: uiLanguage,
+        targetLang: targetLanguage,
+        screenContext: "category_browser_sentence",
+      });
+
+      const result = await submitContentReport({
+        ...baseInput,
+        reportReason: reason,
+        userNote: note,
+      });
+
+      setReportTarget(null);
+      showContentReportAlert(t, result);
+    } finally {
+      setReportSubmitting(false);
+    }
   };
 
   // ─── Sentence list view ───────────────────────────────────────────────────
@@ -130,6 +163,11 @@ export default function CategoryBrowserScreen() {
                         <Text style={styles.addBtnText}>{t("learn.add_to_list")}</Text>
                       </TouchableOpacity>
                     )}
+                    <ReportIconButton
+                      onPress={() => setReportTarget(item)}
+                      size={26}
+                      iconSize={16}
+                    />
                     <FavoriteButton sentenceId={item.id} isPreset={true} size={18} />
                   </View>
                 </View>
@@ -144,6 +182,13 @@ export default function CategoryBrowserScreen() {
             }
           />
         )}
+        <ContentReportSheet
+          visible={!!reportTarget}
+          loading={reportSubmitting}
+          contentType="preset_sentence"
+          onClose={() => !reportSubmitting && setReportTarget(null)}
+          onSubmit={handleSubmitSentenceReport}
+        />
       </SafeAreaView>
     );
   }

@@ -37,6 +37,34 @@
     "why_premium_title": "Kullanıcılar neden Premium'a geçiyor?",
     "why_premium_body": "Premium küçük günlük sınırları kaldırır ve gerçek bir dil rutini kurmanın en hızlı yolunu açar."
   },
+  "report": {
+    "title": "İçerik hatasını bildir",
+    "subtitle_generic": "Ters giden kısmı bize bildir. Kontrol edelim.",
+    "subtitle_sentence": "Bu cümlede yanlış görünen kısmı bize bildir.",
+    "subtitle_reading": "Bu metinde yanlış görünen kısmı bize bildir.",
+    "subtitle_dialog": "Bu diyalog turunda yanlış görünen kısmı bize bildir.",
+    "reason_label": "Sorun ne görünüyor?",
+    "note_label": "İsteğe bağlı not",
+    "note_placeholder": "İstersen kısa bir not ekleyebilirsin.",
+    "submit": "Bildir",
+    "sending": "Gönderiliyor...",
+    "success_title": "Teşekkürler",
+    "success_body": "Bildirimin alındı.",
+    "duplicate_title": "Zaten bildirildi",
+    "duplicate_body": "Bu içerik için benzer bir bildirimi zaten göndermiştin.",
+    "rate_limited_title": "Biraz yavaşlayalım",
+    "rate_limited_body": "Yeni bir bildirim göndermeden önce biraz bekle.",
+    "validation_error_title": "Bildirim gönderilemedi",
+    "validation_error_body": "Lütfen birazdan tekrar dene.",
+    "reasons": {
+      "typo": "Yazım hatası",
+      "translation": "Çeviri hatası",
+      "unnatural": "Doğal değil",
+      "keyword": "Anahtar kelime / vurgu hatası",
+      "tts": "Seslendirme / telaffuz hatası",
+      "other": "Diğer"
+    }
+  },
   "tabs": {
     "learn": "Öğren",
     "quiz": "Quiz",

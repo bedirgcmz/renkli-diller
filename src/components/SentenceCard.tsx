@@ -9,6 +9,7 @@ import { stripMarkers } from "@/utils/keywords";
 import { GradientView } from "@/components/GradientView";
 import { KeywordText } from "@/components/KeywordText";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ReportIconButton } from "@/components/report/ReportIconButton";
 import { VisualBadge } from "@/components/VisualBadge";
 import { Sentence, SupportedLanguage } from "@/types";
 
@@ -39,6 +40,7 @@ export interface SentenceCardProps {
   onForgot: () => void;
   onRemoveFromList?: () => void;
   onEdit?: () => void;
+  onReportPress?: () => void;
   showTarget?: boolean;
 }
 
@@ -52,6 +54,7 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
   onForgot,
   onRemoveFromList,
   onEdit,
+  onReportPress,
   showTarget = true,
 }) => {
   const { t } = useTranslation();
@@ -158,6 +161,14 @@ export const SentenceCard: React.FC<SentenceCardProps> = ({
               />
             </Pressable>
           )}
+          {sentence.is_preset && onReportPress ? (
+            <ReportIconButton
+              onPress={onReportPress}
+              size={34}
+              iconSize={18}
+              backgroundColor={colors.backgroundSecondary}
+            />
+          ) : null}
           <FavoriteButton
             sentenceId={sentence.id}
             isPreset={sentence.is_preset ?? false}
