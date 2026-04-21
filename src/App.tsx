@@ -27,10 +27,16 @@ import type { SupportedLanguage } from "@/types";
 
 const SUPPORTED_LANGUAGES: SupportedLanguage[] = ["tr", "en", "sv", "de", "es", "fr", "pt"];
 
-function resolveSystemLanguage(): SupportedLanguage {
+function resolveStartupLanguagePair(): {
+  uiLanguage: SupportedLanguage;
+  targetLanguage: SupportedLanguage;
+} {
   const locale = Intl.DateTimeFormat().resolvedOptions().locale?.toLowerCase() ?? "en";
   const baseLanguage = locale.split("-")[0] as SupportedLanguage;
-  return SUPPORTED_LANGUAGES.includes(baseLanguage) ? baseLanguage : "en";
+  const uiLanguage = SUPPORTED_LANGUAGES.includes(baseLanguage) ? baseLanguage : "en";
+  const targetLanguage: SupportedLanguage = uiLanguage === "en" ? "de" : "en";
+
+  return { uiLanguage, targetLanguage };
 }
 
 export default function App() {
@@ -58,8 +64,10 @@ export default function App() {
 
     void (async () => {
       try {
+        const { uiLanguage, targetLanguage } = resolveStartupLanguagePair();
         await bootstrapSettings({
-          systemLanguage: resolveSystemLanguage(),
+          systemLanguage: uiLanguage,
+          systemTargetLanguage: targetLanguage,
           systemTheme: systemColorScheme === "dark" ? "dark" : "light",
         });
 

@@ -40,6 +40,7 @@ interface SettingsState extends Settings {
   setTTSVoice: (voice: string) => Promise<void>;
   bootstrap: (input: {
     systemLanguage: SupportedLanguage;
+    systemTargetLanguage: SupportedLanguage;
     systemTheme: "light" | "dark";
   }) => Promise<void>;
   loadSettings: (force?: boolean) => Promise<void>;
@@ -70,13 +71,23 @@ function getSettingsStorageKey(userId: string | null): string {
 
 function createSystemDefaults(
   systemLanguage: SupportedLanguage,
+  systemTargetLanguage: SupportedLanguage,
   systemTheme: "light" | "dark",
 ): Settings {
   return {
     ...DEFAULT_SETTINGS,
     uiLanguage: systemLanguage,
-    targetLanguage: "en",
+    targetLanguage: systemTargetLanguage,
     theme: systemTheme,
+  };
+}
+
+function createBootstrapAwareDefaults(state: SettingsState): Settings {
+  return {
+    ...DEFAULT_SETTINGS,
+    uiLanguage: state.uiLanguage,
+    targetLanguage: state.targetLanguage,
+    theme: state.theme,
   };
 }
 
@@ -240,14 +251,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await get().saveSettings({ ttsVoice: voice });
   },
 
-  bootstrap: async ({ systemLanguage, systemTheme }) => {
+  bootstrap: async ({ systemLanguage, systemTargetLanguage, systemTheme }) => {
     if (get().bootstrapped) return;
 
     try {
       const userId = await getCurrentUserId();
       const userStorageKey = getSettingsStorageKey(userId);
       const guestStorageKey = getSettingsStorageKey(null);
-      const systemDefaults = createSystemDefaults(systemLanguage, systemTheme);
+      const systemDefaults = createSystemDefaults(
+        systemLanguage,
+        systemTargetLanguage,
+        systemTheme,
+      );
 
       const readLegacyInto = async (storageKey: string): Promise<string | null> => {
         let stored = await AsyncStorage.getItem(storageKey);
@@ -301,7 +316,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       if (__DEV__) console.error("Error bootstrapping settings:", error);
       set((state) => ({
         ...state,
-        ...createSystemDefaults(systemLanguage, systemTheme),
+        ...createSystemDefaults(systemLanguage, systemTargetLanguage, systemTheme),
         bootstrapped: true,
       }));
     }
@@ -396,7 +411,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           return;
         }
 
-        const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
+        const resolvedDefaults = await reconcileNotificationState(
+          createBootstrapAwareDefaults(get()),
+        );
         set({
           ...resolvedDefaults,
           bootstrapped: true,
@@ -436,7 +453,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         return;
       }
 
-      const resolvedDefaults = await reconcileNotificationState(DEFAULT_SETTINGS);
+      const resolvedDefaults = await reconcileNotificationState(
+        createBootstrapAwareDefaults(get()),
+      );
       set({
         ...resolvedDefaults,
         bootstrapped: true,
@@ -449,7 +468,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     } catch (error) {
       if (__DEV__) console.error("Error loading settings:", error);
       set({
-        ...DEFAULT_SETTINGS,
+        ...createBootstrapAwareDefaults(get()),
         bootstrapped: true,
         loading: false,
         initialized: true,
