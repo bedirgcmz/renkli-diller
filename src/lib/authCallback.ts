@@ -66,6 +66,9 @@ export async function establishSessionFromCallbackUrl(url: string): Promise<{
   const accessToken = params.get("access_token");
   const refreshToken = params.get("refresh_token");
 
+  // Keep this strict unless we confirm a real callback shape that differs.
+  // OAuth and password-reset returns both rely on a complete token pair so
+  // the app can seed a recoverable Supabase session immediately.
   if (!accessToken || !refreshToken) {
     return {
       handled: true,

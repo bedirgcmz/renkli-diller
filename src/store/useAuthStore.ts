@@ -92,11 +92,16 @@ let rcListenerRemover: (() => void) | null = null;
 let lastHydratedSessionKey: string | null = null;
 let inFlightHydrationKey: string | null = null;
 let inFlightHydrationPromise: Promise<void> | null = null;
+let pendingExplicitCleanupReason: "manual_signout" | "delete_account" | null = null;
+let lastCleanupReason: "manual_signout" | "delete_account" | "signed_out" | "store_clear" | null =
+  null;
+let lastCleanupAt = 0;
 
 const AVATAR_BUCKET = "user_profile_img";
 const AVATAR_FILE_PREFIX = "avatar.";
 const AVATAR_FALLBACK_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "heic", "heif"];
 const LEGACY_SESSION_STORAGE_KEY = "supabase_session";
+const EXPLICIT_CLEANUP_GUARD_MS = 3000;
 
 function clearClientStores() {
   useSentenceStore.getState().clear();
@@ -323,15 +328,6 @@ function syncProfileCaches(
 }
 
 export const useAuthStore = create<AuthState>((set, get) => {
-  const persistLegacySessionCopy = async (session: any | null) => {
-    if (!session) {
-      await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
-      return;
-    }
-
-    await AsyncStorage.setItem(LEGACY_SESSION_STORAGE_KEY, JSON.stringify(session));
-  };
-
   const extractSessionTokens = (
     session: any
   ): { access_token: string; refresh_token: string } | null => {
@@ -429,7 +425,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       });
 
       attachRevenueCatListener();
-      await persistLegacySessionCopy(session);
       lastHydratedSessionKey = hydrationKey;
     })();
 
@@ -452,7 +447,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
     });
   };
 
-  const clearAuthenticatedState = async () => {
+  const clearAuthenticatedState = async (
+    reason: "manual_signout" | "delete_account" | "signed_out" | "store_clear"
+  ) => {
     if (rcListenerRemover) {
       rcListenerRemover();
       rcListenerRemover = null;
@@ -495,6 +492,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
     lastHydratedSessionKey = null;
     inFlightHydrationKey = null;
     inFlightHydrationPromise = null;
+    lastCleanupReason = reason;
+    lastCleanupAt = Date.now();
+    pendingExplicitCleanupReason = null;
     await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
     await clearAITrialCache();
   };
@@ -567,9 +567,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         // Start real-time RC listener (clears any previous one first)
         attachRevenueCatListener();
-
-        // Store session in AsyncStorage
-        await persistLegacySessionCopy(data.session);
       }
 
       return { success: true };
@@ -672,7 +669,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         // Start real-time RC listener (clears any previous one first)
         attachRevenueCatListener();
-        await persistLegacySessionCopy(data.session);
       }
 
       return { success: true };
@@ -770,15 +766,18 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     set({ loading: true });
     try {
+      pendingExplicitCleanupReason = "manual_signout";
       // Remove RC listener before signing out
       await supabase.auth.signOut();
-      await clearAuthenticatedState();
+      console.log("[auth] manual_signout_cleanup");
+      await clearAuthenticatedState("manual_signout");
       await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
       set({
         loading: false,
       });
     } catch (error) {
+      pendingExplicitCleanupReason = null;
       set({ loading: false });
       if (__DEV__) console.error("Sign out error:", error);
     }
@@ -798,12 +797,15 @@ export const useAuthStore = create<AuthState>((set, get) => {
         headers: { Authorization: `Bearer ${refreshData.session.access_token}` },
       });
       if (error) {
+        pendingExplicitCleanupReason = null;
         set({ loading: false });
         return { success: false, error: error.message };
       }
 
       // Edge function deleted the user — clean up locally
-      await clearAuthenticatedState();
+      pendingExplicitCleanupReason = "delete_account";
+      console.log("[auth] delete_account_cleanup");
+      await clearAuthenticatedState("delete_account");
       await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
       set({
@@ -811,6 +813,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       });
       return { success: true };
     } catch (error: any) {
+      pendingExplicitCleanupReason = null;
       set({ loading: false });
       if (__DEV__) console.error("Delete account error:", error);
       return { success: false, error: error.message ?? "An unexpected error occurred" };
@@ -1067,21 +1070,32 @@ export const useAuthStore = create<AuthState>((set, get) => {
               : state.user,
           }));
 
-          void persistLegacySessionCopy(session);
-
           if (!get().user || get().user?.id !== session.user.id) {
             primeAuthenticatedSession(session);
             scheduleHydration(session, event);
           }
         } else if (event === "SIGNED_OUT") {
           void (async () => {
+            const explicitCleanupInFlight = pendingExplicitCleanupReason;
+            const recentExplicitCleanup =
+              (lastCleanupReason === "manual_signout" || lastCleanupReason === "delete_account") &&
+              Date.now() - lastCleanupAt < EXPLICIT_CLEANUP_GUARD_MS;
+
+            if (explicitCleanupInFlight || recentExplicitCleanup) {
+              console.log(
+                `[auth] cleanup_skipped_explicit reason=${explicitCleanupInFlight ?? lastCleanupReason}`
+              );
+              pendingExplicitCleanupReason = null;
+              return;
+            }
+
             try {
               const {
                 data: { session: currentSession },
               } = await supabase.auth.getSession();
 
               if (currentSession?.user) {
-                console.log("[auth] SIGNED_OUT ignored because a recoverable session still exists");
+                console.log("[auth] cleanup_skipped_recoverable");
                 primeAuthenticatedSession(currentSession);
                 await hydrateAuthenticatedSession(currentSession);
                 return;
@@ -1090,7 +1104,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
               console.error("[auth] post-SIGNED_OUT verification failed:", error);
             }
 
-            await clearAuthenticatedState();
+            console.log("[auth] cleanup_confirmed_signed_out");
+            await clearAuthenticatedState("signed_out");
           })();
         }
       });
@@ -1106,7 +1121,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
 
       if (currentSession?.user) {
-        console.log("[auth] initialize restored Supabase persisted session");
+        console.log("[auth] initialize restored session source=supabase_persisted");
         primeAuthenticatedSession(currentSession);
         // Pre-populate stores from cache so screens have data on first render.
         await hydrateStoresFromCache(currentSession.user.id).catch((e) => {
@@ -1118,14 +1133,17 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
 
       // Legacy fallback: previous builds stored a manual copy in AsyncStorage.
+      // This is migration-only: once the session is restored into Supabase,
+      // remove the legacy key immediately so it cannot act as a second source.
       const storedSession = await AsyncStorage.getItem(LEGACY_SESSION_STORAGE_KEY);
       if (storedSession) {
+        console.log("[auth] legacy_read");
         try {
           const parsedSession = JSON.parse(storedSession);
           const sessionTokens = extractSessionTokens(parsedSession);
 
           if (!sessionTokens) {
-            console.log("[auth] removing malformed legacy session copy");
+            console.log("[auth] legacy_removed reason=malformed");
             await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
           } else {
             const {
@@ -1134,10 +1152,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
             } = await supabase.auth.setSession(sessionTokens);
 
             if (sessionError || !restoredData.session?.user) {
-              console.log("[auth] removing stale legacy session copy");
+              console.log("[auth] legacy_removed reason=stale");
               await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
             } else {
-              console.log("[auth] initialize restored session from legacy fallback");
+              console.log("[auth] legacy_removed reason=migrated");
+              await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+              console.log("[auth] initialize restored session source=legacy_fallback");
               primeAuthenticatedSession(restoredData.session);
               await hydrateStoresFromCache(restoredData.session.user.id).catch((e) => {
                 console.error("[auth] hydrateStoresFromCache (legacy) failed:", e);
@@ -1149,6 +1169,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           }
         } catch (error) {
           console.error("[auth] failed to parse legacy session copy:", error);
+          console.log("[auth] legacy_removed reason=parse_error");
           await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
         }
       }
@@ -1166,6 +1187,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
       authSubscription = null;
     }
     if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
+    pendingExplicitCleanupReason = null;
+    lastCleanupReason = "store_clear";
+    lastCleanupAt = Date.now();
     set({
       user: null,
       session: null,
