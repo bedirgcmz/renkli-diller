@@ -1102,6 +1102,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
 
       // Legacy fallback: previous builds stored a manual copy in AsyncStorage.
+      // This is migration-only: once the session is restored into Supabase,
+      // remove the legacy key immediately so it cannot act as a second source.
       const storedSession = await AsyncStorage.getItem(LEGACY_SESSION_STORAGE_KEY);
       if (storedSession) {
         try {
@@ -1121,6 +1123,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
               console.log("[auth] removing stale legacy session copy");
               await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
             } else {
+              await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
               console.log("[auth] initialize restored session from legacy fallback");
               primeAuthenticatedSession(restoredData.session);
               await hydrateStoresFromCache(restoredData.session.user.id).catch((e) => {
