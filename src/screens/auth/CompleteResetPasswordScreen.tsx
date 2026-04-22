@@ -31,12 +31,12 @@ export default function CompleteResetPasswordScreen() {
     setMessage(null);
 
     if (password.trim().length < 6) {
-      setError(t("settings.password_too_short"));
+      setError(t("profile.password_too_short"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(t("settings.password_mismatch"));
+      setError(t("profile.password_mismatch"));
       return;
     }
 
@@ -45,11 +45,11 @@ export default function CompleteResetPasswordScreen() {
     setSubmitting(false);
 
     if (!result.success) {
-      setError(result.error ?? t("settings.password_update_error"));
+      setError(result.error ?? t("profile.password_update_error"));
       return;
     }
 
-    setMessage(t("settings.password_updated"));
+    setMessage(t("profile.password_updated"));
     clearPasswordRecovery();
   };
 
@@ -59,14 +59,14 @@ export default function CompleteResetPasswordScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={[styles.title, { color: colors.text }]}>{t("settings.change_password")}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t("profile.change_password")}</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           {t("onboarding.forgot_password")}
         </Text>
 
         <TextInput
           style={[styles.input, { borderColor: colors.border, color: colors.text }]}
-          placeholder={t("settings.new_password")}
+          placeholder={t("profile.new_password")}
           placeholderTextColor={colors.textSecondary}
           secureTextEntry
           value={password}
@@ -76,7 +76,7 @@ export default function CompleteResetPasswordScreen() {
 
         <TextInput
           style={[styles.input, { borderColor: colors.border, color: colors.text }]}
-          placeholder={t("settings.confirm_new_password")}
+          placeholder={t("profile.confirm_new_password")}
           placeholderTextColor={colors.textSecondary}
           secureTextEntry
           value={confirmPassword}
@@ -96,7 +96,7 @@ export default function CompleteResetPasswordScreen() {
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>{t("settings.change_password")}</Text>
+            <Text style={styles.buttonText}>{t("profile.change_password")}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

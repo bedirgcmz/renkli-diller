@@ -25,6 +25,13 @@ import i18n from "@/i18n";
 
 const Stack = createNativeStackNavigator();
 const WELCOME_BACK_TOAST_SESSION_KEY = "welcome_back_toast_session_key";
+const REMEMBERED_SHELL_SESSION_KEY = "remembered_shell_session_key";
+const REMEMBERED_SHELL_MIN_MS = 1400;
+const LANGUAGE_NOTICE_DELAY_MS = 900;
+
+function buildStartupSessionKey(userId: string, session: any) {
+  return `${userId}:${session?.refresh_token ?? session?.access_token ?? "session"}`;
+}
 
 function StartupLoadingScreen({
   title,
@@ -182,8 +189,15 @@ export default function AppNavigator() {
   // Track eager load per user so we don't repeat it on every render
   const eagerLoadedForUser = useRef<string | null>(null);
   const rememberedShellUserId = useRef<string | null>(null);
+  const rememberedShellSessionKeyRef = useRef<string | null>(null);
   const shownLanguageNoticeKey = useRef<string | null>(null);
+  const scheduledLanguageNoticeKey = useRef<string | null>(null);
+  const languageNoticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rememberedShellHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rememberedShellStartedAtRef = useRef<number | null>(null);
   const [welcomeBackToast, setWelcomeBackToast] = useState<string | null>(null);
+  const [rememberedShellVisible, setRememberedShellVisible] = useState(false);
+  const [rememberedShellEligible, setRememberedShellEligible] = useState(false);
 
   // ── Auth initialisation ───────────────────────────────────────────────────
   useEffect(() => {
@@ -297,9 +311,27 @@ export default function AppNavigator() {
 
   // ── Language preference alert ──────────────────────────────────────────────
   useEffect(() => {
-    if (!user || !pendingLanguagePreferenceNotice) return;
-    if (!settingsReadyForCurrentUser || settingsLoading) return;
-    if (i18n.language !== pendingLanguagePreferenceNotice.uiLanguage) return;
+    if (languageNoticeTimerRef.current) {
+      clearTimeout(languageNoticeTimerRef.current);
+      languageNoticeTimerRef.current = null;
+    }
+
+    if (!user || !pendingLanguagePreferenceNotice) {
+      scheduledLanguageNoticeKey.current = null;
+      return;
+    }
+    if (!settingsReadyForCurrentUser || settingsLoading) {
+      scheduledLanguageNoticeKey.current = null;
+      return;
+    }
+    if (i18n.language !== pendingLanguagePreferenceNotice.uiLanguage) {
+      scheduledLanguageNoticeKey.current = null;
+      return;
+    }
+    if (rememberedShellVisible || welcomeBackToast) {
+      scheduledLanguageNoticeKey.current = null;
+      return;
+    }
 
     const noticeKey = [
       user.id,
@@ -309,61 +341,164 @@ export default function AppNavigator() {
       targetLanguage,
     ].join(":");
 
-    if (shownLanguageNoticeKey.current === noticeKey) return;
-    shownLanguageNoticeKey.current = noticeKey;
+    if (
+      shownLanguageNoticeKey.current === noticeKey ||
+      scheduledLanguageNoticeKey.current === noticeKey
+    ) {
+      return;
+    }
+
+    scheduledLanguageNoticeKey.current = noticeKey;
 
     const moreTabLabel = t("tabs.more", { defaultValue: "More" });
     const settingsLabel = t("common.settings", { defaultValue: t("settings.title") });
 
-    clearPendingLanguagePreferenceNotice();
+    languageNoticeTimerRef.current = setTimeout(() => {
+      scheduledLanguageNoticeKey.current = null;
+      shownLanguageNoticeKey.current = noticeKey;
+      clearPendingLanguagePreferenceNotice();
 
-    Alert.alert(
-      t("onboarding.saved_language_settings_title"),
-      t("onboarding.saved_language_settings_body", {
-        pair: `${uiLanguage.toUpperCase()}-${targetLanguage.toUpperCase()}`,
-        moreTab: moreTabLabel,
-        settingsLabel,
-      }),
-      [
-        {
-          text: t("common.ok"),
-          onPress: () => {
-            shownLanguageNoticeKey.current = null;
+      Alert.alert(
+        t("onboarding.saved_language_settings_title"),
+        t("onboarding.saved_language_settings_body", {
+          pair: `${uiLanguage.toUpperCase()}-${targetLanguage.toUpperCase()}`,
+          moreTab: moreTabLabel,
+          settingsLabel,
+        }),
+        [
+          {
+            text: t("common.ok"),
+            onPress: () => {
+              shownLanguageNoticeKey.current = null;
+            },
           },
-        },
-      ],
-    );
+        ],
+      );
+    }, LANGUAGE_NOTICE_DELAY_MS);
+
+    return () => {
+      if (languageNoticeTimerRef.current) {
+        clearTimeout(languageNoticeTimerRef.current);
+        languageNoticeTimerRef.current = null;
+      }
+      if (scheduledLanguageNoticeKey.current === noticeKey) {
+        scheduledLanguageNoticeKey.current = null;
+      }
+    };
   }, [
     clearPendingLanguagePreferenceNotice,
     pendingLanguagePreferenceNotice,
+    rememberedShellVisible,
     settingsLoading,
     settingsReadyForCurrentUser,
     t,
     targetLanguage,
     uiLanguage,
     user,
+    welcomeBackToast,
   ]);
 
   useEffect(() => {
     if (pendingLanguagePreferenceNotice) return;
     shownLanguageNoticeKey.current = null;
+    scheduledLanguageNoticeKey.current = null;
   }, [pendingLanguagePreferenceNotice, user?.id]);
 
   const hasRestorableSession = !!session?.user || !!user;
   const showingRememberedShell =
     hasRestorableSession && (!initialized || !settingsReadyForCurrentUser || settingsLoading);
+  const shouldShowRememberedShell = showingRememberedShell && rememberedShellEligible;
 
   useEffect(() => {
-    if (showingRememberedShell && user?.id) {
+    if (!user?.id || !session || !hasRestorableSession) {
+      rememberedShellSessionKeyRef.current = null;
+      setRememberedShellEligible(false);
+      return;
+    }
+
+    const activeSessionKey = buildStartupSessionKey(user.id, session);
+    rememberedShellSessionKeyRef.current = activeSessionKey;
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const shownSessionKey = await AsyncStorage.getItem(REMEMBERED_SHELL_SESSION_KEY);
+        if (!cancelled) {
+          setRememberedShellEligible(shownSessionKey !== activeSessionKey);
+        }
+      } catch {
+        if (!cancelled) {
+          setRememberedShellEligible(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasRestorableSession, session, user?.id]);
+
+  useEffect(() => {
+    if (!shouldShowRememberedShell || !rememberedShellSessionKeyRef.current) return;
+
+    void AsyncStorage.setItem(REMEMBERED_SHELL_SESSION_KEY, rememberedShellSessionKeyRef.current).catch(
+      () => undefined
+    );
+  }, [shouldShowRememberedShell]);
+
+  useEffect(() => {
+    if (rememberedShellHideTimerRef.current) {
+      clearTimeout(rememberedShellHideTimerRef.current);
+      rememberedShellHideTimerRef.current = null;
+    }
+
+    if (!hasRestorableSession) {
+      rememberedShellStartedAtRef.current = null;
+      setRememberedShellVisible(false);
+      return;
+    }
+
+    if (shouldShowRememberedShell) {
+      if (rememberedShellStartedAtRef.current == null) {
+        rememberedShellStartedAtRef.current = Date.now();
+      }
+      setRememberedShellVisible(true);
+      return;
+    }
+
+    if (rememberedShellStartedAtRef.current == null) {
+      setRememberedShellVisible(false);
+      return;
+    }
+
+    const elapsed = Date.now() - rememberedShellStartedAtRef.current;
+    const remaining = Math.max(0, REMEMBERED_SHELL_MIN_MS - elapsed);
+
+    rememberedShellHideTimerRef.current = setTimeout(() => {
+      rememberedShellStartedAtRef.current = null;
+      setRememberedShellVisible(false);
+    }, remaining);
+
+    return () => {
+      if (rememberedShellHideTimerRef.current) {
+        clearTimeout(rememberedShellHideTimerRef.current);
+        rememberedShellHideTimerRef.current = null;
+      }
+    };
+  }, [hasRestorableSession, shouldShowRememberedShell]);
+
+  useEffect(() => {
+    if (rememberedShellVisible && user?.id) {
       rememberedShellUserId.current = user.id;
     }
-  }, [showingRememberedShell, user?.id]);
+  }, [rememberedShellVisible, user?.id]);
 
   useEffect(() => {
     if (!user?.id || settingsLoading || !initialized || !settingsReadyForCurrentUser) return;
     if (rememberedShellUserId.current !== user.id) return;
 
-    const activeSessionKey = `${user.id}:${session?.refresh_token ?? session?.access_token ?? "session"}`;
+    const activeSessionKey = buildStartupSessionKey(user.id, session);
 
     void (async () => {
       try {
@@ -384,7 +519,7 @@ export default function AppNavigator() {
   }, [initialized, session?.access_token, session?.refresh_token, settingsLoading, settingsReadyForCurrentUser, t, user?.id]);
 
   // Show loading while initialising
-  if (showingRememberedShell) {
+  if (rememberedShellVisible) {
     return (
       <StartupLoadingScreen
         title={t("onboarding.remembered_title")}

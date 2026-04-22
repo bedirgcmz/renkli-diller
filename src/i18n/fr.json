@@ -28,6 +28,8 @@
     "offline_sign_up": "Vous êtes hors ligne pour le moment, le compte ne peut donc pas être créé.",
     "offline_social_sign_in": "La connexion sociale nécessite une connexion Internet.",
     "offline_reset_password": "La réinitialisation du mot de passe nécessite une connexion Internet.",
+    "reset_password": "Réinitialiser le mot de passe",
+    "reset_password_sent": "Nous avons envoyé un lien de réinitialisation du mot de passe à {{email}}. Ouvrez l'e-mail pour choisir un nouveau mot de passe.",
     "offline_auth_banner": "Vous êtes hors ligne. Vous pouvez consulter cet écran, mais la connexion et les actions de compte nécessitent Internet.",
     "offline_welcome_hint": "Vous pouvez choisir maintenant la langue de l'interface et la langue d'apprentissage. La connexion fonctionnera quand vous serez de nouveau en ligne.",
     "remembered_title": "Parlio s'est souvenu de vous",

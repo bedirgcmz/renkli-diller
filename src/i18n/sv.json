@@ -28,6 +28,8 @@
     "offline_sign_up": "Du är offline just nu, så kontot kan inte skapas.",
     "offline_social_sign_in": "Social inloggning kräver internetanslutning.",
     "offline_reset_password": "Lösenordsåterställning kräver internetanslutning.",
+    "reset_password": "Återställ Lösenord",
+    "reset_password_sent": "Vi skickade en länk för lösenordsåterställning till {{email}}. Öppna mejlet för att välja ett nytt lösenord.",
     "offline_auth_banner": "Du är offline. Du kan granska den här skärmen, men inloggning och kontoåtgärder kräver internet.",
     "offline_welcome_hint": "Du kan välja gränssnittsspråk och inlärningsspråk nu. Inloggning fungerar när du är online igen.",
     "remembered_title": "Parlio kände igen dig",

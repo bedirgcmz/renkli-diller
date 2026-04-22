@@ -28,6 +28,8 @@
     "offline_sign_up": "Você está offline agora, então não dá para criar a conta.",
     "offline_social_sign_in": "O login social precisa de conexão com a internet.",
     "offline_reset_password": "A redefinição de senha precisa de conexão com a internet.",
+    "reset_password": "Redefinir Senha",
+    "reset_password_sent": "Enviamos um link de redefinição de senha para {{email}}. Abra o e-mail para escolher uma nova senha.",
     "offline_auth_banner": "Você está offline. Pode revisar esta tela, mas entrar e fazer ações de conta precisa de internet.",
     "offline_welcome_hint": "Você pode escolher agora o idioma da interface e o idioma de estudo. O login vai funcionar quando você voltar a ficar online.",
     "remembered_title": "O Parlio lembrou de você",

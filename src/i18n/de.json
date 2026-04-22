@@ -28,6 +28,8 @@
     "offline_sign_up": "Sie sind gerade offline, daher kann kein Konto erstellt werden.",
     "offline_social_sign_in": "Social Sign-in benötigt eine Internetverbindung.",
     "offline_reset_password": "Zum Zurücksetzen des Passworts ist eine Internetverbindung nötig.",
+    "reset_password": "Passwort Zurücksetzen",
+    "reset_password_sent": "Wir haben einen Link zum Zurücksetzen des Passworts an {{email}} gesendet. Öffnen Sie die E-Mail, um ein neues Passwort festzulegen.",
     "offline_auth_banner": "Sie sind offline. Sie können diesen Bildschirm ansehen, aber Anmeldung und Kontoaktionen benötigen Internet.",
     "offline_welcome_hint": "Sie können jetzt Ihre Oberflächensprache und Lernsprache auswählen. Die Anmeldung funktioniert, sobald Sie wieder online sind.",
     "remembered_title": "Parlio hat dich wiedererkannt",

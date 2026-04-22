@@ -65,7 +65,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    setMessage(t("onboarding.reset_password"));
+    setMessage(t("onboarding.reset_password_sent", { email: email.trim() }));
   };
 
   return (
