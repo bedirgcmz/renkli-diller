@@ -323,15 +323,6 @@ function syncProfileCaches(
 }
 
 export const useAuthStore = create<AuthState>((set, get) => {
-  const persistLegacySessionCopy = async (session: any | null) => {
-    if (!session) {
-      await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
-      return;
-    }
-
-    await AsyncStorage.setItem(LEGACY_SESSION_STORAGE_KEY, JSON.stringify(session));
-  };
-
   const extractSessionTokens = (
     session: any
   ): { access_token: string; refresh_token: string } | null => {
@@ -429,7 +420,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       });
 
       attachRevenueCatListener();
-      await persistLegacySessionCopy(session);
       lastHydratedSessionKey = hydrationKey;
     })();
 
@@ -567,9 +557,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         // Start real-time RC listener (clears any previous one first)
         attachRevenueCatListener();
-
-        // Store session in AsyncStorage
-        await persistLegacySessionCopy(data.session);
       }
 
       return { success: true };
@@ -672,7 +659,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         // Start real-time RC listener (clears any previous one first)
         attachRevenueCatListener();
-        await persistLegacySessionCopy(data.session);
       }
 
       return { success: true };
@@ -1066,8 +1052,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 }
               : state.user,
           }));
-
-          void persistLegacySessionCopy(session);
 
           if (!get().user || get().user?.id !== session.user.id) {
             primeAuthenticatedSession(session);
