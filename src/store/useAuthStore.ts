@@ -92,11 +92,16 @@ let rcListenerRemover: (() => void) | null = null;
 let lastHydratedSessionKey: string | null = null;
 let inFlightHydrationKey: string | null = null;
 let inFlightHydrationPromise: Promise<void> | null = null;
+let pendingExplicitCleanupReason: "manual_signout" | "delete_account" | null = null;
+let lastCleanupReason: "manual_signout" | "delete_account" | "signed_out" | "store_clear" | null =
+  null;
+let lastCleanupAt = 0;
 
 const AVATAR_BUCKET = "user_profile_img";
 const AVATAR_FILE_PREFIX = "avatar.";
 const AVATAR_FALLBACK_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "heic", "heif"];
 const LEGACY_SESSION_STORAGE_KEY = "supabase_session";
+const EXPLICIT_CLEANUP_GUARD_MS = 3000;
 
 function clearClientStores() {
   useSentenceStore.getState().clear();
@@ -442,7 +447,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
     });
   };
 
-  const clearAuthenticatedState = async () => {
+  const clearAuthenticatedState = async (
+    reason: "manual_signout" | "delete_account" | "signed_out" | "store_clear"
+  ) => {
     if (rcListenerRemover) {
       rcListenerRemover();
       rcListenerRemover = null;
@@ -485,6 +492,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
     lastHydratedSessionKey = null;
     inFlightHydrationKey = null;
     inFlightHydrationPromise = null;
+    lastCleanupReason = reason;
+    lastCleanupAt = Date.now();
+    pendingExplicitCleanupReason = null;
     await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
     await clearAITrialCache();
   };
@@ -756,15 +766,17 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     set({ loading: true });
     try {
+      pendingExplicitCleanupReason = "manual_signout";
       // Remove RC listener before signing out
       await supabase.auth.signOut();
-      await clearAuthenticatedState();
+      await clearAuthenticatedState("manual_signout");
       await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
       set({
         loading: false,
       });
     } catch (error) {
+      pendingExplicitCleanupReason = null;
       set({ loading: false });
       if (__DEV__) console.error("Sign out error:", error);
     }
@@ -784,12 +796,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
         headers: { Authorization: `Bearer ${refreshData.session.access_token}` },
       });
       if (error) {
+        pendingExplicitCleanupReason = null;
         set({ loading: false });
         return { success: false, error: error.message };
       }
 
       // Edge function deleted the user — clean up locally
-      await clearAuthenticatedState();
+      pendingExplicitCleanupReason = "delete_account";
+      await clearAuthenticatedState("delete_account");
       await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
       set({
@@ -797,6 +811,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       });
       return { success: true };
     } catch (error: any) {
+      pendingExplicitCleanupReason = null;
       set({ loading: false });
       if (__DEV__) console.error("Delete account error:", error);
       return { success: false, error: error.message ?? "An unexpected error occurred" };
@@ -1059,6 +1074,16 @@ export const useAuthStore = create<AuthState>((set, get) => {
           }
         } else if (event === "SIGNED_OUT") {
           void (async () => {
+            const explicitCleanupInFlight = pendingExplicitCleanupReason;
+            const recentExplicitCleanup =
+              (lastCleanupReason === "manual_signout" || lastCleanupReason === "delete_account") &&
+              Date.now() - lastCleanupAt < EXPLICIT_CLEANUP_GUARD_MS;
+
+            if (explicitCleanupInFlight || recentExplicitCleanup) {
+              pendingExplicitCleanupReason = null;
+              return;
+            }
+
             try {
               const {
                 data: { session: currentSession },
@@ -1074,7 +1099,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
               console.error("[auth] post-SIGNED_OUT verification failed:", error);
             }
 
-            await clearAuthenticatedState();
+            await clearAuthenticatedState("signed_out");
           })();
         }
       });
@@ -1153,6 +1178,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
       authSubscription = null;
     }
     if (rcListenerRemover) { rcListenerRemover(); rcListenerRemover = null; }
+    pendingExplicitCleanupReason = null;
+    lastCleanupReason = "store_clear";
+    lastCleanupAt = Date.now();
     set({
       user: null,
       session: null,
