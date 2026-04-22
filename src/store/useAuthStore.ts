@@ -769,6 +769,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       pendingExplicitCleanupReason = "manual_signout";
       // Remove RC listener before signing out
       await supabase.auth.signOut();
+      console.log("[auth] manual_signout_cleanup");
       await clearAuthenticatedState("manual_signout");
       await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
@@ -803,6 +804,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
       // Edge function deleted the user — clean up locally
       pendingExplicitCleanupReason = "delete_account";
+      console.log("[auth] delete_account_cleanup");
       await clearAuthenticatedState("delete_account");
       await AsyncStorage.multiRemove(["user_settings", "user_settings:guest"]);
       await logOutUser().catch(console.error);
@@ -1080,6 +1082,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
               Date.now() - lastCleanupAt < EXPLICIT_CLEANUP_GUARD_MS;
 
             if (explicitCleanupInFlight || recentExplicitCleanup) {
+              console.log(
+                `[auth] cleanup_skipped_explicit reason=${explicitCleanupInFlight ?? lastCleanupReason}`
+              );
               pendingExplicitCleanupReason = null;
               return;
             }
@@ -1090,7 +1095,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
               } = await supabase.auth.getSession();
 
               if (currentSession?.user) {
-                console.log("[auth] SIGNED_OUT ignored because a recoverable session still exists");
+                console.log("[auth] cleanup_skipped_recoverable");
                 primeAuthenticatedSession(currentSession);
                 await hydrateAuthenticatedSession(currentSession);
                 return;
@@ -1099,6 +1104,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
               console.error("[auth] post-SIGNED_OUT verification failed:", error);
             }
 
+            console.log("[auth] cleanup_confirmed_signed_out");
             await clearAuthenticatedState("signed_out");
           })();
         }
@@ -1115,7 +1121,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
 
       if (currentSession?.user) {
-        console.log("[auth] initialize restored Supabase persisted session");
+        console.log("[auth] initialize restored session source=supabase_persisted");
         primeAuthenticatedSession(currentSession);
         // Pre-populate stores from cache so screens have data on first render.
         await hydrateStoresFromCache(currentSession.user.id).catch((e) => {
@@ -1131,12 +1137,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
       // remove the legacy key immediately so it cannot act as a second source.
       const storedSession = await AsyncStorage.getItem(LEGACY_SESSION_STORAGE_KEY);
       if (storedSession) {
+        console.log("[auth] legacy_read");
         try {
           const parsedSession = JSON.parse(storedSession);
           const sessionTokens = extractSessionTokens(parsedSession);
 
           if (!sessionTokens) {
-            console.log("[auth] removing malformed legacy session copy");
+            console.log("[auth] legacy_removed reason=malformed");
             await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
           } else {
             const {
@@ -1145,11 +1152,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
             } = await supabase.auth.setSession(sessionTokens);
 
             if (sessionError || !restoredData.session?.user) {
-              console.log("[auth] removing stale legacy session copy");
+              console.log("[auth] legacy_removed reason=stale");
               await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
             } else {
+              console.log("[auth] legacy_removed reason=migrated");
               await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
-              console.log("[auth] initialize restored session from legacy fallback");
+              console.log("[auth] initialize restored session source=legacy_fallback");
               primeAuthenticatedSession(restoredData.session);
               await hydrateStoresFromCache(restoredData.session.user.id).catch((e) => {
                 console.error("[auth] hydrateStoresFromCache (legacy) failed:", e);
@@ -1161,6 +1169,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           }
         } catch (error) {
           console.error("[auth] failed to parse legacy session copy:", error);
+          console.log("[auth] legacy_removed reason=parse_error");
           await AsyncStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
         }
       }
